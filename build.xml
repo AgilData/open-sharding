@@ -1,0 +1,91 @@
+<project name="opensharding" default="help">
+
+    <!-- version number -->
+    <property name="version" value="0.1" />
+	<property name="build" value="00001" />
+	
+	<path id="apache-commons.classpath">
+		<pathelement location="3rdparty/apache-commons/commons-codec.jar"/>
+	</path>
+	
+	<path id="log4j.classpath">
+		<pathelement location="3rdparty/log4j/log4j-1.2.15.jar"/>
+	</path>
+	
+    <target name="init">
+        <mkdir dir="dist" />
+    	<mkdir dir="release"/>
+    </target>
+
+    <!-- remove temporary files -->
+    <target name="clean">
+        <echo message="Removing temporary files including test results " />
+        <delete dir="dist" />
+        <delete dir="_classes" />
+    </target>
+
+    <target name="compile-common">
+        <delete dir="_classes" />
+        <mkdir dir="_classes" />
+        <javac source="1.6" target="1.6" destdir="_classes" debug="true" includeantruntime="false">
+            <src path="source/common/src" />
+            <classpath refid="apache-commons.classpath" />
+            <classpath refid="log4j.classpath" />
+        </javac>
+        <echo file="_classes/opensharding.properties" append="false" message="version=${version}${line.separator}" />
+        <jar jarfile="dist/opensharding-common.jar" basedir="_classes" />
+    </target>
+	
+    <target name="compile-jdbc-driver">
+        <delete dir="_classes" />
+        <mkdir dir="_classes" />
+        <javac source="1.6" target="1.6" destdir="_classes" debug="true" includeantruntime="false">
+            <src path="source/jdbc/src" />
+            <include name="org/opensharding/jdbc/logging/**"/>
+            <classpath>
+            	<pathelement location="dist/opensharding-common.jar"/>
+            </classpath>
+        </javac>
+        <jar jarfile="dist/osp-jdbc-driver.jar" basedir="_classes" />
+    </target>	
+	
+    <target name="compile">
+    	<antcall target="clean" />
+     	<antcall target="init" />
+        <antcall target="compile-common" />
+    	<antcall target="compile-jdbc-driver" />
+	</target>
+
+    <target name="build-jdbc-driver-with-dependencies" depends="compile">
+        <delete dir="_classes" />
+        <mkdir dir="_classes" />
+        <unjar src="dist/opensharding-common.jar" dest="_classes" />
+        <unjar src="dist/osp-jdbc-driver.jar" dest="_classes" />
+
+        <property name="jdbc.release.dir" value="_temp/jdbc" />
+
+    	<mkdir dir="${jdbc.release.dir}" />
+        <jar jarfile="${jdbc.release.dir}/osp-jdbc-driver-with-dependencies.jar" basedir="_classes" />
+    	<copy file="source/jdbc/conf/ospdriver.properties" todir="${jdbc.release.dir}/conf" />
+    	<copy file="source/jdbc/conf/log.properties" todir="${jdbc.release.dir}/conf" />
+    	<copy file="source/jdbc/README.txt" todir="${jdbc.release.dir}" />
+    	<copy file="license/ApacheLicense-2.0.txt" todir="${jdbc.release.dir}/license" />
+    	
+    	<tar destfile="dist/osp-jdbc-driver-with-dependencies-${version}.${build}.tar">
+			<tarfileset dir="${jdbc.release.dir}" prefix="osp/jdbc">
+				<include name="osp-jdbc-driver-with-dependencies.jar"/>
+				<include name="conf/ospdriver.properties"/>
+				<include name="conf/log.properties"/>
+				<include name="README.txt"/>
+				<include name="license/ApacheLicense-2.0.txt"/>
+			</tarfileset>
+    	</tar>
+    </target>
+		
+    <target name="help">
+        <echo message="Open Sharding ${version} Build System running on ${osname-full}" />
+        <echo message="" />
+        <echo message="One-off environment setup:" />
+    </target>
+
+</project>
