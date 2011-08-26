@@ -15,7 +15,7 @@ import org.opensharding.jdbc.impl.AbstractDriver;
  * @author Andy Grove
  * @created 16-Sep-2007 08:55:22
  */
-public class OspJdbcDriver extends AbstractDriver {
+public class Driver extends AbstractDriver {
 
 	private static String delegateDriverClassName;
     /**
@@ -23,7 +23,7 @@ public class OspJdbcDriver extends AbstractDriver {
      */
     static {
         try {
-            DriverManager.registerDriver( new OspJdbcDriver() );
+            DriverManager.registerDriver( new Driver() );
         } catch (SQLException e) {
             throw new ExceptionInInitializerError(e);
         }
