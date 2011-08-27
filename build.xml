@@ -14,7 +14,6 @@
 	
     <target name="init">
         <mkdir dir="dist" />
-    	<mkdir dir="release"/>
     </target>
 
     <!-- remove temporary files -->
@@ -22,6 +21,7 @@
         <echo message="Removing temporary files including test results " />
         <delete dir="dist" />
         <delete dir="_classes" />
+    	<delete dir="_temp" />
     </target>
 
     <target name="compile-common">
@@ -66,9 +66,8 @@
 
     	<mkdir dir="${jdbc.release.dir}" />
         <jar jarfile="${jdbc.release.dir}/osp-jdbc-driver-with-dependencies.jar" basedir="_classes" />
-    	<copy file="source/jdbc/conf/ospdriver.properties" todir="${jdbc.release.dir}/conf" />
     	<copy file="source/jdbc/conf/log.properties" todir="${jdbc.release.dir}/conf" />
-    	<copy file="source/jdbc/README.txt" todir="${jdbc.release.dir}" />
+    	<copy file="doc/README.txt" todir="${jdbc.release.dir}" />
     	<copy file="license/ApacheLicense-2.0.txt" todir="${jdbc.release.dir}/license" />
     	
     	<tar destfile="dist/osp-jdbc-driver-with-dependencies-${version}.${build}.tar">
@@ -80,6 +79,9 @@
 				<include name="license/ApacheLicense-2.0.txt"/>
 			</tarfileset>
     	</tar>
+    	
+    	<delete dir="_classes" />
+    	<delete dir="_temp" />
     </target>
 		
     <target name="help">
