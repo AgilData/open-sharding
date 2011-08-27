@@ -96,6 +96,8 @@ public final class CallLogger {
     private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd_HH-mm-ss-SSSS");
 
     private static final Map<String,CallLogger> loggerMap = new HashMap<String, CallLogger>();
+    
+    private boolean enabled = false;
 
     /**
      * Static method to get a logger instance.
@@ -123,18 +125,14 @@ public final class CallLogger {
      */
     private CallLogger(String url, Properties props) {
 
-        log("dbShards CallLogger init for: " + url);
-
         synchronized (CallLogger.class) {
             if (!init) {
 
                 try {
-
-                	if(props == null) {
-                		throw new Exception("The props parameter is required for Call Logger init.");
-                	}
+                	
                     configure(props);
- 
+                    log("dbShards CallLogger init for: " + url);
+                    
                 }
                 catch (Throwable e) {
                     log("constructor failed", e);
@@ -161,8 +159,28 @@ public final class CallLogger {
         }
     }
 
+    /**
+     * Configure the logger.  
+     * @param props
+     * @throws Exception
+     */
     public void configure(Properties props) throws Exception {
 
+    	// If props is null, the logger is not enabled.
+    	if(props == null) {
+    		enabled = false;
+    		return;
+    	}
+    	
+		String shardAnalyzeLogString = props.getProperty("shard.analyze.log");
+		if(shardAnalyzeLogString != null && shardAnalyzeLogString.length() > 0) {
+			enabled = Boolean.parseBoolean(shardAnalyzeLogString);
+			if(!enabled) {
+				return;
+			}
+		}
+		
+		// Configure logging params.
         String value = props.getProperty("shard.analyze.log.data");
         log("configure: shard.analyze.log.data: " + value);
         logData = (value != null && value.equalsIgnoreCase("true"));
@@ -221,14 +239,20 @@ public final class CallLogger {
     }
 
     public void log(final int connectionID, final int statementID, String className, String methodSignature, long start, long finish) {
+    	if(!enabled) {
+    		return;
+    	}
         log(connectionID, statementID, className, methodSignature, null, start, finish);
     }
 
     public void log(final int connectionID, final int statementID, final String className, final String methodSignature, final Object param[], long start, long finish) {
+    	if(!enabled) {
+    		return;
+    	}
         _log(connectionID, statementID, className, methodSignature, param, start, finish);
     }
 
-    public void _log(final int connectionID, final int statementID, final String className, final String methodSignature, final Object param[], long start, long finish) {
+    private void _log(final int connectionID, final int statementID, final String className, final String methodSignature, final Object param[], long start, long finish) {
         try {
             if (className.equals("ResultSet")) {
                 // log would be too verbose if we log all result set calls

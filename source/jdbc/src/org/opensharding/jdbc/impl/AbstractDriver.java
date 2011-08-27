@@ -1,6 +1,5 @@
 package org.opensharding.jdbc.impl;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.StringWriter;
 import java.sql.DriverManager;
@@ -43,10 +42,7 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
     
     // The driverMode, either OSP or DELEGATE.
     protected static int driverMode = -1;
-    
-    // Flag to control shard analyze logging.
-    protected static boolean callLoggerEnabled = false;
-    
+        
     private Properties logProps = null;
     
     private static final String PROPERTIESFILENAME = "log.properties";
@@ -75,23 +71,16 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
     	
     	// Attempt to find the log.properties.
 		InputStream inputStream = getClass().getClassLoader().getResourceAsStream(PROPERTIESFILENAME);
-		if(inputStream == null) {
+		if(inputStream != null) {
+			logProps = new Properties();
+			logProps.load(inputStream);
+		} else {
 			logger.warn("init: The " + PROPERTIESFILENAME + " could not be found on the classpath. Using default system log settings.");
-			return;
 		}
-		logProps = new Properties();
-		logProps.load(inputStream);
 		
-		// Handle shard analyze logging if required.
-		final String shardAnalyzeLogString = logProps.getProperty("shard.analyze.log");
-		if(shardAnalyzeLogString != null && shardAnalyzeLogString.length() > 0) {
-			boolean shardAnalyzeLogEnabled = Boolean.parseBoolean(shardAnalyzeLogString);
-			if(shardAnalyzeLogEnabled) {
-				callLogger = CallLogger.getLogger(url, logProps);
-				callLoggerEnabled = true;
-			}
-		}
-
+		// Get the CallLogger. If props is null, or shard analyze logging is not enabled, the log methods do nothing.
+		callLogger = CallLogger.getLogger(url, logProps);
+		
     }
     
     public boolean acceptsURL(java.lang.String url) throws java.sql.SQLException {
@@ -126,7 +115,8 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
             if(urlDetails.startsWith(DELEGATE_PREFIX)) {
             	driverMode = DELEGATE_MODE;
             	String delegateUrl = url.substring(URL_PREFIX.length() + DELEGATE_PREFIX.length());
-            	if(callLoggerEnabled) callLogger.log("Delegate mode enabled. Connecting to " + delegateUrl);
+            	callLogger.log("Delegate mode enabled. Connecting to: " + delegateUrl);
+            	logger.info("Delegate mode enabled. Connecting to: " + delegateUrl);
             	
             	// Get the delegate driver.
             	delegate = DriverManager.getDriver(delegateUrl);
@@ -141,22 +131,20 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
 
             	ret = new ConnectionFacade(conn, callLogger);
 
-                if (callLoggerEnabled) {
-                    // Only log properties param if log
-                    String propertiesParam = null;
-                    final long __finish = System.currentTimeMillis();
-                    if (callLogger.logData) {
-                        StringWriter stringWriter = new StringWriter();
-                        p1.store(stringWriter, null);
-                        propertiesParam = stringWriter.toString();
-                    }
-                    callLogger.log(ret.connectionID, 0, "Driver","connect(java.lang.String,java.util.Properties)",new Object[] {delegateUrl,propertiesParam}, __start, __finish);
+                String propertiesParam = null;
+                final long __finish = System.currentTimeMillis();
+                if (callLogger.logData) {
+                    StringWriter stringWriter = new StringWriter();
+                    p1.store(stringWriter, null);
+                    propertiesParam = stringWriter.toString();
                 }
+                callLogger.log(ret.connectionID, 0, "Driver","connect(java.lang.String,java.util.Properties)",new Object[] {delegateUrl,propertiesParam}, __start, __finish);
             	
             // Else this is OSP mode.
             } else {
             	driverMode = OSP_MODE;
-            	if(callLoggerEnabled) callLogger.log("OSP model enabled. Connecting to: " + urlDetails);
+            	callLogger.log("OSP model enabled. Connecting to: " + urlDetails);
+            	logger.info("OSP mode enabled. Connecting to: " + urlDetails);
             	
             	// Not yet implemented.
             	throw new Exception("OSP mode not yet implemented.");
