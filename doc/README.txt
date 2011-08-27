@@ -48,6 +48,13 @@ The JDBC driver is contained in the following jar file:
 
 osp-jdbc-with-dependencies.jar
 
+Alternatively, you can use the following component jar files (using any compatible version of third-party jars):
+
+osp-common.jar
+osp-jdbc-driver.jar
+apache-codec.jar
+log4j-1.2.15.jar
+
 The classname for the driver is:
 
 org.opensharding.jdbc.Driver

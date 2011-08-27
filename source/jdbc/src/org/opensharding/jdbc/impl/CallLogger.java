@@ -97,50 +97,43 @@ public final class CallLogger {
 
     private static final Map<String,CallLogger> loggerMap = new HashMap<String, CallLogger>();
 
-    public static CallLogger getLogger(String str) throws Exception {
+    /**
+     * Static method to get a logger instance.
+     * @param url
+     * @param props
+     * @return
+     * @throws Exception
+     */
+    public static CallLogger getLogger(String url, Properties props) throws Exception {
         CallLogger logger;
         synchronized (loggerMap) {
-            logger = loggerMap.get(str);
+            logger = loggerMap.get(url);
             if (logger == null) {
-                log("Creating new CallLogger instance for " + str);
-                logger = new CallLogger();
-                loggerMap.put(str, logger);
+                logger = new CallLogger(url, props);
+                loggerMap.put(url, logger);
             }
         }
         return logger;
     }
 
-    private CallLogger() {
+    /**
+     * Private constructor for logger instance.
+     * @param url
+     * @param props
+     */
+    private CallLogger(String url, Properties props) {
 
-        log("dbShards CallLogger init");
+        log("dbShards CallLogger init for: " + url);
 
         synchronized (CallLogger.class) {
             if (!init) {
 
                 try {
-                	
-                	String propFilePath = System.getenv(PROPFILEPATHENV);
-                	if(propFilePath == null) {
-                		propFilePath = "/etc/";
-                	}
-                	String propFile = null;
-                	if(propFilePath.endsWith(PROPFILENAME)) {
-                		propFile = propFilePath;
-                	} else if(propFilePath.endsWith(FS)) {
-                		propFile = propFilePath + PROPFILENAME;
-                	} else {
-                		propFile = propFilePath + FS + PROPFILENAME;
-                	}
 
-                    /* Initialize the properties.*/
-                    final File file = new File(propFile);
-                    if(!file.exists()) {
-                    	throw new Exception("Could not find file: dbshards-analyze.properties. " 
-                    			+ " The file should be in /etc/dbshards-analyze.properties"
-                    			+ " or a path spefied by the " + PROPFILEPATHENV + " environment variable.");
-                    }
-                    
-                    configure(file);
+                	if(props == null) {
+                		throw new Exception("The props parameter is required for Call Logger init.");
+                	}
+                    configure(props);
  
                 }
                 catch (Throwable e) {
@@ -168,39 +161,28 @@ public final class CallLogger {
         }
     }
 
+    public void configure(Properties props) throws Exception {
 
-    public void configure(File file) throws Exception {
-
-        log("Configure logging from  " + file.getAbsolutePath());
-        Properties prop = new Properties();
-        final FileInputStream fis = new FileInputStream(file);
-        prop.load(fis);
-        fis.close();
-        configure(prop);
-    }
-
-    public void configure(Properties prop) throws Exception {
-
-        String value = prop.getProperty("log.data");
-        log("configure: log.data: " + value);
+        String value = props.getProperty("shard.analyze.log.data");
+        log("configure: shard.analyze.log.data: " + value);
         logData = (value != null && value.equalsIgnoreCase("true"));
 
-        value = prop.getProperty("log.limit");
+        value = props.getProperty("shard.analyze.log.limit");
         if (value != null) {
             maxFileSize = Integer.parseInt(value);
         }
 
-        value = prop.getProperty("log.maxfiles");
+        value = props.getProperty("shard.analyze.log.maxfiles");
         if (value != null) {
             maxFiles = Integer.parseInt(value);
         }
 
-        value = prop.getProperty("log.maxhours");
+        value = props.getProperty("shard.analyze.log.maxhours");
         if (value != null) {
             logMaxHours = Integer.parseInt(value);
         }
 
-        value = prop.getProperty("log.dir");
+        value = props.getProperty("shard.analyze.log.dir");
         if (value != null) {
             logDir = value;
 
@@ -218,7 +200,7 @@ public final class CallLogger {
         	}
 
         } else {
-            throw new Exception("The log.dir property is required.");
+            throw new Exception("The shard.analyze.log.dir property is required.");
         }
         
     }
@@ -482,11 +464,11 @@ public final class CallLogger {
 
     private static DateFormat df;
 
-    public static void log(String message) {
+    public void log(String message) {
         log(message, null);
     }
 
-    public static void log(String message, Throwable th) {
+    public void log(String message, Throwable th) {
 //        StringBuilder b = new StringBuilder();
 //        b.append(logPrefix);
 //        if (df == null) {

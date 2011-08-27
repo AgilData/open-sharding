@@ -33,7 +33,7 @@
             <classpath refid="log4j.classpath" />
         </javac>
         <echo file="_classes/opensharding.properties" append="false" message="version=${version}${line.separator}" />
-        <jar jarfile="dist/opensharding-common.jar" basedir="_classes" />
+        <jar jarfile="dist/osp-common.jar" basedir="_classes" />
     </target>
 	
     <target name="compile-jdbc-driver">
@@ -59,8 +59,10 @@
     <target name="build-jdbc-driver-with-dependencies" depends="compile">
         <delete dir="_classes" />
         <mkdir dir="_classes" />
-        <unjar src="dist/opensharding-common.jar" dest="_classes" />
+        <unjar src="dist/osp-common.jar" dest="_classes" />
         <unjar src="dist/osp-jdbc-driver.jar" dest="_classes" />
+    	<unjar src="3rdparty/log4j/log4j-1.2.15.jar" dest="_classes" />
+    	<unjar src="3rdparty/apache-commons/commons-codec.jar" dest="_classes"/>
 
         <property name="jdbc.release.dir" value="_temp/jdbc" />
 
@@ -70,7 +72,7 @@
     	<copy file="doc/README.txt" todir="${jdbc.release.dir}" />
     	<copy file="license/ApacheLicense-2.0.txt" todir="${jdbc.release.dir}/license" />
     	
-    	<tar destfile="dist/osp-jdbc-driver-with-dependencies-${version}.${build}.tar">
+    	<tar destfile="dist/osp-jdbc-driver_${version}.${build}.tar">
 			<tarfileset dir="${jdbc.release.dir}" prefix="osp/jdbc">
 				<include name="osp-jdbc-driver-with-dependencies.jar"/>
 				<include name="conf/ospdriver.properties"/>
@@ -78,6 +80,16 @@
 				<include name="README.txt"/>
 				<include name="license/ApacheLicense-2.0.txt"/>
 			</tarfileset>
+    		<tarfileset dir="dist" prefix="osp/jdbc">
+    			<include name="osp-common.jar"/>
+    			<include name="osp-jdbc-driver"/>
+    		</tarfileset>
+    		<tarfileset dir="3rdparty/apache-commons" prefix="osp/jdbc">
+    			<include name="commons-codec.jar"/>
+    		</tarfileset>
+    		<tarfileset dir="3rdparty/log4j" prefix="osp/jdbc">
+    			<include name="log4j-1.2.15.jar"/>
+    		</tarfileset>
     	</tar>
     	
     	<delete dir="_classes" />
