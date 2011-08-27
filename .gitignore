@@ -1,4 +1,4 @@
-bin/
-_classes
-_temp
-dist
+/bin
+/_classes
+/_temp
+/dist*
