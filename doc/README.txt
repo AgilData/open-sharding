@@ -71,10 +71,6 @@ Register the driver:
 
 Class.forName("org.opensharding.jdbc.Driver").newInstance();
 
-If using the driver in "delegate" mode, also register the third party driver:
-
-Class.forName("third.party.driver.class").newInstance();
-
 Get a connection to the OSP JDBC driver using the appropriate URL:
 
 Connection conn = DriverManager.getConnection(url, userName, password); 
@@ -108,11 +104,17 @@ and also to support the Shard Analyze log format provided by all OSP Facade Driv
 
 The delegate mode URL format is:
 
-jdbc:osp:delegate:[third-party-url]
+jdbc:osp:delegate:[third-party-driver-classname]:[third-party-url]
 
-The third-party-url is the standard JDBC URL supported by the specific vendor driver.
+The third-party-driver-classname is the qualified classname for the delegate driver.
 
-When operating in delegate mode, you must include both the OSP JDBC jar file and the third party
+The third-party-url is the standard JDBC URL supported by the specific third-party-driver driver.
+
+Example:
+
+jdbc:osp:delegate:org.postgresql.Driver:jdbc:postgresql:mydb"
+
+When operating in delegate mode, you must include both the OSP JDBC jar file and the third-party
 driver jar file in the classpath of the application, and you must register both drivers as described above.
 
 

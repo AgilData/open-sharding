@@ -95,12 +95,12 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
         	// Parse the URL details. The URL can be in the form of:
         	//
         	// Delegate Mode:
-        	// delegate:[delegate-url]
+        	// jdbc:osp:delegate:[third-party-driver-classname]:[third-party-url]
         	//
         	// or:
         	//
         	// OSP Mode:
-        	// [protocol]:[details]
+        	// jdbc:osp:[protocol]:[details]
 
         	// The ConnectionFacade return variable.
         	ConnectionFacade ret = null;
@@ -114,9 +114,25 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
             // If this is a delegate driver
             if(urlDetails.startsWith(DELEGATE_PREFIX)) {
             	driverMode = DELEGATE_MODE;
-            	String delegateUrl = url.substring(URL_PREFIX.length() + DELEGATE_PREFIX.length());
-            	callLogger.log("Delegate mode enabled. Connecting to: " + delegateUrl);
-            	logger.info("Delegate mode enabled. Connecting to: " + delegateUrl);
+            	
+            	// Get the delegate driver classname.
+            	int startPos = urlDetails.indexOf(":", URL_PREFIX.length() + DELEGATE_PREFIX.length());
+            	if(startPos == -1) {
+            		throw new Exception("Invalid delegate driver URL. url: " + url);
+            	}
+            	int endPos = urlDetails.indexOf(":", startPos);
+            	if(endPos == -1) {
+            		throw new Exception("Invalid delegate driver URL. url: " + url);
+            	}
+            	String delegateDriverClassname = url.substring(startPos+1, endPos);
+            	
+            	// Get the delegate URL.
+            	String delegateUrl = url.substring(endPos+1);
+            	callLogger.log("Delegate mode enabled. delegateDriverClassname: " + delegateDriverClassname + " delegateUrl: " + delegateUrl);
+            	logger.info("Delegate mode enabled. Delegate classname: " + delegateDriverClassname + " Delelgate url: " + delegateUrl);
+            	
+            	// Register the delegate driver.
+            	Class.forName(delegateDriverClassname).newInstance();
             	
             	// Get the delegate driver.
             	delegate = DriverManager.getDriver(delegateUrl);
