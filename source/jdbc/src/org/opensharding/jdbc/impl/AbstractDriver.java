@@ -54,8 +54,8 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
      */
     public AbstractDriver() {
         try {
-        	// Register the driver.
-            DriverManager.registerDriver(this);
+//        	// Register the driver.
+//            DriverManager.registerDriver(this);
                         
         } catch (Throwable th) {
             logger.error("OSP JDBC Driver init error", th);
@@ -116,7 +116,7 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
             	driverMode = DELEGATE_MODE;
             	
             	// Get the delegate driver classname.
-            	int startPos = urlDetails.indexOf(":", URL_PREFIX.length() + DELEGATE_PREFIX.length());
+            	int startPos = DELEGATE_PREFIX.length();
             	if(startPos == -1) {
             		throw new Exception("Invalid delegate driver URL. url: " + url);
             	}
@@ -124,10 +124,11 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
             	if(endPos == -1) {
             		throw new Exception("Invalid delegate driver URL. url: " + url);
             	}
-            	String delegateDriverClassname = url.substring(startPos+1, endPos);
+            	System.out.println("connect: startPos: " + startPos + " endPos: " + endPos + " urlDetails: " + urlDetails);
+            	String delegateDriverClassname = urlDetails.substring(startPos, endPos);
             	
             	// Get the delegate URL.
-            	String delegateUrl = url.substring(endPos+1);
+            	String delegateUrl = urlDetails.substring(endPos+1);
             	callLogger.log("Delegate mode enabled. delegateDriverClassname: " + delegateDriverClassname + " delegateUrl: " + delegateUrl);
             	logger.info("Delegate mode enabled. Delegate classname: " + delegateDriverClassname + " Delelgate url: " + delegateUrl);
             	

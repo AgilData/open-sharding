@@ -7,6 +7,8 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Properties;
 
+import org.opensharding.common.logging.Logger;
+import org.opensharding.common.logging.LoggerFactory;
 import org.opensharding.jdbc.impl.AbstractDriver;
 
 /**
@@ -18,14 +20,17 @@ import org.opensharding.jdbc.impl.AbstractDriver;
  */
 public class Driver extends AbstractDriver {
 
+	private static final Logger logger = LoggerFactory.getLogger(Driver.class);
+	
     /**
      * Static initialization method.
      */
     static {
         try {
             DriverManager.registerDriver( new Driver() );
-        } catch (SQLException e) {
-            throw new ExceptionInInitializerError(e);
+        } catch (Throwable th) {
+        	logger.error("static initializer error", th);
+            throw new ExceptionInInitializerError(th);
         }
     }
         

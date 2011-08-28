@@ -14,6 +14,7 @@
 	
     <target name="init">
         <mkdir dir="dist" />
+    	<mkdir dir="jars" />
     </target>
 
     <!-- remove temporary files -->
@@ -33,7 +34,7 @@
             <classpath refid="log4j.classpath" />
         </javac>
         <echo file="_classes/opensharding.properties" append="false" message="version=${version}${line.separator}" />
-        <jar jarfile="dist/osp-common.jar" basedir="_classes" />
+        <jar jarfile="jars/osp-common.jar" basedir="_classes" />
     </target>
 	
     <target name="compile-jdbc-driver">
@@ -41,12 +42,12 @@
         <mkdir dir="_classes" />
         <javac source="1.6" target="1.6" destdir="_classes" debug="true" includeantruntime="false">
             <src path="source/jdbc/src" />
-            <include name="org/opensharding/jdbc/logging/**"/>
+            <include name="org/opensharding/jdbc//**"/>
             <classpath>
-            	<pathelement location="dist/opensharding-common.jar"/>
+            	<pathelement location="jars/osp-common.jar"/>
             </classpath>
         </javac>
-        <jar jarfile="dist/osp-jdbc-driver.jar" basedir="_classes" />
+        <jar jarfile="jars/osp-jdbc-driver.jar" basedir="_classes" />
     </target>	
 	
     <target name="compile">
@@ -59,30 +60,30 @@
     <target name="build-jdbc-driver-with-dependencies" depends="compile">
         <delete dir="_classes" />
         <mkdir dir="_classes" />
-        <unjar src="dist/osp-common.jar" dest="_classes" />
-        <unjar src="dist/osp-jdbc-driver.jar" dest="_classes" />
+        <unjar src="jars/osp-common.jar" dest="_classes" />
+        <unjar src="jars/osp-jdbc-driver.jar" dest="_classes" />
     	<unjar src="3rdparty/log4j/log4j-1.2.15.jar" dest="_classes" />
     	<unjar src="3rdparty/apache-commons/commons-codec.jar" dest="_classes"/>
 
         <property name="jdbc.release.dir" value="_temp/jdbc" />
 
     	<mkdir dir="${jdbc.release.dir}" />
-        <jar jarfile="${jdbc.release.dir}/osp-jdbc-driver-with-dependencies.jar" basedir="_classes" />
+        <jar jarfile="jars/osp-jdbc-driver-with-dependencies.jar" basedir="_classes" />
     	<copy file="source/jdbc/conf/log.properties" todir="${jdbc.release.dir}/conf" />
     	<copy file="doc/README.txt" todir="${jdbc.release.dir}" />
     	<copy file="license/ApacheLicense-2.0.txt" todir="${jdbc.release.dir}/license" />
     	
     	<tar destfile="dist/osp-jdbc-driver_${version}.${build}.tar">
 			<tarfileset dir="${jdbc.release.dir}" prefix="osp/jdbc">
-				<include name="osp-jdbc-driver-with-dependencies.jar"/>
 				<include name="conf/ospdriver.properties"/>
 				<include name="conf/log.properties"/>
 				<include name="README.txt"/>
 				<include name="license/ApacheLicense-2.0.txt"/>
 			</tarfileset>
-    		<tarfileset dir="dist" prefix="osp/jdbc">
+    		<tarfileset dir="jars" prefix="osp/jdbc">
+				<include name="osp-jdbc-driver-with-dependencies.jar"/>
     			<include name="osp-common.jar"/>
-    			<include name="osp-jdbc-driver"/>
+    			<include name="osp-jdbc-driver.jar"/>
     		</tarfileset>
     		<tarfileset dir="3rdparty/apache-commons" prefix="osp/jdbc">
     			<include name="commons-codec.jar"/>
