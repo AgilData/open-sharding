@@ -58,8 +58,12 @@
 	</target>
 
     <target name="build-jdbc-driver-with-dependencies" depends="compile">
-        <delete dir="_classes" />
+        <delete>
+        	<fileset dir="dist" includes="osp-jdbc-driver*.tar"/>
+        </delete>
+    	<delete dir="_classes" />
         <mkdir dir="_classes" />
+    	
         <unjar src="jars/osp-common.jar" dest="_classes" />
         <unjar src="jars/osp-jdbc-driver.jar" dest="_classes" />
     	<unjar src="3rdparty/log4j/log4j-1.2.15.jar" dest="_classes" />
