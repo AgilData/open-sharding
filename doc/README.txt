@@ -29,6 +29,8 @@ Facade Drivers support the following characteristics:
 - Optionally provide Shard Analyze log output, a special logging format that can be 
 used to perform a database sharding analysis.
 
+To use a driver to generate Shard Analyze log output, set 
+
 A Facade Driver typically communicates with an OSP process running in the same server as an application, 
 via an efficient inter-process communication protocol (several options are supported).
 The OSP process provides full database sharding access or other useful services to the application in a
@@ -41,8 +43,43 @@ The following OSP Facade Drivers are included in the project (more will be added
 - ODBC
 - Native PostgreSQL libpq (planned)
 
+An OSP driver can operate in either of two modes:
 
+- OSP Mode, for communicating with a local OSP process or remote OSP server
+- Delegate Mode, which delegates all actual JDBC calls to a third-party driver
+
+An OSP driver can be used to generate a Shard Analyze log, recording all API calls and SQL statements 
+which can be used for shard analysis purposes. The Shard Analyze log can be configured in either 
+OSP or Delegate mode, but is normally used with Delegate mode for upfront analysis of a database
+to which database sharding shall be implemented.
+
+There is a section for using and configuring each driver, as well as a section on LOG CONFIGURATION
+which applies to all drivers. This section includes configuration for the Shard Analyze log as 
+well as debug system logging for monitoring driver operation.
+
+-----------------
+LOG CONFIGURATION
+-----------------
+
+An OSP driver contains two types of logs:
+
+- OSP System Log: This is a log which provides output regarding the operation of the driver itself, usually for debugging purposes.
+The default system log file name is: osp-driver-system.log
+- Shard Analyze Log: A special log which provides API calls and SQL statements, used for database shard analysis.
+
+Both types of logging are configured using the following properties file:
+
+log.properties
+
+The format of log.properties is used for all drivers. However, the location of the file is driver specific. 
+See the instructions for the specific driver(s) you will be using.  
+
+A sample log.properties file is included with the release, and it contains documentation on the various
+property names and their function.
+
+---------------
 OSP JDBC DRIVER
+---------------
 
 The JDBC driver is contained in the following jar file:
 
@@ -73,8 +110,11 @@ Class.forName("org.opensharding.jdbc.Driver").newInstance();
 
 Get a connection to the OSP JDBC driver using the appropriate URL:
 
-Connection conn = DriverManager.getConnection(url, userName, password); 
+Connection conn = DriverManager.getConnection(url, userName, password);
+
  
+OSP MODE
+
 The OSP JDBC URL format is described here:
 
 When operating in "osp" mode, communicating with an OSP process or server, use the following JDBC URL format:
@@ -97,6 +137,8 @@ uds:osp:uds:/var/sock/myospprocess.sock
 named-pipes (Unix Named Pipes or Microsoft Windows Named Pipes)
 jdbc:osp:pipes:[pipe-name-prefix]
 jdbc:osp:pipes:/var/pipe/myosppipe_
+
+DELEGATE MODE
 
 When operating in "delegate" mode, an osp driver loads any third party JDBC driver, delegating all functionality
 to the specified driver. This is useful to be able to communicate directly to a DBMS via a third party driver,
