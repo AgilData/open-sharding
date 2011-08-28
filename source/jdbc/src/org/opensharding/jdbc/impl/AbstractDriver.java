@@ -124,7 +124,7 @@ public abstract class AbstractDriver extends DriverFacade implements java.sql.Dr
             	if(endPos == -1) {
             		throw new Exception("Invalid delegate driver URL. url: " + url);
             	}
-            	System.out.println("connect: startPos: " + startPos + " endPos: " + endPos + " urlDetails: " + urlDetails);
+//            	System.out.println("connect: startPos: " + startPos + " endPos: " + endPos + " urlDetails: " + urlDetails);
             	String delegateDriverClassname = urlDetails.substring(startPos, endPos);
             	
             	// Get the delegate URL.
