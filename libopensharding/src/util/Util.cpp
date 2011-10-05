@@ -294,7 +294,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 }
 
 
-/*static*/ string Config::trim(string str) {
+/*static*/ string Util::trim(string str) {
     string whitespace = string(" \t\f\v\n\r");
     size_t start = str.find_first_not_of(whitespace);
     size_t end = str.find_last_not_of(whitespace);
