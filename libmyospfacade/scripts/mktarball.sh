@@ -13,7 +13,9 @@ TARBALL=$1
 LIB_DIR=$2
 rm -f $LIB_DIR/$TARBALL 2>/dev/null
 (cd $LIB_DIR;
-  tar cvzf $TARBALL lib* /usr/local/opensharding/lib/libopensharding.so.1.0.0 ../scripts/setup.rb
+  cp /usr/local/opensharding/lib/libopensharding.so.1.0.0 .
+  cp ../scripts/setup.rb .
+  tar cvzf $TARBALL lib* setup.rb
 )
 mv $LIB_DIR/$TARBALL .
 
