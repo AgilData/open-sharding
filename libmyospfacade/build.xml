@@ -1,0 +1,54 @@
+<project name="libmyospfacade" default="release">
+
+    <property name="version" value="1.0.0" />
+
+    <target name="init" >
+        <delete dir=".">
+            <include name="lib*" />
+        </delete>
+        <exec executable="bash" failonerror="true">
+        	<arg value="./scripts/mkbuildprops.sh" />
+        </exec>
+        <property file="build.properties" />
+
+		<echo message="" />
+        <echo message="Operating System: ${osname-full}" />
+		<echo message="Binaries Directory: ${bin-dir}" />
+    </target>
+
+    <target name="build" depends="init">
+        <delete dir="libs" />
+        <mkdir dir="libs" />
+        <!-- generate header file with version/build number and build timestamp -->
+        <tstamp />
+        <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_VERSION &quot;${version}-b${build}&quot;${line.separator}" append="false" />
+        <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_BUILD_TSTAMP &quot;${DSTAMP}T${TSTAMP}&quot;${line.separator}" append="true" />
+        <!-- call bash script to build four versions of wrapper -->
+        <exec executable="bash">
+            <arg value="scripts/build.sh" />
+            <arg value="${osname-full}" />
+    	    <arg value="libs" />
+        </exec>
+    </target>
+
+    <target name="release" depends="build">
+        <property name="tarfile" value="libmyospfacade-${version}-${osname-full}.tar.gz" />
+        <property file="build.properties" />
+        <echo message="Creating ${tarfile}" />
+        <exec executable="bash">
+            <arg value="scripts/mktarball.sh" />
+            <arg value="${tarfile}" />
+            <arg value="libs" />
+        </exec>
+    </target>
+
+     <target name="autobuild" depends="release">
+         <property name="tarfile" value="libopensharding-mysql-${version}-${osname-full}.tar.gz" />
+         <echo message="Installing ${tarfile}" />
+         <exec executable="bash">
+             <arg value="scripts/install.sh" />
+             <arg value="${tarfile}" />
+         </exec>
+     </target>
+
+</project>
