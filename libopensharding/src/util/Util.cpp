@@ -300,6 +300,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return str.substr(start, end+1);
 }
 
+
 /*static*/ string Util::removeQuotes(string keyValue) {
     if (keyValue.length()>2 
         && (keyValue[0]=='\'' || keyValue[0]=='`' || keyValue[0]=='"') 
