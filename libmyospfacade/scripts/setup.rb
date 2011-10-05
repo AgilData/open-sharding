@@ -16,7 +16,6 @@ puts 'Removing old symlinks...'
 FileUtils.remove_file('libmysqlclient.so.' + mysql_client_vers, :force => true)
 FileUtils.remove_file('libmysqlclient_r.so.' + mysql_client_vers, :force => true)
 FileUtils.remove_file('libmysqlclient_real_r.so.' + mysql_client_vers, :force => true)
-FileUtils.remove_file('libmyodbc5.so', :force => true)
 
 puts 'Creating symlinks...'
 FileUtils.ln_s('libmyfastodbc_wrapper.so.' + mysql_client_vers,

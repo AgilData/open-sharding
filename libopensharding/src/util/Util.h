@@ -72,6 +72,9 @@ public:
     static string toString(long int i);
     static string toString(int i);
     static string toString(void *p);
+    static string toString(const void *p);
+
+    static string trim(string);
     static string removeQuotes(string);
     static string formatIP(char *);
     static void parseIP(string hostAddr, char *hostBytes);

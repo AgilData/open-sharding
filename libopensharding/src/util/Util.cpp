@@ -284,6 +284,22 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
+/*static*/ string Util::toString(const void *p) {
+    if (p==NULL) {
+        return string("NULL");
+    }
+    char temp[256];
+    sprintf(temp, "%p", p);
+    return string(temp);
+}
+
+/*static*/ string Util::trim(string str) {
+    string whitespace = string(" \t\f\v\n\r");
+    size_t start = str.find_first_not_of(whitespace);
+    size_t end = str.find_last_not_of(whitespace);
+    return str.substr(start, end+1);
+}
+
 /*static*/ string Util::removeQuotes(string keyValue) {
     if (keyValue.length()>2 
         && (keyValue[0]=='\'' || keyValue[0]=='`' || keyValue[0]=='"') 
