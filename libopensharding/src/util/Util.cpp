@@ -19,7 +19,20 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/* Copyright (C) 2010 CodeFutures Corporation
 
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; version 2 of the License.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
 
 #include <stdio.h>
@@ -280,16 +293,16 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
-/*static*/ string Util::trim(string str) {
-    string whitespace = string(" \t\f\v\n\r");
-    size_t start = str.find_first_not_of(whitespace);
-    size_t end = str.find_last_not_of(whitespace);
-    return str.substr(start, end+1);
+
+/*static*/ string Config::trim(string str) {
+    string whitespace = string(" \t\f\v\n\r");
+    size_t start = str.find_first_not_of(whitespace);
+    size_t end = str.find_last_not_of(whitespace);
+    return str.substr(start, end+1);
 }
 
-
 /*static*/ string Util::removeQuotes(string keyValue) {
-    if (keyValue.length()>2 
+    if (keyValue.length()>2
         && (keyValue[0]=='\'' || keyValue[0]=='`' || keyValue[0]=='"') 
         && keyValue[0] == keyValue[keyValue.length()-1]) 
     {
