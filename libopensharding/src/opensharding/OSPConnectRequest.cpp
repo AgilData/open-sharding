@@ -44,7 +44,7 @@ void OSPConnectRequest::write(OSPOutputStream *buffer) {
 }
 
 unsigned int OSPConnectRequest::getEstimatedEncodingLength() {
-    return database.length() + user.length + password.length() + 16;
+    return database.length() + user.length() + password.length() + 16;
 }
 
 
