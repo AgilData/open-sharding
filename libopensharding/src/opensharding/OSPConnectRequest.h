@@ -39,6 +39,8 @@ public:
     virtual ~OSPConnectRequest();
 
     unsigned char getMessageType() { return 0x01; }
+
+    unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);
 
     // setField implementation not required for request messages since C only encodes them

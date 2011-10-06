@@ -38,6 +38,8 @@ public:
     virtual ~OSPResultSetRequest();
 
     unsigned char getMessageType() { return 0x04; }
+
+    unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);
 
     // setField implementation not required for request messages since C only encodes them
