@@ -25,6 +25,8 @@ FileUtils.ln_s('libmyospfacade.so.' + mysql_client_vers,
 FileUtils.ln_s('libmyospfacade_r.so.' + mysql_client_vers,
                'libmysqlclient_r.so.' + mysql_client_vers)
 
+FileUtils.ln_s('libopensharding.so.1.0.0', 'libopensharding.so')
+
 #TODO: we need to link to the real mysql driver here, but where is it ??
 FileUtils.ln_s('libmysqlclient_real_r.so.' + mysql_client_vers + '.0.0',
                'libmysqlclient_real_r.so.' + mysql_client_vers)
