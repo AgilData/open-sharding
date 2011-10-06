@@ -40,6 +40,7 @@ public:
 
     unsigned char getMessageType() { return 0xa6; }
     OSPMessage *getResponse() { return response; }
+    unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
 
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
