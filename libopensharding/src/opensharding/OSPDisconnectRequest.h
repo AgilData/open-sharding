@@ -37,7 +37,7 @@ public:
 
     unsigned char getMessageType() { return 0x05; }
 
-    unsigned int getEstimatedEncodingLength() { return connID.length() + 16 };
+    unsigned int getEstimatedEncodingLength() { return connID.length() + 16; }
     void write(OSPOutputStream *);
 
     // setField implementation not required for request messages since C only encodes them
