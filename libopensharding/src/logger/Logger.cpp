@@ -203,9 +203,11 @@ void Logger::setLevel(int logLevel) {
 
 
     //HACK HACK HACK
+    /*
     isTrace = true;
     isDebug = true;
     isInfo = true;
+    */
 }
 
 Logger::~Logger() {
