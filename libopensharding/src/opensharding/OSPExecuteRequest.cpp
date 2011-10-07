@@ -37,7 +37,7 @@ OSPExecuteRequest::~OSPExecuteRequest() {
 void OSPExecuteRequest::write(OSPOutputStream *buffer) {
     buffer->writeString(1, connID);
     buffer->writeInt(2, stmtID);
-    buffer->writeString(3, sql.c_str());
+    buffer->writeString(3, sql);
 }
 
 unsigned int OSPExecuteRequest::getEstimatedEncodingLength() {
