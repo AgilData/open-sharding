@@ -546,6 +546,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // fetch each field's value as a string
         for (col = 1; col <= columnCount; col++) {
 
+        //TODO: this can all be optimized to avoid copying data from the message and just store the pointer directly
+        // no need to have  currentRowData at all
+
             unsigned int l = currentRowData[col-1] ? currentRowData[col-1]->getLength() : 0;
 
             // ensure the buffer is large enough to store this data plus a null terminator
@@ -565,7 +568,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             }
             else {
                 // store -1 to indicate a NULL field
-                rowDataLength[col-1] = l;
+                rowDataLength[col-1] = -1;
             }
 
             // we always store a null terminator after the data just to be safe
