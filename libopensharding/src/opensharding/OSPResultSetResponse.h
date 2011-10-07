@@ -63,6 +63,7 @@ public:
     void setField(int fieldNum, int value);
 
     unsigned int       getColumnCount() { return columnCount; }
+    int*       getColumnTypes() { return columnType; }
     OSPString        **getColumnNames() { return columnName; }
     list<OSPString**> *getResultRows()  { return &resultRows; }
 

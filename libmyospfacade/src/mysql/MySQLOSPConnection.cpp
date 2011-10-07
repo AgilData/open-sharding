@@ -389,6 +389,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             // set the data type
             res->fields[i].type = MYSQL_TYPE_VARCHAR;
 
+            bool TRACE = true;		
+            const char *odbcColumnName = columnName->getBuffer();
+
             switch (jdbcType) {
                 case JDBC_BLOB:
                     res->fields[i].type = MYSQL_TYPE_BLOB;
@@ -455,7 +458,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                 default:
                     res->fields[i].type = MYSQL_TYPE_VARCHAR;
                     log.warn(string("Column ") + string((const char *)odbcColumnName)
-                            + string(" used UNKNOWN JDBC datatype (") + Util::toString((int)odbcDataType) + string(") --> MYSQL_TYPE_VARCHAR"));
+                            + string(" used UNKNOWN JDBC datatype (") + Util::toString((int)jdbcType) + string(") --> MYSQL_TYPE_VARCHAR"));
                     break;
             }
 
