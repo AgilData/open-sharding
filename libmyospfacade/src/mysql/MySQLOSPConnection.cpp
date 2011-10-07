@@ -424,6 +424,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DECIMAL --> MYSQL_TYPE_DECIMAL"));
                     break;
                 case JDBC_BIT:
+                case JDBC_TINYINT:
                     res->fields[i].type = MYSQL_TYPE_TINY;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BIT --> MYSQL_TYPE_TINY"));
                     break;
