@@ -587,11 +587,10 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //struct timeval tvStart, tvEnd;
     //gettimeofday(&tvStart, NULL);
 
-/*
     if (xlog.isDebugEnabled()) {
         xlog.debug(getLogPrefix(mysql) + "mysql_real_query(" + string(sql) + ")");
     }
-*/
+
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         xlog.error(string("mysql_real_query() returning -1 because no connection found for mysql handle ") + Util::toString((void*)mysql));
