@@ -44,6 +44,7 @@ public:
     virtual ~OSPResultSetMetaResponse();
 
     unsigned char getMessageType() { return 0xaa; }
+    unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {}
 

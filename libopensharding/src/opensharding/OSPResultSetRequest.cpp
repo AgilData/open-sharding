@@ -38,5 +38,8 @@ void OSPResultSetRequest::write(OSPOutputStream *buffer) {
     buffer->writeInt(3, resultSetID);
 }
 
+unsigned int OSPResultSetRequest::getEstimatedEncodingLength() {
+    return connID.length() + 16;
+}
 
 }

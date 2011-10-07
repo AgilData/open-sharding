@@ -42,6 +42,8 @@ private:
     OSPFileInputStream *is;
     OSPFileOutputStream *os;
 
+    int nextRequestID;
+
     char *buffer;
     unsigned int bufferSize;
 

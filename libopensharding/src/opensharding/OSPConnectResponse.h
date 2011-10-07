@@ -38,6 +38,7 @@ public:
     virtual ~OSPConnectResponse();
 
     unsigned char getMessageType() { return 0xa1; }
+    unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
     void setField(int fieldNum, int value);

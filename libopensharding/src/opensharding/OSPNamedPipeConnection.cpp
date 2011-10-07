@@ -35,6 +35,8 @@
 
 #define DEBUG log.isDebugEnabled()
 
+#define AVOID_COPY 1
+
 using namespace util;
 
 namespace opensharding {
@@ -67,6 +69,8 @@ OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, strin
 
     bufferSize = 8192;
     buffer = new char[bufferSize];
+
+    nextRequestID = 1;
 }
 
 OSPNamedPipeConnection::~OSPNamedPipeConnection() {
@@ -83,18 +87,29 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expectACK, OSPMessageConsumer *consumer) {
 
-    //TODO: re-instate request IDs
+    // allocate next request ID
+    int requestID = nextRequestID++;
 
-    OSPWireRequest request(1, message->getMessageType(), message);
+    OSPWireRequest request(requestID, message->getMessageType(), message);
 
-    OSPByteBuffer tempBuffer(1024);  // TODO: could calculate message length first
+    // encode the message into a temporary memory buffer
+    OSPByteBuffer tempBuffer(message->getEstimatedEncodingLength());
     request.write(&tempBuffer);
+
+    int messageLength = tempBuffer.getOffset();
+
+#ifdef AVOID_COPY
+
+    os->writeInt(messageLength);
+    os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
+
+#else
 
     // wrap the message in the messaging protocol
     OSPByteBuffer zbuffer(tempBuffer.getOffset() + 4);
 
     // message length
-    zbuffer.writeInt(tempBuffer.getOffset());
+    zbuffer.writeInt(messageLength);
 
     // message bytes
     zbuffer.writeBytes(tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
@@ -102,6 +117,10 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
     // write to pipe
     if (DEBUG) log.debug("Writing request to request pipe");
     os->writeBytes((char *) zbuffer.getBuffer(), 0, zbuffer.getOffset());
+
+#endif
+
+    // flush the pipe if we are waiting for a response
     if (expectACK) {
         log.debug("Flushing request pipe");
         os->flush();

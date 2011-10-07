@@ -46,7 +46,7 @@ OSPWireResponse::~OSPWireResponse() {
 }
 
 void OSPWireResponse::write(OSPOutputStream *buffer) {
-    // implementation not required - C never en
+    // implementation not required - C never encodes responses
 }
 
 void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
@@ -65,6 +65,9 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
             break;
         case 104:
             response = new OSPDisconnectResponse();
+            break;
+        case 200:
+            //TODO: response = new OSPErrorResponse();
             break;
         default:
             throw "OSPWireResponse::setField() invalid fieldNum";

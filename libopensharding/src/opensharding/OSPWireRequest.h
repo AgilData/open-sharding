@@ -38,6 +38,8 @@ public:
     ~OSPWireRequest();
 
     unsigned char getMessageType() { return 0xa6; }
+
+    unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);
 
     // setField implementation not required for request messages since C only encodes them

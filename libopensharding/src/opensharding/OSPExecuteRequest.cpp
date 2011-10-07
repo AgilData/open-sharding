@@ -23,8 +23,6 @@
 #include <opensharding/OSPMessage.h>
 #include <opensharding/OSPOutputStream.h>
 
-#define SQL_CHUNK_SIZE 10240
-
 namespace opensharding {
 
 OSPExecuteRequest::OSPExecuteRequest(string connID, int stmtID, string sql) {
@@ -40,6 +38,10 @@ void OSPExecuteRequest::write(OSPOutputStream *buffer) {
     buffer->writeString(1, connID);
     buffer->writeInt(2, stmtID);
     buffer->writeString(3, sql.c_str());
+}
+
+unsigned int OSPExecuteRequest::getEstimatedEncodingLength() {
+    return sql.length() + connID.length() + 16;
 }
 
 
