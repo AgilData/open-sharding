@@ -61,7 +61,7 @@ LoggerGlobalState *__logger__getGlobalState() {
 
 /*static*/ Logger &Logger::getLogger(string name) {
 
-    //cerr << "getLogger(" << name << ")" << endl;
+    cerr << "getLogger(" << name << ")" << endl;
 
     Logger *logger = LOGGER_GLOBAL_STATE->loggerMap[name];
 
@@ -200,6 +200,12 @@ void Logger::setLevel(int logLevel) {
     isTrace = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_TRACE;
     isDebug = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_DEBUG;
     isInfo = logLevel <= LOG_LEVEL_INFO;
+
+
+    //HACK HACK HACK
+    isTrace = true;
+    isDebug = true;
+    isInfo = true;
 }
 
 Logger::~Logger() {

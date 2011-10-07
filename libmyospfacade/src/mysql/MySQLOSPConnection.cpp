@@ -62,9 +62,9 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     // connect to OSP server via TCP
     OSPConnectRequest request(database, user, password);
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
-    log.info(("wireResponse = ") + Util::toString((void*)wireResponse));
+    //log.info(("wireResponse = ") + Util::toString((void*)wireResponse));
     OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
-    log.info(("response = ") + Util::toString((void*)response));
+    //log.info(("response = ") + Util::toString((void*)response));
     connID = response->getConnID();
 
     // close TCP connection
