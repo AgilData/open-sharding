@@ -372,6 +372,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              */
 
             OSPString *columnName = response->getColumnNames()[i];
+            int jdbcType = response->getColumnTypes()[i];
             int columnNameLength = columnName->getLength();
             if (columnNameLength<1) {
                 res->fields[i].name = "";
@@ -388,121 +389,79 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             // set the data type
             res->fields[i].type = MYSQL_TYPE_VARCHAR;
 
+            bool TRACE = true;		
+            const char *odbcColumnName = columnName->getBuffer();
 
-        //TODO: do real data type support
-    //
-    //        /*
-    //
-    //        These are the valid MySQL data type constants
-    //        MYSQL_TYPE_DECIMAL, MYSQL_TYPE_TINY,
-    //        MYSQL_TYPE_SHORT,  MYSQL_TYPE_LONG,
-    //        MYSQL_TYPE_FLOAT,  MYSQL_TYPE_DOUBLE,
-    //        MYSQL_TYPE_NULL,   MYSQL_TYPE_TIMESTAMP,
-    //        MYSQL_TYPE_LONGLONG,MYSQL_TYPE_INT24,
-    //        MYSQL_TYPE_DATE,   MYSQL_TYPE_TIME,
-    //        MYSQL_TYPE_DATETIME, MYSQL_TYPE_YEAR,
-    //        MYSQL_TYPE_NEWDATE, MYSQL_TYPE_VARCHAR,
-    //        MYSQL_TYPE_BIT,
-    //        MYSQL_TYPE_NEWDECIMAL=246,
-    //        MYSQL_TYPE_ENUM=247,
-    //        MYSQL_TYPE_SET=248,
-    //        MYSQL_TYPE_TINY_BLOB=249,
-    //        MYSQL_TYPE_MEDIUM_BLOB=250,
-    //        MYSQL_TYPE_LONG_BLOB=251,
-    //        MYSQL_TYPE_BLOB=252,
-    //        MYSQL_TYPE_VAR_STRING=253,
-    //        MYSQL_TYPE_STRING=254,
-    //        MYSQL_TYPE_GEOMETRY=255,
-    //        */
-    //
-    //        switch (odbcDataType) {
-    //            case SQL_BINARY:
-    //                res->fields[i].type = MYSQL_TYPE_BLOB;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_BINARY --> MYSQL_TYPE_BLOB"));
-    //                break;
-    //            case SQL_VARBINARY:
-    //                res->fields[i].type = MYSQL_TYPE_BLOB;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_VARBINARY --> MYSQL_TYPE_BLOB"));
-    //                break;
-    //            case SQL_LONGVARBINARY:
-    //                res->fields[i].type = MYSQL_TYPE_BLOB;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_LONGVARBINARY --> MYSQL_TYPE_BLOB"));
-    //                break;
-    //            case SQL_TYPE_DATE:
-    //                res->fields[i].type = MYSQL_TYPE_DATE;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_TYPE_DATE --> MYSQL_TYPE_DATE"));
-    //                break;
-    //            case SQL_TYPE_TIME:
-    //            case SQL_TYPE_TIMESTAMP:
-    //            //case SQL_TYPE_UTCDATETIME:
-    //            //case SQL_TYPE_UTCTIME:
-    //            case SQL_TIME:
-    //            case SQL_TIMESTAMP:
-    //            case SQL_DATETIME:
-    //                res->fields[i].type = MYSQL_TYPE_DATETIME;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_DATETIME --> MYSQL_TYPE_DATETIME"));
-    //                break;
-    //            case SQL_INTERVAL_MONTH:
-    //            case SQL_INTERVAL_YEAR:
-    //            case SQL_INTERVAL_YEAR_TO_MONTH:
-    //            case SQL_INTERVAL_DAY:
-    //            case SQL_INTERVAL_HOUR:
-    //            case SQL_INTERVAL_MINUTE:
-    //            case SQL_INTERVAL_SECOND:
-    //            case SQL_INTERVAL_DAY_TO_HOUR:
-    //            case SQL_INTERVAL_DAY_TO_MINUTE:
-    //            case SQL_INTERVAL_DAY_TO_SECOND:
-    //            case SQL_INTERVAL_HOUR_TO_MINUTE:
-    //            case SQL_INTERVAL_HOUR_TO_SECOND:
-    //            case SQL_INTERVAL_MINUTE_TO_SECOND:
-    //                // no equivalent mysql type, so use VARCHAR
-    //                res->fields[i].type = MYSQL_TYPE_VARCHAR;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_INTERVAL --> MYSQL_TYPE_VARCHAR"));
-    //                break;
-    //            case SQL_DECIMAL:
-    //            case SQL_NUMERIC:
-    //                res->fields[i].type = MYSQL_TYPE_DECIMAL;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_DECIMAL --> MYSQL_TYPE_DECIMAL"));
-    //                break;
-    //            case SQL_BIT:
-    //            case SQL_TINYINT:
-    //                res->fields[i].type = MYSQL_TYPE_TINY;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_TINYINT --> MYSQL_TYPE_TINY"));
-    //                break;
-    //            case SQL_SMALLINT:
-    //            case SQL_BIGINT:
-    //            case SQL_INTEGER:
-    //                res->fields[i].type = MYSQL_TYPE_INT24;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_INTEGER --> MYSQL_TYPE_INT24"));
-    //                break;
-    //            case SQL_REAL:
-    //            case SQL_FLOAT:
-    //                res->fields[i].type = MYSQL_TYPE_FLOAT;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_FLOAT --> MYSQL_TYPE_FLOAT"));
-    //                break;
-    //            case SQL_DOUBLE:
-    //                res->fields[i].type = MYSQL_TYPE_DOUBLE;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_DOUBLE --> MYSQL_TYPE_DOUBLE"));
-    //                break;
-    //            case SQL_CHAR:
-    //            case SQL_VARCHAR:
-    //            case SQL_LONGVARCHAR:
-    //            case SQL_WCHAR:
-    //            case SQL_WVARCHAR:
-    //            case SQL_WLONGVARCHAR:
-    //                res->fields[i].type = MYSQL_TYPE_VARCHAR;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_VARCHAR --> MYSQL_TYPE_VARCHAR"));
-    //                break;
-    //            case SQL_GUID:
-    //                res->fields[i].type = MYSQL_TYPE_VARCHAR;
-    //                if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" SQL_GUID --> MYSQL_TYPE_VARCHAR"));
-    //                break;
-    //            default:
-    //                res->fields[i].type = MYSQL_TYPE_VARCHAR;
-    //                log.warn(string("Column ") + string((const char *)odbcColumnName)
-    //                        + string(" used UNKNOWN ODBC datatype (") + Util::toString((int)odbcDataType) + string(") --> MYSQL_TYPE_VARCHAR"));
-    //                break;
-    //        }
+            switch (jdbcType) {
+                case JDBC_BLOB:
+                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BLOB --> MYSQL_TYPE_BLOB"));
+                    break;
+                case JDBC_BINARY:
+                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BINARY --> MYSQL_TYPE_BLOB"));
+                    break;
+                case JDBC_VARBINARY:
+                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARBINARY --> MYSQL_TYPE_BLOB"));
+                    break;
+                case JDBC_LONGVARBINARY:
+                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_LONGVARBINARY --> MYSQL_TYPE_BLOB"));
+                    break;
+                case JDBC_DATE:
+                    res->fields[i].type = MYSQL_TYPE_DATE;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TYPE_DATE --> MYSQL_TYPE_DATE"));
+                    break;
+                case JDBC_TIME:
+                    res->fields[i].type = MYSQL_TYPE_DATETIME;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TIME --> MYSQL_TYPE_DATETIME"));
+                    break;
+                case JDBC_TIMESTAMP:
+                    res->fields[i].type = MYSQL_TYPE_DATETIME;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DATETIME --> MYSQL_TYPE_DATETIME"));
+                    break;
+                case JDBC_DECIMAL:
+                case JDBC_NUMERIC:
+                    res->fields[i].type = MYSQL_TYPE_DECIMAL;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DECIMAL --> MYSQL_TYPE_DECIMAL"));
+                    break;
+                case JDBC_BIT:
+                case JDBC_TINYINT:
+                    res->fields[i].type = MYSQL_TYPE_TINY;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BIT --> MYSQL_TYPE_TINY"));
+                    break;
+                case JDBC_SMALLINT:
+                case JDBC_BIGINT:
+                case JDBC_INTEGER:
+                    res->fields[i].type = MYSQL_TYPE_INT24;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_INTEGER --> MYSQL_TYPE_INT24"));
+                    break;
+                case JDBC_REAL:
+                case JDBC_FLOAT:
+                    res->fields[i].type = MYSQL_TYPE_FLOAT;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_FLOAT --> MYSQL_TYPE_FLOAT"));
+                    break;
+                case JDBC_DOUBLE:
+                    res->fields[i].type = MYSQL_TYPE_DOUBLE;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DOUBLE --> MYSQL_TYPE_DOUBLE"));
+                    break;
+                case JDBC_CHAR:
+                case JDBC_VARCHAR:
+                case JDBC_LONGVARCHAR:
+                    res->fields[i].type = MYSQL_TYPE_VARCHAR;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARCHAR --> MYSQL_TYPE_VARCHAR"));
+                    break;
+                case JDBC_CLOB:
+                    res->fields[i].type = MYSQL_TYPE_VARCHAR;
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_CLOB --> MYSQL_TYPE_VARCHAR"));
+                    break;
+                default:
+                    res->fields[i].type = MYSQL_TYPE_VARCHAR;
+                    log.warn(string("Column ") + string((const char *)odbcColumnName)
+                            + string(" used UNKNOWN JDBC datatype (") + Util::toString((int)jdbcType) + string(") --> MYSQL_TYPE_VARCHAR"));
+                    break;
+            }
 
             res->fields[i].org_name = emptyString;
             res->fields[i].table = emptyString;
