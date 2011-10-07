@@ -546,7 +546,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // fetch each field's value as a string
         for (col = 1; col <= columnCount; col++) {
 
-            unsigned int l = currentRowData[col-1]->getLength();
+            unsigned int l = currentRowData[col-1] ? currentRowData[col-1]->getLength() : 0;
 
             // ensure the buffer is large enough to store this data plus a null terminator
             rowData = ensureCapacity(rowData, &rowDataSize, rowDataOffset+l+1);
@@ -554,15 +554,22 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             // calculate pointer to offset where we will store the data
             char *fieldValue = rowData + rowDataOffset;
 
-            // store data
-            memcpy(fieldValue, currentRowData[col-1]->getBuffer(), l);
-            rowDataOffset += l;
+            if (currentRowData[col-1]) {
+                // store data
+                memcpy(fieldValue, currentRowData[col-1]->getBuffer(), l);
+                rowDataOffset += l;
+
+                // store length (excluding null terminator)
+                rowDataLength[col-1] = l;
+
+            }
+            else {
+                // store -1 to indicate a NULL field
+                rowDataLength[col-1] = l;
+            }
 
             // we always store a null terminator after the data just to be safe
             rowData[rowDataOffset++] = '\0';
-
-            // store length (excluding null terminator)
-            rowDataLength[col-1] = l;
 
             // update max length
             if (l > res->fields[col - 1].max_length) {
