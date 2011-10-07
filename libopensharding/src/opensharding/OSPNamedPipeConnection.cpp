@@ -35,7 +35,7 @@
 
 #define DEBUG log.isDebugEnabled()
 
-#define AVOID_COPY 1
+#define AVOID_COPY 0
 
 using namespace util;
 
@@ -99,6 +99,8 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
     int messageLength = tempBuffer.getOffset();
 
 #ifdef AVOID_COPY
+
+    //TODO: OSPFileOutputStream is not implemented correctly yet
 
     os->writeInt(messageLength);
     os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
