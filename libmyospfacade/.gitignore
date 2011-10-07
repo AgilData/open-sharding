@@ -1,5 +1,7 @@
 build.properties
-lib*
+libmyosp*
+libopensharding*
+libs
 temp
 *.gz
 
