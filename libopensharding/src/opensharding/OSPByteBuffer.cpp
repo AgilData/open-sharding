@@ -466,6 +466,21 @@ void OSPByteBuffer::writeShort(short n) {
 
 void OSPByteBuffer::writeVarInt(int n) {
     log.trace(string("writeVarInt(") + Util::toString(n) + string(") BEGIN"));
+
+    while (true) {
+        if ((value & ~0x7F) == 0) {
+            buffer[offset++] = value & 0xFF;
+            log.trace(string("writeVarInt(") + Util::toString(n) + string(") WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
+            log.trace(string("writeVarInt(") + Util::toString(n) + string(") END"));
+            return;
+        } else {
+            buffer[offset++] = ((value & 0x7F) | 0x80);
+            log.trace(string("writeVarInt(") + Util::toString(n) + string(") WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
+            value >>>= 7;
+        }
+    }
+
+    /*
     while (n>0x7F) {
         ensureCapacity(1);
         buffer[offset++] = (n & 0x7F) | 0x80;
@@ -475,7 +490,8 @@ void OSPByteBuffer::writeVarInt(int n) {
     ensureCapacity(1);
     buffer[offset++] = (n & 0x7F);
     log.trace(string("writeVarInt(") + Util::toString(n) + string(") WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
-    log.trace(string("writeVarInt(") + Util::toString(n) + string(") END"));
+    */
+
 }
 
 void OSPByteBuffer::writeInt(int fieldNum, int i) {
