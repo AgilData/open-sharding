@@ -32,6 +32,7 @@ private:
     int resultSetID;
     int resultSetColumnCount;
     int rowsAffected;
+    int generatedID;
     string sqlState;
     int errorCode;
     string errorMessage;
@@ -50,6 +51,7 @@ public:
     int getResultSetID() { return resultSetID; }
     int getResultSetColumnCount() { return resultSetColumnCount; }
     int getUpdateCount() { return rowsAffected; }
+    int getGeneratedID() { return generatedID; }
 
     string getSQLState() { return sqlState; }
     int getErrorCode() { return errorCode; }
