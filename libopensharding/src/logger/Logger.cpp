@@ -238,6 +238,14 @@ bool Logger::isTraceEnabled() {
 }
 
 bool Logger::isDebugEnabled() {
+
+    // HACK
+    if (name == "MySQLDriver") {
+        char temp[256];
+        sprintf(temp, "%p", (void*) this);
+        cerr << "Logger::isDebugEnabled(MySQLDriver logger @" << temp << ") " << isDebug << endl;
+    }
+
     return isDebug;
 }
 
