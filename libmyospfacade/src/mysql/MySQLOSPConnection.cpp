@@ -164,10 +164,6 @@ int MySQLOSPConnection::mysql_query(MYSQL *mysql, const char *sql) {
 
 int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
 
-    log->info(string("mysql_real_query() logger is ") + Util::toString(log));
-
-    log->info(string("MySQLOSPConnection::mysql_real_query(") + Util::toString(mysql) + string(", ") + string(sql) + string(")"));
-
     if (log->isDebugEnabled()) {
         log->debug(string("MySQLOSPConnection::mysql_real_query(") + Util::toString(mysql) + string(", ") + string(sql) + string(")"));
     }

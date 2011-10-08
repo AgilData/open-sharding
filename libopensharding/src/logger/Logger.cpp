@@ -57,7 +57,7 @@ string getPidTid() {
 LoggerGlobalState *__logger__getGlobalState() {
     //TODO: use mutex
     if (!__loggerGlobalState__) {
-        cerr << getPidTid() << " Logger creating LoggerGlobalState object" << endl;
+        //cerr << getPidTid() << " Logger creating LoggerGlobalState object" << endl;
         __loggerGlobalState__ = new LoggerGlobalState();
     }
     return __loggerGlobalState__;
@@ -78,7 +78,7 @@ LoggerGlobalState *__logger__getGlobalState() {
 
 /*static*/ Logger *Logger::getLoggerPtr(string name) {
 
-    cerr << getPidTid() << " Logger::getLogger(" << name << ")" << endl;
+    //cerr << getPidTid() << " Logger::getLogger(" << name << ")" << endl;
 
     Logger *logger = LOGGER_GLOBAL_STATE->loggerMap[name];
 
@@ -117,7 +117,7 @@ LoggerGlobalState *__logger__getGlobalState() {
 
     char temp[256];
     sprintf(temp, "%p", (void*) logger);
-    cerr << getPidTid() << " Logger::getLogger(" << name << ") returning " << temp << endl;
+    //cerr << getPidTid() << " Logger::getLogger(" << name << ") returning " << temp << endl;
 
     return logger;
 }
@@ -130,7 +130,7 @@ LoggerGlobalState *__logger__getGlobalState() {
  */
 /*static*/ void Logger::configure(string filename) {
 
-    cerr << getPidTid() << " Logger::configure(" << filename << ")" << endl;
+    //cerr << getPidTid() << " Logger::configure(" << filename << ")" << endl;
 
     string line;
     ifstream myfile(filename.c_str());
@@ -199,18 +199,18 @@ LoggerGlobalState *__logger__getGlobalState() {
             // configure existing logger, if it exists
             Logger *logger = LOGGER_GLOBAL_STATE->loggerMap[className];
             if (logger) {
-                cerr << getPidTid() << " Logger::configure() reconfiguring logger (" << className << ")" << endl;
+                //cerr << getPidTid() << " Logger::configure() reconfiguring logger (" << className << ")" << endl;
                 logger->setLevel(level);
             }
             else {
-                cerr << getPidTid() << " Logger::configure() could not find logger (" << className << ")" << endl;
+                //cerr << getPidTid() << " Logger::configure() could not find logger (" << className << ")" << endl;
             }
 
         }
         myfile.close();
     }
     else {
-        cerr << getPidTid() << " Logger::configure() failed to open file" << endl;
+        //cerr << getPidTid() << " Logger::configure() failed to open file" << endl;
     }
 }
 
@@ -222,13 +222,13 @@ LoggerGlobalState *__logger__getGlobalState() {
 
 Logger::Logger(string name, int logLevel) {
     this->name = name;
-    cerr << getPidTid() << " Logger::Logger(" << name << ")" << endl;
+    //cerr << getPidTid() << " Logger::Logger(" << name << ")" << endl;
     setLevel(logLevel);
 }
 
 void Logger::setLevel(int logLevel) {
 
-    cerr << getPidTid() << " Logger::setLevel(" << name << ", " << logLevel << ")" << endl;
+    //cerr << getPidTid() << " Logger::setLevel(" << name << ", " << logLevel << ")" << endl;
 
     isTrace = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_TRACE;
     isDebug = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_DEBUG;
@@ -256,7 +256,7 @@ bool Logger::isDebugEnabled() {
     if (name == "MySQLDriver") {
         char temp[256];
         sprintf(temp, "%p", (void*) this);
-        cerr << getPidTid() << " Logger::isDebugEnabled(MySQLDriver logger @" << temp << ") " << isDebug << endl;
+        //cerr << getPidTid() << " Logger::isDebugEnabled(MySQLDriver logger @" << temp << ") " << isDebug << endl;
     }
 
     return isDebug;
@@ -293,7 +293,7 @@ void Logger::error(string message) {
 void Logger::log(const char *level, const char *message) {
 
     if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDERR) {
-        cerr << "[" << time(NULL) << "s] "
+        //cerr << "[" << time(NULL) << "s] "
              << getPidTid()
              << " [opensharding] [" << level << "] [" << name << "] "
              << message << "\n";
