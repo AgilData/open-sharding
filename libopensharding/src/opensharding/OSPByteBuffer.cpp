@@ -476,7 +476,7 @@ void OSPByteBuffer::writeVarInt(int n) {
         } else {
             buffer[offset++] = ((n & 0x7F) | 0x80);
             log.trace(string("writeVarInt(") + Util::toString(n) + string(") WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
-            n >>>= 7;
+            n >>= 7;
         }
     }
 
