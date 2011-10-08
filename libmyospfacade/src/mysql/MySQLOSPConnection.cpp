@@ -49,7 +49,7 @@ using namespace util;
 
 #define LOG_METHOD_CALLS false
 
-Logger MySQLOSPConnection::log = Logger::getLoggerPtr("MySQLOSPConnection");
+Logger *MySQLOSPConnection::log = Logger::getLoggerPtr("MySQLOSPConnection");
 
 MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap) {
 
