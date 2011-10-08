@@ -244,7 +244,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         resultSetID = 0;
         affectedRows = 0;
         fieldCount = 0;
-        my_errno = 9999;
+        my_errno = 1105; // MySQL unknown error
         my_error = "Query failed due to OSP error";
     }
 
