@@ -103,7 +103,9 @@ LoggerGlobalState *__logger__getGlobalState() {
         LOGGER_GLOBAL_STATE->loggerMap[name] = logger;
     }
 
-    cerr << "getLogger(" << name << ") returning " << Util::toString((void*)logger) << endl;
+    char temp[256];
+    sprintf(temp, "%p", (void*) logger);
+    cerr << "getLogger(" << name << ") returning " << temp << endl;
 
     return logger;
 }
