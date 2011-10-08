@@ -48,7 +48,7 @@ private:
     unsigned int       fieldIndex;
     OSPString        **currentRow;
 
-    static Logger log;
+    static Logger &log;
 
 
 public:

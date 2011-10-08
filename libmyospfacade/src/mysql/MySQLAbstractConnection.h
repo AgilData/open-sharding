@@ -26,7 +26,7 @@ using namespace logger;
 class MySQLAbstractConnection {
 private:
     // logger
-    static Logger _log;
+    static Logger &_log;
 
 public:
     MySQLAbstractConnection();

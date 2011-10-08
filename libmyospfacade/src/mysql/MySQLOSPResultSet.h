@@ -31,7 +31,7 @@ class MySQLOSPResultSet : public MySQLAbstractResultSet {
 private:
 
     // logger
-    static Logger log;
+    static Logger &log;
 
     // reference to the connection that created this result set
     MySQLOSPConnection *conn;

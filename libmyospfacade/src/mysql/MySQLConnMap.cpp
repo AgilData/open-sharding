@@ -32,7 +32,7 @@ using namespace std;
 using namespace util;
 using namespace logger;
 
-Logger MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
+Logger &MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
 
 MySQLConnMap::MySQLConnMap() {
     pid = getpid();

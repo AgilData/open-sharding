@@ -33,7 +33,7 @@ using namespace util;
 
 namespace opensharding {
 
-logger::Logger OSPFileInputStream::log = Logger::getLogger("OSPFileInputStream");
+logger::Logger &OSPFileInputStream::log = Logger::getLogger("OSPFileInputStream");
 
 OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
     this->file = file;

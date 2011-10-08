@@ -59,7 +59,7 @@ namespace opensharding {
 class OSPTCPConnection : public OSPConnection {
 private:
 
-    static logger::Logger log;
+    static logger::Logger &log;
 
     string host;
     int port;

@@ -41,7 +41,7 @@ using namespace util;
 
 namespace opensharding {
 
-logger::Logger OSPNamedPipeConnection::log = Logger::getLogger("OSPNamedPipeConnection");
+logger::Logger &OSPNamedPipeConnection::log = Logger::getLogger("OSPNamedPipeConnection");
 
 OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, string responsePipeFilename) {
 
