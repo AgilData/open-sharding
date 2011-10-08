@@ -61,6 +61,10 @@ LoggerGlobalState *__logger__getGlobalState() {
 //////////////////////////////
 
 /*static*/ Logger &Logger::getLogger(string name) {
+    return *getLoggerPtr(name);
+}
+
+/*static*/ Logger *Logger::getLoggerPtr(string name) {
 
     cerr << "getLogger(" << name << ")" << endl;
 
@@ -99,7 +103,7 @@ LoggerGlobalState *__logger__getGlobalState() {
         LOGGER_GLOBAL_STATE->loggerMap[name] = logger;
     }
 
-    return *logger;
+    return logger;
 }
 
 /**
