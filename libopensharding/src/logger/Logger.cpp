@@ -45,7 +45,15 @@ static LoggerGlobalState *__loggerGlobalState__ = NULL;
 LoggerGlobalState *__logger__getGlobalState() {
     //TODO: use mutex
     if (!__loggerGlobalState__) {
-        cerr << getPidTid() << " Logger creating LoggerGlobalState object" << endl;
+
+    char temp[256];
+#ifdef __APPLE__
+    sprintf(temp, "[PID:N/A]");
+#else
+    sprintf(temp, "[PID:%d] [TID:%u]", getpid(), (unsigned int)pthread_self());
+#endif
+
+        cerr << temp << " Logger creating LoggerGlobalState object" << endl;
         __loggerGlobalState__ = new LoggerGlobalState();
     }
     return __loggerGlobalState__;
