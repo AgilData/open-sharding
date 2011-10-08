@@ -1019,7 +1019,7 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         }
     }
     catch (...) {
-        log->error("mysql_close() FAILED - perhaps DbsClient died or restarted?");
+        log->error("mysql_close() FAILED - perhaps OSP died or restarted?");
     }
 }
 
