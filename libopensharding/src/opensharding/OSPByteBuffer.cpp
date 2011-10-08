@@ -468,15 +468,15 @@ void OSPByteBuffer::writeVarInt(int n) {
     log.trace(string("writeVarInt(") + Util::toString(n) + string(") BEGIN"));
 
     while (true) {
-        if ((value & ~0x7F) == 0) {
-            buffer[offset++] = value & 0xFF;
+        if ((n & ~0x7F) == 0) {
+            buffer[offset++] = n & 0xFF;
             log.trace(string("writeVarInt(") + Util::toString(n) + string(") WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
             log.trace(string("writeVarInt(") + Util::toString(n) + string(") END"));
             return;
         } else {
-            buffer[offset++] = ((value & 0x7F) | 0x80);
+            buffer[offset++] = ((n & 0x7F) | 0x80);
             log.trace(string("writeVarInt(") + Util::toString(n) + string(") WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
-            value >>>= 7;
+            n >>>= 7;
         }
     }
 
