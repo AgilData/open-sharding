@@ -42,18 +42,22 @@ namespace logger {
 
 static LoggerGlobalState *__loggerGlobalState__ = NULL;
 
-LoggerGlobalState *__logger__getGlobalState() {
-    //TODO: use mutex
-    if (!__loggerGlobalState__) {
-
+// get process-id and thread-id
+string getPidTid() {
     char temp[256];
 #ifdef __APPLE__
     sprintf(temp, "[PID:N/A]");
 #else
     sprintf(temp, "[PID:%d] [TID:%u]", getpid(), (unsigned int)pthread_self());
 #endif
+    return string(temp);
+}
 
-        cerr << temp << " Logger creating LoggerGlobalState object" << endl;
+
+LoggerGlobalState *__logger__getGlobalState() {
+    //TODO: use mutex
+    if (!__loggerGlobalState__) {
+        cerr << getPidTid() << " Logger creating LoggerGlobalState object" << endl;
         __loggerGlobalState__ = new LoggerGlobalState();
     }
     return __loggerGlobalState__;
@@ -284,17 +288,6 @@ void Logger::warn(string message) {
 
 void Logger::error(string message) {
     error(message.c_str());
-}
-
-// get process-id and thread-id
-string getPidTid() {
-    char temp[256];
-#ifdef __APPLE__
-    sprintf(temp, "[PID:N/A]");
-#else
-    sprintf(temp, "[PID:%d] [TID:%u]", getpid(), (unsigned int)pthread_self());
-#endif
-    return string(temp);
 }
 
 void Logger::log(const char *level, const char *message) {
