@@ -45,6 +45,7 @@ static LoggerGlobalState *__loggerGlobalState__ = NULL;
 LoggerGlobalState *__logger__getGlobalState() {
     //TODO: use mutex
     if (!__loggerGlobalState__) {
+        cerr << "Logger creating LoggerGlobalState object" << endl;
         __loggerGlobalState__ = new LoggerGlobalState();
     }
     return __loggerGlobalState__;
@@ -108,6 +109,8 @@ LoggerGlobalState *__logger__getGlobalState() {
  * - Log level setting in format NAME=LEVEL where LEVEL is one of TRACE,DEBUG,INFO,WARN,ERROR
  */
 /*static*/ void Logger::configure(string filename) {
+
+    cerr << "Logger::configure(" << filename << ")" << endl;
 
     string line;
     ifstream myfile(filename.c_str());
@@ -176,11 +179,18 @@ LoggerGlobalState *__logger__getGlobalState() {
             // configure existing logger, if it exists
             Logger *logger = LOGGER_GLOBAL_STATE->loggerMap[className];
             if (logger) {
+                cerr << "configure() reconfiguring logger (" << className << ")" << endl;
                 logger->setLevel(level);
+            }
+            else {
+                cerr << "configure() could not find logger (" << className << ")" << endl;
             }
 
         }
         myfile.close();
+    }
+    else {
+        cerr << "Logger::configure() failed to open file" << endl;
     }
 }
 
@@ -192,15 +202,17 @@ LoggerGlobalState *__logger__getGlobalState() {
 
 Logger::Logger(string name, int logLevel) {
     this->name = name;
+    cerr << "Logger::Logger(" << name << ")" << endl;
     setLevel(logLevel);
 }
 
 void Logger::setLevel(int logLevel) {
 
+    cerr << "Logger::setLevel(" << name << ", " << logLevel << ")" << endl;
+
     isTrace = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_TRACE;
     isDebug = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_DEBUG;
     isInfo = logLevel <= LOG_LEVEL_INFO;
-
 
     //HACK HACK HACK
     /*
