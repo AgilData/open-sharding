@@ -58,7 +58,7 @@ private:
     unsigned int buf_mark;
     unsigned int buf_size;
 
-    static Logger log;
+    static Logger &log;
 
 public:
     OSPFileInputStream(FILE *, int buf_size);

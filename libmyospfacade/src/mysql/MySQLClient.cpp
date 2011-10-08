@@ -43,7 +43,7 @@ using namespace util;
 
 namespace mysql {
 
-Logger MySQLClient::log = Logger::getLogger("MySQLClient");
+Logger &MySQLClient::log = Logger::getLogger("MySQLClient");
 
 MySQLClient::MySQLClient() {
     initOK = false;

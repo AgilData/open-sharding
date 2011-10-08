@@ -32,7 +32,7 @@ using namespace logger;
 
 namespace opensharding {
 
-logger::Logger OSPFileOutputStream::log = Logger::getLogger("OSPFileOutputStream");
+logger::Logger &OSPFileOutputStream::log = Logger::getLogger("OSPFileOutputStream");
 
 OSPFileOutputStream::OSPFileOutputStream(FILE *file, unsigned int writeBufferSize) {
     this->file = file;

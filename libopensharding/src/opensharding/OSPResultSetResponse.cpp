@@ -26,7 +26,7 @@ using namespace logger;
 
 namespace opensharding {
 
-/*static*/ Logger OSPResultSetResponse::log = Logger::getLogger("OSPResultSetResponse");
+/*static*/ Logger &OSPResultSetResponse::log = Logger::getLogger("OSPResultSetResponse");
 
 OSPResultSetResponse::OSPResultSetResponse() {
     columnCount = 0;

@@ -37,7 +37,7 @@ namespace util {
 class Util {
 
 private:
-    static Logger xlog;
+    static Logger &xlog;
 
 public:
 

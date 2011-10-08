@@ -24,7 +24,7 @@
 
 using namespace logger;
 
-Logger MySQLAbstractConnection::_log = Logger::getLogger("MySQLAbstractConnection");
+Logger &MySQLAbstractConnection::_log = Logger::getLogger("MySQLAbstractConnection");
 
 
 MySQLAbstractConnection::MySQLAbstractConnection() {

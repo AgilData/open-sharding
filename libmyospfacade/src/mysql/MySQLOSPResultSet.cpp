@@ -24,7 +24,7 @@
 using namespace util;
 using namespace logger;
 
-Logger MySQLOSPResultSet::log = Logger::getLogger("MySQLOSPResultSet");
+Logger &MySQLOSPResultSet::log = Logger::getLogger("MySQLOSPResultSet");
 
 MySQLOSPResultSet::MySQLOSPResultSet(MySQLOSPConnection *conn) {
     this->conn = conn;

@@ -36,7 +36,7 @@ using namespace util;
 
 namespace opensharding {
 
-logger::Logger OSPByteBuffer::log = Logger::getLogger("OSPByteBuffer");
+logger::Logger &OSPByteBuffer::log = Logger::getLogger("OSPByteBuffer");
 
 OSPByteBuffer::OSPByteBuffer(unsigned int _length) {
 

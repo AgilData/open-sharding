@@ -31,7 +31,7 @@ using namespace util;
 
 namespace opensharding {
 
-logger::Logger OSPMessageDecoder::log = Logger::getLogger("OSPMessageDecoder");
+logger::Logger &OSPMessageDecoder::log = Logger::getLogger("OSPMessageDecoder");
 
 OSPMessageDecoder::OSPMessageDecoder() {
 }
