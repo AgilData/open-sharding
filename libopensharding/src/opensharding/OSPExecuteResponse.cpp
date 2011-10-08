@@ -66,7 +66,7 @@ void OSPExecuteResponse::setField(int fieldNum, int value) {
         case 4:
             errorCode = value;
             break;
-        case 4:
+        case 5:
             generatedID = value;
             break;
         default:
