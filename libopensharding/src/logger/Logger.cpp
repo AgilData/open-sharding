@@ -110,6 +110,8 @@ LoggerGlobalState *__logger__getGlobalState() {
  */
 /*static*/ void Logger::configure(string filename) {
 
+    cerr << "Logger::configure(" << filename << ")" << endl;
+
     string line;
     ifstream myfile(filename.c_str());
     if (myfile.is_open()) {
@@ -186,6 +188,9 @@ LoggerGlobalState *__logger__getGlobalState() {
 
         }
         myfile.close();
+    }
+    else {
+        cerr << "Logger::configure() failed to open file" << endl;
     }
 }
 
