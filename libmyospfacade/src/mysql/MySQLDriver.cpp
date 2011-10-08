@@ -51,7 +51,7 @@ using namespace util;
 
 /* GLOBAL VARIABLES */
 
-static Logger *xlog = Logger::getLoggerPtr("MySQLDriver");
+static Logger &xlog = Logger::getLogger("MySQLDriver");
 
 static bool bannerDisplayed = false;
 
@@ -145,7 +145,7 @@ MySQLClient* getMySQLClient() {
     boost::mutex::scoped_lock lock(initMutex);
     if (!mysqlclient) {
         mysqlclient = new MySQLClient();
-        if (!mysqlclient->init()) { xlog->error("Failed to init mysqlClient"); }
+        if (!mysqlclient->init()) { xlog.error("Failed to init mysqlClient"); }
     }
     return mysqlclient;
 }
@@ -157,8 +157,8 @@ void banner() {
 
         Logger::configure("/etc/myospfacade-log.properties");
 
-        if (xlog->isDebugEnabled()) {
-            xlog->debug(string("Open Sharding MySQL Driver") +
+        if (xlog.isDebugEnabled()) {
+            xlog.debug(string("Open Sharding MySQL Driver") +
                        string(" (libopensharding_mysql) version ") +
                        WRAPPER_VERSION + " (" + WRAPPER_BUILD_TSTAMP ")");
         }
@@ -167,28 +167,28 @@ void banner() {
 }
 
 void trace(const char *name) {
-    if (xlog->isTraceEnabled()) {
-        xlog->trace(string("In method '") + name + "'");
+    if (xlog.isTraceEnabled()) {
+        xlog.trace(string("In method '") + name + "'");
     }
 }
 
 void trace(const char *name, MYSQL *mysql) {
-    if (xlog->isTraceEnabled()) {
-        xlog->trace("In method '" + string(name) +
+    if (xlog.isTraceEnabled()) {
+        xlog.trace("In method '" + string(name) +
                    "' (MYSQL=" + Util::toString(mysql) + ")");
     }
 }
 
 void trace(const char *name, MYSQL_RES *res) {
-    if (xlog->isTraceEnabled()) {
-        xlog->trace("In method '" + string(name) +
+    if (xlog.isTraceEnabled()) {
+        xlog.trace("In method '" + string(name) +
                    "' (MYSQL_RES=" + Util::toString(res) + ")");
     }
 }
 
 void trace(const char *name, MYSQL_STMT *stmt) {
-    if (xlog->isTraceEnabled()) {
-        xlog->trace("In method '" + string(name) +
+    if (xlog.isTraceEnabled()) {
+        xlog.trace("In method '" + string(name) +
                    "' (MYSQL_STMT=" + Util::toString(stmt) + ")");
     }
 }
@@ -220,7 +220,7 @@ int setErrorState(MYSQL *mysql, int _errno, const char *_error,
 MySQLAbstractConnection *getConnection(MYSQL *mysql, bool createIfNotExist) {
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(mysql);
     if (createIfNotExist && conn==NULL) {
-        ////xlog->trace(string("Creating new Native MySQL Connection for MYSQL ") +
+        ////xlog.trace(string("Creating new Native MySQL Connection for MYSQL ") +
                    //Util::toString((void*)mysql));
         conn = new MySQLNativeConnection(mysql, getMySQLClient(),
                                          getResourceMap());
@@ -228,8 +228,8 @@ MySQLAbstractConnection *getConnection(MYSQL *mysql, bool createIfNotExist) {
     }
     
     /*
-    if (xlog->isTraceEnabled()) {
-        //xlog->trace(
+    if (xlog.isTraceEnabled()) {
+        //xlog.trace(
             string("getConnection(MYSQL=")
             + Util::toString((void*)mysql)
             + string(") returning ")
@@ -287,20 +287,20 @@ unsigned int mysql_errno(MYSQL *mysql) {
     //trace("mysql_errno", mysql);
     MySQLErrorState *errorState = getResourceMap()->getErrorState(mysql);
     if (errorState != NULL) {
-        //xlog->trace(string("mysql_errno() returning local error state ") + Util::toString((int)errorState->my_errno));
+        //xlog.trace(string("mysql_errno() returning local error state ") + Util::toString((int)errorState->my_errno));
         return errorState->my_errno;
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn) {
         unsigned int ret = conn->mysql_errno(mysql);
-        if (xlog->isDebugEnabled() || ret>0) {
-            xlog->debug(string("mysql_errno returning ") + Util::toString((int)ret));
+        if (xlog.isDebugEnabled() || ret>0) {
+            xlog.debug(string("mysql_errno returning ") + Util::toString((int)ret));
         }
         return ret;
     } else {
         // no error
-        if (xlog->isDebugEnabled()) {
-            xlog->debug("mysql_errno() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("mysql_errno() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
         }
         //HACK:
         return 2006;
@@ -322,8 +322,8 @@ const char *mysql_error(MYSQL *mysql) {
         return ret;
     } else {
         // no error
-        if (xlog->isDebugEnabled()) {
-            xlog->debug("mysql_error() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("mysql_error() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
         }
         //HACK:
         return "MySQL server has gone away";
@@ -359,8 +359,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         info->unix_socket = unix_socket;
         info->clientflag = clientflag;
 
-        if (xlog->isDebugEnabled()) {
-            xlog->debug(string("mysql_real_connect(")
+        if (xlog.isDebugEnabled()) {
+            xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
                 + string("host=") + info->host + string(", ")
                 + string("user=") + info->user + string(", ")
@@ -381,11 +381,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
         return mysql;
     } catch (const char *ex1) {
-        xlog->error(string("mysql_real_connect() failed: ") + string(ex1));
+        xlog.error(string("mysql_real_connect() failed: ") + string(ex1));
         setErrorState(mysql, 9001, "Failed to connect to DB [2]", "DBS01");
         return NULL;
     } catch (...) {
-        xlog->error(string("mysql_real_connect() failed due to exception"));
+        xlog.error(string("mysql_real_connect() failed due to exception"));
         setErrorState(mysql, 9001, "Failed to connect to DB [3]", "DBS01");
         return NULL;
     }
@@ -396,12 +396,12 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     if (db==NULL) {
         return -1;
     }
-    if (xlog->isDebugEnabled()) {
-        xlog->debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
     }
 
     if (!getMySQLClient()->init()) {
-        xlog->error("failed to init mysqlClient");
+        xlog.error("failed to init mysqlClient");
         return -1;
     }
 
@@ -411,15 +411,15 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
         if (mysql->db != NULL && strcmp(mysql->db, db)==0) {
             // yes, we already selected this db, so there is nothing we need to do
-            if (xlog->isDebugEnabled()) {
-                xlog->debug("mysql_select_db() re-using existing connection");
+            if (xlog.isDebugEnabled()) {
+                xlog.debug("mysql_select_db() re-using existing connection");
             }
             return 0;
         }
         else {
 
-            if (xlog->isDebugEnabled()) {
-                xlog->debug("mysql_select_db() closing OLD connection");
+            if (xlog.isDebugEnabled()) {
+                xlog.debug("mysql_select_db() closing OLD connection");
             }
 
             // a different db is being selected so we need to close the old connection now
@@ -446,14 +446,14 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
 
         if (info == NULL) {
-            xlog->error("No ConnInfo in map");
+            xlog.error("No ConnInfo in map");
             return -1;
         }
 
         if (strlen(mysql->db)>=4 && strncmp("osp:", mysql->db, 4)==0) {
 
-            if (xlog->isDebugEnabled()) {
-                xlog->debug("Creating OSP connection");
+            if (xlog.isDebugEnabled()) {
+                xlog.debug("Creating OSP connection");
             }
 
             // osp:databasename
@@ -464,7 +464,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap());
             }
             catch (...) {
-                xlog->error("Failed to connect to OSP");
+                xlog.error("Failed to connect to OSP");
                 return -1;
             }
 
@@ -473,8 +473,8 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         }
         else {
 
-            if (xlog->isDebugEnabled()) {
-                xlog->debug("Creating native connection");
+            if (xlog.isDebugEnabled()) {
+                xlog.debug("Creating native connection");
             }
 
             // create native connection
@@ -485,9 +485,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
             // do some validation to prevent segv in MySQL driver
             if (info->host == "") {
-               /* xlog->error("Call to mysql_select_db() but stored connection information has blank host name");
+               /* xlog.error("Call to mysql_select_db() but stored connection information has blank host name");
                 return -1;*/
-		        xlog->error("Call to mysql_select_db() with blank host name");
+		        xlog.error("Call to mysql_select_db() with blank host name");
             }
 
             if (!conn->connect(
@@ -499,7 +499,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     info->unix_socket,
                     info->clientflag
             )) {
-                xlog->error("connect() FAILED");
+                xlog.error("connect() FAILED");
                 return -1;
             }
         }
@@ -507,17 +507,17 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         // success
         getResourceMap()->clearErrorState(mysql);
 
-        if (xlog->isDebugEnabled()) {
-            xlog->debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+        if (xlog.isDebugEnabled()) {
+            xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
         }
 
         return 0;
 
     } catch (const char *exception) {
-        xlog->error(string("mysql_select_db() failed due to exception: ") + exception);
+        xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
         return -1;
     } catch (...) {
-        xlog->error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+        xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
         return -1;
     }
 
@@ -525,15 +525,15 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
 my_bool mysql_autocommit(MYSQL *mysql, my_bool auto_mode) {
     //trace("mysql_autocommit", mysql);
-    if (xlog->isDebugEnabled()) {
-        xlog->debug("mysql_autocommit(" + Util::toString(auto_mode) + ")");
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_autocommit(" + Util::toString(auto_mode) + ")");
     }
     if (!valid(mysql)) {
         return false;
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        xlog->error(string("mysql_autocommit() returning false because no connection found for mysql handle ") + Util::toString((void*)mysql));
+        xlog.error(string("mysql_autocommit() returning false because no connection found for mysql handle ") + Util::toString((void*)mysql));
         return false;
     }
 
@@ -547,7 +547,7 @@ MYSQL_STMT * mysql_stmt_init(MYSQL *mysql) {
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        xlog->error(string("mysql_stmt_init() returning NULL because no connection found for mysql handle ") + Util::toString((void*)mysql));
+        xlog.error(string("mysql_stmt_init() returning NULL because no connection found for mysql handle ") + Util::toString((void*)mysql));
         return NULL;
     }
     MYSQL_STMT *stmt = conn->mysql_stmt_init(mysql);
@@ -593,13 +593,13 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //struct timeval tvStart, tvEnd;
     //gettimeofday(&tvStart, NULL);
 
-    if (xlog->isDebugEnabled()) {
-        xlog->debug(getLogPrefix(mysql) + "mysql_real_query(" + string(sql) + ")");
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(getLogPrefix(mysql) + "mysql_real_query(" + string(sql) + ")");
     }
 
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        xlog->error(string("mysql_real_query() returning -1 because no connection found for mysql handle ") + Util::toString((void*)mysql));
+        xlog.error(string("mysql_real_query() returning -1 because no connection found for mysql handle ") + Util::toString((void*)mysql));
         return -1;
     }
 
@@ -608,7 +608,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //gettimeofday(&tvEnd, NULL);
 
 /*
-    if (xlog->isDebugEnabled()) {
+    if (xlog.isDebugEnabled()) {
         if (result!=0) {
             // output details of error
             int _errno = mysql_errno(mysql);
@@ -617,13 +617,13 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
                         + string(" second(s) and is returning ") + Util::toString(result)
                         + string(" (FAILURE); errno=") + Util::toString(_errno)
                         + string("; error=") + string(_error);
-            xlog->warn(msg);
+            xlog.warn(msg);
         }
         else {
                 // output details of successful query
                 string msg = string("mysql_real_query(") + string(sql) + string(" ) took ") + Util::getElapsedTimeString(&tvStart, &tvEnd)
                             + string(" second(s) and is returning 0 (SUCCESS)");
-                xlog->debug(msg);
+                xlog.debug(msg);
         }
     }
     */
@@ -635,7 +635,7 @@ int mysql_send_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //trace("mysql_send_query", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        xlog->error("mysql_send_query() returning -1 because no connection found");
+        xlog.error("mysql_send_query() returning -1 because no connection found");
         return -1;
     }
     return conn->mysql_send_query(mysql, sql, length);}
@@ -644,7 +644,7 @@ MYSQL_RES * mysql_store_result(MYSQL *mysql) {
     ////trace("mysql_store_result BEGIN", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_store_result but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_store_result but there is no current connection");
         return NULL;
     }
     MYSQL_RES *result = conn->mysql_store_result(mysql);
@@ -660,7 +660,7 @@ my_bool mysql_more_results(MYSQL *mysql) {
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_more_results but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_more_results but there is no current connection");
         return false;
     }
     return conn->mysql_more_results(mysql);
@@ -669,8 +669,8 @@ my_bool mysql_more_results(MYSQL *mysql) {
 my_bool mysql_commit(MYSQL * mysql) {
     //trace("mysql_commit", mysql);
     /*
-    if (xlog->isDebugEnabled()) {
-        xlog->debug(string("mysql_commit(") + Util::toString(mysql) + string(")"));
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("mysql_commit(") + Util::toString(mysql) + string(")"));
     }
     */
 
@@ -679,7 +679,7 @@ my_bool mysql_commit(MYSQL * mysql) {
 
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_commit but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_commit but there is no current connection");
         return false;
     }
     my_bool ret = conn->mysql_commit(mysql);
@@ -687,21 +687,21 @@ my_bool mysql_commit(MYSQL * mysql) {
     //gettimeofday(&tvEnd, NULL);
 
     /*
-    if (xlog->isDebugEnabled()) {
+    if (xlog.isDebugEnabled()) {
         // Zero if successful. Nonzero if an error occurred.
         if (ret) {
             string msg = string("mysql_commit() took ")
                 + Util::getElapsedTimeString(&tvStart, &tvEnd)
                 + string(" second(s) and is returning FAILURE"
             );
-            xlog->debug(msg);
+            xlog.debug(msg);
         }
         else {
             string msg = string("mysql_commit() took ")
                 + Util::getElapsedTimeString(&tvStart, &tvEnd)
                 + string(" second(s) and is returning SUCCESS"
             );
-            xlog->debug(msg);
+            xlog.debug(msg);
         }
     }
     */
@@ -713,7 +713,7 @@ my_bool mysql_rollback(MYSQL * mysql) {
     //trace("mysql_rollback", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_rollback but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_rollback but there is no current connection");
         return false;
     }
     return conn->mysql_rollback(mysql);
@@ -723,44 +723,44 @@ void mysql_close(MYSQL *mysql) {
     //trace("mysql_close", mysql);
     if (!valid(mysql)) {
         // this is quite common, so we don't want to show a warning for this
-        if (xlog->isDebugEnabled()) {
-            xlog->debug("mysql_close() called with an invalid MYSQL handle");
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("mysql_close() called with an invalid MYSQL handle");
         }
         return;
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         // this is quite common, so we don't want to show a warning for this
-        if (xlog->isDebugEnabled()) {
-            xlog->debug("Call to mysql_close but there is no current connection");
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("Call to mysql_close but there is no current connection");
         }
         return;
     }
 
-    if (xlog->isDebugEnabled()) {
-        xlog->debug("BEFORE remove from map");
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("BEFORE remove from map");
     }
 
     // remove from the map
     getResourceMap()->erase(mysql);
     getResourceMap()->eraseResults(conn);
 
-    if (xlog->isDebugEnabled()) {
-        xlog->debug("AFTER remove from map, BEFORE delegate mysql_close()");
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("AFTER remove from map, BEFORE delegate mysql_close()");
     }
 
     // close the connection
     conn->mysql_close(mysql);
 
-    if (xlog->isDebugEnabled()) {
-        xlog->debug("AFTER delegate mysql_close(), BEFORE delete connection object");
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("AFTER delegate mysql_close(), BEFORE delete connection object");
     }
 
     // delete the connection
     delete conn;
 
-    if (xlog->isDebugEnabled()) {
-        xlog->debug("AFTER delete connection object. END of mysql_close().");
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("AFTER delete connection object. END of mysql_close().");
     }
 
      //TODO: we should delete the mysql structure if it was created by us in mysql_init or mysql_connect, according
@@ -818,7 +818,7 @@ int mysql_server_init(int argc, char **argv, char **groups) {
     banner();
 
     if (!getMySQLClient()->init()) {
-        xlog->error("mysql_server_init() failed to init mysqlclient");
+        xlog.error("mysql_server_init() failed to init mysqlclient");
         return -1;
     }
 
@@ -845,7 +845,7 @@ unsigned int mysql_field_count(MYSQL *mysql) {
     //trace("mysql_field_count", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_field_count but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_field_count but there is no current connection");
         return 0;
     }
     return conn->mysql_field_count(mysql);
@@ -855,12 +855,12 @@ my_ulonglong mysql_affected_rows(MYSQL *mysql) {
     //trace("mysql_affected_rows", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_affected_rows but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_affected_rows but there is no current connection");
         return 0;
     }
     my_ulonglong ret = conn->mysql_affected_rows(mysql);
-    if (xlog->isTraceEnabled()) {
-        //xlog->trace(string("mysql_affected_rows() returning ") + Util::toString((int)ret));
+    if (xlog.isTraceEnabled()) {
+        //xlog.trace(string("mysql_affected_rows() returning ") + Util::toString((int)ret));
     }
     return ret;
 }
@@ -869,7 +869,7 @@ my_ulonglong mysql_insert_id(MYSQL *mysql) {
     //trace("mysql_insert_id", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_insert_id but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_insert_id but there is no current connection");
         return 0;
     }
     return conn->mysql_insert_id(mysql);
@@ -879,7 +879,7 @@ unsigned int mysql_warning_count(MYSQL *mysql) {
     //trace("mysql_warning_count", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_warning_count but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_warning_count but there is no current connection");
         return 0;
     }
     return conn->mysql_warning_count(mysql);
@@ -889,7 +889,7 @@ const char * mysql_info(MYSQL *mysql) {
     //trace("mysql_info", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_info but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_info but there is no current connection");
         return NULL;
     }
     return conn->mysql_info(mysql);
@@ -899,7 +899,7 @@ unsigned long mysql_thread_id(MYSQL *mysql) {
     //trace("mysql_thread_id", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_thread_id but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_thread_id but there is no current connection");
         return 0;
     }
     return conn->mysql_thread_id(mysql);
@@ -909,7 +909,7 @@ const char * mysql_character_set_name(MYSQL *mysql) {
     //trace("mysql_character_set_name", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_character_set_name but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_character_set_name but there is no current connection");
         return NULL;
     }
     return conn->mysql_character_set_name(mysql);
@@ -917,12 +917,12 @@ const char * mysql_character_set_name(MYSQL *mysql) {
 
 int mysql_set_character_set(MYSQL *mysql, const char *csname) {
     //trace("mysql_set_character_set", mysql);
-    if (xlog->isDebugEnabled()) {
-        xlog->debug(string("set_character_set(") + string(csname) + string(")"));
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("set_character_set(") + string(csname) + string(")"));
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_set_character_set but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_set_character_set but there is no current connection");
         return 0;
     }
     return conn->mysql_set_character_set(mysql, csname);
@@ -932,7 +932,7 @@ void mysql_get_character_set_info(MYSQL *mysql, MY_CHARSET_INFO *charset) {
     //trace("mysql_get_character_set_info", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_get_character_set_info but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_get_character_set_info but there is no current connection");
         return;
     }
     conn->mysql_get_character_set_info(mysql, charset);
@@ -942,7 +942,7 @@ int mysql_ping(MYSQL *mysql) {
     //trace("mysql_ping", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_ping but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_ping but there is no current connection");
         // return non-zero to indicate the connection is bad
         return -1;
     }
@@ -953,7 +953,7 @@ const char * mysql_stat(MYSQL *mysql) {
     //trace("mysql_stat", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_stat but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_stat but there is no current connection");
         return NULL;
     }
     return conn->mysql_stat(mysql);
@@ -984,7 +984,7 @@ unsigned long mysql_get_client_version(void) {
     //trace("mysql_get_client_version");
     mysql_get_client_versionFnType* tempFunction = (mysql_get_client_versionFnType*)mysqlclient->get_mysql_function("mysql_get_client_version");
     unsigned long tempValue = tempFunction();
-    //xlog->trace(string("mysql_get_client_version() returning ") + Util::toString((int)tempValue));
+    //xlog.trace(string("mysql_get_client_version() returning ") + Util::toString((int)tempValue));
     return tempValue;
 }
 
@@ -992,7 +992,7 @@ const char * mysql_get_host_info(MYSQL *mysql) {
     //trace("mysql_get_host_info", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_get_host_info but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_get_host_info but there is no current connection");
         return NULL;
     }
     return conn->mysql_get_host_info(mysql);
@@ -1012,7 +1012,7 @@ unsigned int mysql_get_proto_info(MYSQL *mysql) {
     //trace("mysql_get_proto_info", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_get_proto_info but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_get_proto_info but there is no current connection");
         return 0;
     }
     return conn->mysql_get_proto_info(mysql);
@@ -1022,7 +1022,7 @@ MYSQL_RES * mysql_list_dbs(MYSQL *mysql, const char *wild) {
     //trace("mysql_list_dbs", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_list_dbs but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_list_dbs but there is no current connection");
         return NULL;
     }
     return conn->mysql_list_dbs(mysql, wild);
@@ -1032,7 +1032,7 @@ MYSQL_RES * mysql_list_tables(MYSQL *mysql, const char *wild) {
     //trace("mysql_list_tables", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_list_tables but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_list_tables but there is no current connection");
         return NULL;
     }
     return conn->mysql_list_tables(mysql, wild);
@@ -1042,7 +1042,7 @@ MYSQL_RES * mysql_list_processes(MYSQL *mysql) {
     //trace("mysql_list_processes", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_list_processes but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_list_processes but there is no current connection");
         return NULL;
     }
     return conn->mysql_list_processes(mysql);
@@ -1053,7 +1053,7 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
     //trace("mysql_options", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_options but there is no connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_options but there is no connection");
         return -1;
     }
     return conn->mysql_options(mysql, option, arg);
@@ -1064,7 +1064,7 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg) {
     //trace("mysql_options", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_options but there is no connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_options but there is no connection");
         return -1;
     }
     return conn->mysql_options(mysql, option, arg);
@@ -1098,7 +1098,7 @@ int mysql_next_result(MYSQL *mysql) {
     //trace("mysql_next_result", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_next_result but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_next_result but there is no current connection");
         return -1;
     }
     return conn->mysql_next_result(mysql);
@@ -1107,14 +1107,14 @@ int mysql_next_result(MYSQL *mysql) {
 
 void mysql_debug(const char *debug) {
     //trace("mysql_debug");
-    xlog->debug(string("mysql_debug(\"") + string(debug==NULL?"":debug) + string("\""));
+    xlog.debug(string("mysql_debug(\"") + string(debug==NULL?"":debug) + string("\""));
 }
 
 MYSQL_RES * mysql_use_result(MYSQL *mysql) {
     //trace("mysql_use_result", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_use_result but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_use_result but there is no current connection");
         return NULL;
     }
     return conn->mysql_use_result(mysql);
@@ -1125,7 +1125,7 @@ int mysql_set_server_option(MYSQL *mysql, enum enum_mysql_set_option option) {
     //trace("mysql_set_server_option", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_set_server_option but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_set_server_option but there is no current connection");
         return 0;
     }
     return conn->mysql_set_server_option(mysql, option);
@@ -1143,7 +1143,7 @@ void mysql_free_result(MYSQL_RES *res) {
     }
     MySQLAbstractResultSet *rs = getResourceMap()->getResultSet(res);
     if (rs == NULL) {
-        xlog->warn(string("Call to mysql_free_result(") + Util::toString((void*)res) + string(") but there is no result set mapped to that MYSQL_RES*"));
+        xlog.warn(string("Call to mysql_free_result(") + Util::toString((void*)res) + string(") but there is no result set mapped to that MYSQL_RES*"));
         return;
     }
 
@@ -1161,7 +1161,7 @@ void mysql_data_seek(MYSQL_RES *result, my_ulonglong offset) {
     //trace("mysql_data_seek", result);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(result);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_data_seek but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_data_seek but there is no current connection");
         return;
     }
     conn->mysql_data_seek(result, offset);
@@ -1171,7 +1171,7 @@ MYSQL_ROW_OFFSET mysql_row_seek(MYSQL_RES *result, MYSQL_ROW_OFFSET offset) {
     //trace("mysql_row_seek", result);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(result);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_row_seek but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_row_seek but there is no current connection");
         return NULL;
     }
     return conn->mysql_row_seek(result, offset);
@@ -1179,355 +1179,355 @@ MYSQL_ROW_OFFSET mysql_row_seek(MYSQL_RES *result, MYSQL_ROW_OFFSET offset) {
 
 MYSQL_RES * mysql_list_fields(MYSQL *mysql, const char *table, const char *wild) {
     //trace("mysql_list_fields", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_list_fields");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_list_fields");
     return NULL;
 }
 
 void myodbc_remove_escape(MYSQL *mysql, char *name) {
     //trace("myodbc_remove_escape", mysql);
-    ////if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: myodbc_remove_escape");
+    ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: myodbc_remove_escape");
 }
 
 unsigned int mysql_thread_safe(void) {
     //trace("mysql_thread_safe");
-    ////if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_safe");
+    ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_safe");
     return 0;
 }
 
 my_bool mysql_embedded(void) {
     //trace("mysql_embedded");
-    ////if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_embedded");
+    ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_embedded");
     return false;
 }
 
 MYSQL_MANAGER* mysql_manager_init(MYSQL_MANAGER* con) {
     //trace("mysql_manager_init");
-    ////if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_init");
+    ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_init");
     return NULL;
 }
 
 MYSQL_MANAGER* mysql_manager_connect(MYSQL_MANAGER* con, const char* host,
         const char* user, const char* passwd, unsigned int port) {
     //trace("mysql_manager_connect");
-//    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_connect");
+//    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_connect");
     return NULL;
 }
 
 void mysql_manager_close(MYSQL_MANAGER* con) {
     //trace("mysql_manager_close");
-//    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_close");
+//    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_close");
 }
 
 int mysql_manager_command(MYSQL_MANAGER* con, const char* cmd, int cmd_len) {
     //trace("mysql_manager_command");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_command");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_command");
     return -1;
 }
 
 int mysql_manager_fetch_line(MYSQL_MANAGER* con, char* res_buf,
         int res_buf_size) {
     //trace("mysql_manager_fetch_line");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_fetch_line");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_fetch_line");
     return -1;
 }
 
 my_bool mysql_read_query_result(MYSQL *mysql) {
     //trace("mysql_read_query_result", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_read_query_result");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_read_query_result");
     return false;
 }
 
 int mysql_stmt_fetch(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_fetch");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_fetch");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_fetch");
     return -1;
 }
 
 int mysql_stmt_fetch_column(MYSQL_STMT *stmt, MYSQL_BIND *bind_arg,
         unsigned int column, unsigned long offset) {
     //trace("mysql_stmt_fetch_column");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_fetch_column");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_fetch_column");
     return -1;
 }
 
 int mysql_stmt_store_result(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_store_result");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_store_result");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_store_result");
     return -1;
 }
 
 unsigned long mysql_stmt_param_count(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_param_count");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_param_count");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_param_count");
     return 0;
 }
 
 my_bool mysql_stmt_attr_set(MYSQL_STMT *stmt,
         enum enum_stmt_attr_type attr_type, const void *attr) {
     //trace("mysql_stmt_attr_set");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_attr_set");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_attr_set");
     return 0;
 }
 
 my_bool mysql_stmt_attr_get(MYSQL_STMT *stmt,
         enum enum_stmt_attr_type attr_type, void *attr) {
     //trace("mysql_stmt_attr_get");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_attr_get");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_attr_get");
     return false;
 }
 
 my_bool mysql_stmt_bind_result(MYSQL_STMT * stmt, MYSQL_BIND * bnd) {
     //trace("mysql_stmt_bind_result");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_bind_result");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_bind_result");
     return false;
 }
 
 my_bool mysql_stmt_reset(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_reset");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_reset");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_reset");
     return false;
 }
 
 my_bool mysql_stmt_free_result(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_free_result");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_free_result");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_free_result");
     return false;
 }
 
 my_bool mysql_stmt_send_long_data(MYSQL_STMT *stmt, unsigned int param_number,
         const char *data, unsigned long length) {
     //trace("mysql_stmt_send_long_data");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_send_long_data");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_send_long_data");
     return false;
 }
 
 MYSQL_RES * mysql_stmt_result_metadata(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_result_metadata");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_result_metadata");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_result_metadata");
     return NULL;
 }
 
 MYSQL_RES * mysql_stmt_param_metadata(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_param_metadata");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_param_metadata");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_param_metadata");
     return NULL;
 }
 
 unsigned int mysql_stmt_errno(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_errno");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_errno");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_errno");
     return -1;
 }
 
 const char * mysql_stmt_error(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_error");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_error");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_error");
     return NULL;
 }
 
 const char * mysql_stmt_sqlstate(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_sqlstate");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_sqlstate");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_sqlstate");
     return NULL;
 }
 
 MYSQL_ROW_OFFSET mysql_stmt_row_seek(MYSQL_STMT *stmt, MYSQL_ROW_OFFSET offset) {
     //trace("mysql_stmt_row_seek");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_row_seek");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_row_seek");
     return NULL;
 }
 
 MYSQL_ROW_OFFSET mysql_stmt_row_tell(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_row_tell");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_row_tell");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_row_tell");
     return NULL;
 }
 
 void mysql_stmt_data_seek(MYSQL_STMT *stmt, my_ulonglong offset) {
     //trace("mysql_stmt_data_seek");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_data_seek");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_data_seek");
 }
 
 my_ulonglong mysql_stmt_num_rows(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_num_rows");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_num_rows");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_num_rows");
     return 0;
 }
 
 my_ulonglong mysql_stmt_affected_rows(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_affected_rows");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_affected_rows");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_affected_rows");
     return 0;
 }
 
 my_ulonglong mysql_stmt_insert_id(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_insert_id");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_insert_id");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_insert_id");
     return 0;
 }
 
 unsigned int mysql_stmt_field_count(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_field_count");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_field_count");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_field_count");
     return -1;
 }
 
 MYSQL * mysql_connect(MYSQL *mysql, const char *host, const char *user,
         const char *passwd) {
     //trace("mysql_connect", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_connect");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_connect");
     return NULL;
 }
 
 int mysql_create_db(MYSQL *mysql, const char *DB) {
     //trace("mysql_create_db", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_create_db");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_create_db");
     return -1;
 }
 
 int mysql_drop_db(MYSQL *mysql, const char *DB) {
     //trace("mysql_drop_db", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_drop_db");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_drop_db");
     return -1;
 }
 
 my_bool mysql_thread_init(void) {
     //trace("mysql_thread_init");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_init");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_init");
     return false;
 }
 
 void mysql_thread_end(void) {
     //trace("mysql_thread_end");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_end");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_end");
 }
 
 my_bool mysql_ssl_set(MYSQL *mysql, const char *key, const char *cert,
         const char *ca, const char *capath, const char *cipher) {
     //trace("mysql_ssl_set", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_ssl_set");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_ssl_set");
     return false;
 }
 
 const char * mysql_get_ssl_cipher(MYSQL *mysql) {
     //trace("mysql_get_ssl_cipher", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_get_ssl_cipher");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_get_ssl_cipher");
     return NULL;
 }
 
 my_bool mysql_change_user(MYSQL *mysql, const char *user, const char *passwd,
         const char *db) {
     //trace("mysql_change_user", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_change_user");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_change_user");
     return false;
 }
 
 my_bool mysql_master_query(MYSQL *mysql, const char *q, unsigned long length) {
     //trace("mysql_master_query", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_master_query");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_master_query");
     return false;
 }
 
 my_bool mysql_master_send_query(MYSQL *mysql, const char *q,
         unsigned long length) {
     //trace("mysql_master_send_query", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_master_query");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_master_query");
     return false;
 }
 
 my_bool mysql_slave_query(MYSQL *mysql, const char *q, unsigned long length) {
     //trace("mysql_slave_query", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_slave_query");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_slave_query");
     return false;
 }
 
 my_bool mysql_slave_send_query(MYSQL *mysql, const char *q,
         unsigned long length) {
     //trace("mysql_slave_send_query", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_slave_query");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_slave_query");
     return false;
 }
 
 void mysql_enable_rpl_parse(MYSQL* mysql) {
     //trace("mysql_enable_rpl_parse", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_enable_rpl_parse");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_enable_rpl_parse");
 }
 
 void mysql_disable_rpl_parse(MYSQL* mysql) {
     //trace("mysql_disable_rpl_parse", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_disable_rpl_parse_rpl_parse");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_disable_rpl_parse_rpl_parse");
 }
 
 int mysql_rpl_parse_enabled(MYSQL* mysql) {
     //trace("mysql_rpl_parse_enabled", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_parse_enabled");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_parse_enabled");
     return 0;
 }
 
 void mysql_enable_reads_from_master(MYSQL* mysql) {
     //trace("mysql_enable_reads_from_master", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_enable_reads_from_master");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_enable_reads_from_master");
 }
 
 void mysql_disable_reads_from_master(MYSQL* mysql) {
     //trace("mysql_disable_reads_from_master", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_disable_reads_from_master");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_disable_reads_from_master");
 }
 
 my_bool mysql_reads_from_master_enabled(MYSQL* mysql) {
     //trace("mysql_reads_from_master_enabled", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_reads_from_master_enabled");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_reads_from_master_enabled");
     return false;
 }
 
 enum mysql_rpl_type mysql_rpl_query_type(const char* q, int len) {
     //trace("mysql_rpl_query_type");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_query_type");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_query_type");
     //TODO: not sure what to return here
     return MYSQL_RPL_MASTER;
 }
 
 my_bool mysql_rpl_probe(MYSQL* mysql) {
     //trace("mysql_rpl_probe", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_probe");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_probe");
     return false;
 }
 
 int mysql_set_master(MYSQL* mysql, const char* host, unsigned int port,
         const char* user, const char* passwd) {
     //trace("mysql_set_master", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_master");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_master");
     return 0;
 }
 
 int mysql_add_slave(MYSQL* mysql, const char* host, unsigned int port,
         const char* user, const char* passwd) {
     //trace("mysql_add_slave", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_add_slave");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_add_slave");
     return 0;
 }
 
 int mysql_shutdown(MYSQL *mysql, enum mysql_enum_shutdown_level shutdown_level) {
     //trace("mysql_shutdown", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_shutdown");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_shutdown");
     return 0;
 }
 
 int mysql_dump_debug_info(MYSQL *mysql) {
     //trace("mysql_dump_debug_info", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_dump_debug_info");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_dump_debug_info");
     return 0;
 }
 
 int mysql_refresh(MYSQL *mysql, unsigned int refresh_options) {
     //trace("mysql_refresh", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_refresh");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_refresh");
     return 0;
 }
 
 int mysql_kill(MYSQL *mysql, unsigned long pid) {
     //trace("mysql_kill", mysql);
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_kill");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_kill");
     return 0;
 }
 
@@ -1540,27 +1540,27 @@ void mysql_set_local_infile_handler(MYSQL *mysql,
 {
     // no implementation
     //trace("mysql_set_local_infile_handler");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_local_infile_handler");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_local_infile_handler");
 }
 
 void mysql_set_local_infile_default(MYSQL *mysql) {
     // no implementation
     //trace("mysql_set_local_infile_default");
-    //if (xlog->isTraceEnabled()) xlog->trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_local_infile_default");
+    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_local_infile_default");
 }
 
 my_ulonglong mysql_num_rows(MYSQL_RES *res) {
     //trace("mysql_num_rows", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) {
-            xlog->debug("mysql_num_rows() returning 0 (no connection)");
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("mysql_num_rows() returning 0 (no connection)");
         }
         return 0;
     }
     my_ulonglong ret = conn->mysql_num_rows(res);
-    if (xlog->isDebugEnabled()) {
-        xlog->debug(string("mysql_num_rows() returning ") + Util::toString((long int)ret));
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("mysql_num_rows() returning ") + Util::toString((long int)ret));
     }
     return ret;
 }
@@ -1569,7 +1569,7 @@ unsigned int mysql_num_fields(MYSQL_RES *res) {
     //trace("mysql_num_fields", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_num_fields but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_num_fields but there is no current connection");
         return 0;
     }
     return conn->mysql_num_fields(res);
@@ -1579,7 +1579,7 @@ my_bool mysql_eof(MYSQL_RES *res) {
     //trace("mysql_eof", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_eof but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_eof but there is no current connection");
         return 0;
     }
     return conn->mysql_eof(res);
@@ -1589,7 +1589,7 @@ MYSQL_ROW mysql_fetch_row(MYSQL_RES *result) {
     //trace("mysql_fetch_row BEGIN", result);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(result);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_fetch_row but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_fetch_row but there is no current connection");
         return NULL;
     }
     MYSQL_ROW ret = conn->mysql_fetch_row(result);
@@ -1601,7 +1601,7 @@ unsigned long * mysql_fetch_lengths(MYSQL_RES *result) {
     //trace("mysql_fetch_lengths", result);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(result);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_fetch_lengths but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_fetch_lengths but there is no current connection");
         return NULL;
     }
     return conn->mysql_fetch_lengths(result);
@@ -1612,7 +1612,7 @@ MYSQL_FIELD_OFFSET mysql_field_seek(MYSQL_RES *result,
     //trace("mysql_field_seek", result);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(result);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_field_seek but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_field_seek but there is no current connection");
         return 0;
     }
     return conn->mysql_field_seek(result, offset);
@@ -1622,7 +1622,7 @@ MYSQL_FIELD * mysql_fetch_field(MYSQL_RES *result) {
     //trace("mysql_fetch_field", result);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(result);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_fetch_field but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_fetch_field but there is no current connection");
         return NULL;
     }
     return conn->mysql_fetch_field(result);
@@ -1632,7 +1632,7 @@ MYSQL_FIELD * mysql_fetch_field_direct(MYSQL_RES *res, unsigned int fieldnr) {
     //trace("mysql_fetch_field_direct", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_fetch_field_direct but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_fetch_field_direct but there is no current connection");
         return NULL;
     }
     return conn->mysql_fetch_field_direct(res, fieldnr);
@@ -1642,7 +1642,7 @@ MYSQL_FIELD * mysql_fetch_fields(MYSQL_RES *res) {
     //trace("mysql_fetch_fields", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_fetch_fields but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_fetch_fields but there is no current connection");
         return NULL;
     }
     MYSQL_FIELD * ret = conn->mysql_fetch_fields(res);
@@ -1664,7 +1664,7 @@ MYSQL_ROW_OFFSET mysql_row_tell(MYSQL_RES *res) {
     //trace("mysql_row_tell", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_row_tell but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_row_tell but there is no current connection");
         return 0;
     }
     return conn->mysql_row_tell(res);
@@ -1674,7 +1674,7 @@ MYSQL_FIELD_OFFSET mysql_field_tell(MYSQL_RES *res) {
     //trace("mysql_field_tell", res);
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(res);
     if (conn == NULL) {
-        if (xlog->isDebugEnabled()) xlog->debug("Call to mysql_field_tell but there is no current connection");
+        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_field_tell but there is no current connection");
         return 0;
     }
     return conn->mysql_field_tell(res);
