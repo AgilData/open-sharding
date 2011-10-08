@@ -29,6 +29,7 @@ OSPExecuteResponse::OSPExecuteResponse() {
     resultSetID = 0;
     resultSetColumnCount = 0;
     rowsAffected = 0;
+    generatedID = 0;
     sqlState = "00000";
     errorCode = 0;
     errorMessage = "";
@@ -64,6 +65,9 @@ void OSPExecuteResponse::setField(int fieldNum, int value) {
             break;
         case 4:
             errorCode = value;
+            break;
+        case 4:
+            generatedID = value;
             break;
         default:
             throw "OSPExecuteResponse::setField() invalid fieldNum";

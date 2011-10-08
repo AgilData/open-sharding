@@ -102,6 +102,7 @@ private:
 
     /* Last result set response */
     int affectedRows;
+    int insertID;
     int fieldCount;
 
     MySQLConnMap *mysqlResourceMap;

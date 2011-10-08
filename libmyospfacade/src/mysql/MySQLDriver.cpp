@@ -200,16 +200,6 @@ string getLogPrefix(MYSQL *mysql) {
 
 void cleanup() { }
 
-void __attribute__ ((constructor)) dbsclient_init(void) {
-    ////logger.info << "*** dbsclient_init()" << endl;
-}
-
-void __attribute__ ((destructor)) dbsclient_fini(void) {
-    ////logger.info << "*** dbsclient_fini()" << endl;
-    // this method is called when the library is removed from memory - no
-    // need to do any cleanup here.
-}
-
 int setErrorState(MYSQL *mysql, int _errno, const char *_error,
                   const char *_sqlstate) {
     getResourceMap()->setErrorState(mysql, new MySQLErrorState(_errno,

@@ -89,6 +89,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     my_error = NULL;
 
     nextResultSetID = 1;
+    insertID = -1;
     resultSetID = -1;
 
     affectedRows = 0;
@@ -188,6 +189,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
     my_sqlstate = "00000";
     my_errno = 0;
     my_error = NULL;
+    insertID = -1;
 
     int ret = -1;
 
@@ -201,6 +203,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         resultSetID = executeResponse->getResultSetID();
         fieldCount = executeResponse->getResultSetColumnCount();
         affectedRows = executeResponse->getUpdateCount();
+        insertID = executeResponse->getGeneratedID();
 
         if (executeResponse->getErrorCode()) {
 
@@ -1019,7 +1022,7 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         }
     }
     catch (...) {
-        log->error("mysql_close() FAILED - perhaps DbsClient died or restarted?");
+        log->error("mysql_close() FAILED - perhaps OSP died or restarted?");
     }
 }
 
@@ -1087,10 +1090,10 @@ MYSQL_FIELD_OFFSET MySQLOSPConnection::mysql_field_tell(MYSQL_RES *result) {
 my_ulonglong MySQLOSPConnection::mysql_insert_id(MYSQL *mysql) {
 
     if (log->isTraceEnabled()) {
-        log->trace("mysql_insert_id()");
+        log->trace(string("mysql_insert_id() returning ") + Util::toString(insertID));
     }
 
-    return -1;
+    return insertID;
 }
 
 const char * MySQLOSPConnection::mysql_sqlstate(MYSQL *mysql) {
