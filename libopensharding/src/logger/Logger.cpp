@@ -293,7 +293,7 @@ void Logger::error(string message) {
 void Logger::log(const char *level, const char *message) {
 
     if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDERR) {
-        //cerr << "[" << time(NULL) << "s] "
+        cerr << "[" << time(NULL) << "s] "
              << getPidTid()
              << " [opensharding] [" << level << "] [" << name << "] "
              << message << "\n";
