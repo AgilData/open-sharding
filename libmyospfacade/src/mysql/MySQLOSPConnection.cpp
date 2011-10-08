@@ -59,6 +59,8 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     
     //TODO: combine these 2 OSP calls into a single call for improved performance
 
+    //TODO: need try/catch block around OSP interactions otherwise driver will seg fault on error
+
     // connect to OSP server via TCP
     OSPConnectRequest request(database, user, password);
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
@@ -1001,10 +1003,15 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         log.debug("mysql_close");
     }
 
-    OSPDisconnectRequest request(connID);
-    OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
-    if (wireResponse) {
-        delete wireResponse;
+    try {
+        OSPDisconnectRequest request(connID);
+        OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
+        if (wireResponse) {
+            delete wireResponse;
+        }
+    }
+    catch (...) {
+        log.error("mysql_close() FAILED - perhaps DbsClient died or restarted?");
     }
 }
 

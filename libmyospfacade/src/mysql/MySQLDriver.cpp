@@ -460,7 +460,13 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             string databaseName = string(mysql->db).substr(4);
 
             // create OSP connection
-            conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap());
+            try {
+                conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap());
+            }
+            catch (...) {
+                xlog.error("Failed to connect to OSP");
+                return -1;
+            }
 
             // store mapping from the MYSQL structure to the ODBC connection
             getResourceMap()->setConnection(mysql, conn);
