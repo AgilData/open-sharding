@@ -59,8 +59,6 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     
     //TODO: combine these 2 OSP calls into a single call for improved performance
 
-    //TODO: need try/catch block around OSP interactions otherwise driver will seg fault on error
-
     // connect to OSP server via TCP
     OSPConnectRequest request(database, user, password);
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
@@ -218,7 +216,17 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             fieldCount = 0;
 
             my_errno = executeResponse->getErrorCode();
-			my_error = "Query failed due to OSP error. See log for details";
+
+            if (my_errno>2999) {
+                // OSP error
+                my_errno = 1105; // MySQL "unknown error"
+                my_error = "Query failed due to OSP error. See log for details.";
+            }
+            else {
+                // MySQL error
+                my_error = "Query failed due to MySQL error. See log for details.";
+            }
+
         }
         else {
             // success
