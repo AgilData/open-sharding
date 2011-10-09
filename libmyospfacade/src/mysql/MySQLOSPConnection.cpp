@@ -66,6 +66,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     if (wireResponse->isErrorResponse()) {
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
         log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        delete wireResponse;
         throw "OSP_ERROR";
     }
 
@@ -76,7 +77,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
 
     // close TCP connection
     ospConn->stop();
-    ospConn = NULL;
+    delete ospConn;
 
     // now connect via named pipes
     ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
@@ -258,7 +259,8 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             ret = 0;
         }
 
-        delete executeResponse;
+        // delete wire response (this will also delete the execute response)
+        delete wireResponse;
 
     }
     catch (...) {
