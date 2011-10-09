@@ -114,9 +114,6 @@ void MySQLOSPConnection::setError(const char *sqlstate, int _errno, const char *
 }
 
 MySQLOSPConnection::~MySQLOSPConnection() {
-    if (ospConn) {
-        delete ospConn;
-    }
 }
 
 string MySQLOSPConnection::getLogPrefix(MYSQL *mysql) {
