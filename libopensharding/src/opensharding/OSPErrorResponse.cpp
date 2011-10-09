@@ -19,41 +19,42 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __OSPWireResponse_h__
-#define __OSPWireResponse_h__
-
+#include <opensharding/OSPErrorResponse.h>
 #include <opensharding/OSPMessage.h>
 #include <opensharding/OSPOutputStream.h>
 
 namespace opensharding {
 
-class OSPWireResponse : public OSPMessage {
-private:
-    int requestID;
-    int messageType;
-    bool finalResponse;
-    OSPMessage *response;
-    bool errorResponse;
-
-public:
-    OSPWireResponse();
-    ~OSPWireResponse();
-
-    unsigned char getMessageType() { return 0xa6; }
-    OSPMessage *getResponse() { return response; }
-    unsigned int getEstimatedEncodingLength() { return 0; }
-    void write(OSPOutputStream *);
-
-    void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
-    void setField(int fieldNum, int value);
-
-    bool isErrorResponse() { return errorResponse; }
-    bool isFinalResponse() { return finalResponse; }
-
-
-};
-
+OSPErrorResponse::OSPErrorResponse() {
+    errorCode = 0;
 }
 
-#endif //__OSPWireResponse_h__
+OSPErrorResponse::~OSPErrorResponse() {
+}
 
+void OSPErrorResponse::write(OSPOutputStream *buffer) {
+    // no need to implement this in C client
+}
+
+void OSPErrorResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
+    switch (fieldNum) {
+        case 2:
+            errorMessage = string(buffer+offset, length);
+            break;
+        default:
+            throw "OSPErrorResponse::setField() invalid fieldNum";
+    }
+}
+
+void OSPErrorResponse::setField(int fieldNum, int value) {
+    switch (fieldNum) {
+        case 1:
+            errorCode = value;
+            break;
+        default:
+            throw "OSPErrorResponse::setField() invalid fieldNum";
+    }
+}
+
+
+}
