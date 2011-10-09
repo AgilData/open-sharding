@@ -486,6 +486,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 }
 
                 // now connect via named pipes
+                OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
                 ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
                 // store the OSP connection for all future interaction with this OSP server
