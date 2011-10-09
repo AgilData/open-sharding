@@ -36,6 +36,13 @@
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLOSPConnection.h>
 #include <mysql/MySQLNativeConnection.h>
+#include <opensharding/OSPConnection.h>
+#include <opensharding/OSPTCPConnection.h>
+#include <opensharding/OSPNamedPipeConnection.h>
+#include <opensharding/OSPWireRequest.h>
+#include <opensharding/OSPConnectRequest.h>
+#include <opensharding/OSPWireResponse.h>
+#include <opensharding/OSPConnectResponse.h>
 #include <logger/Logger.h>
 #include <util/Util.h>
 
@@ -48,6 +55,7 @@ using namespace mysql;
 using namespace logger;
 using namespace std;
 using namespace util;
+using namespace opensharding;
 
 /* GLOBAL VARIABLES */
 
@@ -455,11 +463,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             string databaseName = string(mysql->db).substr(4);
 
             // get named pipe connection for this database
-            OSPConnection *ospConn = getResourceMap()->getOSPConnection(databaseName);
+            OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
             if (!ospConn) {
 
                 // create TCP connection
-                OSPTCPConnection *ospTcpConn = new OSPTCPConnection(host, port==0 ? 4545 : port);
+                OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
 
                 // connect to OSP server via TCP
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
@@ -477,7 +485,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
                 // store the OSP connection for all future interaction with this OSP server
-                getResourceMap()->setOSPConnection(databasName, ospConn);
+                getResourceMap()->setOSPConn(databasName, ospConn);
 
                 // delete the wire response now we have the info
                 delete wireResponse;
