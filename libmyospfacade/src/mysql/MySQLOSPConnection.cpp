@@ -52,37 +52,25 @@ using namespace util;
 
 Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
-MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap) {
+MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
 
     this->mysqlResourceMap = mysqlResourceMap;
+    this->ospConn = ospConn;
 
-    ospConn = new OSPTCPConnection(host, port==0 ? 4545 : port);
-    
-    //TODO: combine these 2 OSP calls into a single call for improved performance
-
-    // connect to OSP server via TCP
+    // request a database connection
     OSPConnectRequest request(database, user, password);
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
     if (wireResponse->isErrorResponse()) {
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-        log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
         delete wireResponse;
-        ospConn->stop();
-        delete ospConn;
-        throw "OSP_ERROR";
+        throw "OSP_CONNECT_ERROR"
     }
 
     //log.info(("wireResponse = ") + Util::toString((void*)wireResponse));
     OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
     //log.info(("response = ") + Util::toString((void*)response));
     connID = response->getConnID();
-
-    // close TCP connection
-    ospConn->stop();
-    delete ospConn;
-
-    // now connect via named pipes
-    ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
     // delete the response now we have all the info from it
     delete wireResponse;
@@ -93,6 +81,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     if (wireResponse->isErrorResponse()) {
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
         log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        delete wireResponse;
         throw "OSP_ERROR";
     }
 

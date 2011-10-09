@@ -26,10 +26,14 @@
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLAbstractResultSet.h>
 #include <mysql/MySQLErrorState.h>
+#include <opensharding/OSPConnection.h>
+#include <opensharding/OSPTCPConnection.h>
+#include <opensharding/OSPNamedPipeConnection.h>
 #include <logger/Logger.h>
 
 using namespace std;
 using namespace logger;
+using namespace opensharding;
 
 struct ConnectInfo {
     string host, user, passwd;
@@ -64,6 +68,9 @@ private:
 
     map<MYSQL*, MySQLErrorState*> mysqlToErrorMap;
 
+    /* map of dbName to named pipe connection */
+    map<string, OSPConnection*> ospConnMap;
+
     // mutex for thread safety
 //    boost::interprocess::interprocess_mutex mutex;
     boost::mutex mutex;
@@ -93,6 +100,9 @@ public:
     void clearErrorState(MYSQL *mysql);
 
     void eraseResults(MySQLAbstractConnection *conn);
+
+    void setOSPConn(string dbName, OSPConnection*);
+    OSPConnection* getOSPConn(string dbName);
 
 };
 
