@@ -50,7 +50,7 @@ using namespace util;
 
 #define LOG_METHOD_CALLS false
 
-Logger *MySQLOSPConnection::log = Logger::getLoggerPtr("MySQLOSPConnection");
+Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
 MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap) {
 
@@ -69,9 +69,9 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
         throw "OSP_ERROR";
     }
 
-    //log->info(("wireResponse = ") + Util::toString((void*)wireResponse));
+    //log.info(("wireResponse = ") + Util::toString((void*)wireResponse));
     OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
-    //log->info(("response = ") + Util::toString((void*)response));
+    //log.info(("response = ") + Util::toString((void*)response));
     connID = response->getConnID();
 
     // close TCP connection
@@ -113,8 +113,8 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
 }
 
 void MySQLOSPConnection::setError(const char *sqlstate, int _errno, const char *_error) {
-    if (log->isDebugEnabled()) {
-        log->debug(string("setError(") + string(sqlstate==NULL?"NULL":sqlstate) + string(",") + Util::toString(_errno) + string(",") + string(_error==NULL?"NULL":_error));
+    if (log.isDebugEnabled()) {
+        log.debug(string("setError(") + string(sqlstate==NULL?"NULL":sqlstate) + string(",") + Util::toString(_errno) + string(",") + string(_error==NULL?"NULL":_error));
     }
     my_sqlstate = sqlstate;
     my_errno = _errno;
@@ -135,7 +135,7 @@ string MySQLOSPConnection::getLogPrefix(MYSQL *mysql) {
 bool MySQLOSPConnection::connect(const char *, const char *, const char *,
         const char *, unsigned int port, const char *unix_socket,
         unsigned long clientflag) {
-    log->error("Call to connect() in ODBC connection");
+    log.error("Call to connect() in ODBC connection");
     return false;
 }
 
@@ -178,12 +178,12 @@ int MySQLOSPConnection::mysql_query(MYSQL *mysql, const char *sql) {
 
 int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
 
-    if (log->isDebugEnabled()) {
-        log->debug(string("MySQLOSPConnection::mysql_real_query(") + Util::toString(mysql) + string(", ") + string(sql) + string(")"));
+    if (log.isDebugEnabled()) {
+        log.debug(string("MySQLOSPConnection::mysql_real_query(") + Util::toString(mysql) + string(", ") + string(sql) + string(")"));
     }
 
     if (pid != getpid()) {
-        log->warn(
+        log.warn(
             "Connection was created in process " + Util::toString((long)pid)
             + " but mysql_real_query() called from process " + Util::toString((long)getpid())
         );
@@ -191,7 +191,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
 
     if (strlen(sql)>9 && Util::_strnicmp("SET NAMES", sql, 9)==0) {
         // ignore this SQL because it is not supported by MySQL ODBC, pretend it worked through
-        log->warn("Ignoring 'SET NAMES' query");
+        log.warn("Ignoring 'SET NAMES' query");
         return 0;
     }
 
@@ -207,8 +207,8 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
     int ret = -1;
 
     try {
-        if (log->isDebugEnabled()) {
-            log->debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
+        if (log.isDebugEnabled()) {
+            log.debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
         }
         OSPExecuteRequest request(connID, stmtID, string(sql));
         OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
@@ -226,7 +226,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
 
         if (executeResponse->getErrorCode()) {
 
-            log->error(
+            log.error(
                 string("Failed to execute query. ")
                 + string("Error Code: ") + Util::toString(executeResponse->getErrorCode())
                 + string("; Error Text: ") + executeResponse->getErrorMessage()
@@ -253,7 +253,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         else {
             // success
 
-            log->debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
+            log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
 
             ret = 0;
         }
@@ -262,7 +262,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
 
     }
     catch (...) {
-        log->error(string("Failed to execute query [unhandled exception]. ConnID = ") + connID + string("; SQL=") + string(sql));
+        log.error(string("Failed to execute query [unhandled exception]. ConnID = ") + connID + string("; SQL=") + string(sql));
         resultSetID = 0;
         affectedRows = 0;
         fieldCount = 0;
@@ -275,7 +275,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
 
 int MySQLOSPConnection::mysql_send_query(MYSQL *mysql, const char *q,
         unsigned long length) {
-    log->debug("mysql_send_query (NOT SUPPORTED)");
+    log.debug("mysql_send_query (NOT SUPPORTED)");
     return -1;
 }
 
@@ -289,7 +289,7 @@ char *MySQLOSPConnection::ensureCapacity(char *buffer, unsigned int *length, uns
     // re-size buffer
     unsigned int newLength = capacity + 512;
 
-    log->warn(string("ensureCapacity is resizing buffer from ") + Util::toString((int)(*length)) + " to " + Util::toString((int)newLength));
+    log.warn(string("ensureCapacity is resizing buffer from ") + Util::toString((int)(*length)) + " to " + Util::toString((int)newLength));
 
     char *ret = new char[newLength];
     memcpy(ret, buffer, *length); //TODO: would only need to copy as far as offset?
@@ -303,7 +303,7 @@ char *MySQLOSPConnection::ensureCapacity(char *buffer, unsigned int *length, uns
 MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
 
     if (resultSetID==0) {
-        //log->warn("mysql_store_result() fetching empty remote result set for CRUD query!");
+        //log.warn("mysql_store_result() fetching empty remote result set for CRUD query!");
         return NULL;
     }
 
@@ -311,8 +311,8 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
     currentRes = new MYSQL_RES();
     memset(currentRes, 0, sizeof(MYSQL_RES));
 
-    if (log->isTraceEnabled()) {
-        log->trace(string("mysql_store_result(") + Util::toString((void*)mysql)
+    if (log.isTraceEnabled()) {
+        log.trace(string("mysql_store_result(") + Util::toString((void*)mysql)
              + string(") creating MYSQL_RES* ")
              + Util::toString((void*)currentRes)
             );
@@ -328,7 +328,7 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
         ospConn->sendMessage(&request, true, this);
     }
     catch (...) {
-        log->error("mysql_store_result() failed to retrieve results from OSP server");
+        log.error("mysql_store_result() failed to retrieve results from OSP server");
         return NULL;
     }
 
@@ -361,8 +361,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     // how many columns?
     int columnCount = response->getColumnCount();
 
-    if (log->isTraceEnabled()) {
-        log->trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
+    if (log.isTraceEnabled()) {
+        log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
     }
 
     bool firstMessage = currentRow==NULL;
@@ -433,70 +433,70 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             switch (jdbcType) {
                 case JDBC_BLOB:
                     res->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BLOB --> MYSQL_TYPE_BLOB"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BLOB --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_BINARY:
                     res->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BINARY --> MYSQL_TYPE_BLOB"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_VARBINARY:
                     res->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARBINARY --> MYSQL_TYPE_BLOB"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARBINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_LONGVARBINARY:
                     res->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_LONGVARBINARY --> MYSQL_TYPE_BLOB"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_LONGVARBINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_DATE:
                     res->fields[i].type = MYSQL_TYPE_DATE;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TYPE_DATE --> MYSQL_TYPE_DATE"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TYPE_DATE --> MYSQL_TYPE_DATE"));
                     break;
                 case JDBC_TIME:
                     res->fields[i].type = MYSQL_TYPE_DATETIME;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TIME --> MYSQL_TYPE_DATETIME"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TIME --> MYSQL_TYPE_DATETIME"));
                     break;
                 case JDBC_TIMESTAMP:
                     res->fields[i].type = MYSQL_TYPE_DATETIME;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DATETIME --> MYSQL_TYPE_DATETIME"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DATETIME --> MYSQL_TYPE_DATETIME"));
                     break;
                 case JDBC_DECIMAL:
                 case JDBC_NUMERIC:
                     res->fields[i].type = MYSQL_TYPE_DECIMAL;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DECIMAL --> MYSQL_TYPE_DECIMAL"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DECIMAL --> MYSQL_TYPE_DECIMAL"));
                     break;
                 case JDBC_BIT:
                 case JDBC_TINYINT:
                     res->fields[i].type = MYSQL_TYPE_TINY;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BIT --> MYSQL_TYPE_TINY"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BIT --> MYSQL_TYPE_TINY"));
                     break;
                 case JDBC_SMALLINT:
                 case JDBC_BIGINT:
                 case JDBC_INTEGER:
                     res->fields[i].type = MYSQL_TYPE_INT24;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_INTEGER --> MYSQL_TYPE_INT24"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_INTEGER --> MYSQL_TYPE_INT24"));
                     break;
                 case JDBC_REAL:
                 case JDBC_FLOAT:
                     res->fields[i].type = MYSQL_TYPE_FLOAT;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_FLOAT --> MYSQL_TYPE_FLOAT"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_FLOAT --> MYSQL_TYPE_FLOAT"));
                     break;
                 case JDBC_DOUBLE:
                     res->fields[i].type = MYSQL_TYPE_DOUBLE;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DOUBLE --> MYSQL_TYPE_DOUBLE"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DOUBLE --> MYSQL_TYPE_DOUBLE"));
                     break;
                 case JDBC_CHAR:
                 case JDBC_VARCHAR:
                 case JDBC_LONGVARCHAR:
                     res->fields[i].type = MYSQL_TYPE_VARCHAR;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARCHAR --> MYSQL_TYPE_VARCHAR"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARCHAR --> MYSQL_TYPE_VARCHAR"));
                     break;
                 case JDBC_CLOB:
                     res->fields[i].type = MYSQL_TYPE_VARCHAR;
-                    if (TRACE) log->trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_CLOB --> MYSQL_TYPE_VARCHAR"));
+                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_CLOB --> MYSQL_TYPE_VARCHAR"));
                     break;
                 default:
                     res->fields[i].type = MYSQL_TYPE_VARCHAR;
-                    log->warn(string("Column ") + string((const char *)odbcColumnName)
+                    log.warn(string("Column ") + string((const char *)odbcColumnName)
                             + string(" used UNKNOWN JDBC datatype (") + Util::toString((int)jdbcType) + string(") --> MYSQL_TYPE_VARCHAR"));
                     break;
             }
@@ -566,14 +566,14 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // create buffer to store data for entire row in a contiguous block
         unsigned int rowDataSize = 0;
         int col;
-        //log->info("CALC row length");
+        //log.info("CALC row length");
         for (col = 1; col <= columnCount; col++) {
             rowDataSize += currentRowData[col-1] ? currentRowData[col-1]->getLength() : 0;
             rowDataSize += 1; // null terminator
-            //log->info(string("interim row data size now is ") + Util::toString((int)rowDataSize));
+            //log.info(string("interim row data size now is ") + Util::toString((int)rowDataSize));
         }
 
-        //log->info(string("TOTAL row data size is ") + Util::toString((int)rowDataSize));
+        //log.info(string("TOTAL row data size is ") + Util::toString((int)rowDataSize));
 
         unsigned int rowDataOffset = 0;
         char *rowData = new char[rowDataSize];
@@ -656,8 +656,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
 void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
 
-    if (log->isTraceEnabled()) {
-        log->trace("mysql_free_result");
+    if (log.isTraceEnabled()) {
+        log.trace("mysql_free_result");
     }
 
     if (res != NULL) {
@@ -699,11 +699,11 @@ void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
 }
 
 MYSQL_RES * MySQLOSPConnection::mysql_use_result(MYSQL *mysql) {
-    log->error("mysql_use_result not implemented with OSP yet!");
+    log.error("mysql_use_result not implemented with OSP yet!");
     return NULL;
 
 //
-//    if (log->isDebugEnabled()) log->debug(getLogPrefix(mysql) + "In mysql_use_result()");
+//    if (log.isDebugEnabled()) log.debug(getLogPrefix(mysql) + "In mysql_use_result()");
 //
 //    // create native MySQL result set structure
 //    res = new MYSQL_RES();
@@ -738,7 +738,7 @@ MYSQL_RES * MySQLOSPConnection::mysql_use_result(MYSQL *mysql) {
 //                &odbcColumnSize, &odbcDecimalDigits, &odbcNullable);
 //
 //        if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-//            log->error("SQLDescribeCol FAILED");
+//            log.error("SQLDescribeCol FAILED");
 //            setODBCError(SQL_HANDLE_STMT);
 //            return NULL;
 //        }
@@ -789,7 +789,7 @@ my_bool MySQLOSPConnection::mysql_rollback(MYSQL * mysql) {
 
 
 void MySQLOSPConnection::mysql_data_seek(MYSQL_RES *result, my_ulonglong row) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_data_seek(") + Util::toString((void*)result) + string(", ") + string(Util::toString((long)row)));
+    if (log.isTraceEnabled()) log.trace(string("mysql_data_seek(") + Util::toString((void*)result) + string(", ") + string(Util::toString((long)row)));
     MYSQL_ROWS *tmp = NULL;
     if (result->data) {
         for (tmp = result->data->data; row-- && tmp; tmp = tmp->next) {
@@ -804,42 +804,42 @@ unsigned int MySQLOSPConnection::mysql_field_count(MYSQL *mysql) {
 
     unsigned int ret = -1;
 
-    if (log->isTraceEnabled()) log->trace(getLogPrefix(mysql) + string("mysql_field_count()"));
+    if (log.isTraceEnabled()) log.trace(getLogPrefix(mysql) + string("mysql_field_count()"));
 
     ret = fieldCount;
 
-    if (log->isDebugEnabled()) log->debug(getLogPrefix(mysql) + string("mysql_field_count() returning ") + Util::toString((int)ret));
+    if (log.isDebugEnabled()) log.debug(getLogPrefix(mysql) + string("mysql_field_count() returning ") + Util::toString((int)ret));
 
     return ret;
 }
 
 unsigned int MySQLOSPConnection::mysql_num_fields(MYSQL_RES *result) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_num_fields() RES=") + Util::toString((void*)result) + string(" returning ") + Util::toString((int)(result->data->fields)));
+    if (log.isTraceEnabled()) log.trace(string("mysql_num_fields() RES=") + Util::toString((void*)result) + string(" returning ") + Util::toString((int)(result->data->fields)));
     return result->data->fields;
 }
 
 MYSQL_FIELD *MySQLOSPConnection::mysql_fetch_fields(MYSQL_RES *result) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_fetch_fields() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_fetch_fields() RES=") + Util::toString((void*)result));
     return result->fields;
 }
 
 my_ulonglong MySQLOSPConnection::mysql_affected_rows(MYSQL *mysql) {
-    if (log->isTraceEnabled()) log->trace(getLogPrefix(mysql) + string("mysql_affected_rows()"));
+    if (log.isTraceEnabled()) log.trace(getLogPrefix(mysql) + string("mysql_affected_rows()"));
     return affectedRows;
 }
 
 my_ulonglong MySQLOSPConnection::mysql_num_rows(MYSQL_RES *result) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_num_rows() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_num_rows() RES=") + Util::toString((void*)result));
     return result->data->rows;
 }
 
 unsigned long *MySQLOSPConnection::mysql_fetch_lengths(MYSQL_RES *result) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_fetch_lengths() RES=") + Util::toString((void*)result)
+    if (log.isTraceEnabled()) log.trace(string("mysql_fetch_lengths() RES=") + Util::toString((void*)result)
         + string(" returning ") + Util::toString(result->lengths)
     );
 
     // dangerous - assumes array has length > 0
-    if (log->isTraceEnabled()) log->trace(string("mysql_fetch_lengths() RES=") + Util::toString((void*)result)
+    if (log.isTraceEnabled()) log.trace(string("mysql_fetch_lengths() RES=") + Util::toString((void*)result)
         + string(" first length is ") + Util::toString((long)result->lengths[0])
     );
 
@@ -848,10 +848,10 @@ unsigned long *MySQLOSPConnection::mysql_fetch_lengths(MYSQL_RES *result) {
 
 MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
 
-//    bool TRACE = log->isTraceEnabled();
+//    bool TRACE = log.isTraceEnabled();
 //
 //    if (TRACE) {
-//        log->trace(string("mysql_fetch_row() RES=") + Util::toString((void*)res));
+//        log.trace(string("mysql_fetch_row() RES=") + Util::toString((void*)res));
 //    }
 //
 //    if (!stmt) {
@@ -866,12 +866,12 @@ MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
     }
 
     if (isUseResult) {
-        log->error("mysql_fetch_row not implemented in OSP yet!");
+        log.error("mysql_fetch_row not implemented in OSP yet!");
         return NULL;
 
 //
 //        if (TRACE) {
-//            log->trace("USE RESULT VERSION (NOT STORE RESULT VERSION");
+//            log.trace("USE RESULT VERSION (NOT STORE RESULT VERSION");
 //        }
 //
 //        // mysql_use_result version
@@ -925,7 +925,7 @@ MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
 //                }//end of isSuccess if condition
 //
 //                else {
-//                    log->error("SQLGetData FAILED");
+//                    log.error("SQLGetData FAILED");
 //                    setODBCError(SQL_HANDLE_STMT);
 //                    return NULL;
 //                }//end of else
@@ -967,32 +967,32 @@ MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
         unsigned int prevColTotalLen = 0;
         for (unsigned short i=0; i<res->data->fields; i++) {
 
-            //log->trace(string("i=") + Util::toString((int)i));
+            //log.trace(string("i=") + Util::toString((int)i));
 
             // is this a NULL field?
             if (res->current_row[i]==NULL) {
                 res->lengths[i] = 0;
 
-                //log->trace(string("NULL FIELD"));
+                //log.trace(string("NULL FIELD"));
 
             }
             else {
 
-                //log->trace(string("res->current_row[i]=") + Util::toString((void*)res->current_row[i]));
+                //log.trace(string("res->current_row[i]=") + Util::toString((void*)res->current_row[i]));
 
                 // find next non-NULL field
                 unsigned short nextIndex = i +1;
                 char *nextField = NULL;
                 while (nextField == NULL && nextIndex<res->data->fields) {
                     nextField = res->current_row[nextIndex];
-                    //log->trace(string("nextField=") + Util::toString((void*)nextField));
+                    //log.trace(string("nextField=") + Util::toString((void*)nextField));
                     nextIndex++;
                 }
 
                 if (nextField==NULL) {
                     // the current field is the last non-NULL field
                     res->lengths[i] = tmp->length - prevColTotalLen - 1;
-                    //log->trace(string("prevColTotalLen=") + Util::toString((int*)prevColTotalLen));
+                    //log.trace(string("prevColTotalLen=") + Util::toString((int*)prevColTotalLen));
                 }
                 else {
                     res->lengths[i] = nextField - res->current_row[i] - 1; // remove null terminator from length
@@ -1002,7 +1002,7 @@ MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
             }
 
 //            if (TRACE) {
-//                log->trace(string("column length calculated as ") + Util::toString((int)res->lengths[i]));
+//                log.trace(string("column length calculated as ") + Util::toString((int)res->lengths[i]));
 //            }
         }
 
@@ -1016,7 +1016,7 @@ MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
 MYSQL_FIELD_OFFSET MySQLOSPConnection::mysql_field_seek(MYSQL_RES *result,
         MYSQL_FIELD_OFFSET offset) {
 
-    if (log->isTraceEnabled()) log->trace(string("mysql_field_seek() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_field_seek() RES=") + Util::toString((void*)result));
 
     MYSQL_FIELD_OFFSET ret = result->current_field;
     result->current_field = offset;
@@ -1025,7 +1025,7 @@ MYSQL_FIELD_OFFSET MySQLOSPConnection::mysql_field_seek(MYSQL_RES *result,
 
 MYSQL_FIELD * MySQLOSPConnection::mysql_fetch_field(MYSQL_RES *result) {
 
-    if (log->isTraceEnabled()) log->trace(string("mysql_fetch_field() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_fetch_field() RES=") + Util::toString((void*)result));
 
     if (result->current_field >= result->field_count) {
         // no more fields left
@@ -1035,8 +1035,8 @@ MYSQL_FIELD * MySQLOSPConnection::mysql_fetch_field(MYSQL_RES *result) {
 }
 
 void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
-    if (log->isDebugEnabled()) {
-        log->debug("mysql_close");
+    if (log.isDebugEnabled()) {
+        log.debug("mysql_close");
     }
 
     try {
@@ -1053,7 +1053,7 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         }
     }
     catch (...) {
-        log->error("mysql_close() FAILED - perhaps OSP died or restarted?");
+        log.error("mysql_close() FAILED - perhaps OSP died or restarted?");
     }
 }
 
@@ -1098,7 +1098,7 @@ my_bool MySQLOSPConnection::mysql_eof(MYSQL_RES *res) {
 MYSQL_FIELD * MySQLOSPConnection::mysql_fetch_field_direct(MYSQL_RES *result,
         unsigned int fieldnr) {
 
-    if (log->isTraceEnabled()) log->trace(string("mysql_fetch_field_direct() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_fetch_field_direct() RES=") + Util::toString((void*)result));
 
     MYSQL_FIELD *fields = mysql_fetch_fields(result);
     if (fields == NULL) {
@@ -1109,19 +1109,19 @@ MYSQL_FIELD * MySQLOSPConnection::mysql_fetch_field_direct(MYSQL_RES *result,
 }
 
 MYSQL_ROW_OFFSET MySQLOSPConnection::mysql_row_tell(MYSQL_RES *result) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_row_tell() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_row_tell() RES=") + Util::toString((void*)result));
     return result->data_cursor;
 }
 
 MYSQL_FIELD_OFFSET MySQLOSPConnection::mysql_field_tell(MYSQL_RES *result) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_field_tell() RES=") + Util::toString((void*)result));
+    if (log.isTraceEnabled()) log.trace(string("mysql_field_tell() RES=") + Util::toString((void*)result));
     return result->current_field;
 }
 
 my_ulonglong MySQLOSPConnection::mysql_insert_id(MYSQL *mysql) {
 
-    if (log->isTraceEnabled()) {
-        log->trace(string("mysql_insert_id() returning ") + Util::toString(insertID));
+    if (log.isTraceEnabled()) {
+        log.trace(string("mysql_insert_id() returning ") + Util::toString(insertID));
     }
 
     return insertID;
@@ -1132,7 +1132,7 @@ const char * MySQLOSPConnection::mysql_sqlstate(MYSQL *mysql) {
 }
 
 unsigned int MySQLOSPConnection::mysql_errno(MYSQL *mysql) {
-    if (log->isTraceEnabled()) log->trace(string("mysql_errno() returning ") + Util::toString(my_errno));
+    if (log.isTraceEnabled()) log.trace(string("mysql_errno() returning ") + Util::toString(my_errno));
     return my_errno;
 }
 
@@ -1141,14 +1141,14 @@ const char * MySQLOSPConnection::mysql_error(MYSQL *mysql) {
 }
 
 unsigned int MySQLOSPConnection::mysql_warning_count(MYSQL *mysql) {
-    if (log->isDebugEnabled()) {
+    if (log.isDebugEnabled()) {
         notImplementedPtr("MySQLOSPConnection::mysql_warning_count");
     }
     return 0;
 }
 
 const char * MySQLOSPConnection::mysql_info(MYSQL *mysql) {
-    if (log->isDebugEnabled()) {
+    if (log.isDebugEnabled()) {
         notImplementedPtr("MySQLOSPConnection::mysql_info");
     }
     return NULL;
@@ -1160,8 +1160,8 @@ unsigned long MySQLOSPConnection::mysql_thread_id(MYSQL *mysql) {
 }
 
 const char * MySQLOSPConnection::mysql_character_set_name(MYSQL *mysql) {
-    if (log->isDebugEnabled()) {
-        if (log->isDebugEnabled()) log->debug(string("mysql_character_set_name() returning hard-coded 'utf8' value!"));
+    if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) log.debug(string("mysql_character_set_name() returning hard-coded 'utf8' value!"));
     }
     return "utf8";
 }
@@ -1169,8 +1169,8 @@ const char * MySQLOSPConnection::mysql_character_set_name(MYSQL *mysql) {
 int MySQLOSPConnection::mysql_set_character_set(MYSQL *mysql, const char *csname) {
     // MySQL ODBC does not support "SET NAMES" syntax. Correct charset must be specified in ODBC ConnectString.
     // return success code anyway
-    if (log->isDebugEnabled()) {
-        if (log->isDebugEnabled()) log->debug(string("mysql_set_character_set(") + string(csname==NULL?"NULL":csname) + string(") WILL BE IGNORED!"));
+    if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) log.debug(string("mysql_set_character_set(") + string(csname==NULL?"NULL":csname) + string(") WILL BE IGNORED!"));
     }
     return 0;
 }
@@ -1178,8 +1178,8 @@ int MySQLOSPConnection::mysql_set_character_set(MYSQL *mysql, const char *csname
 void MySQLOSPConnection::mysql_get_character_set_info(MYSQL *mysql,
         MY_CHARSET_INFO *charset) {
 
-    if (log->isDebugEnabled()) {
-        if (log->isDebugEnabled()) log->debug(string("mysql_get_character_set_info() returning partialy info for 'utf8' char set!"));
+    if (log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) log.debug(string("mysql_get_character_set_info() returning partialy info for 'utf8' char set!"));
     }
 
     charset->name = "utf8";
@@ -1290,15 +1290,15 @@ int MySQLOSPConnection::mysql_dump_debug_info(MYSQL *mysql) {
 }
 
 int MySQLOSPConnection::mysql_refresh(MYSQL *mysql, unsigned int refresh_options) {
-    if (log->isTraceEnabled()) {
-        log->trace("mysql_refresh() not implemented, but faking success");
+    if (log.isTraceEnabled()) {
+        log.trace("mysql_refresh() not implemented, but faking success");
     }
     return 0;
 }
 
 int MySQLOSPConnection::mysql_kill(MYSQL *mysql, unsigned long pid) {
-    if (log->isTraceEnabled()) {
-        log->trace("mysql_kill() not implemented, but faking success");
+    if (log.isTraceEnabled()) {
+        log.trace("mysql_kill() not implemented, but faking success");
     }
     return 0;
 }
@@ -1306,16 +1306,16 @@ int MySQLOSPConnection::mysql_kill(MYSQL *mysql, unsigned long pid) {
 int MySQLOSPConnection::mysql_set_server_option(MYSQL *mysql,
         enum enum_mysql_set_option option) {
 
-    if (log->isTraceEnabled()) {
-        log->trace("mysql_set_server_option() not implemented, but faking success");
+    if (log.isTraceEnabled()) {
+        log.trace("mysql_set_server_option() not implemented, but faking success");
     }
 
     return 0;
 }
 
 int MySQLOSPConnection::mysql_ping(MYSQL *mysql) {
-    if (log->isTraceEnabled()) {
-        log->trace("mysql_ping() not implemented, but faking success");
+    if (log.isTraceEnabled()) {
+        log.trace("mysql_ping() not implemented, but faking success");
     }
     //TODO: run validation query such as "SELECT 1" to validate that the connection really is OK
     return 0;
@@ -1370,13 +1370,13 @@ MYSQL_RES * MySQLOSPConnection::mysql_list_processes(MYSQL *mysql) {
 
 int MySQLOSPConnection::mysql_options(MYSQL *mysql, enum mysql_option option,
         const char *arg) {
-    log->warn("mysql_options() not implemented");
+    log.warn("mysql_options() not implemented");
     return -1;
 }
 
 int MySQLOSPConnection::mysql_options(MYSQL *mysql, enum mysql_option option,
         const void *arg) {
-    log->warn("mysql_options() not implemented");
+    log.warn("mysql_options() not implemented");
     return -1;
 }
 
@@ -1412,12 +1412,12 @@ unsigned long MySQLOSPConnection::mysql_real_escape_string(MYSQL *mysql,
 }
 
 void MySQLOSPConnection::mysql_debug(const char *debug) {
-    if (log->isDebugEnabled()) log->debug("MySQLOSPConnection::mysql_debug");
+    if (log.isDebugEnabled()) log.debug("MySQLOSPConnection::mysql_debug");
     // never called
 }
 
 void MySQLOSPConnection::myodbc_remove_escape(MYSQL *mysql, char *name) {
-    if (log->isDebugEnabled()) log->debug("MySQLOSPConnection::myodbc_remove_escape");
+    if (log.isDebugEnabled()) log.debug("MySQLOSPConnection::myodbc_remove_escape");
 }
 
 unsigned int MySQLOSPConnection::mysql_thread_safe(void) {
@@ -1570,7 +1570,7 @@ unsigned int MySQLOSPConnection::mysql_stmt_field_count(MYSQL_STMT *stmt) {
 }
 
 int MySQLOSPConnection::mysql_next_result(MYSQL *mysql) {
-    if (log->isDebugEnabled()) {
+    if (log.isDebugEnabled()) {
         notImplementedPtr("MySQLOSPConnection::mysql_next_result");
     }
     return -1;
