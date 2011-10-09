@@ -359,6 +359,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             ); 
         }
 
+        ConnectInfo *old_info = getResourceMap()->getConnectInfo(mysql);
+        if (old_info) {
+            delete old_info;
+        }
+
         // store connection info so it can be retrieved in mysql_select_db in separate call
         getResourceMap()->setConnectInfo(mysql, info);
 
@@ -428,7 +433,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     //TODO: we are setting this variable before we successfully connect, should add code to reset it on failure
     // or only set it after success
-    mysql->db = Util::createString(db);
+    mysql->db = Util::createString(db); //TODO: this is a memory leak
 
     try {
 
@@ -734,6 +739,7 @@ void mysql_close(MYSQL *mysql) {
     // remove from the map
     getResourceMap()->erase(mysql);
     getResourceMap()->eraseResults(conn);
+
 
     if (xlog.isDebugEnabled()) {
         xlog.debug("AFTER remove from map, BEFORE delegate mysql_close()");

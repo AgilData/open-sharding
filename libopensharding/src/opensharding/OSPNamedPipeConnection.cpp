@@ -74,7 +74,15 @@ OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, strin
 }
 
 OSPNamedPipeConnection::~OSPNamedPipeConnection() {
-
+    if (buffer) {
+        delete [] buffer;
+    }
+    if (is) {
+        delete is;
+    }
+    if (os) {
+        delete os;
+    }
 }
 
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message) {
@@ -193,6 +201,21 @@ void OSPNamedPipeConnection::stop() {
     if (DEBUG) log.debug("Closing pipes");
     fclose(requestPipe);
     fclose(responsePipe);
+
+    if (buffer) {
+        delete [] buffer;
+        buffer = null;
+    }
+
+    if (is) {
+        delete is;
+        is = null;
+    }
+
+    if (os) {
+        delete os;
+        os = null;
+    }
 }
 
 } // namespace
