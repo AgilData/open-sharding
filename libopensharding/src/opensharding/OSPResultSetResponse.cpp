@@ -41,7 +41,7 @@ OSPResultSetResponse::OSPResultSetResponse() {
 OSPResultSetResponse::~OSPResultSetResponse() {
     if (columnName) {
         // delete columnName OSPStrings
-        for (int i=0; i<columnNameIndex; i++) {
+        for (unsigned int i=0; i<columnNameIndex; i++) {
             delete columnName[i];
         }
         delete [] columnName;
