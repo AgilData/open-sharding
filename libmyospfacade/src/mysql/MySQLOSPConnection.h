@@ -88,7 +88,7 @@ class MySQLOSPConnection : public MySQLAbstractConnection, public OSPMessageCons
 private:
 
     // logger
-    static Logger *log;
+    static Logger &log;
 
     pid_t pid;
 
