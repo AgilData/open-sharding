@@ -43,6 +43,7 @@
 #include <opensharding/OSPConnectRequest.h>
 #include <opensharding/OSPWireResponse.h>
 #include <opensharding/OSPConnectResponse.h>
+#include <opensharding/OSPErrorResponse.h>
 #include <logger/Logger.h>
 #include <util/Util.h>
 
@@ -485,7 +486,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
                 // store the OSP connection for all future interaction with this OSP server
-                getResourceMap()->setOSPConn(databasName, ospConn);
+                getResourceMap()->setOSPConn(databaseName, ospConn);
 
                 // delete the wire response now we have the info
                 delete wireResponse;
