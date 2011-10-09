@@ -19,41 +19,33 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __OSPWireResponse_h__
-#define __OSPWireResponse_h__
+#ifndef __OSPErrorResponse_h__
+#define __OSPErrorResponse_h__
 
 #include <opensharding/OSPMessage.h>
-#include <opensharding/OSPOutputStream.h>
+#include <opensharding/OSPByteBuffer.h>
 
 namespace opensharding {
 
-class OSPWireResponse : public OSPMessage {
+class OSPErrorResponse : public OSPMessage {
 private:
-    int requestID;
-    int messageType;
-    bool finalResponse;
-    OSPMessage *response;
-    bool errorResponse;
+    int errorCode;
+    string errorMessage;
 
 public:
-    OSPWireResponse();
-    ~OSPWireResponse();
+    OSPErrorResponse();
+    virtual ~OSPErrorResponse();
 
-    unsigned char getMessageType() { return 0xa6; }
-    OSPMessage *getResponse() { return response; }
+    unsigned char getMessageType() { return 0xa3; }
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
-
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
     void setField(int fieldNum, int value);
 
-    bool isErrorResponse() { return errorResponse; }
-    bool isFinalResponse() { return finalResponse; }
-
-
+    int getErrorCode() { return errorCode; }
+    string getErrorMessage() { return errorMessage; }
 };
 
 }
 
-#endif //__OSPWireResponse_h__
-
+#endif // __OSPErrorResponse_h__

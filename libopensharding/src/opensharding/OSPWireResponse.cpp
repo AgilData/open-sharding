@@ -29,6 +29,7 @@
 #include <opensharding/OSPExecuteResponse.h>
 #include <opensharding/OSPResultSetResponse.h>
 #include <opensharding/OSPDisconnectResponse.h>
+#include <opensharding/OSPErrorResponse.h>
 #include <opensharding/OSPMessageDecoder.h>
 
 namespace opensharding {
@@ -37,6 +38,7 @@ OSPWireResponse::OSPWireResponse() {
     requestID = 0;
     messageType = 0;
     response = NULL;
+    errorResponse = false;
 }
 
 OSPWireResponse::~OSPWireResponse() {
@@ -67,16 +69,19 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
             response = new OSPDisconnectResponse();
             break;
         case 200:
-            //TODO: response = new OSPErrorResponse();
+            response = new OSPErrorResponse();
+            errorResponse = true;
             break;
         default:
             throw "OSPWireResponse::setField() invalid fieldNum";
     }
 
     // decode the response message
-    OSPByteBuffer temp(buffer+offset, length);
-    OSPMessageDecoder decoder;
-    decoder.decode(response, &temp);
+    if (response) {
+        OSPByteBuffer temp(buffer+offset, length);
+        OSPMessageDecoder decoder;
+        decoder.decode(response, &temp);
+    }
 
 }
 

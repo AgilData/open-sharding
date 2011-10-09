@@ -62,6 +62,12 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     // connect to OSP server via TCP
     OSPConnectRequest request(database, user, password);
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
+    if (wireResponse->isErrorResponse()) {
+        OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+        log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        throw "OSP_ERROR";
+    }
+
     //log->info(("wireResponse = ") + Util::toString((void*)wireResponse));
     OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
     //log->info(("response = ") + Util::toString((void*)response));
@@ -80,6 +86,12 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     // create a statement that we will re-use with this connection
     OSPCreateStatementRequest request2(connID);
     wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request2, true));
+    if (wireResponse->isErrorResponse()) {
+        OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+        log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        throw "OSP_ERROR";
+    }
+
     OSPCreateStatementResponse* response2 = dynamic_cast<OSPCreateStatementResponse*>(wireResponse->getResponse());
     stmtID = response2->getStmtID();
     delete wireResponse;
@@ -199,6 +211,12 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         }
         OSPExecuteRequest request(connID, stmtID, string(sql));
         OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
+        if (wireResponse->isErrorResponse()) {
+            OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+            log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+            throw "OSP_ERROR";
+        }
+
         OSPExecuteResponse *executeResponse = dynamic_cast<OSPExecuteResponse*>(wireResponse->getResponse());
         resultSetID = executeResponse->getResultSetID();
         fieldCount = executeResponse->getResultSetColumnCount();
@@ -331,6 +349,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
     // cast to expected message type
     OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse *>(message);
+    if (wireResponse->isErrorResponse()) {
+        OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+        log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        throw "OSP_ERROR";
+    }
+
     OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
 
     // how many columns?
@@ -1017,6 +1041,12 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
     try {
         OSPDisconnectRequest request(connID);
         OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
+        if (wireResponse->isErrorResponse()) {
+            OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+            log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+            throw "OSP_ERROR";
+        }
+
         if (wireResponse) {
             delete wireResponse;
         }
