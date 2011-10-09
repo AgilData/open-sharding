@@ -204,17 +204,17 @@ void OSPNamedPipeConnection::stop() {
 
     if (buffer) {
         delete [] buffer;
-        buffer = null;
+        buffer = NULL;
     }
 
     if (is) {
         delete is;
-        is = null;
+        is = NULL;
     }
 
     if (os) {
         delete os;
-        os = null;
+        os = NULL;
     }
 }
 
