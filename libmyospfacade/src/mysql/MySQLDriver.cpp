@@ -207,7 +207,10 @@ string getLogPrefix(MYSQL *mysql) {
     return ret;
 }
 
-void cleanup() { }
+void cleanup() {
+    //TODO: close OSP connections
+    xlog.info("cleanup()");
+}
 
 int setErrorState(MYSQL *mysql, int _errno, const char *_error,
                   const char *_sqlstate) {
