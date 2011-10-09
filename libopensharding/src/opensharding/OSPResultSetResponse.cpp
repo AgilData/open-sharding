@@ -40,6 +40,10 @@ OSPResultSetResponse::OSPResultSetResponse() {
 
 OSPResultSetResponse::~OSPResultSetResponse() {
     if (columnName) {
+        // delete columnName OSPStrings
+        for (int i=0; i<columnNameIndex; i++) {
+            delete columnName[i];
+        }
         delete [] columnName;
         delete [] columnType;
     }
@@ -47,7 +51,9 @@ OSPResultSetResponse::~OSPResultSetResponse() {
     for (it=resultRows.begin(); it!=resultRows.end(); it++) {
         OSPString **row = *it;
         for (unsigned int i=0; i<columnCount; i++) {
-            delete row[i];
+            if (row[i]) {
+                delete row[i];
+            }
         }
         delete [] row;
     }

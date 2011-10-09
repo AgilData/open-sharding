@@ -135,11 +135,19 @@ void MySQLConnMap::erase(MYSQL *mysql) {
 
     LOCK_MUTEX
 
+    // delete old ConnectInfo*
+    if (mysqlToConnInfoMap[mysql]) {
+        delete mysqlToConnInfoMap[mysql];
+    }
+
     mysqlToConnMap[mysql] = NULL;
     mysqlToErrorMap[mysql] = NULL;
+    mysqlToConnInfoMap[mysql] = NULL;
 
     mysqlToConnMap.erase(mysql);
     mysqlToErrorMap.erase(mysql);
+    mysqlToConnInfoMap.erase(mysql);
+
 
     // validation
 }
