@@ -34,6 +34,7 @@
 #include <opensharding/OSPWireResponse.h>
 #include <opensharding/OSPConnectResponse.h>
 #include <opensharding/OSPCreateStatementResponse.h>
+#include <opensharding/OSPErrorResponse.h>
 
 #include <logger/Logger.h>
 #include <util/Util.h>
