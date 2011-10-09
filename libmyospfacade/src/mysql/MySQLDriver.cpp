@@ -454,9 +454,42 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             // osp:databasename
             string databaseName = string(mysql->db).substr(4);
 
-            // create OSP connection
+            // get named pipe connection for this database
+            OSPConnection *ospConn = getResourceMap()->getOSPConnection(databaseName);
+            if (!ospConn) {
+
+                // create TCP connection
+                OSPTCPConnection *ospTcpConn = new OSPTCPConnection(host, port==0 ? 4545 : port);
+
+                // connect to OSP server via TCP
+                OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
+                OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+                if (wireResponse->isErrorResponse()) {
+                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                    delete wireResponse;
+                    ospTcpConn->stop();
+                    delete ospTcpConn;
+                    return -1;
+                }
+
+                // now connect via named pipes
+                ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
+
+                // store the OSP connection for all future interaction with this OSP server
+                getResourceMap()->setOSPConnection(databasName, ospConn);
+
+                // delete the wire response now we have the info
+                delete wireResponse;
+
+                // close the temporary TCP connection
+                ospTcpConn->stop();
+                delete ospTcpConn;
+            }
+
+            // create MySQL OSP connection
             try {
-                conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap());
+                conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap(), ospConn);
             }
             catch (...) {
                 xlog.error("Failed to connect to OSP");
