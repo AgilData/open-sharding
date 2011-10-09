@@ -67,6 +67,8 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
         log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
         delete wireResponse;
+        ospConn->stop();
+        delete ospConn;
         throw "OSP_ERROR";
     }
 
