@@ -210,8 +210,7 @@ string getLogPrefix(MYSQL *mysql) {
 }
 
 void cleanup() {
-    //TODO: close OSP connections
-    xlog.info("cleanup()");
+    //TODO: close resources? do we care? this gets called just before the process exist
 }
 
 int setErrorState(MYSQL *mysql, int _errno, const char *_error,
