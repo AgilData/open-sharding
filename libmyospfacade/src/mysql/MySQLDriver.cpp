@@ -481,11 +481,12 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 bool CREATE_PIPES = true;
 
                 if (CREATE_PIPES) {
-                    xlog.info("Creating pipes");
+                    //xlog.info("Creating pipes");
 
+                    //TODO: get paths from config
                     string requestPipeName  = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_request.fifo");
                     string responsePipeName = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_response.fifo");
-                    mode_t mode = 666; // rw-rw-rw-
+                    mode_t mode = S_IRUSR | S_IWUSR | S_IRGRP | S_IWRGRP | S_IROTH | S_IWOTH | S_IFIFO;
                     if (0 != mkfifo(requestPipeName.c_str(),  mode)) {
                         xlog.error("Failed to create pipe"); //: errno=") + Util::toString((errno));
                         return -1;
@@ -499,7 +500,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     request.setRequestPipe(requestPipeName);
                     request.setResponsePipe(responsePipeName);
 
-                    xlog.info("Created pipes OK");
+                    //xlog.info("Created pipes OK");
                 }
 
                 OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
