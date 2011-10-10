@@ -483,32 +483,29 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 // connect to OSP server via TCP
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
 
-                bool CREATE_PIPES = true;
+                // construct filename for request pipe
+                char requestPipeName[128];
+                sprintf(requestPipeName,  "%s/mysqlospfacade_%d_request.fifo",  P_tmpdir, getpid());
 
-                if (CREATE_PIPES) {
-                    //xlog.info("Creating pipes");
+                // construct filename for response pipe
+                char responsePipeName[128];
+                sprintf(responsePipeName, "%s/mysqlospfacade_%d_response.fifo", P_tmpdir, getpid());
 
-                    //TODO: get paths from config
-                    string requestPipeName  = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_request.fifo");
-                    string responsePipeName = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_response.fifo");
-                    umask(0);
-                    if (0 != mkfifo(requestPipeName.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                        xlog.error("Failed to create pipe"); //: errno=") + Util::toString((errno));
-                        //TODO: set error code and message
-                        return -1;
-                    }
-
-                    if (0 != mkfifo(responsePipeName.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                        xlog.error("Failed to create pipe"); //: errno=") + Util::toString((errno));
-                        //TODO: set error code and message
-                        return -1;
-                    }
-
-                    request.setRequestPipe(requestPipeName);
-                    request.setResponsePipe(responsePipeName);
-
-                    //xlog.info("Created pipes OK");
+                umask(0);
+                if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?");
+                    //TODO: set error code and message
+                    return -1;
                 }
+
+                if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?");
+                    //TODO: set error code and message
+                    return -1;
+                }
+
+                request.setRequestPipe(requestPipeName);
+                request.setResponsePipe(responsePipeName);
 
                 OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
                 if (wireResponse->isErrorResponse()) {
