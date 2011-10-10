@@ -210,8 +210,7 @@ string getLogPrefix(MYSQL *mysql) {
 }
 
 void cleanup() {
-    //TODO: close OSP connections
-    xlog.info("cleanup()");
+    //TODO: close resources? do we care? this gets called just before the process exist
 }
 
 int setErrorState(MYSQL *mysql, int _errno, const char *_error,
@@ -447,6 +446,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     //TODO: we are setting this variable before we successfully connect, should add code to reset it on failure
     // or only set it after success
+
+    if (mysql->db) {
+        delete [] mysql->db;
+    }
+
     mysql->db = Util::createString(db); //TODO: this is a memory leak
 
     try {
@@ -456,6 +460,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
         if (info == NULL) {
             xlog.error("No ConnInfo in map");
+            //TODO: set error code and message
             return -1;
         }
 
@@ -478,30 +483,29 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 // connect to OSP server via TCP
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
 
-                bool CREATE_PIPES = true;
+                // construct filename for request pipe
+                char requestPipeName[128];
+                sprintf(requestPipeName,  "%s/mysqlospfacade_%d_request.fifo",  P_tmpdir, getpid());
 
-                if (CREATE_PIPES) {
-                    //xlog.info("Creating pipes");
+                // construct filename for response pipe
+                char responsePipeName[128];
+                sprintf(responsePipeName, "%s/mysqlospfacade_%d_response.fifo", P_tmpdir, getpid());
 
-                    //TODO: get paths from config
-                    string requestPipeName  = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_request.fifo");
-                    string responsePipeName = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_response.fifo");
-                    umask(0);
-                    if (0 != mkfifo(requestPipeName.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                        xlog.error("Failed to create pipe"); //: errno=") + Util::toString((errno));
-                        return -1;
-                    }
-
-                    if (0 != mkfifo(responsePipeName.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                        xlog.error("Failed to create pipe"); //: errno=") + Util::toString((errno));
-                        return -1;
-                    }
-
-                    request.setRequestPipe(requestPipeName);
-                    request.setResponsePipe(responsePipeName);
-
-                    //xlog.info("Created pipes OK");
+                umask(0);
+                if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?");
+                    //TODO: set error code and message
+                    return -1;
                 }
+
+                if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?");
+                    //TODO: set error code and message
+                    return -1;
+                }
+
+                request.setRequestPipe(requestPipeName);
+                request.setResponsePipe(responsePipeName);
 
                 OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
                 if (wireResponse->isErrorResponse()) {
@@ -510,6 +514,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     delete wireResponse;
                     ospTcpConn->stop();
                     delete ospTcpConn;
+                    //TODO: set error code and message
                     return -1;
                 }
 
@@ -534,6 +539,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             }
             catch (...) {
                 xlog.error("Failed to connect to OSP");
+                //TODO: set error code and message
                 return -1;
             }
 
@@ -569,6 +575,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     info->clientflag
             )) {
                 xlog.error("connect() FAILED");
+                //TODO: set error code and message
                 return -1;
             }
         }
@@ -584,12 +591,13 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     } catch (const char *exception) {
         xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
+        //TODO: set error code and message
         return -1;
     } catch (...) {
         xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+        //TODO: set error code and message
         return -1;
     }
-
 }
 
 my_bool mysql_autocommit(MYSQL *mysql, my_bool auto_mode) {
