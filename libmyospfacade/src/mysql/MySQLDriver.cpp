@@ -488,7 +488,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     string responsePipeName = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_response.fifo");
                     mode_t mode = 011; // 066
 //                    mode_t mode = ~(S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
-                    if (0 != mkfifo(requestPipeName.c_str(),  mode)) {
+                    if (0 != mkfifo(requestPipeName.c_str(),  S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)) {
                         xlog.error("Failed to create pipe"); //: errno=") + Util::toString((errno));
                         return -1;
                     }
