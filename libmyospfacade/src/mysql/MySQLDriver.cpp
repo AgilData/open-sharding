@@ -493,13 +493,13 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
                 umask(0);
                 if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?");
+                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?"));
                     //TODO: set error code and message
                     return -1;
                 }
 
                 if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?");
+                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?"));
                     //TODO: set error code and message
                     return -1;
                 }
