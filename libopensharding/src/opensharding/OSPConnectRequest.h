@@ -50,8 +50,8 @@ public:
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {}
     void setField(int fieldNum, int value) {}
 
-    void setRequestPipe(string requestPipe) { this->requestPipe = requestPipe; }
-    void setResponsePipe(string requestPipe) { this->responsePipe = responsePipe; }
+    void setRequestPipe(string requestPipe)   { this->requestPipe  = requestPipe; }
+    void setResponsePipe(string responsePipe) { this->responsePipe = responsePipe; }
 };
 
 }
