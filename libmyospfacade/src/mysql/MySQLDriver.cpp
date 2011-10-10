@@ -446,6 +446,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     //TODO: we are setting this variable before we successfully connect, should add code to reset it on failure
     // or only set it after success
+
+    if (mysql->db) {
+        delete [] mysql->db;
+    }
+
     mysql->db = Util::createString(db); //TODO: this is a memory leak
 
     try {
