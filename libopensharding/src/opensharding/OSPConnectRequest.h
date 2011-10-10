@@ -34,6 +34,9 @@ private:
     string user;
     string password;
 
+    string requestPipe;
+    string responsePipe;
+
 public:
     OSPConnectRequest(string database, string user, string password);
     virtual ~OSPConnectRequest();
@@ -46,6 +49,9 @@ public:
     // setField implementation not required for request messages since C only encodes them
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {}
     void setField(int fieldNum, int value) {}
+
+    void setRequestPipe(string requestPipe) { this->requestPipe = requestPipe; }
+    void setResponsePipe(string requestPipe) { this->responsePipe = responsePipe; }
 };
 
 }

@@ -28,6 +28,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <boost/thread/mutex.hpp>
 
@@ -475,6 +477,31 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
                 // connect to OSP server via TCP
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
+
+                bool CREATE_PIPES = true;
+
+                if (CREATE_PIPES) {
+                    xlog.info("Creating pipes");
+
+                    string requestPipeName  = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_request.fifo");
+                    string responsePipeName = string("/opt/dbshards/fifo/mysqlospfacade_") + Util::toString(getpid()) + string("_response.fifo");
+                    mode_t mode = 0;
+                    if (0 != mkfifo(requestPipeName.c_str(),  mode)) {
+                        xlog.error("Failed to create pipe: errno=") + Util::toString(errno));
+                        return -1;
+                    }
+
+                    if (0 != mkfifo(responsePipeName.c_str(), mode)) {
+                        xlog.error("Failed to create pipe: errno=") + Util::toString(errno));
+                        return -1;
+                    }
+
+                    request.setRequestPipe(requestPipeName);
+                    request.setResponsePipe(responsePipeName);
+
+                    xlog.info("Created pipes OK");
+                }
+
                 OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
                 if (wireResponse->isErrorResponse()) {
                     OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
