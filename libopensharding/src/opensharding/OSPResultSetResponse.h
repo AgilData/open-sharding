@@ -48,7 +48,7 @@ private:
     unsigned int       fieldIndex;
     OSPString        **currentRow;
 
-    static Logger log;
+    static Logger &log;
 
 
 public:
@@ -56,12 +56,14 @@ public:
     virtual ~OSPResultSetResponse();
 
     unsigned char getMessageType() { return 0xa7; }
+    unsigned int getEstimatedEncodingLength() { return 0; }
     void          write(OSPOutputStream *);
 
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
     void setField(int fieldNum, int value);
 
     unsigned int       getColumnCount() { return columnCount; }
+    int*       getColumnTypes() { return columnType; }
     OSPString        **getColumnNames() { return columnName; }
     list<OSPString**> *getResultRows()  { return &resultRows; }
 

@@ -30,7 +30,7 @@ namespace opensharding {
 
 class OSPMessageDecoder {
 private:
-    static logger::Logger log;
+    static logger::Logger &log;
 public:
     OSPMessageDecoder();
     ~OSPMessageDecoder();

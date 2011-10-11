@@ -43,10 +43,10 @@ using namespace mysql;
 using namespace util;
 using namespace logger;
 
-Logger MySQLNativeConnection::log = Logger::getLogger("MySQLNativeConnection");
+Logger &MySQLNativeConnection::log = Logger::getLogger("MySQLNativeConnection");
 
 // LOG_ANALYSER LOG_ANALYSER LOG_ANALYSER LOG_ANALYSER LOG_ANALYSER
-Logger MySQLNativeConnection::alog = Logger::getLogger("LogAnalyzer"); // use DEBUG setting
+Logger &MySQLNativeConnection::alog = Logger::getLogger("LogAnalyzer"); // use DEBUG setting
 static unsigned int Pid = 0;    // GLOBAL VARIABLE
 
 

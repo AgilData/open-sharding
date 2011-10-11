@@ -61,6 +61,7 @@ private:
 public: // static methods
 
     static Logger &getLogger(string name);
+    static Logger *getLoggerPtr(string name);
     static void configure(string filename);
 
 private: // private instance methods

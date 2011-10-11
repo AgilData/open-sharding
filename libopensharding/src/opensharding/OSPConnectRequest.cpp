@@ -41,6 +41,12 @@ void OSPConnectRequest::write(OSPOutputStream *buffer) {
     buffer->writeString(3, password);
     buffer->writeInt(4, 1); // autocommit
     buffer->writeInt(5, 1); // use named pipes
+    buffer->writeString(6, requestPipe);
+    buffer->writeString(7, responsePipe);
+}
+
+unsigned int OSPConnectRequest::getEstimatedEncodingLength() {
+    return database.length() + user.length() + password.length() + 16;
 }
 
 

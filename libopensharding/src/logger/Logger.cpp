@@ -42,9 +42,22 @@ namespace logger {
 
 static LoggerGlobalState *__loggerGlobalState__ = NULL;
 
+// get process-id and thread-id
+string getPidTid() {
+    char temp[256];
+#ifdef __APPLE__
+    sprintf(temp, "[PID:N/A]");
+#else
+    sprintf(temp, "[PID:%d] [TID:%u]", getpid(), (unsigned int)pthread_self());
+#endif
+    return string(temp);
+}
+
+
 LoggerGlobalState *__logger__getGlobalState() {
     //TODO: use mutex
     if (!__loggerGlobalState__) {
+        //cerr << getPidTid() << " Logger creating LoggerGlobalState object" << endl;
         __loggerGlobalState__ = new LoggerGlobalState();
     }
     return __loggerGlobalState__;
@@ -60,8 +73,12 @@ LoggerGlobalState *__logger__getGlobalState() {
 //////////////////////////////
 
 /*static*/ Logger &Logger::getLogger(string name) {
+    return *getLoggerPtr(name);
+}
 
-    //cerr << "getLogger(" << name << ")" << endl;
+/*static*/ Logger *Logger::getLoggerPtr(string name) {
+
+    //cerr << getPidTid() << " Logger::getLogger(" << name << ")" << endl;
 
     Logger *logger = LOGGER_GLOBAL_STATE->loggerMap[name];
 
@@ -98,7 +115,11 @@ LoggerGlobalState *__logger__getGlobalState() {
         LOGGER_GLOBAL_STATE->loggerMap[name] = logger;
     }
 
-    return *logger;
+    char temp[256];
+    sprintf(temp, "%p", (void*) logger);
+    //cerr << getPidTid() << " Logger::getLogger(" << name << ") returning " << temp << endl;
+
+    return logger;
 }
 
 /**
@@ -108,6 +129,8 @@ LoggerGlobalState *__logger__getGlobalState() {
  * - Log level setting in format NAME=LEVEL where LEVEL is one of TRACE,DEBUG,INFO,WARN,ERROR
  */
 /*static*/ void Logger::configure(string filename) {
+
+    //cerr << getPidTid() << " Logger::configure(" << filename << ")" << endl;
 
     string line;
     ifstream myfile(filename.c_str());
@@ -176,11 +199,18 @@ LoggerGlobalState *__logger__getGlobalState() {
             // configure existing logger, if it exists
             Logger *logger = LOGGER_GLOBAL_STATE->loggerMap[className];
             if (logger) {
+                //cerr << getPidTid() << " Logger::configure() reconfiguring logger (" << className << ")" << endl;
                 logger->setLevel(level);
+            }
+            else {
+                //cerr << getPidTid() << " Logger::configure() could not find logger (" << className << ")" << endl;
             }
 
         }
         myfile.close();
+    }
+    else {
+        //cerr << getPidTid() << " Logger::configure() failed to open file" << endl;
     }
 }
 
@@ -192,14 +222,25 @@ LoggerGlobalState *__logger__getGlobalState() {
 
 Logger::Logger(string name, int logLevel) {
     this->name = name;
+    //cerr << getPidTid() << " Logger::Logger(" << name << ")" << endl;
     setLevel(logLevel);
 }
 
 void Logger::setLevel(int logLevel) {
 
+    //cerr << getPidTid() << " Logger::setLevel(" << name << ", " << logLevel << ")" << endl;
+
     isTrace = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_TRACE;
     isDebug = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_DEBUG;
     isInfo = logLevel <= LOG_LEVEL_INFO;
+
+    //HACK HACK HACK
+    isDebugEnabled();
+    /*
+    isTrace = true;
+    isDebug = true;
+    isInfo = true;
+    */
 }
 
 Logger::~Logger() {
@@ -210,6 +251,14 @@ bool Logger::isTraceEnabled() {
 }
 
 bool Logger::isDebugEnabled() {
+
+    // HACK
+    if (name == "MySQLDriver") {
+        char temp[256];
+        sprintf(temp, "%p", (void*) this);
+        //cerr << getPidTid() << " Logger::isDebugEnabled(MySQLDriver logger @" << temp << ") " << isDebug << endl;
+    }
+
     return isDebug;
 }
 
@@ -239,17 +288,6 @@ void Logger::warn(string message) {
 
 void Logger::error(string message) {
     error(message.c_str());
-}
-
-// get process-id and thread-id
-string getPidTid() {
-    char temp[256];
-#ifdef __APPLE__
-    sprintf(temp, "[PID:N/A]");
-#else
-    sprintf(temp, "[PID:%d] [TID:%u]", getpid(), (unsigned int)pthread_self());
-#endif
-    return string(temp);
 }
 
 void Logger::log(const char *level, const char *message) {

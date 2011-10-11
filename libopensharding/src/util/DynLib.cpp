@@ -42,7 +42,7 @@ using namespace logger;
 void* lib_handle = NULL;
 
 // logger for global methods
-static Logger LOG = Logger::getLogger("DynLib");
+static Logger &LOG = Logger::getLogger("DynLib");
 
 //boost::mutex dbsmutex;
 

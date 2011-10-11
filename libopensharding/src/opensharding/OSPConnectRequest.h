@@ -34,16 +34,24 @@ private:
     string user;
     string password;
 
+    string requestPipe;
+    string responsePipe;
+
 public:
     OSPConnectRequest(string database, string user, string password);
     virtual ~OSPConnectRequest();
 
     unsigned char getMessageType() { return 0x01; }
+
+    unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);
 
     // setField implementation not required for request messages since C only encodes them
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {}
     void setField(int fieldNum, int value) {}
+
+    void setRequestPipe(string requestPipe)   { this->requestPipe  = requestPipe; }
+    void setResponsePipe(string responsePipe) { this->responsePipe = responsePipe; }
 };
 
 }

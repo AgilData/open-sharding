@@ -32,7 +32,7 @@ using namespace std;
 using namespace util;
 using namespace logger;
 
-Logger MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
+Logger &MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
 
 MySQLConnMap::MySQLConnMap() {
     pid = getpid();
@@ -135,11 +135,19 @@ void MySQLConnMap::erase(MYSQL *mysql) {
 
     LOCK_MUTEX
 
+    // delete old ConnectInfo*
+    if (mysqlToConnInfoMap[mysql]) {
+        delete mysqlToConnInfoMap[mysql];
+    }
+
     mysqlToConnMap[mysql] = NULL;
     mysqlToErrorMap[mysql] = NULL;
+    mysqlToConnInfoMap[mysql] = NULL;
 
     mysqlToConnMap.erase(mysql);
     mysqlToErrorMap.erase(mysql);
+    mysqlToConnInfoMap.erase(mysql);
+
 
     // validation
 }
@@ -194,6 +202,18 @@ MySQLErrorState *MySQLConnMap::getErrorState(MYSQL *mysql) {
 void MySQLConnMap::clearErrorState(MYSQL *mysql) {
     LOCK_MUTEX
     mysqlToErrorMap.erase(mysql);
+}
+
+
+void MySQLConnMap::setOSPConn(string dbName, OSPConnection *ospConn) {
+    LOCK_MUTEX
+    ospConnMap[dbName] = ospConn;
+
+}
+
+OSPConnection* MySQLConnMap::getOSPConn(string dbName) {
+    LOCK_MUTEX
+    return ospConnMap[dbName];
 }
 
 

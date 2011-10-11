@@ -48,7 +48,7 @@ private:
     unsigned int writeBufferSize;
     OSPByteBuffer *writeBuffer;
 
-    static Logger log;
+    static Logger &log;
 
     void writeFieldHeader(int fieldNum, int wireType);
     void writeBytesToFile(const char *buffer, unsigned int offset, unsigned int length);

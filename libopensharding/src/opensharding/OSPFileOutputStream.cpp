@@ -32,7 +32,7 @@ using namespace logger;
 
 namespace opensharding {
 
-logger::Logger OSPFileOutputStream::log = Logger::getLogger("OSPFileOutputStream");
+logger::Logger &OSPFileOutputStream::log = Logger::getLogger("OSPFileOutputStream");
 
 OSPFileOutputStream::OSPFileOutputStream(FILE *file, unsigned int writeBufferSize) {
     this->file = file;
@@ -90,7 +90,7 @@ void OSPFileOutputStream::writeInt(int fieldNum, int n) {
 }
 
 void OSPFileOutputStream::writeString(int fieldNum, string s) {
-    writeBytes(s.c_str(), 0, s.length());
+    writeBytes(fieldNum, s.c_str(), 0, s.length());
 }
 
 void OSPFileOutputStream::writeBytes(int fieldNum, const char *buffer, unsigned int offset, unsigned int length) {
@@ -140,6 +140,7 @@ void OSPFileOutputStream::writeBytesToFile(const char *buffer, unsigned int offs
 }
 
 void OSPFileOutputStream::writeFieldHeader(int fieldNum, int wireType) {
+    //TODO: this is wrong - should write var int
     int n = fieldNum << 3 | wireType;
     intBuffer[3] = (char) (n); n = n >> 8;
     intBuffer[2] = (char) (n); n = n >> 8;

@@ -28,6 +28,8 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
 
 #include <boost/thread/mutex.hpp>
 
@@ -36,6 +38,14 @@
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLOSPConnection.h>
 #include <mysql/MySQLNativeConnection.h>
+#include <opensharding/OSPConnection.h>
+#include <opensharding/OSPTCPConnection.h>
+#include <opensharding/OSPNamedPipeConnection.h>
+#include <opensharding/OSPWireRequest.h>
+#include <opensharding/OSPConnectRequest.h>
+#include <opensharding/OSPWireResponse.h>
+#include <opensharding/OSPConnectResponse.h>
+#include <opensharding/OSPErrorResponse.h>
 #include <logger/Logger.h>
 #include <util/Util.h>
 
@@ -48,10 +58,11 @@ using namespace mysql;
 using namespace logger;
 using namespace std;
 using namespace util;
+using namespace opensharding;
 
 /* GLOBAL VARIABLES */
 
-static Logger xlog = Logger::getLogger("MySQLDriver");
+static Logger &xlog = Logger::getLogger("MySQLDriver");
 
 static bool bannerDisplayed = false;
 
@@ -154,6 +165,9 @@ MySQLClient* getMySQLClient() {
 void banner() {
     //boost::mutex::scoped_lock lock(initMutex);
     if (!bannerDisplayed) {
+
+        Logger::configure("/etc/myospfacade-log.properties");
+
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("Open Sharding MySQL Driver") +
                        string(" (libopensharding_mysql) version ") +
@@ -195,16 +209,8 @@ string getLogPrefix(MYSQL *mysql) {
     return ret;
 }
 
-void cleanup() { }
-
-void __attribute__ ((constructor)) dbsclient_init(void) {
-    ////logger.info << "*** dbsclient_init()" << endl;
-}
-
-void __attribute__ ((destructor)) dbsclient_fini(void) {
-    ////logger.info << "*** dbsclient_fini()" << endl;
-    // this method is called when the library is removed from memory - no
-    // need to do any cleanup here.
+void cleanup() {
+    //TODO: close resources? do we care? this gets called just before the process exist
 }
 
 int setErrorState(MYSQL *mysql, int _errno, const char *_error,
@@ -366,6 +372,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             ); 
         }
 
+        ConnectInfo *old_info = getResourceMap()->getConnectInfo(mysql);
+        if (old_info) {
+            delete old_info;
+        }
+
         // store connection info so it can be retrieved in mysql_select_db in separate call
         getResourceMap()->setConnectInfo(mysql, info);
 
@@ -435,7 +446,12 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     //TODO: we are setting this variable before we successfully connect, should add code to reset it on failure
     // or only set it after success
-    mysql->db = Util::createString(db);
+
+    if (mysql->db) {
+        delete [] mysql->db;
+    }
+
+    mysql->db = Util::createString(db); //TODO: this is a memory leak
 
     try {
 
@@ -444,6 +460,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
         if (info == NULL) {
             xlog.error("No ConnInfo in map");
+            //TODO: set error code and message
             return -1;
         }
 
@@ -456,8 +473,78 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             // osp:databasename
             string databaseName = string(mysql->db).substr(4);
 
-            // create OSP connection
-            conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap());
+            // get named pipe connection for this database
+            OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
+            if (!ospConn) {
+
+                // create TCP connection
+                OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
+
+                // connect to OSP server via TCP
+                OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
+
+                // construct filename for request pipe
+                char requestPipeName[256];
+                sprintf(requestPipeName,  "%s/mysqlospfacade_%s_%d_request.fifo",  databaseName.c_str(), P_tmpdir, getpid());
+
+                // construct filename for response pipe
+                char responsePipeName[256];
+                sprintf(responsePipeName, "%s/mysqlospfacade_%s_%d_response.fifo", databaseName.c_str(), P_tmpdir, getpid());
+
+                umask(0);
+                if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?"));
+                    //TODO: set error code and message
+                    perror("Error creating pipe");
+                    return 1105;
+                }
+
+                umask(0);
+                if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?"));
+                    //TODO: set error code and message
+                    perror("Error creating pipe");
+                    return 1105;
+                }
+
+                request.setRequestPipe(requestPipeName);
+                request.setResponsePipe(responsePipeName);
+
+                OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+                if (wireResponse->isErrorResponse()) {
+                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                    delete wireResponse;
+                    ospTcpConn->stop();
+                    delete ospTcpConn;
+                    //TODO: set error code and message
+                    return 1105;
+                }
+
+                // now connect via named pipes
+                OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
+                ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
+
+                // store the OSP connection for all future interaction with this OSP server
+                getResourceMap()->setOSPConn(databaseName, ospConn);
+
+                // delete the wire response now we have the info
+                delete wireResponse;
+
+                // close the temporary TCP connection
+                ospTcpConn->stop();
+                delete ospTcpConn;
+            }
+
+            // create MySQL OSP connection
+            try {
+                conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap(), ospConn);
+            }
+            catch (...) {
+                xlog.error("Failed to connect to OSP");
+                //TODO: set error code and message
+                return 1105;
+            }
 
             // store mapping from the MYSQL structure to the ODBC connection
             getResourceMap()->setConnection(mysql, conn);
@@ -491,6 +578,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     info->clientflag
             )) {
                 xlog.error("connect() FAILED");
+                //TODO: set error code and message
                 return -1;
             }
         }
@@ -506,12 +594,13 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     } catch (const char *exception) {
         xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
+        //TODO: set error code and message
         return -1;
     } catch (...) {
         xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+        //TODO: set error code and message
         return -1;
     }
-
 }
 
 my_bool mysql_autocommit(MYSQL *mysql, my_bool auto_mode) {
@@ -584,11 +673,10 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //struct timeval tvStart, tvEnd;
     //gettimeofday(&tvStart, NULL);
 
-/*
     if (xlog.isDebugEnabled()) {
         xlog.debug(getLogPrefix(mysql) + "mysql_real_query(" + string(sql) + ")");
     }
-*/
+
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         xlog.error(string("mysql_real_query() returning -1 because no connection found for mysql handle ") + Util::toString((void*)mysql));
@@ -736,6 +824,7 @@ void mysql_close(MYSQL *mysql) {
     // remove from the map
     getResourceMap()->erase(mysql);
     getResourceMap()->eraseResults(conn);
+
 
     if (xlog.isDebugEnabled()) {
         xlog.debug("AFTER remove from map, BEFORE delegate mysql_close()");

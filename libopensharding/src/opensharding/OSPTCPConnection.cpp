@@ -64,7 +64,7 @@ namespace opensharding {
 
 //boost::mutex OSPTCPConnectionMutex;
 
-logger::Logger OSPTCPConnection::log = Logger::getLogger("OSPTCPConnection");
+logger::Logger &OSPTCPConnection::log = Logger::getLogger("OSPTCPConnection");
 
 OSPTCPConnection::OSPTCPConnection(string host, int port) {
     this->host = host;

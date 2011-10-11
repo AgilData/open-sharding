@@ -32,6 +32,7 @@ private:
     int resultSetID;
     int resultSetColumnCount;
     int rowsAffected;
+    int generatedID;
     string sqlState;
     int errorCode;
     string errorMessage;
@@ -41,6 +42,7 @@ public:
     virtual ~OSPExecuteResponse();
 
     unsigned char getMessageType() { return 0xa5; }
+    unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
 
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
@@ -49,6 +51,7 @@ public:
     int getResultSetID() { return resultSetID; }
     int getResultSetColumnCount() { return resultSetColumnCount; }
     int getUpdateCount() { return rowsAffected; }
+    int getGeneratedID() { return generatedID; }
 
     string getSQLState() { return sqlState; }
     int getErrorCode() { return errorCode; }

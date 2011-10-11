@@ -26,7 +26,7 @@ using namespace logger;
 
 namespace opensharding {
 
-/*static*/ Logger OSPResultSetResponse::log = Logger::getLogger("OSPResultSetResponse");
+/*static*/ Logger &OSPResultSetResponse::log = Logger::getLogger("OSPResultSetResponse");
 
 OSPResultSetResponse::OSPResultSetResponse() {
     columnCount = 0;
@@ -40,6 +40,10 @@ OSPResultSetResponse::OSPResultSetResponse() {
 
 OSPResultSetResponse::~OSPResultSetResponse() {
     if (columnName) {
+        // delete columnName OSPStrings
+        for (unsigned int i=0; i<columnNameIndex; i++) {
+            delete columnName[i];
+        }
         delete [] columnName;
         delete [] columnType;
     }
@@ -47,7 +51,9 @@ OSPResultSetResponse::~OSPResultSetResponse() {
     for (it=resultRows.begin(); it!=resultRows.end(); it++) {
         OSPString **row = *it;
         for (unsigned int i=0; i<columnCount; i++) {
-            delete row[i];
+            if (row[i]) {
+                delete row[i];
+            }
         }
         delete [] row;
     }
@@ -78,13 +84,31 @@ void OSPResultSetResponse::setField(int fieldNum, char *buffer, unsigned int off
                 currentRow = new OSPString*[columnCount];
             }
 
-            // create copy of string data
-            char *strdata = new char[length+1];
-            memcpy(strdata, buffer+offset, length);
-            strdata[length] = 0;
+            //TODO: gross HACK magic value for NULL strings
+            if (length==10
+                && buffer[offset+0]=='_'
+                && buffer[offset+1]=='!'
+                && buffer[offset+2]=='_'
+                && buffer[offset+3]=='N'
+                && buffer[offset+4]=='U'
+                && buffer[offset+5]=='L'
+                && buffer[offset+6]=='L'
+                && buffer[offset+7]=='_'
+                && buffer[offset+8]=='!'
+                && buffer[offset+9]=='_')
+            {
+                currentRow[fieldIndex++] = NULL;
+            }
+            else {
 
-            // store this field
-            currentRow[fieldIndex++] = new OSPString(strdata, 0, length, true);
+                // create copy of string data
+                char *strdata = new char[length+1];
+                memcpy(strdata, buffer+offset, length);
+                strdata[length] = 0;
+
+                // store this field
+                currentRow[fieldIndex++] = new OSPString(strdata, 0, length, true);
+            }
 
             if (fieldIndex == columnCount) {
                 resultRows.push_back(currentRow);

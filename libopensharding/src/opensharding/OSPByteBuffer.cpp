@@ -36,7 +36,7 @@ using namespace util;
 
 namespace opensharding {
 
-logger::Logger OSPByteBuffer::log = Logger::getLogger("OSPByteBuffer");
+logger::Logger &OSPByteBuffer::log = Logger::getLogger("OSPByteBuffer");
 
 OSPByteBuffer::OSPByteBuffer(unsigned int _length) {
 
@@ -465,13 +465,21 @@ void OSPByteBuffer::writeShort(short n) {
 }
 
 void OSPByteBuffer::writeVarInt(int n) {
-    while (n>0x7F) {
-        ensureCapacity(1);
-        buffer[offset++] = (n & 0x7F) | 0x80;
-        n >>= 7;
+
+    //log.trace(string("writeVarInt(") + Util::toString(n) + string(") BEGIN"));
+
+    while (true) {
+        if ((n & ~0x7F) == 0) {
+            buffer[offset++] = n & 0xFF;
+            //log.trace(string("writeVarInt() WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
+            //log.trace(string("writeVarInt() END"));
+            return;
+        } else {
+            buffer[offset++] = ((n & 0x7F) | 0x80);
+            //log.trace(string("writeVarInt() WRITE BYTE ") + Util::toString((int)buffer[offset-1]));
+            n >>= 7;
+        }
     }
-    ensureCapacity(1);
-    buffer[offset++] = (n & 0x7F);
 }
 
 void OSPByteBuffer::writeInt(int fieldNum, int i) {

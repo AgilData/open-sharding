@@ -44,6 +44,9 @@ public:
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {}
 
     void setField(int fieldNum, int value) {}
+
+    unsigned int getEstimatedEncodingLength();
+
 };
 
 }

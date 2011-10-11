@@ -314,7 +314,7 @@ namespace mysql {
 class MySQLClient {
 private:
 
-    static Logger log;
+    static Logger &log;
 
     bool initOK;
 

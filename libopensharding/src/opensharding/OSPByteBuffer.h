@@ -37,7 +37,7 @@ namespace opensharding {
 class OSPByteBuffer : public OSPInputStream, public OSPOutputStream {
 private:
 
-    static Logger log;
+    static Logger &log;
 
     bool deleteBuffer;
     char *buffer;

@@ -42,11 +42,15 @@ void OSPWireRequest::write(OSPOutputStream *buffer) {
     buffer->writeInt(2, messageType);
 
     // encode request to temp buffer
-    OSPByteBuffer temp(1024);
+    OSPByteBuffer temp(request->getEstimatedEncodingLength());
     request->write(&temp);
 
     // write encoded message
     buffer->writeBytes(99+messageType, temp.getBuffer(), 0, temp.getOffset());
+}
+
+unsigned int OSPWireRequest::getEstimatedEncodingLength() {
+    return request->getEstimatedEncodingLength() + 64;
 }
 
 }

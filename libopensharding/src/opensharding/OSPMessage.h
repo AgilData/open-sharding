@@ -43,6 +43,10 @@ public:
 
     // encode message
     virtual void write(OSPOutputStream*)=0;
+
+    // estimate the length of the encoded message (this is used so that an appropriately-sized temporary
+    // encoding buffer can be created, avoiding expensive buffer resize operations)
+    virtual unsigned int getEstimatedEncodingLength()=0;
 };
 
 }

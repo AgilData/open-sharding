@@ -19,58 +19,42 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __OSPFileInputStream_h__
-#define __OSPFileInputStream_h__
-
-#include <opensharding/OSPInputStream.h>
-#include <opensharding/OSPString.h>
-
-#include <stdio.h>
-#include <string>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
-#include <logger/Logger.h>
-
-using namespace std;
-using namespace logger;
+#include <opensharding/OSPErrorResponse.h>
+#include <opensharding/OSPMessage.h>
+#include <opensharding/OSPOutputStream.h>
 
 namespace opensharding {
 
-class OSPFileInputStream : public OSPInputStream {
-private:
-
-    int fd;
-    FILE *file;
-
-    // selector info
-    struct timeval timeout;
-    fd_set set;
-
-    // temp buffers
-    char *intBuffer;
-    char *stringBuffer;
-    int stringBufferSize;
-
-    // read buffer
-    char *buffer;
-    unsigned int buf_pos;
-    unsigned int buf_mark;
-    unsigned int buf_size;
-
-    static Logger &log;
-
-public:
-    OSPFileInputStream(FILE *, int buf_size);
-    ~OSPFileInputStream();
-
-    // read raw data
-    int readInt();
-    string readString();
-    OSPString *readOSPString();
-    void readBytes(char *buffer, unsigned int offset, unsigned int length);
-};
-
+OSPErrorResponse::OSPErrorResponse() {
+    errorCode = 0;
 }
 
-#endif // __OSPFileInputStream_h__
+OSPErrorResponse::~OSPErrorResponse() {
+}
+
+void OSPErrorResponse::write(OSPOutputStream *buffer) {
+    // no need to implement this in C client
+}
+
+void OSPErrorResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
+    switch (fieldNum) {
+        case 2:
+            errorMessage = string(buffer+offset, length);
+            break;
+        default:
+            throw "OSPErrorResponse::setField() invalid fieldNum";
+    }
+}
+
+void OSPErrorResponse::setField(int fieldNum, int value) {
+    switch (fieldNum) {
+        case 1:
+            errorCode = value;
+            break;
+        default:
+            throw "OSPErrorResponse::setField() invalid fieldNum";
+    }
+}
+
+
+}

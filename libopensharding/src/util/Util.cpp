@@ -54,7 +54,7 @@ using namespace logger;
 
 namespace util {
 
-/*static*/ Logger Util::xlog = Logger::getLogger("Util");
+/*static*/ Logger &Util::xlog = Logger::getLogger("Util");
 
 /*static*/ void Util::init() {
      srand ( time(NULL) );

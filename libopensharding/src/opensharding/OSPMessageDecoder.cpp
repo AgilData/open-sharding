@@ -31,7 +31,7 @@ using namespace util;
 
 namespace opensharding {
 
-logger::Logger OSPMessageDecoder::log = Logger::getLogger("OSPMessageDecoder");
+logger::Logger &OSPMessageDecoder::log = Logger::getLogger("OSPMessageDecoder");
 
 OSPMessageDecoder::OSPMessageDecoder() {
 }
@@ -75,6 +75,10 @@ void OSPMessageDecoder::decode(OSPMessage *message, OSPByteBuffer *bb) {
                 if (TRACE) log.trace(string("fieldValue = BINARY DATA; length=") + Util::toString((int)fieldLength));
 
                 message->setField(fieldNumber, fieldValue, 0, fieldLength);
+
+                //NOTE: setField() must take a copy of the data!
+                delete [] fieldValue;
+
             } else if (wireType == 5) {
                 // fixed 32 bit integer
                 int fieldValue = bb->readInt();

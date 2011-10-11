@@ -19,58 +19,33 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __OSPFileInputStream_h__
-#define __OSPFileInputStream_h__
+#ifndef __OSPErrorResponse_h__
+#define __OSPErrorResponse_h__
 
-#include <opensharding/OSPInputStream.h>
-#include <opensharding/OSPString.h>
-
-#include <stdio.h>
-#include <string>
-#include <sys/ioctl.h>
-#include <fcntl.h>
-
-#include <logger/Logger.h>
-
-using namespace std;
-using namespace logger;
+#include <opensharding/OSPMessage.h>
+#include <opensharding/OSPByteBuffer.h>
 
 namespace opensharding {
 
-class OSPFileInputStream : public OSPInputStream {
+class OSPErrorResponse : public OSPMessage {
 private:
-
-    int fd;
-    FILE *file;
-
-    // selector info
-    struct timeval timeout;
-    fd_set set;
-
-    // temp buffers
-    char *intBuffer;
-    char *stringBuffer;
-    int stringBufferSize;
-
-    // read buffer
-    char *buffer;
-    unsigned int buf_pos;
-    unsigned int buf_mark;
-    unsigned int buf_size;
-
-    static Logger &log;
+    int errorCode;
+    string errorMessage;
 
 public:
-    OSPFileInputStream(FILE *, int buf_size);
-    ~OSPFileInputStream();
+    OSPErrorResponse();
+    virtual ~OSPErrorResponse();
 
-    // read raw data
-    int readInt();
-    string readString();
-    OSPString *readOSPString();
-    void readBytes(char *buffer, unsigned int offset, unsigned int length);
+    unsigned char getMessageType() { return 0xa3; }
+    unsigned int getEstimatedEncodingLength() { return 0; }
+    void write(OSPOutputStream *);
+    void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
+    void setField(int fieldNum, int value);
+
+    int getErrorCode() { return errorCode; }
+    string getErrorMessage() { return errorMessage; }
 };
 
 }
 
-#endif // __OSPFileInputStream_h__
+#endif // __OSPErrorResponse_h__

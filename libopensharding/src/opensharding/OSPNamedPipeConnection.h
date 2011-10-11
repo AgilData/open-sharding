@@ -42,10 +42,12 @@ private:
     OSPFileInputStream *is;
     OSPFileOutputStream *os;
 
+    int nextRequestID;
+
     char *buffer;
     unsigned int bufferSize;
 
-    static logger::Logger log;
+    static logger::Logger &log;
 
 public:
     OSPNamedPipeConnection(string requestPipeFilename, string responsePipeFilename);
