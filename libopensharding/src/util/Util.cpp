@@ -299,7 +299,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
-/*static*/ string toString(const int *s, int s_length) {
+/*static*/ string Util::toString(const int *s, int s_length) {
 	stringstream ret;
 	int i;
 	char temp[256];
@@ -314,7 +314,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string toString(const unsigned int *s, int s_length) {
+/*static*/ string Util::toString(const unsigned int *s, int s_length) {
 	stringstream ret;
 	int i;
 	char temp[256];
@@ -329,7 +329,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string toString(const unsigned long *s, int s_length) {
+/*static*/ string Util::toString(const unsigned long int *s, int s_length) {
 	stringstream ret;
 	int i;
 	char temp[256];
@@ -344,7 +344,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string toString(const char * const * s, int s_length, int bracketType) {
+/*static*/ string Util::buildParamList(const char * const * s, int s_length, int bracketType) {
 	stringstream ret;
 	int i;
 	switch (bracketType)
@@ -357,7 +357,31 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 		if(i > 0) {
 			ret << ", ";
 		}
-		ret << s[i];
+		ret << (s[i] ? s[i] : "NULL");
+	}
+	switch (bracketType)
+	{
+		case SQUARE_BRACKETS: ret << "]"; break;
+		case SQUIGGLY_BRACKETS: ret << "}"; break;
+		default: ret << "}"; break;
+	}
+	return ret.str();
+}
+
+/*static*/ string Util::buildParamList(string * s, int s_length, int bracketType) {
+	stringstream ret;
+	int i;
+	switch (bracketType)
+	{
+		case SQUARE_BRACKETS: ret << "["; break;
+		case SQUIGGLY_BRACKETS: ret << "{"; break;
+		default: ret << "{"; break;
+	}
+	for(i=0; i<s_length; i++) {
+		if(i > 0) {
+			ret << ", ";
+		}
+		ret << (s[i]=="" ? s[i] : "NULL");
 	}
 	switch (bracketType)
 	{
