@@ -29,6 +29,9 @@
 
 #include <logger/Logger.h>
 
+#define SQUARE_BRACKETS 1
+#define SQUIGGLY_BRACKETS 2
+
 using namespace std;
 using namespace logger;
 
@@ -57,8 +60,13 @@ public:
 
     static string toString(long int i);
     static string toString(int i);
+    static string toString(unsigned int i);
     static string toString(void *p);
     static string toString(const void *p);
+    static string toString(const int *s, int s_length);
+    static string toString(const unsigned int *s, int s_length);
+    static string toString(const unsigned long *s, int s_length);
+    static string toString(const char * const * s, int s_length, int bracketType);
 
     static string trim(string);
     static string removeQuotes(string);

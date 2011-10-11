@@ -275,6 +275,12 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
+/*static*/ string Util::toString(unsigned int i) {
+    char temp[256];
+    sprintf(temp, "%u", i);
+    return string(temp);
+}
+
 /*static*/ string Util::toString(void *p) {
     if (p==NULL) {
         return string("NULL");
@@ -293,6 +299,74 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
+/*static*/ string toString(const int *s, int s_length) {
+	stringstream ret;
+	int i;
+	char temp[256];
+	ret << "[";
+	for(i=0; i<s_length; i++) {
+		if(i>0)
+			ret << ", ";
+		sprintf(temp, "%d", s[i]);
+		ret << temp;
+	}
+	ret << "]";
+	return ret.str();
+}
+
+/*static*/ string toString(const unsigned int *s, int s_length) {
+	stringstream ret;
+	int i;
+	char temp[256];
+	ret << "[";
+	for(i=0; i<s_length; i++) {
+		if(i>0)
+			ret << ", ";
+		sprintf(temp, "%u", s[i]);
+		ret << temp;
+	}
+	ret << "]";
+	return ret.str();
+}
+
+/*static*/ string toString(const unsigned long *s, int s_length) {
+	stringstream ret;
+	int i;
+	char temp[256];
+	ret << "[";
+	for(i=0; i<s_length; i++) {
+		if(i>0)
+			ret << ", ";
+		sprintf(temp, "%lu", s[i]);
+		ret << temp;
+	}
+	ret << "]";
+	return ret.str();
+}
+
+/*static*/ string toString(const char * const * s, int s_length, int bracketType) {
+	stringstream ret;
+	int i;
+	switch (bracketType)
+	{
+		case SQUARE_BRACKETS: ret << "["; break;
+		case SQUIGGLY_BRACKETS: ret << "{"; break;
+		default: ret << "{"; break;
+	}
+	for(i=0; i<s_length; i++) {
+		if(i > 0) {
+			ret << ", ";
+		}
+		ret << s[i];
+	}
+	switch (bracketType)
+	{
+		case SQUARE_BRACKETS: ret << "]"; break;
+		case SQUIGGLY_BRACKETS: ret << "}"; break;
+		default: ret << "}"; break;
+	}
+	return ret.str();
+}
 
 /*static*/ string Util::trim(string str) {
     string whitespace = string(" \t\f\v\n\r");
