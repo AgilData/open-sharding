@@ -46,6 +46,7 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/logger/Logger.cpp
 	@g++ $(CPPFLAGS) src/util/Util.cpp
 	@g++ $(CPPFLAGS) src/util/DynLib.cpp
+	@g++ $(CPPFLAGS) src/util/OSPConfig.cpp
 	@echo "Linking libopensharding..."
 	@gcc -shared -Wl,-soname,libopensharding.so -o libopensharding.so.1.0.0 *.o -lc -lstdc++ -l$(BOOST_THREAD_LIB) -L/usr/lib64 -L$(BOOST_THREAD_LIB)
 	@rm -f *.o
