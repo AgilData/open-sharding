@@ -485,11 +485,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
                 // construct filename for request pipe
                 char requestPipeName[256];
-                sprintf(requestPipeName,  "%s/mysqlospfacade_%s_%d_request.fifo",  databaseName.c_str(), P_tmpdir, getpid());
+                sprintf(requestPipeName,  "%s/mysqlospfacade_%s_%d_request.fifo",  P_tmpdir, databaseName.c_str(), getpid());
 
                 // construct filename for response pipe
                 char responsePipeName[256];
-                sprintf(responsePipeName, "%s/mysqlospfacade_%s_%d_response.fifo", databaseName.c_str(), P_tmpdir, getpid());
+                sprintf(responsePipeName, "%s/mysqlospfacade_%s_%d_response.fifo", P_tmpdir, databaseName.c_str(), getpid());
 
                 umask(0);
                 if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
