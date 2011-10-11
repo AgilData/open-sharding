@@ -71,6 +71,7 @@ public:
 
     static string trim(string);
     static string removeQuotes(string);
+    static string escapeQuotes(string);
     static string formatIP(char *);
     static void parseIP(string hostAddr, char *hostBytes);
     static const char * createException(const char *message);

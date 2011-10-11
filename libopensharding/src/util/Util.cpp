@@ -411,6 +411,15 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     }
 }
 
+/*static*/ string Util::escapeQuotes(string str) {
+	string::size_type pos = 0;
+	    while ( (pos = str.find("\"", pos)) != string::npos ) {
+	        str.replace( pos, 1, "\\\"" );
+	        pos+=2;
+	    }
+	return str;
+}
+
 /*static*/ string Util::formatIP(char *addr) {
     char temp[64];
     sprintf(temp, "%d.%d.%d.%d", (0xFF & addr[0]), (0xFF & addr[1]), (0xFF & addr[2]), (0xFF & addr[3]));
