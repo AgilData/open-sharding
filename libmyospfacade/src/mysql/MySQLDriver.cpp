@@ -484,24 +484,27 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
 
                 // construct filename for request pipe
-                char requestPipeName[128];
-                sprintf(requestPipeName,  "%s/mysqlospfacade_%d_request.fifo",  P_tmpdir, getpid());
+                char requestPipeName[256];
+                sprintf(requestPipeName,  "%s/mysqlospfacade_%s_%d_request.fifo",  databaseName.c_str(), P_tmpdir, getpid());
 
                 // construct filename for response pipe
-                char responsePipeName[128];
-                sprintf(responsePipeName, "%s/mysqlospfacade_%d_response.fifo", P_tmpdir, getpid());
+                char responsePipeName[256];
+                sprintf(responsePipeName, "%s/mysqlospfacade_%s_%d_response.fifo", databaseName.c_str(), P_tmpdir, getpid());
 
                 umask(0);
                 if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
                     xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?"));
                     //TODO: set error code and message
-                    return -1;
+                    perror("Error creating pipe");
+                    return 1105;
                 }
 
+                umask(0);
                 if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
                     xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?"));
                     //TODO: set error code and message
-                    return -1;
+                    perror("Error creating pipe");
+                    return 1105;
                 }
 
                 request.setRequestPipe(requestPipeName);
@@ -515,7 +518,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     ospTcpConn->stop();
                     delete ospTcpConn;
                     //TODO: set error code and message
-                    return -1;
+                    return 1105;
                 }
 
                 // now connect via named pipes
@@ -540,7 +543,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             catch (...) {
                 xlog.error("Failed to connect to OSP");
                 //TODO: set error code and message
-                return -1;
+                return 1105;
             }
 
             // store mapping from the MYSQL structure to the ODBC connection
