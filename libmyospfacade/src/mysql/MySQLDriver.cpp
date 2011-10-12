@@ -510,15 +510,25 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 request.setRequestPipe(requestPipeName);
                 request.setResponsePipe(responsePipeName);
 
-                OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
-                if (wireResponse->isErrorResponse()) {
-                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-                    delete wireResponse;
-                    ospTcpConn->stop();
-                    delete ospTcpConn;
-                    //TODO: set error code and message
-                    return 1105;
+                //TODO: if DbsClient is not running then the following code will throw an exception - need to delete the pipes
+                // in this case so that they can be re-created on a future attempt
+
+                try {
+                    OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+                    if (wireResponse->isErrorResponse()) {
+                        OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                        xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                        delete wireResponse;
+                        ospTcpConn->stop();
+                        delete ospTcpConn;
+                        //TODO: set error code and message
+                        return 1105;
+                    }
+                } catch (...) {
+                    xlog.error("OSP communication error - OSP process dead?");
+                    // important that we delete the pipes as the next attempt will create them again
+                    unlink(requestPipeName);
+                    unlink(responsePipeName);
                 }
 
                 // now connect via named pipes
@@ -595,11 +605,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     } catch (const char *exception) {
         xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
         //TODO: set error code and message
-        return -1;
+        return 1105;
     } catch (...) {
         xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
         //TODO: set error code and message
-        return -1;
+        return 1105;
     }
 }
 
