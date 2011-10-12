@@ -513,8 +513,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 //TODO: if DbsClient is not running then the following code will throw an exception - need to delete the pipes
                 // in this case so that they can be re-created on a future attempt
 
+                OSPWireResponse* wireResponse = NULL;
                 try {
-                    OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+                    wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
                     if (wireResponse->isErrorResponse()) {
                         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
                         xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
