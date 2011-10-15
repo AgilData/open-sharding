@@ -927,7 +927,7 @@ void mysql_server_end(void) {
 
 MYSQL_PARAMETERS * mysql_get_parameters(void) {
     //trace("mysql_get_parameters");
-    mysql_get_parametersFnType* tempFunction = (mysql_get_parametersFnType*)mysqlclient->get_mysql_function("mysql_get_parameters");
+    mysql_get_parametersFnType* tempFunction = (mysql_get_parametersFnType*)getMySQLClient()->get_mysql_function("mysql_get_parameters");
     MYSQL_PARAMETERS * tempValue = tempFunction();
     return tempValue;
 }
@@ -1067,14 +1067,14 @@ const char * mysql_get_server_info(MYSQL *mysql) {
 
 const char * mysql_get_client_info(void) {
     //trace("mysql_get_client_info");
-    mysql_get_client_infoFnType* tempFunction = (mysql_get_client_infoFnType*)mysqlclient->get_mysql_function("mysql_get_client_info");
+    mysql_get_client_infoFnType* tempFunction = (mysql_get_client_infoFnType*)getMySQLClient()->get_mysql_function("mysql_get_client_info");
     const char * tempValue = tempFunction();
     return tempValue;
 }
 
 unsigned long mysql_get_client_version(void) {
     //trace("mysql_get_client_version");
-    mysql_get_client_versionFnType* tempFunction = (mysql_get_client_versionFnType*)mysqlclient->get_mysql_function("mysql_get_client_version");
+    mysql_get_client_versionFnType* tempFunction = (mysql_get_client_versionFnType*)getMySQLClient()->get_mysql_function("mysql_get_client_version");
     unsigned long tempValue = tempFunction();
     //xlog.trace(string("mysql_get_client_version() returning ") + Util::toString((int)tempValue));
     return tempValue;
