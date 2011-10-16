@@ -66,7 +66,7 @@ namespace util {
     return "Method Not Implemented - See stderr for details";
 }
 
-/*static*/ const char * Util::EMPTYCHARBUF = "";
+/*static*/ char * Util::EMPTYCHARBUF = "";
 
 /*
  * Generate short (16 char) unique ID for Tribes usage.

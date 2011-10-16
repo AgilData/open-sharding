@@ -78,7 +78,7 @@ public:
 
     static string getElapsedTimeString(struct timeval *start, struct timeval *end);
 
-    static const char *EMPTYCHARBUF;
+    static char *EMPTYCHARBUF;
 
 };
 
