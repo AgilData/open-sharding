@@ -39,6 +39,7 @@
 
 #include <util/Util.h>
 
+using namespace std;
 using namespace mysql;
 using namespace util;
 using namespace logger;
@@ -96,12 +97,12 @@ void MySQLNativeConnection::trace(const char *name, MYSQL *mysql) {
 #define SET_END_TIME   struct timeval tend;   if (isAnalyzeLogEnabled) gettimeofday(&tend, NULL);
 #define LOG_COMMAND_FOR_ANALYZER                                              \
     if (isAnalyzeLogEnabled) {                                              \
-        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str()); \
+        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str(), &alog); \
     }
 
 void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
                             struct timeval *tstart, struct timeval *tend,
-                            string          msg) {
+                            string          msg, Logger &alog) {
     struct timeval tdiff;
     timersub(tend, tstart, &tdiff);
     char sdiff[64];
