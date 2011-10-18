@@ -99,7 +99,7 @@ void MySQLNativeConnection::trace(const char *name, MYSQL *mysql) {
 
 void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
                             struct timeval *tstart, struct timeval *tend,
-                            string          msg, const Logger &alog) {
+                            string          msg, Logger &alog) {
     struct timeval tdiff;
     timersub(tend, tstart, &tdiff);
     char sdiff[64];
