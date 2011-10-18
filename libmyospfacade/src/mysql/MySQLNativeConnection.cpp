@@ -91,19 +91,13 @@ void MySQLNativeConnection::trace(const char *name, MYSQL *mysql) {
     }
 }
 
-// disable this until we can write it correctly so it only uses up CPU if we enable this type of logging
-#define SET_START_TIME
-#define SET_END_TIME
-#define LOG_COMMAND_FOR_ANALYZER
-
-/*
-#define SET_START_TIME struct timeval tstart; gettimeofday(&tstart, NULL);
-#define SET_END_TIME   struct timeval tend;   gettimeofday(&tend, NULL);
+#define SET_START_TIME bool isAnalyzeLogEnabled = alog.isDebugEnabled(); \
+                       struct timeval tstart; if (isAnalyzeLogEnabled) gettimeofday(&tstart, NULL);
+#define SET_END_TIME   struct timeval tend;   if (isAnalyzeLogEnabled) gettimeofday(&tend, NULL);
 #define LOG_COMMAND_FOR_ANALYZER                                              \
-    if (alog.isDebugEnabled()) {                                              \
+    if (isAnalyzeLogEnabled) {                                              \
         log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str()); \
     }
-*/
 
 void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
                             struct timeval *tstart, struct timeval *tend,
@@ -113,13 +107,17 @@ void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
     char sdiff[64];
     sprintf(sdiff, "%ld.%06ld", tdiff.tv_sec, tdiff.tv_usec);
     unsigned long long ts = (tstart->tv_sec * 1000) + tstart->tv_usec;
-    cerr << "[LOGSTART]"
+    stringstream ss;
+    ss   << "[LOGSTART]"
          << "[" << Pid                   << "]"
          << "[" << Util::toString(mysql) << "]"
          << "[" << ts                    << "]"
          << "[" << sdiff                 << "]"
          << "[" << msg                   << "]"
-         << "[LOGEND]"                   << endl;
+         << "[LOGEND]"                   ;
+
+    // output to the log
+    alog.output(ss.str());
 }
 
 void *MySQLNativeConnection::get_mysql_function(const char *name) {
@@ -197,10 +195,10 @@ int MySQLNativeConnection::mysql_real_query(MYSQL *mysql, const char *_sql,
         mysql_real_queryFn =
                 (mysql_real_queryFnType*)get_mysql_function("mysql_real_query");
     }
-//    SET_START_TIME
+    SET_START_TIME
     int tempValue = mysql_real_queryFn(mysql, _sql, length);
-//    SET_END_TIME
-//    LOG_COMMAND_FOR_ANALYZER
+    SET_END_TIME
+    LOG_COMMAND_FOR_ANALYZER
     return tempValue;
 }
 
@@ -209,11 +207,11 @@ my_ulonglong MySQLNativeConnection::mysql_insert_id(MYSQL *mysql){
     if (!mysql_insert_idFn) {
         mysql_insert_idFn = (mysql_insert_idFnType*)get_mysql_function("mysql_insert_id");
     }
-//    SET_START_TIME
+    SET_START_TIME
     my_ulonglong tempValue = mysql_insert_idFn(mysql);
-//    SET_END_TIME
+    SET_END_TIME
 //    if (alog.isDebugEnabled()) { ss << "mysql_insert_id(" << tempValue << ")"; }
-//    LOG_COMMAND_FOR_ANALYZER
+    LOG_COMMAND_FOR_ANALYZER
     return tempValue;
 }
 
@@ -237,10 +235,10 @@ my_bool MySQLNativeConnection::mysql_rollback(MYSQL *mysql){
     if (!mysql_rollbackFn) {
         mysql_rollbackFn = (mysql_rollbackFnType*)get_mysql_function("mysql_rollback");
     }
-//    SET_START_TIME
+    SET_START_TIME
     my_bool tempValue = mysql_rollbackFn(mysql);
-//    SET_END_TIME
-//    LOG_COMMAND_FOR_ANALYZER
+    SET_END_TIME
+    LOG_COMMAND_FOR_ANALYZER
     return tempValue;
 }
 
@@ -251,10 +249,10 @@ my_bool MySQLNativeConnection::mysql_commit(MYSQL * mysql){
     if (!mysql_commitFn) {
         mysql_commitFn = (mysql_commitFnType*)get_mysql_function("mysql_commit");
     }
-//    SET_START_TIME
+    SET_START_TIME
     my_bool tempValue = mysql_commitFn(mysql);
-//    SET_END_TIME
-//    LOG_COMMAND_FOR_ANALYZER
+    SET_END_TIME
+    LOG_COMMAND_FOR_ANALYZER
     return tempValue;
 }
 

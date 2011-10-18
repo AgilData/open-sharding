@@ -290,6 +290,10 @@ void Logger::error(string message) {
     error(message.c_str());
 }
 
+void Logger::output(string message) {
+    output(message.c_str());
+}
+
 void Logger::log(const char *level, const char *message) {
 
     if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDERR) {
@@ -356,6 +360,41 @@ void Logger::warn(const char *message) {
 
 void Logger::error(const char *message) {
     log("ERROR", message);
+}
+
+// raw output - no formatting
+void Logger::output(const char *message) {
+    if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDERR) {
+        cerr << message << "\n";
+    }
+    else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDOUT) {
+        cout << message << "\n";
+    }
+    else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_SYSLOG) {
+        int slevel = LOG_ERR;
+        if (strcmp("DEBUG",level)==0) {
+            slevel = LOG_DEBUG;
+        }
+        else if (strcmp("INFO",level)==0) {
+            slevel = LOG_NOTICE;
+        }
+        else if (strcmp("WARN",level)==0) {
+            slevel = LOG_WARNING;
+        }
+        else if (strcmp("ERROR",level)==0) {
+            slevel = LOG_ERR;
+        }
+
+        syslog (
+            slevel,
+            "%s",
+            message
+        );
+    }
+    else {
+        fprintf(LOGGER_GLOBAL_STATE->file, "%s\n", message);
+        fflush(LOGGER_GLOBAL_STATE->file);
+    }
 }
 
 }
