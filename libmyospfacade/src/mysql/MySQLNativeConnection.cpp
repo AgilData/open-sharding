@@ -95,7 +95,7 @@ void MySQLNativeConnection::trace(const char *name, MYSQL *mysql) {
 #define SET_START_TIME struct timeval tstart; gettimeofday(&tstart, NULL);
 #define SET_END_TIME   struct timeval tend;   gettimeofday(&tend, NULL);
 #define LOG_COMMAND_FOR_ANALYZER                                              \
-        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str(), &alog);
+        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str(), alog);
 
 void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
                             struct timeval *tstart, struct timeval *tend,
