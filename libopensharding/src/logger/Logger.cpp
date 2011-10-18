@@ -371,22 +371,8 @@ void Logger::output(const char *message) {
         cout << message << "\n";
     }
     else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_SYSLOG) {
-        int slevel = LOG_ERR;
-        if (strcmp("DEBUG",level)==0) {
-            slevel = LOG_DEBUG;
-        }
-        else if (strcmp("INFO",level)==0) {
-            slevel = LOG_NOTICE;
-        }
-        else if (strcmp("WARN",level)==0) {
-            slevel = LOG_WARNING;
-        }
-        else if (strcmp("ERROR",level)==0) {
-            slevel = LOG_ERR;
-        }
-
         syslog (
-            slevel,
+            LOG_NOTICE,
             "%s",
             message
         );
