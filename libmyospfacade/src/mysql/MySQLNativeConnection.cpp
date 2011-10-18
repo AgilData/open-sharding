@@ -92,13 +92,10 @@ void MySQLNativeConnection::trace(const char *name, MYSQL *mysql) {
     }
 }
 
-#define SET_START_TIME bool isAnalyzeLogEnabled = alog.isDebugEnabled(); \
-                       struct timeval tstart; if (isAnalyzeLogEnabled) gettimeofday(&tstart, NULL);
-#define SET_END_TIME   struct timeval tend;   if (isAnalyzeLogEnabled) gettimeofday(&tend, NULL);
+#define SET_START_TIME struct timeval tstart; gettimeofday(&tstart, NULL);
+#define SET_END_TIME   struct timeval tend;   gettimeofday(&tend, NULL);
 #define LOG_COMMAND_FOR_ANALYZER                                              \
-    if (isAnalyzeLogEnabled) {                                              \
-        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str(), &alog); \
-    }
+        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str(), &alog);
 
 void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
                             struct timeval *tstart, struct timeval *tend,
@@ -136,6 +133,9 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
                                     unsigned long clientflag) {
     trace("connect", mysql);
     try {
+
+        //TODO: this is inefficient because we create stringstream even when logging is not enabled
+
         stringstream ss;
         if (alog.isDebugEnabled() || log.isDebugEnabled()) {
             string us; if (unix_socket) us = unix_socket;
@@ -147,8 +147,14 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         }
         if (log.isDebugEnabled()) { log.debug(ss.str()); }
 
+        //TODO: we should be caching this function pointer instead of looking it up each time
         mysql_real_connectFnType* tempFunction =
             (mysql_real_connectFnType*)get_mysql_function("mysql_real_connect");
+
+
+        //TODO: this method doesn't follow the same pattern for logging as the other methods and we
+        // are incurring overhead of calling gettimeofday() even when analyze logging is disabled
+
         SET_START_TIME
         if (!tempFunction(mysql, server, user, password, database,
                           port, unix_socket, clientflag)) {
@@ -158,7 +164,9 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
             return false;
         }
         SET_END_TIME
-        LOG_COMMAND_FOR_ANALYZER
+        if (alog.isDebugEnabled()) {
+            LOG_COMMAND_FOR_ANALYZER
+        }
 
         if (log.isDebugEnabled()) {
             log.debug(string("Connected OK; server=") +
@@ -185,87 +193,162 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
     }
 }
 
-int MySQLNativeConnection::mysql_real_query(MYSQL *mysql, const char *_sql,
-                                            unsigned long length) {
-//    trace("mysql_real_query", mysql);
-//    string sql(_sql);
-//    stringstream ss;
-//    if (alog.isDebugEnabled()) { ss << "mysql_real_query(" << sql <<  ")"; }
-//    if (log.isDebugEnabled())  { log.debug("mysql_real_query(" + sql + ")"); }
+int MySQLNativeConnection::mysql_real_query(MYSQL *mysql, const char *_sql, unsigned long length) {
+
+    if (log.isDebugEnabled())  {
+        // debug logging
+        string sql(_sql);
+        log.debug("mysql_real_query(" + sql + ")");
+    }
+
+    // get function pointer
     if (!mysql_real_queryFn) {
         mysql_real_queryFn =
                 (mysql_real_queryFnType*)get_mysql_function("mysql_real_query");
     }
-    SET_START_TIME
-    int tempValue = mysql_real_queryFn(mysql, _sql, length);
-    SET_END_TIME
-    LOG_COMMAND_FOR_ANALYZER
-    return tempValue;
+
+    if (alog.isDebugEnabled()) {
+        // analyze logging
+        string sql(_sql);
+        stringstream ss;
+        ss << "mysql_real_query(" << sql <<  ")";;
+        SET_START_TIME
+        int tempValue = mysql_real_queryFn(mysql, _sql, length);
+        SET_END_TIME
+        LOG_COMMAND_FOR_ANALYZER
+        return tempValue;
+    }
+    else {
+        // no analyze logging
+        return mysql_real_queryFn(mysql, _sql, length);
+    }
 }
 
 my_ulonglong MySQLNativeConnection::mysql_insert_id(MYSQL *mysql){
-//    stringstream ss;
+
+    // get function pointer
     if (!mysql_insert_idFn) {
         mysql_insert_idFn = (mysql_insert_idFnType*)get_mysql_function("mysql_insert_id");
     }
-    SET_START_TIME
-    my_ulonglong tempValue = mysql_insert_idFn(mysql);
-    SET_END_TIME
-//    if (alog.isDebugEnabled()) { ss << "mysql_insert_id(" << tempValue << ")"; }
-    LOG_COMMAND_FOR_ANALYZER
-    return tempValue;
+
+    if  (alog.isDebugEnabled()) {
+        // analyze logging
+        stringstream ss;
+        SET_START_TIME
+        my_ulonglong tempValue = mysql_insert_idFn(mysql);
+        SET_END_TIME
+        ss << "mysql_insert_id(" << tempValue << ")";
+        LOG_COMMAND_FOR_ANALYZER
+        return tempValue;
+    }
+    else {
+        // no analyze logging
+        return mysql_insert_idFn(mysql);
+    }
 }
 
 int MySQLNativeConnection::mysql_select_db(MYSQL *mysql, const char *db){
+
     trace("mysql_select_db", mysql);
-    stringstream ss;
-    if (alog.isDebugEnabled()) { ss << "mysql_select_db(" << db << ")"; }
+
+    //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_select_dbFnType* tempFunction =
                   (mysql_select_dbFnType*)get_mysql_function("mysql_select_db");
-    SET_START_TIME
-    int tempValue = tempFunction(mysql, db);
-    SET_END_TIME
-    LOG_COMMAND_FOR_ANALYZER
-    return tempValue;
+
+    if  (alog.isDebugEnabled()) {
+        // analyze logging
+        stringstream ss;
+        if (alog.isDebugEnabled()) { ss << "mysql_select_db(" << db << ")"; }
+        SET_START_TIME
+        int tempValue = tempFunction(mysql, db);
+        SET_END_TIME
+        LOG_COMMAND_FOR_ANALYZER
+        return tempValue;
+    }
+    else {
+        // no analyze logging
+        return tempFunction(mysql, db);
+    }
 }
 
 my_bool MySQLNativeConnection::mysql_rollback(MYSQL *mysql){
-//    stringstream ss;
-//    if (alog.isDebugEnabled()) { ss << "mysql_rollback()"; }
-//    if (log.isDebugEnabled())  { log.debug(string("mysql_rollback()")); }
+
+    // debug logging
+    if (log.isDebugEnabled())  {
+        log.debug(string("mysql_rollback()"));
+    }
+
+    // get function pointer
     if (!mysql_rollbackFn) {
         mysql_rollbackFn = (mysql_rollbackFnType*)get_mysql_function("mysql_rollback");
     }
-    SET_START_TIME
-    my_bool tempValue = mysql_rollbackFn(mysql);
-    SET_END_TIME
-    LOG_COMMAND_FOR_ANALYZER
-    return tempValue;
+
+    if  (alog.isDebugEnabled()) {
+        // analyze logging
+        stringstream ss;
+        ss << "mysql_rollback()";
+        SET_START_TIME
+        my_bool tempValue = mysql_rollbackFn(mysql);
+        SET_END_TIME
+        LOG_COMMAND_FOR_ANALYZER
+        return tempValue;
+    }
+    else {
+        // no analyze logging
+        return mysql_rollbackFn(mysql);
+    }
+
 }
 
 my_bool MySQLNativeConnection::mysql_commit(MYSQL * mysql){
-//    stringstream ss;
-//    if (alog.isDebugEnabled()) { ss << "mysql_commit()"; }
-//    if (log.isDebugEnabled())  { log.debug(string("mysql_commit()")); }
+
+    // debug logging
+    if (log.isDebugEnabled()) {
+        log.debug(string("mysql_commit()"));
+    }
+
+    // get function pointer
     if (!mysql_commitFn) {
         mysql_commitFn = (mysql_commitFnType*)get_mysql_function("mysql_commit");
     }
-    SET_START_TIME
-    my_bool tempValue = mysql_commitFn(mysql);
-    SET_END_TIME
-    LOG_COMMAND_FOR_ANALYZER
-    return tempValue;
+
+    if (alog.isDebugEnabled()) {
+        // analyze logging
+        stringstream ss;
+        ss << "mysql_commit()";
+        SET_START_TIME
+        my_bool tempValue = mysql_commitFn(mysql);
+        SET_END_TIME
+        LOG_COMMAND_FOR_ANALYZER
+        return tempValue;
+    }
+    else {
+        // no analyze logging
+        return mysql_commitFn(mysql);
+    }
+
 }
 
 void MySQLNativeConnection::mysql_close(MYSQL *mysql){
-    stringstream ss;
-    if (alog.isDebugEnabled()) { ss << "mysql_close()"; }
+
+    //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_closeFnType* tempFunction =
                           (mysql_closeFnType*)get_mysql_function("mysql_close");
-    SET_START_TIME
-    tempFunction(mysql);
-    SET_END_TIME
-    LOG_COMMAND_FOR_ANALYZER
+
+    if (alog.isDebugEnabled()) {
+        // analyze logging
+        stringstream ss;
+        ss << "mysql_close()";
+        SET_START_TIME
+        tempFunction(mysql);
+        SET_END_TIME
+        LOG_COMMAND_FOR_ANALYZER
+    }
+    else {
+        // no analyze logging
+        tempFunction(mysql);
+    }
+
 }
 
 // MYSQL API METHODS    - TODO move these to MySQLClient and delegate to mysqlclient here 
@@ -325,12 +408,14 @@ my_bool MySQLNativeConnection::mysql_stmt_close(MYSQL_STMT *stmt){
 
 unsigned int MySQLNativeConnection::mysql_errno(MYSQL *mysql){
     //trace("mysql_errno", mysql);
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_errnoFnType* tempFunction = (mysql_errnoFnType*)get_mysql_function("mysql_errno");
     unsigned int tempValue = tempFunction(mysql);
     return tempValue;
 }
 
 const char * MySQLNativeConnection::mysql_error(MYSQL *mysql){
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_errorFnType* tempFunction = (mysql_errorFnType*)get_mysql_function("mysql_error");
     const char * tempValue = tempFunction(mysql);
     return tempValue;
@@ -406,6 +491,7 @@ MYSQL_FIELD * MySQLNativeConnection::mysql_fetch_field_direct(MYSQL_RES *res, un
 }
 
 MYSQL_FIELD * MySQLNativeConnection::mysql_fetch_fields(MYSQL_RES *res){
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_fetch_fieldsFnType* tempFunction = (mysql_fetch_fieldsFnType*)get_mysql_function("mysql_fetch_fields");
     MYSQL_FIELD * tempValue = tempFunction(res);
     return tempValue;
@@ -420,24 +506,28 @@ MYSQL_ROW_OFFSET MySQLNativeConnection::mysql_row_tell(MYSQL_RES *res){
 }
 
 MYSQL_FIELD_OFFSET MySQLNativeConnection::mysql_field_tell(MYSQL_RES *res){
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_field_tellFnType* tempFunction = (mysql_field_tellFnType*)get_mysql_function("mysql_field_tell");
     MYSQL_FIELD_OFFSET tempValue = tempFunction(res);
     return tempValue;
 }
 
 unsigned int MySQLNativeConnection::mysql_field_count(MYSQL *mysql){
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_field_countFnType* tempFunction = (mysql_field_countFnType*)get_mysql_function("mysql_field_count");
     unsigned int tempValue = tempFunction(mysql);
     return tempValue;
 }
 
 my_ulonglong MySQLNativeConnection::mysql_affected_rows(MYSQL *mysql){
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_affected_rowsFnType* tempFunction = (mysql_affected_rowsFnType*)get_mysql_function("mysql_affected_rows");
     my_ulonglong tempValue = tempFunction(mysql);
     return tempValue;
 }
 
 const char * MySQLNativeConnection::mysql_sqlstate(MYSQL *mysql){
+        //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_sqlstateFnType* tempFunction = (mysql_sqlstateFnType*)get_mysql_function("mysql_sqlstate");
     const char * tempValue = tempFunction(mysql);
     return tempValue;
