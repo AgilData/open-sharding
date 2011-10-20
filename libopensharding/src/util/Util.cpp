@@ -66,6 +66,7 @@ namespace util {
     return "Method Not Implemented - See stderr for details";
 }
 
+/*static*/ char * Util::EMPTYCHARBUF = "";
 
 /*
  * Generate short (16 char) unique ID for Tribes usage.
@@ -299,7 +300,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
-/*static*/ string toString(const int *s, int s_length) {
+/*static*/ string Util::toString(const int *s, int s_length) {
 	stringstream ret;
 	int i;
 	char temp[256];
@@ -314,7 +315,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string toString(const unsigned int *s, int s_length) {
+/*static*/ string Util::toString(const unsigned int *s, int s_length) {
 	stringstream ret;
 	int i;
 	char temp[256];
@@ -329,7 +330,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string toString(const unsigned long *s, int s_length) {
+/*static*/ string Util::toString(const unsigned long int *s, int s_length) {
 	stringstream ret;
 	int i;
 	char temp[256];
@@ -344,7 +345,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string toString(const char * const * s, int s_length, int bracketType) {
+/*static*/ string Util::buildParamList(const char * const * s, int s_length, int bracketType) {
 	stringstream ret;
 	int i;
 	switch (bracketType)
@@ -357,7 +358,31 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 		if(i > 0) {
 			ret << ", ";
 		}
-		ret << s[i];
+		ret << (s[i] ? "NULL" : s[i]);
+	}
+	switch (bracketType)
+	{
+		case SQUARE_BRACKETS: ret << "]"; break;
+		case SQUIGGLY_BRACKETS: ret << "}"; break;
+		default: ret << "}"; break;
+	}
+	return ret.str();
+}
+
+/*static*/ string Util::buildParamList(string * s, int s_length, int bracketType) {
+	stringstream ret;
+	int i;
+	switch (bracketType)
+	{
+		case SQUARE_BRACKETS: ret << "["; break;
+		case SQUIGGLY_BRACKETS: ret << "{"; break;
+		default: ret << "{"; break;
+	}
+	for(i=0; i<s_length; i++) {
+		if(i > 0) {
+			ret << ", ";
+		}
+		ret << (s[i]=="" ? "NULL" : s[i]);
 	}
 	switch (bracketType)
 	{
@@ -385,6 +410,15 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     else {
         return keyValue;
     }
+}
+
+/*static*/ string Util::escapeQuotes(string str) {
+	string::size_type pos = 0;
+	    while ( (pos = str.find("\"", pos)) != string::npos ) {
+	        str.replace( pos, 1, "\\\"" );
+	        pos+=2;
+	    }
+	return str;
 }
 
 /*static*/ string Util::formatIP(char *addr) {

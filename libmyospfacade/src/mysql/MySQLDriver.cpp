@@ -402,6 +402,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 int mysql_select_db(MYSQL *mysql, const char *db) {
     //trace("mysql_select_db", mysql);
     if (db==NULL) {
+		//TODO: set error code
+        xlog.error("failed to init mysqlClient");
         return -1;
     }
     if (xlog.isDebugEnabled()) {
@@ -410,6 +412,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     if (!getMySQLClient()->init()) {
         xlog.error("failed to init mysqlClient");
+		//TODO: set error code
         return -1;
     }
 
@@ -496,7 +499,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?"));
                     //TODO: set error code and message
                     perror("Error creating pipe");
-                    return 1105;
+                    return -1;
                 }
 
                 umask(0);
@@ -504,21 +507,32 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?"));
                     //TODO: set error code and message
                     perror("Error creating pipe");
-                    return 1105;
+                    return -1;
                 }
 
                 request.setRequestPipe(requestPipeName);
                 request.setResponsePipe(responsePipeName);
 
-                OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
-                if (wireResponse->isErrorResponse()) {
-                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-                    delete wireResponse;
-                    ospTcpConn->stop();
-                    delete ospTcpConn;
-                    //TODO: set error code and message
-                    return 1105;
+                //TODO: if DbsClient is not running then the following code will throw an exception - need to delete the pipes
+                // in this case so that they can be re-created on a future attempt
+
+                OSPWireResponse* wireResponse = NULL;
+                try {
+                    wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+                    if (wireResponse->isErrorResponse()) {
+                        OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                        xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                        delete wireResponse;
+                        ospTcpConn->stop();
+                        delete ospTcpConn;
+                    	//TODO: set error code and message
+                        return -1;
+                    }
+                } catch (...) {
+                    xlog.error("OSP communication error - OSP process dead?");
+                    // important that we delete the pipes as the next attempt will create them again
+                    unlink(requestPipeName);
+                    unlink(responsePipeName);
                 }
 
                 // now connect via named pipes
@@ -543,7 +557,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             catch (...) {
                 xlog.error("Failed to connect to OSP");
                 //TODO: set error code and message
-                return 1105;
+                return -1;
             }
 
             // store mapping from the MYSQL structure to the ODBC connection
@@ -560,13 +574,6 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
             // store mapping from the MYSQL structure to the native connection
             getResourceMap()->setConnection(mysql, conn);
-
-            // do some validation to prevent segv in MySQL driver
-            if (info->host == "") {
-               /* xlog.error("Call to mysql_select_db() but stored connection information has blank host name");
-                return -1;*/
-		        xlog.error("Call to mysql_select_db() with blank host name");
-            }
 
             if (!conn->connect(
                     info->host.c_str(),
@@ -916,7 +923,7 @@ void mysql_server_end(void) {
 
 MYSQL_PARAMETERS * mysql_get_parameters(void) {
     //trace("mysql_get_parameters");
-    mysql_get_parametersFnType* tempFunction = (mysql_get_parametersFnType*)mysqlclient->get_mysql_function("mysql_get_parameters");
+    mysql_get_parametersFnType* tempFunction = (mysql_get_parametersFnType*)getMySQLClient()->get_mysql_function("mysql_get_parameters");
     MYSQL_PARAMETERS * tempValue = tempFunction();
     return tempValue;
 }
@@ -1056,14 +1063,14 @@ const char * mysql_get_server_info(MYSQL *mysql) {
 
 const char * mysql_get_client_info(void) {
     //trace("mysql_get_client_info");
-    mysql_get_client_infoFnType* tempFunction = (mysql_get_client_infoFnType*)mysqlclient->get_mysql_function("mysql_get_client_info");
+    mysql_get_client_infoFnType* tempFunction = (mysql_get_client_infoFnType*)getMySQLClient()->get_mysql_function("mysql_get_client_info");
     const char * tempValue = tempFunction();
     return tempValue;
 }
 
 unsigned long mysql_get_client_version(void) {
     //trace("mysql_get_client_version");
-    mysql_get_client_versionFnType* tempFunction = (mysql_get_client_versionFnType*)mysqlclient->get_mysql_function("mysql_get_client_version");
+    mysql_get_client_versionFnType* tempFunction = (mysql_get_client_versionFnType*)getMySQLClient()->get_mysql_function("mysql_get_client_version");
     unsigned long tempValue = tempFunction();
     //xlog.trace(string("mysql_get_client_version() returning ") + Util::toString((int)tempValue));
     return tempValue;

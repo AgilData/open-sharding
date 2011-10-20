@@ -233,61 +233,9 @@ void Logger::setLevel(int logLevel) {
     isTrace = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_TRACE;
     isDebug = logLevel > LOG_LEVEL_NONE && logLevel <= LOG_LEVEL_DEBUG;
     isInfo = logLevel <= LOG_LEVEL_INFO;
-
-    //HACK HACK HACK
-    isDebugEnabled();
-    /*
-    isTrace = true;
-    isDebug = true;
-    isInfo = true;
-    */
 }
 
 Logger::~Logger() {
-}
-
-bool Logger::isTraceEnabled() {
-    return isTrace;
-}
-
-bool Logger::isDebugEnabled() {
-
-    // HACK
-    if (name == "MySQLDriver") {
-        char temp[256];
-        sprintf(temp, "%p", (void*) this);
-        //cerr << getPidTid() << " Logger::isDebugEnabled(MySQLDriver logger @" << temp << ") " << isDebug << endl;
-    }
-
-    return isDebug;
-}
-
-bool Logger::isInfoEnabled() {
-    return isInfo;
-}
-
-bool Logger::isWarnEnabled() {
-    return true;
-}
-
-void Logger::trace(string message) {
-    trace(message.c_str());
-}
-
-void Logger::debug(string message) {
-    debug(message.c_str());
-}
-
-void Logger::info(string message) {
-    info(message.c_str());
-}
-
-void Logger::warn(string message) {
-    warn(message.c_str());
-}
-
-void Logger::error(string message) {
-    error(message.c_str());
 }
 
 void Logger::log(const char *level, const char *message) {
@@ -333,6 +281,70 @@ void Logger::log(const char *level, const char *message) {
         fprintf(LOGGER_GLOBAL_STATE->file, "[%ld s] %s [opensharding] [%s] [%s] %s\n", time(NULL), getPidTid().c_str(), level, name.c_str(), message);
         fflush(LOGGER_GLOBAL_STATE->file);
     }
+}
+
+
+// raw output - no formatting
+void Logger::output(const char *message) {
+    if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDERR) {
+        cerr << message << "\n";
+    }
+    else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDOUT) {
+        cout << message << "\n";
+    }
+    else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_SYSLOG) {
+        syslog (
+            LOG_NOTICE,
+            "%s",
+            message
+        );
+    }
+    else {
+        fprintf(LOGGER_GLOBAL_STATE->file, "%s\n", message);
+        fflush(LOGGER_GLOBAL_STATE->file);
+    }
+}
+
+//TODO: make the rest of these methods inline to avoid the cost of a function call
+
+bool Logger::isTraceEnabled() {
+    return isTrace;
+}
+
+bool Logger::isDebugEnabled() {
+    return isDebug;
+}
+
+bool Logger::isInfoEnabled() {
+    return isInfo;
+}
+
+bool Logger::isWarnEnabled() {
+    return true;
+}
+
+void Logger::trace(string message) {
+    trace(message.c_str());
+}
+
+void Logger::debug(string message) {
+    debug(message.c_str());
+}
+
+void Logger::info(string message) {
+    info(message.c_str());
+}
+
+void Logger::warn(string message) {
+    warn(message.c_str());
+}
+
+void Logger::error(string message) {
+    error(message.c_str());
+}
+
+void Logger::output(string message) {
+    output(message.c_str());
 }
 
 void Logger::trace(const char *message) {

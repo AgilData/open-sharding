@@ -84,12 +84,14 @@ public: // public instance methods
     void info(string message);
     void warn(string message);
     void error(string message);
+    void output(string message);
 
     void trace(const char *message);
     void debug(const char *message);
     void info(const char *message);
     void warn(const char *message);
     void error(const char *message);
+    void output(const char *message);
 };
 
 // because loggers are staticly created, we can't have static members in Logger, so we have a global variable holding all global state

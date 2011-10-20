@@ -50,17 +50,12 @@ void MySQLConnMap::setConnection(MYSQL *mysql, MySQLAbstractConnection *conn) {
         _log.trace(string(string("[") + Util::toString((void*)this)) + string("] setConnection(MYSQL=") + Util::toString((void *)mysql) + string(", conn=") + Util::toString((void *)conn) + string(")"));
     }
 
-    /*
-
-    REMOVED THESE WARNINGS FOR NOW SINCE WE HAVE THIS WARNING ON THE ODBC CONNECTION OBJECT INSTEAD NOW WHICH IS MORE MEANINGFUL
-
     if (pid != getpid()) {
         _log.warn("Map was created in process " + Util::toString((long)pid)
             + " but call to setConnection(" + Util::toString((void*)mysql)
             + ") was made from process " + Util::toString((long)getpid())
         );
     }
-    */
 
     LOCK_MUTEX
     mysqlToConnMap[mysql] = conn;
@@ -78,17 +73,12 @@ MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL *mysql) {
         _log.trace(string(string("[") + Util::toString((void*)this)) + string("] getConnection(MYSQL=") + Util::toString((void *)mysql) + string(") returning ") + Util::toString((void *)ret));
     }
 
-    /*
-
-    REMOVED THESE WARNINGS FOR NOW SINCE WE HAVE THIS WARNING ON THE ODBC CONNECTION OBJECT INSTEAD NOW WHICH IS MORE MEANINGFUL
-
     if (pid != getpid()) {
         _log.warn("Map was created in process " + Util::toString((long)pid)
             + " but call to getConnection(" + Util::toString((void*)mysql)
             + ") was made from process " + Util::toString((long)getpid())
         );
     }
-    */
 
     return ret;
 }
@@ -121,17 +111,12 @@ void MySQLConnMap::erase(MYSQL *mysql) {
         _log.trace(string("[") + Util::toString((void*)this) + string("] erase(MYSQL=") + Util::toString((void *)mysql) + string(")"));
     }
 
-    /*
-
-    REMOVED THESE WARNINGS FOR NOW SINCE WE HAVE THIS WARNING ON THE ODBC CONNECTION OBJECT INSTEAD NOW WHICH IS MORE MEANINGFUL
-
     if (pid != getpid()) {
         _log.warn("Map was created in process " + Util::toString((long)pid)
             + " but call to erase(" + Util::toString((void*)mysql)
             + ") was made from process " + Util::toString((long)getpid())
         );
     }
-    */
 
     LOCK_MUTEX
 

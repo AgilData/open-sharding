@@ -65,16 +65,20 @@ public:
     static string toString(const void *p);
     static string toString(const int *s, int s_length);
     static string toString(const unsigned int *s, int s_length);
-    static string toString(const unsigned long *s, int s_length);
-    static string toString(const char * const * s, int s_length, int bracketType);
+    static string toString(const unsigned long int *s, int s_length);
+    static string buildParamList(const char * const * s, int s_length, int bracketType);
+    static string buildParamList(string * s, int s_length, int bracketType);
 
     static string trim(string);
     static string removeQuotes(string);
+    static string escapeQuotes(string);
     static string formatIP(char *);
     static void parseIP(string hostAddr, char *hostBytes);
     static const char * createException(const char *message);
 
     static string getElapsedTimeString(struct timeval *start, struct timeval *end);
+
+    static char *EMPTYCHARBUF;
 
 };
 
