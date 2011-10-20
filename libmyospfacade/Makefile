@@ -25,24 +25,25 @@ TEST_OBJ=test/src/MySQLTest.o test/src/Test.o
 all: $(SO_FILE) $(TEST_FILE)
 
 fifteen:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" SO_FILE="libopensharding_mysql.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" SO_FILE="libmyospfacade.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so"
 fifteen_r:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" SO_FILE="libopensharding_mysql_r.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" SO_FILE="libmyospfacade_r.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so"
 fifteen_debug:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" SO_FILE="libopensharding_mysql.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" SO_FILE="libmyospfacade.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so"
 fifteen_r_debug:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0_R" SO_FILE="libopensharding_mysql_r.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_r.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0_R" SO_FILE="libmyospfacade_r.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_r.so"
 
 sixteen:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libopensharding_mysql.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libmyospfacade.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so"
 sixteen_r:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libopensharding_mysql_r.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libmyospfacade_r.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so"
 sixteen_debug:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libopensharding_mysql.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so"
+	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libmyospfacade.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so"
 
 $(SO_FILE): $(OBJ)
 	@echo "Creating Shared Library"
-	gcc -shared -Wl,-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o -lc -lstdc++ -luuid -lopensharding -lmysys -lmystrings -l$(BOOST_THREAD_LIB) -L$(BOOST_LIB_PATH) -L/usr/local/opensharding/lib -L/usr/lib64/mysql
+	#gcc -shared -Wl,-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o -lc -lstdc++ -luuid -lopensharding -lmysys -lmystrings -l$(BOOST_THREAD_LIB) -L$(BOOST_LIB_PATH) -L/usr/local/opensharding/lib -L/usr/lib64/mysql
+	gcc -shared -Wl,-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o -lc -lstdc++ -luuid -lopensharding -l$(BOOST_THREAD_LIB) -L$(BOOST_LIB_PATH) -L/usr/local/opensharding/lib -L/usr/lib64/mysql
 
 testsuite_fifteen: fifteen
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
