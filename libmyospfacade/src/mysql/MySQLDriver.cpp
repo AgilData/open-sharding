@@ -293,11 +293,23 @@ unsigned int mysql_errno(MYSQL *mysql) {
     MySQLErrorState *errorState = getResourceMap()->getErrorState(mysql);
     if (errorState != NULL) {
         //xlog.trace(string("mysql_errno() returning local error state ") + Util::toString((int)errorState->my_errno));
-        return errorState->my_errno;
+        unsigned int ret =  errorState->my_errno;
+
+        if (xlog.isDebugEnabled() || ret>0) {
+            xlog.debug(string("mysql_errno returning ") + Util::toString((int)ret));
+        }
+
+        // HACK to avoid Python "error totally whack" error messages
+        if (ret!=0 && (ret<CR_MIN_ERROR || ret>CR_MAX_ERROR)) {
+            return CR_UNKNOWN_ERROR; // 1105
+        }
+
+        return ret;
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn) {
         unsigned int ret = conn->mysql_errno(mysql);
+
         if (xlog.isDebugEnabled() || ret>0) {
             xlog.debug(string("mysql_errno returning ") + Util::toString((int)ret));
         }
@@ -398,11 +410,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         return mysql;
     } catch (const char *ex1) {
         xlog.error(string("mysql_real_connect() failed: ") + string(ex1));
-        setErrorState(mysql, 9001, "Failed to connect to DB [2]", "DBS01");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [2]", "DBS01");
         return NULL;
     } catch (...) {
         xlog.error(string("mysql_real_connect() failed due to exception"));
-        setErrorState(mysql, 9001, "Failed to connect to DB [3]", "DBS01");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [3]", "DBS01");
         return NULL;
     }
 }
@@ -410,7 +422,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 int mysql_select_db(MYSQL *mysql, const char *db) {
     //trace("mysql_select_db", mysql);
     if (db==NULL) {
-		//TODO: set error code
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_select_db() passed NULL database name", "DBS01");
         xlog.error("failed to init mysqlClient");
         return -1;
     }
@@ -419,8 +431,8 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     }
 
     if (!getMySQLClient()->init()) {
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "DBS01");
         xlog.error("failed to init mysqlClient");
-		//TODO: set error code
         return -1;
     }
 
@@ -433,9 +445,22 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             if (xlog.isDebugEnabled()) {
                 xlog.debug("mysql_select_db() re-using existing connection");
             }
+            // success
             return 0;
         }
         else {
+
+            xlog.error(string("mysql_select_db() attempting to switch from ")
+                + mysql->db ? string(mysql->db) : string("NULL")
+                + string(" to ")
+                + db ? string(db) : string("NULL")
+            );
+
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "Cannot switch to a different db", "DBS01");
+            return -1;
+
+            /*
+            THIS IS WRONG
 
             if (xlog.isDebugEnabled()) {
                 xlog.debug("mysql_select_db() closing OLD connection");
@@ -452,6 +477,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
             // reset reference
             conn = NULL;
+            */
         }
     }
 
@@ -462,7 +488,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         delete [] mysql->db;
     }
 
-    mysql->db = Util::createString(db); //TODO: this is a memory leak
+    mysql->db = Util::createString(db); //TODO: this is a potential memory leak
 
     try {
 
