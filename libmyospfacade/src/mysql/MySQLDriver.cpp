@@ -450,10 +450,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         }
         else {
 
-            xlog.error(string("mysql_select_db() attempting to switch from ")
-                + mysql->db ? string(mysql->db) : string("NULL")
+            xlog.error(
+                string("mysql_select_db() attempting to switch from ")
+                + (mysql->db ? string(mysql->db) : string("NULL"))
                 + string(" to ")
-                + db ? string(db) : string("NULL")
+                + (db ? string(db) : string("NULL"))
             );
 
             setErrorState(mysql, CR_UNKNOWN_ERROR, "Cannot switch to a different db", "DBS01");
