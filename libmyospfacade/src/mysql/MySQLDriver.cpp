@@ -450,7 +450,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         }
         else {
 
-            xlog.error(
+            xlog.warn(
                 string("mysql_select_db() attempting to switch from ")
                 + (mysql->db ? string(mysql->db) : string("NULL"))
                 + string(" to ")
@@ -464,6 +464,8 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 xlog.debug("mysql_select_db() closing OLD connection");
             }
 
+            ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
+
             // a different db is being selected so we need to close the old connection now
             conn->mysql_close(mysql);
 
@@ -475,6 +477,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
             // reset reference
             conn = NULL;
+
+            // store the connection info in the map again
+            getResourceMap()->setConnectInfo(mysql, info);
         }
     }
 
@@ -494,7 +499,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
         if (info == NULL) {
             xlog.error("No ConnInfo in map");
-            //TODO: set error code and message
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "DBS01");
             return -1;
         }
 
