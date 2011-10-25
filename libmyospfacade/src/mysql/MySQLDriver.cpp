@@ -25,6 +25,8 @@
 //#include <m_ctype.h>
 
 #include <mysql.h>
+#include <errmsg.h>
+
 #include <string>
 #include <iostream>
 #include <fstream>
