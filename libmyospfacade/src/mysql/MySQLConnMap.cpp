@@ -120,11 +120,6 @@ void MySQLConnMap::erase(MYSQL *mysql) {
 
     LOCK_MUTEX
 
-    // delete old ConnectInfo*
-    if (mysqlToConnInfoMap[mysql]) {
-        delete mysqlToConnInfoMap[mysql];
-    }
-
     mysqlToConnMap[mysql] = NULL;
     mysqlToErrorMap[mysql] = NULL;
     mysqlToConnInfoMap[mysql] = NULL;

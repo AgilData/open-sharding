@@ -864,6 +864,11 @@ void mysql_close(MYSQL *mysql) {
         xlog.debug("BEFORE remove from map");
     }
 
+    ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
+    if (info) {
+        delete info;
+    }
+
     // remove from the map
     getResourceMap()->erase(mysql);
     getResourceMap()->eraseResults(conn);
