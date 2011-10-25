@@ -159,8 +159,8 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         if (!tempFunction(mysql, server, user, password, database,
                           port, unix_socket, clientflag)) {
             log.warn(string("Failed to connect to DB. Error = [") +
-                             Util::toString((int)this->mysql_errno(NULL)) +
-                             string("] ") + string(this->mysql_error(NULL)));
+                             Util::toString((int)this->mysql_errno(mysql)) +
+                             string("] ") + string(this->mysql_error(mysql)));
             return false;
         }
         SET_END_TIME
