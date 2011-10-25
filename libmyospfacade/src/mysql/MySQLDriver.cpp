@@ -457,11 +457,8 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 + (db ? string(db) : string("NULL"))
             );
 
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "Cannot switch to a different db", "DBS01");
-            return -1;
-
-            /*
-            THIS IS WRONG
+            //setErrorState(mysql, CR_UNKNOWN_ERROR, "Cannot switch to a different db", "DBS01");
+            //return -1;
 
             if (xlog.isDebugEnabled()) {
                 xlog.debug("mysql_select_db() closing OLD connection");
@@ -478,7 +475,6 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
             // reset reference
             conn = NULL;
-            */
         }
     }
 
