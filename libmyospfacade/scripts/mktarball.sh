@@ -13,7 +13,7 @@ TARBALL=$1
 LIB_DIR=$2
 rm -f $LIB_DIR/$TARBALL 2>/dev/null
 (cd $LIB_DIR;
-  cp /usr/local/lib/libboost_thread-gcc41-mt-1_38.so.1.38.0 .
+  cp /usr/local/lib/libboost_thread-gcc4?-mt-1_38.so.1.38.0 .
   cp /usr/local/opensharding/lib/libopensharding.so.1.0.0 .
   cp ../scripts/setup.rb .
   tar cvzf $TARBALL lib* setup.rb
