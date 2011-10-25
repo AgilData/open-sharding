@@ -299,6 +299,12 @@ unsigned int mysql_errno(MYSQL *mysql) {
         if (xlog.isDebugEnabled() || ret>0) {
             xlog.debug(string("mysql_errno returning ") + Util::toString((int)ret));
         }
+
+        // HACK to avoid Python "error totally whack" error messages
+        if (ret!=0 && (ret<CR_MIN_ERROR || ret>CR_MAX_ERROR)) {
+            return CR_UNKNOWN_ERROR; // 1105
+        }
+
         return ret;
     } else {
         // no error
@@ -306,7 +312,7 @@ unsigned int mysql_errno(MYSQL *mysql) {
             xlog.debug("mysql_errno() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
         }
         //HACK:
-        return 2006;
+        return CR_SERVER_GONE_ERROR; // 2006
     }
 }
 
