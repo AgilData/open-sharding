@@ -32,6 +32,9 @@ OSNAME_FULL="${OSNAME}-${RELEASE}-${BITS}"
 echo "osname=${OSNAME}"           >> build.properties
 echo "osname-full=${OSNAME_FULL}" >> build.properties
 
+
+#TODO: we are using git not svn ! need new build number mechanism
+
 # use svn revision number for build number
-BUILD_NUMBER=`svn info | grep "Last Changed Rev" | cut -f 2 -d : | tr -d " "`
-echo "buildnum=${BUILD_NUMBER}" >> build.properties
+#BUILD_NUMBER=`svn info | grep "Last Changed Rev" | cut -f 2 -d : | tr -d " "`
+#echo "buildnum=${BUILD_NUMBER}" >> build.properties
