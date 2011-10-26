@@ -1,4 +1,4 @@
-<project name="libmyospfacade" default="release">
+<project name="libmyosp" default="release">
 
     <property name="version" value="1.1" />
 

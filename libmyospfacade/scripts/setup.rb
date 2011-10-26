@@ -19,10 +19,10 @@ FileUtils.remove_file('libmysqlclient_real_r.so.' + mysql_client_vers, :force =>
 
 puts 'Creating symlinks...'
 
-FileUtils.ln_s('libmyospfacade.so.' + mysql_client_vers,
+FileUtils.ln_s('libmyosp.so.' + mysql_client_vers,
                'libmysqlclient.so.' + mysql_client_vers)
 
-FileUtils.ln_s('libmyospfacade_r.so.' + mysql_client_vers,
+FileUtils.ln_s('libmyosp_r.so.' + mysql_client_vers,
                'libmysqlclient_r.so.' + mysql_client_vers)
 
 FileUtils.ln_s('libopensharding.so.1.0.0', 'libopensharding.so')

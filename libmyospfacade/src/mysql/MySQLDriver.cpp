@@ -172,7 +172,7 @@ void banner() {
 
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("Open Sharding MySQL Driver") +
-                       string(" (libopensharding_mysql) version ") +
+                       string(" (libmyosp) version ") +
                        WRAPPER_VERSION + " (" + WRAPPER_BUILD_TSTAMP ")");
         }
         bannerDisplayed = true;

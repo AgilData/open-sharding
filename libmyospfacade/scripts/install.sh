@@ -5,7 +5,7 @@ if [ -z "$1" ]; then
 fi
 
 TARBALL=$1
-rm -f /usr/lib64/opensharding_mysql/libopensharding_mysql*.so.1?
+rm -f /usr/lib64/opensharding_mysql/libmyosp*.so.1?
 tar xzf $TARBALL
-cp libopensharding_mysql*.so.1? /usr/lib64/opensharding_mysql
-rm -f libopensharding_mysql*.so.1?
+cp libmyosp*.so.1? /usr/lib64/opensharding_mysql
+rm -f libmyosp*.so.1?
