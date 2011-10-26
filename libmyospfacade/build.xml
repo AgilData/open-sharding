@@ -1,6 +1,6 @@
 <project name="libmyospfacade" default="release">
 
-    <property name="version" value="1.0.2" />
+    <property name="version" value="1.1" />
 
     <target name="init" >
         <delete dir=".">
@@ -12,8 +12,9 @@
         <property file="build.properties" />
 
 		<echo message="" />
-        <echo message="Operating System: ${osname-full}" />
-		<echo message="Binaries Directory: ${bin-dir}" />
+        <echo message="Operating System    : ${osname-full}" />
+		<echo message="Binaries Directory  : ${bin-dir}" />
+		<echo message="Build Number        : ${buildnum}" />
     </target>
 
     <target name="build" depends="init">
@@ -21,7 +22,7 @@
         <mkdir dir="libs" />
         <!-- generate header file with version/build number and build timestamp -->
         <tstamp />
-        <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_VERSION &quot;${version}-b${build}&quot;${line.separator}" append="false" />
+        <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_VERSION &quot;${version}.${buildnum}&quot;${line.separator}" append="false" />
         <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_BUILD_TSTAMP &quot;${DSTAMP}T${TSTAMP}&quot;${line.separator}" append="true" />
         <!-- call bash script to build four versions of wrapper -->
         <exec executable="bash">
@@ -32,7 +33,7 @@
     </target>
 
     <target name="release" depends="build">
-        <property name="tarfile" value="libmyospfacade-${version}-${osname-full}.tar.gz" />
+        <property name="tarfile" value="libmyosp-${version}.${buildnum}-${osname-full}.tar.gz" />
         <property file="build.properties" />
         <echo message="Creating ${tarfile}" />
         <exec executable="bash">
@@ -43,7 +44,7 @@
     </target>
 
      <target name="autobuild" depends="release">
-         <property name="tarfile" value="libopensharding-mysql-${version}-${osname-full}.tar.gz" />
+         <property name="tarfile" value="libmyosp-${version}.${buildnum}-${osname-full}.tar.gz" />
          <echo message="Installing ${tarfile}" />
          <exec executable="bash">
              <arg value="scripts/install.sh" />

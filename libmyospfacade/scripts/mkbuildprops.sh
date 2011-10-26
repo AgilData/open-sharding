@@ -31,3 +31,7 @@ BITS=""; if [ -n "$X64" ]; then BITS="x64"; else BITS="x32"; fi
 OSNAME_FULL="${OSNAME}-${RELEASE}-${BITS}"
 echo "osname=${OSNAME}"           >> build.properties
 echo "osname-full=${OSNAME_FULL}" >> build.properties
+
+# use svn revision number for build number
+BUILD_NUMBER=`svn info | grep "Last Changed Rev" | cut -f 2 -d : | tr -d " "`
+echo "buildnum=${BUILD_NUMBER}" >> build.properties
