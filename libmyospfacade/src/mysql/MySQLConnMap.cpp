@@ -16,8 +16,6 @@
 #include <unistd.h>
 #include <map>
 #include <boost/thread/mutex.hpp>
-//#include <boost/interprocess/sync/interprocess_mutex.hpp>
-//#include <boost/interprocess/sync/scoped_lock.hpp>
 #include <mysql.h>
 #include <mysql/MySQLConnMap.h>
 #include <mysql/MySQLAbstractConnection.h>
@@ -26,7 +24,6 @@
 #include <util/Util.h>
 
 #define LOCK_MUTEX boost::mutex::scoped_lock lock(mutex);
-//#define LOCK_MUTEX boost::interprocess::scoped_lock<boost::interprocess::interprocess_mutex> lock(mutex);
 
 using namespace std;
 using namespace util;
