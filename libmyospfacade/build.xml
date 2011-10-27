@@ -1,7 +1,7 @@
 <project name="libmyosp" default="release">
 
     <property name="version" value="1.1" />
-    <property name="buildnum" value="100" />
+    <property name="buildnum" value="101" />
 
     <target name="init" >
         <delete dir=".">

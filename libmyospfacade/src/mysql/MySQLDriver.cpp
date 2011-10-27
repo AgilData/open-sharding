@@ -505,8 +505,10 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             // osp:databasename
             string databaseName = string(mysql->db).substr(4);
 
+            string key = Util::toString((void*) mysql) + string(":") + databaseName;
+
             // get named pipe connection for this database
-            OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
+            OSPConnection *ospConn = getResourceMap()->getOSPConn(key);
             if (!ospConn) {
 
                 // create TCP connection
@@ -569,7 +571,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
                 // store the OSP connection for all future interaction with this OSP server
-                getResourceMap()->setOSPConn(databaseName, ospConn);
+                getResourceMap()->setOSPConn(key, ospConn);
 
                 // delete the wire response now we have the info
                 delete wireResponse;
