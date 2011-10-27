@@ -37,4 +37,7 @@ echo "osname-full=${OSNAME_FULL}" >> build.properties
 
 # use svn revision number for build number
 #BUILD_NUMBER=`svn info | grep "Last Changed Rev" | cut -f 2 -d : | tr -d " "`
+
+#GITREF=`git show-ref | grep "origin/master" | cut -d ' ' -f 1`
+
 #echo "buildnum=${BUILD_NUMBER}" >> build.properties
