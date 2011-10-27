@@ -507,7 +507,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
             string key = Util::toString((void*) mysql) + string(":") + databaseName;
 
-            // get named pipe connection for this database
+            // get named pipe connection for this MySLQ handle and this database
             OSPConnection *ospConn = getResourceMap()->getOSPConn(key);
             if (!ospConn) {
 
@@ -524,6 +524,10 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 // construct filename for response pipe
                 char responsePipeName[256];
                 sprintf(responsePipeName, "%s/mysqlosp_%s_%d_%p_response.fifo", P_tmpdir, databaseName.c_str(), getpid(), mysql);
+
+                if (xlog.isDebugEnabled()) {
+                    xlog.debug(string("Creating ") + string(requestPipeName));
+                }
 
                 umask(0);
                 if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
