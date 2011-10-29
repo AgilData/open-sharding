@@ -25,7 +25,11 @@
 #define __Util_h__
 
 #include <string>
+#ifdef _WINDOWS
+#include <winsock.h>
+#else
 #include <sys/time.h>
+#endif
 
 #include <logger/Logger.h>
 

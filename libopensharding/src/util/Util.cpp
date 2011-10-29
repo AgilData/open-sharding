@@ -42,9 +42,14 @@
 #include <fstream>
 #include <iostream>
 #include <time.h>
+#ifdef _WINDOWS
+#include <Windows.h>
+#include <Rpc.h>
+#pragma comment(lib, "Rpcrt4.lib")
+#else
 #include <sys/time.h>
-
 #include <uuid/uuid.h>
+#endif
 
 #include <util/Util.h>
 #include <logger/Logger.h>
@@ -84,13 +89,21 @@ namespace util {
 }
 
 /*static*/ string Util::generateUUID() {
-
+#ifdef _WINDOWS
+	UUID uuid;
+	char * tmp;
+	UuidCreate(&uuid);
+	UuidToStringA(&uuid, tmp);
+	string ret(tmp);
+	return ret;
+#else
     char tmp[37]; // 36 chars plus \0
     uuid_t uuid;
     uuid_generate(uuid);
     uuid_unparse(uuid, tmp);
     string ret(tmp);
     return ret;
+#endif
 
     // call Apache Portable Runtime UUID function
     /*
@@ -130,7 +143,7 @@ void Util::dump(const char *buf, unsigned int len, int lineLength) {
     int tempOffset = 0;
 
     int c = 0;
-    char text[lineLength+1];
+    char *text = new char[lineLength+1];
     memset(text, 0, lineLength+1);
     for (unsigned int i=0; i<len; i++) {
         if ((buf[i] >= 'a' && buf[i] <= 'z')
@@ -206,6 +219,7 @@ void Util::dump(const char *buf, unsigned int len, int lineLength) {
 
     // delete the temp buffer
     delete [] temp;
+	delete [] text;
 
 }
 

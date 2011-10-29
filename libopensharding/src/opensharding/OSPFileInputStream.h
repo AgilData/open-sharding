@@ -27,7 +27,12 @@
 
 #include <stdio.h>
 #include <string>
+#ifdef _WINDOWS
+#include <Windows.h>
+#include <WinIoCtl.h>
+#else
 #include <sys/ioctl.h>
+#endif
 #include <fcntl.h>
 
 #include <logger/Logger.h>

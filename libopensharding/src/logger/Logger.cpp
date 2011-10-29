@@ -23,12 +23,16 @@
 #include <string.h>
 #include <iostream>
 #include <fstream>
+#ifdef _WINDOWS
+#include <Windows.h>
+#else
 #include <pthread.h>
-#include <sys/types.h>
 #include <unistd.h>
+#include <syslog.h>
+#endif
+#include <sys/types.h>
 #include <time.h>
 #include <map>
-#include <syslog.h>
 
 #include <boost/scoped_ptr.hpp>
 #include <boost/thread.hpp>
@@ -45,8 +49,10 @@ static LoggerGlobalState *__loggerGlobalState__ = NULL;
 // get process-id and thread-id
 string getPidTid() {
     char temp[256];
-#ifdef __APPLE__
+#if defined __APPLE__
     sprintf(temp, "[PID:N/A]");
+#elif defined _WINDOWS
+	sprintf(temp, "[PID:%ul] [TID:%ul]", GetCurrentProcessId(), GetCurrentThreadId());
 #else
     sprintf(temp, "[PID:%d] [TID:%u]", getpid(), (unsigned int)pthread_self());
 #endif
@@ -252,6 +258,7 @@ void Logger::log(const char *level, const char *message) {
              << " [opensharding] [" << level << "] [" << name << "] "
              << message << "\n";
     }
+#ifndef _WINDOWS
     else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_SYSLOG) {
         int slevel = LOG_ERR;
         if (strcmp("DEBUG",level)==0) {
@@ -277,6 +284,7 @@ void Logger::log(const char *level, const char *message) {
             message
         );
     }
+#endif
     else {
         fprintf(LOGGER_GLOBAL_STATE->file, "[%ld s] %s [opensharding] [%s] [%s] %s\n", time(NULL), getPidTid().c_str(), level, name.c_str(), message);
         fflush(LOGGER_GLOBAL_STATE->file);
@@ -292,6 +300,7 @@ void Logger::output(const char *message) {
     else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_STDOUT) {
         cout << message << "\n";
     }
+#ifndef _WINDOWS
     else if (LOGGER_GLOBAL_STATE->logMode == LOG_OUTPUT_SYSLOG) {
         syslog (
             LOG_NOTICE,
@@ -299,6 +308,7 @@ void Logger::output(const char *message) {
             message
         );
     }
+#endif
     else {
         fprintf(LOGGER_GLOBAL_STATE->file, "%s\n", message);
         fflush(LOGGER_GLOBAL_STATE->file);

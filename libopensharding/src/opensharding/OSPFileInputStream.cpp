@@ -40,11 +40,15 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
     this->buf_size = buf_size;
 
     // make sure we are non-blocking if we are using a buffer
+#ifdef _WINDOWS
+	//TODO make file non-blocking in windows mode
+#else
     if (buf_size>0) {
         fd = fileno(file);
         int flags = fcntl(fd, F_GETFL);
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     }
+#endif
 
     // selector timeout
     timeout.tv_sec = 5; //TODO: make configurable

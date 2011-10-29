@@ -28,7 +28,14 @@
 #include <cstring>
 #include <iostream>
 #include <fstream>
-#include <dlfcn.h>
+
+#ifdef _WINDOWS
+	#include <Windows.h>
+	//error buffer is set to max length allowed by FormatMessageA.
+    #define ERROR_BUFFER_LENGTH 65535
+#else
+	#include <dlfcn.h>
+#endif
 
 //#include <boost/thread.hpp>
 //#include <boost/thread/mutex.hpp>
@@ -39,7 +46,11 @@
 using namespace logger;
 
 // library handle -- TODO: add support for multiple libraries
+#ifdef _WINDOWS
+HMODULE lib_handle = NULL;
+#else
 void* lib_handle = NULL;
+#endif
 
 // logger for global methods
 static Logger &LOG = Logger::getLogger("DynLib");
@@ -66,7 +77,11 @@ DynLib::DynLib(const char *libraryName) {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Loading dynamic library");
         }
+#ifdef _WINDOWS
+		lib_handle = LoadLibraryExA((LPCSTR) libraryName, NULL, LOAD_WITH_ALTERED_SEARCH_PATH);
+#else
         lib_handle = dlopen(libraryName, RTLD_LAZY | RTLD_LOCAL);
+#endif
         if (NULL == lib_handle) {
             //logger.info << "Failed to load dynamic library " << libraryName << endl;
             LOG.error(string("Failed to load dynamic library ") + libraryName);
@@ -96,6 +111,16 @@ void *DynLib::get_function(const char *functionName) {
     }
 
     void *func = functionMap[functionName];
+#ifdef _WINDOWS
+    if (func==NULL) {
+		func = GetProcAddress(lib_handle, functionName);
+		if (!func) {
+			DWORD errorId = GetLastError();
+			char error[ERROR_BUFFER_LENGTH];
+			FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM, NULL, errorId, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), error, ERROR_BUFFER_LENGTH, NULL);
+			LOG.error(string("Failed to resolve function '") + string(functionName) + string("' - GetLastError() returns ") + string(error==NULL?"NULL":error));
+		}
+#else
     if (func==NULL) {
         func = dlsym(lib_handle, functionName);
         if (!func) {
@@ -103,6 +128,7 @@ void *DynLib::get_function(const char *functionName) {
             LOG.error(string("Failed to resolve function '") + string(functionName) + string("' - dlerror() returns ") + string(error==NULL?"NULL":error));
             return NULL;
         }
+#endif
         functionMap[functionName] = func;
     }
 
