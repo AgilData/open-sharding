@@ -168,7 +168,7 @@ void banner() {
     //boost::mutex::scoped_lock lock(initMutex);
     if (!bannerDisplayed) {
 
-        Logger::configure("/etc/myospfacade-log.properties");
+        Logger::configure("/etc/myosp-log.properties");
 
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("Open Sharding MySQL Driver") +
@@ -842,6 +842,11 @@ my_bool mysql_rollback(MYSQL * mysql) {
 }
 
 void mysql_close(MYSQL *mysql) {
+
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_close()");
+    }
+
     //trace("mysql_close", mysql);
     if (!valid(mysql)) {
         // this is quite common, so we don't want to show a warning for this
