@@ -505,10 +505,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             // osp:databasename
             string databaseName = string(mysql->db).substr(4);
 
-            string key = Util::toString((void*) mysql) + string(":") + databaseName;
+            // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
+            boost::mutex::scoped_lock lock(initMutex);
 
-            // get named pipe connection for this MySLQ handle and this database
-            OSPConnection *ospConn = getResourceMap()->getOSPConn(key);
+            // get named pipe connection for this osp database
+            OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
             if (!ospConn) {
 
                 // create TCP connection
@@ -519,11 +520,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
                 // construct filename for request pipe
                 char requestPipeName[256];
-                sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_%p_request.fifo",  P_tmpdir, databaseName.c_str(), getpid(), mysql);
+                sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, databaseName.c_str(), getpid());
 
                 // construct filename for response pipe
                 char responsePipeName[256];
-                sprintf(responsePipeName, "%s/mysqlosp_%s_%d_%p_response.fifo", P_tmpdir, databaseName.c_str(), getpid(), mysql);
+                sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, databaseName.c_str(), getpid());
 
                 if (xlog.isDebugEnabled()) {
                     xlog.debug(string("Creating ") + string(requestPipeName));
@@ -574,8 +575,8 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
                 ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
-                // store the OSP connection for all future interaction with this OSP server
-                getResourceMap()->setOSPConn(key, ospConn);
+                // store the OSP connection for all future interaction with this OSP server for this database
+                getResourceMap()->setOSPConn(databaseName, ospConn);
 
                 // delete the wire response now we have the info
                 delete wireResponse;
@@ -585,7 +586,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 delete ospTcpConn;
             }
 
-            // create MySQL OSP connection
+            // create MySQL OSP connection object
             try {
                 conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap(), ospConn);
             }
