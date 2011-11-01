@@ -95,6 +95,8 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expectACK, OSPMessageConsumer *consumer) {
 
+    //TODO: add mutex / make thread-safe
+
     // allocate next request ID
     int requestID = nextRequestID++;
 
