@@ -293,7 +293,14 @@ char *MySQLOSPConnection::ensureCapacity(char *buffer, unsigned int *length, uns
 MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
 
     if (resultSetID==0) {
-        //log.warn("mysql_store_result() fetching empty remote result set for CRUD query!");
+        if (log.isDebugEnabled()) {
+            log.debug("mysql_store_result() fetching empty remote result set for CRUD query");
+        }
+        return NULL;
+    }
+
+    if (resultSetID<0) {
+        log.warn("mysql_store_result() attempting to fetch invalid result set");
         return NULL;
     }
 
