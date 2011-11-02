@@ -227,15 +227,11 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             fieldCount = 0;
 
             my_errno = executeResponse->getErrorCode();
+            //TODO: this is a memory leak ... do we care? what can we do about it?
+            my_error = Util::createString(executeResponse->getErrorMessage().c_str());
 
             if (my_errno>2999) {
-                // OSP error
-                my_errno = 1105; // MySQL "unknown error"
-                my_error = "Query failed due to OSP error. See log for details.";
-            }
-            else {
-                // MySQL error
-                my_error = "Query failed due to MySQL error. See log for details.";
+                my_errno = 1105; // MySQL "unknown error" .. avoid Python "error totally whack" message
             }
 
         }
