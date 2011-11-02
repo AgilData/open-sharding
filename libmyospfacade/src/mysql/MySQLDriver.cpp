@@ -337,7 +337,7 @@ const char *mysql_error(MYSQL *mysql) {
     MySQLErrorState *errorState = getResourceMap()->getErrorState(mysql);
     if (errorState != NULL) {
 
-        if (xlog.isDebugEnabled() || ret>0) {
+        if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_error returning cached errorState"));
         }
 
@@ -350,7 +350,7 @@ const char *mysql_error(MYSQL *mysql) {
             ret = "";
         }
 
-        if (xlog.isDebugEnabled() || ret>0) {
+        if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_error returning ") + string(ret));
         }
 
