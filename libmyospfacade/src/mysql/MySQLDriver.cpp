@@ -217,8 +217,17 @@ void cleanup() {
 
 int setErrorState(MYSQL *mysql, int _errno, const char *_error,
                   const char *_sqlstate) {
+
+    xlog.error(
+        string("Setting error state to ")
+        + Util::toString(_errno)
+        + string("; ")
+        + string(_error)
+    );
+
     getResourceMap()->setErrorState(mysql, new MySQLErrorState(_errno,
                                    _error, _sqlstate));
+
     return -1;
 }
 
@@ -585,6 +594,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     // important that we delete the pipes as the next attempt will create them again
                     unlink(requestPipeName);
                     unlink(responsePipeName);
+
+                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP communications error", "OSP01");
+                    return -1;
                 }
 
                 // now connect via named pipes
@@ -607,8 +619,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap(), ospConn);
             }
             catch (...) {
-                xlog.error("Failed to connect to OSP");
-                //TODO: set error code and message
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
                 return -1;
             }
 
@@ -636,8 +647,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     info->unix_socket,
                     info->clientflag
             )) {
-                xlog.error("connect() FAILED");
-                //TODO: set error code and message
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [1]", "OSP01");
                 return -1;
             }
         }
@@ -653,11 +663,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     } catch (const char *exception) {
         xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
-        //TODO: set error code and message
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
         return -1;
     } catch (...) {
         xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
-        //TODO: set error code and message
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
         return -1;
     }
 }
