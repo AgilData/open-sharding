@@ -230,10 +230,6 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             //TODO: this is a memory leak ... do we care? what can we do about it?
             my_error = Util::createString(executeResponse->getErrorMessage().c_str());
 
-            if (my_errno>2999) {
-                my_errno = 1105; // MySQL "unknown error" .. avoid Python "error totally whack" message
-            }
-
         }
         else {
             // success
@@ -252,7 +248,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         resultSetID = 0;
         affectedRows = 0;
         fieldCount = 0;
-        my_errno = 1105; // MySQL unknown error
+        my_errno = CR_UNKNOWN_ERROR; // MySQL unknown error
         my_error = "Query failed due to OSP error";
     }
 
@@ -1130,6 +1126,10 @@ unsigned int MySQLOSPConnection::mysql_errno(MYSQL *mysql) {
 }
 
 const char * MySQLOSPConnection::mysql_error(MYSQL *mysql) {
+    if (log.isTraceEnabled()) {
+        string s = my_error ? string(my_error) : string("");
+        log.trace(string("mysql_error() returning ") + s);
+    }
     return my_error;
 }
 

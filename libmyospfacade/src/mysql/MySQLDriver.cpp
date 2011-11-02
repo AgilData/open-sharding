@@ -301,7 +301,8 @@ unsigned int mysql_errno(MYSQL *mysql) {
 
         // HACK to avoid Python "error totally whack" error messages
         if (ret!=0 && (ret<CR_MIN_ERROR || ret>CR_MAX_ERROR)) {
-            return CR_UNKNOWN_ERROR; // 1105
+            xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
+            return CR_UNKNOWN_ERROR; // 2000
         }
 
         return ret;
@@ -316,7 +317,8 @@ unsigned int mysql_errno(MYSQL *mysql) {
 
         // HACK to avoid Python "error totally whack" error messages
         if (ret!=0 && (ret<CR_MIN_ERROR || ret>CR_MAX_ERROR)) {
-            return CR_UNKNOWN_ERROR; // 1105
+            xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
+            return CR_UNKNOWN_ERROR; // 2000
         }
 
         return ret;
@@ -334,6 +336,11 @@ const char *mysql_error(MYSQL *mysql) {
     //trace("mysql_error", mysql);
     MySQLErrorState *errorState = getResourceMap()->getErrorState(mysql);
     if (errorState != NULL) {
+
+        if (xlog.isDebugEnabled() || ret>0) {
+            xlog.debug(string("mysql_error returning cached errorState"));
+        }
+
         return errorState->my_error;
     }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
@@ -342,6 +349,11 @@ const char *mysql_error(MYSQL *mysql) {
         if (ret == NULL) {
             ret = "";
         }
+
+        if (xlog.isDebugEnabled() || ret>0) {
+            xlog.debug(string("mysql_error returning ") + string(ret));
+        }
+
         return ret;
     } else {
         // no error
