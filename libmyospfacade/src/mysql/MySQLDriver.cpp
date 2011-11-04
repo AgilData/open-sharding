@@ -309,7 +309,7 @@ unsigned int mysql_errno(MYSQL *mysql) {
         }
 
         // HACK to avoid Python "error totally whack" error messages
-        if (ret>CR_MAX_ERROR)) {
+        if (ret>CR_MAX_ERROR) {
             xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
             return CR_UNKNOWN_ERROR; // 2000
         }
@@ -325,7 +325,7 @@ unsigned int mysql_errno(MYSQL *mysql) {
         }
 
         // HACK to avoid Python "error totally whack" error messages
-        if (ret>CR_MAX_ERROR)) {
+        if (ret>CR_MAX_ERROR) {
             xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
             return CR_UNKNOWN_ERROR; // 2000
         }
