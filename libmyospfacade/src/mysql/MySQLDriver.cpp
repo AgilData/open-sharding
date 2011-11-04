@@ -308,13 +308,11 @@ unsigned int mysql_errno(MYSQL *mysql) {
             xlog.debug(string("mysql_errno returning ") + Util::toString((int)ret));
         }
 
-        //TODO: this is WRONG ... 1062 is less than CR_MIN_ERROR (2000)
-
         // HACK to avoid Python "error totally whack" error messages
-//        if (ret!=0 && (ret<CR_MIN_ERROR || ret>CR_MAX_ERROR)) {
-//            xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
-//            return CR_UNKNOWN_ERROR; // 2000
-//        }
+        if (ret>CR_MAX_ERROR)) {
+            xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
+            return CR_UNKNOWN_ERROR; // 2000
+        }
 
         return ret;
     }
@@ -326,13 +324,11 @@ unsigned int mysql_errno(MYSQL *mysql) {
             xlog.debug(string("mysql_errno returning ") + Util::toString((int)ret));
         }
 
-        //TODO: this is WRONG ... 1062 is less than CR_MIN_ERROR (2000)
-
         // HACK to avoid Python "error totally whack" error messages
-//        if (ret!=0 && (ret<CR_MIN_ERROR || ret>CR_MAX_ERROR)) {
-//            xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
-//            return CR_UNKNOWN_ERROR; // 2000
-//        }
+        if (ret>CR_MAX_ERROR)) {
+            xlog.warn("mysql_errno() out of range, so actually returning CR_UNKNOWN_ERROR");
+            return CR_UNKNOWN_ERROR; // 2000
+        }
 
         return ret;
     } else {
