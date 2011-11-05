@@ -150,8 +150,8 @@ LoggerGlobalState *__logger__getGlobalState() {
                 continue;
             }
     
-            string className = util::Util::trim(line.substr(0,pos));
-            string levelName = util::Util::trim(line.substr(pos+1));
+            string className = line.substr(0,pos);
+            string levelName = line.substr(pos+1);
 
             // store log level in map
             LOGGER_GLOBAL_STATE->logLevelMap[className] = levelName;

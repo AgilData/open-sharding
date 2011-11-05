@@ -46,3 +46,24 @@ MyOSPConfig::~MyOSPConfig() {
 	}
 	return configFile;
 }
+
+/*static*/ FILE * MyOSPConfig::getAnalyzeLogFile() {
+	if(shardAnalyze && !shardAnalyzeLog) {
+		string logDir;
+		if((logDir = MyOSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
+			//TODO if no log file is defined, use stdout or stderr?
+			shardAnalyzeLog = NULL;
+		}
+		else {
+			string fileName = logDir + string("/myosp-analyze.log");
+			shardAnalyzeLog = fopen(fileName.c_str(), "a");
+			if(!shardAnalyzeLog) {
+				cerr << "Failed to load shard analyze log file: " << fileName
+					 << "\nUsing stderr" << endl;
+			}
+		}
+	}
+	return shardAnalyzeLog;
+}
+
+} //namespace util

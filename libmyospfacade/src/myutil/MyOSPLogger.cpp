@@ -20,37 +20,20 @@
 using namespace std;
 using namespace util;
 
+//TODO increase this
+#define FLUSH_LIMIT 0 //Lines to let into buffer before flushing.
+
 namespace logger {
 
 /*static*/ bool MyOSPLogger::init = false;
-/*static*/ bool MyOSPLogger::shardAnalyze = false;
 
 /*static*/ Logger &MyOSPLogger::getLogger(string name) {
 	if(!init) {
-		//configure logger
+		//Load configs into static map in super class Logger
 		MyOSPLogger::configure(MyOSPConfig::getConfFile());
 		init = true;
 	}
 	return Logger::getLogger(name);
-}
-
-bool MyOSPLogger::isShardAnalyze() {
-	if(!config_init) {
-		shardAnalyze = (MyOSPConfig::getConfigMap()["shard.analyze.log"] == "TRUE");
-		if(shardAnalyze) {
-			string logDir;
-			if((logDir = MyOSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
-				logDir = string("/var/log/");
-			}
-			string fileName = logDir + string("/pqosp-analyze.log");
-			shardAnalyzeLog = fopen(fileName.c_str(), "a");
-			if(!shardAnalyzeLog) {
-				cerr << "Failed to load shard analyze log file: " << fileName << endl;
-			}
-		}
-		config_init=true;
-	}
-	return shardAnalyze;
 }
 
 } //namespace logger

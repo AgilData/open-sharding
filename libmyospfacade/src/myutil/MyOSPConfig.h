@@ -31,12 +31,14 @@ class MyOSPConfig : public OSPConfig {
 private:
 	static bool init;
 	static map<string, string> configMap;
+	static FILE * shardAnalyzeLog;
 
 public:
     MyOSPConfig();
     virtual ~MyOSPConfig();
 
 	static string getConfFile();
+	static FILE * getAnalyzeLogFile();
 //    static void loadConfigs(string fileName);
 //    static map<string, string> getConfigMap();
 };

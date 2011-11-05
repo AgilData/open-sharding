@@ -105,7 +105,7 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         //TODO: this is inefficient because we create stringstream even when logging is not enabled
 
         stringstream ss;
-        if (alog.isDebugEnabled() || log.isDebugEnabled()) {
+        if (log.isDebugEnabled()) {
             string us; if (unix_socket) us = unix_socket;
             string db; if (database)    db = database;
             ss << "connect(server: "      << server

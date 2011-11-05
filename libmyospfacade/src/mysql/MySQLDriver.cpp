@@ -49,6 +49,8 @@
 #include <opensharding/OSPConnectResponse.h>
 #include <opensharding/OSPErrorResponse.h>
 #include <logger/Logger.h>
+#include <myutil/MyOSPLogger.h>
+#include <myutil/MyOSPConfig.h>
 #include <util/Util.h>
 
 #include <mysql/MySQLDriver.h>
@@ -64,8 +66,7 @@ using namespace opensharding;
 
 /* GLOBAL VARIABLES */
 
-static Logger &xlog = Logger::getLogger("MySQLDriver");
-static Logger &alog = Logger::getLogger("ShardAnalyze");
+static Logger &xlog = MyOSPLogger::getLogger("MySQLDriver");
 static unsigned int Pid = 0;
 
 static bool bannerDisplayed = false;
@@ -222,8 +223,7 @@ string getLogPrefix(MYSQL *mysql) {
 void log_entry_for_analyser(string domain, void *connId,
 							int stmtId, string methodSignature, string* params,
 							int nParams, string returnVal,
-                            struct timeval *tstart, struct timeval *tend,
-                            Logger &alog) {
+                            struct timeval *tstart, struct timeval *tend) {
 	// [LOGSTART][logVersion][driverName][domain][dbms][pid][threadId][connId][stmtId][start][dur][methodSignature(){params}{returnVal}]\n[LOGEND]
     struct timeval tdiff;
     timersub(tend, tstart, &tdiff);
@@ -249,7 +249,14 @@ void log_entry_for_analyser(string domain, void *connId,
          << "\n[LOGEND]"                   ;
 
     // output to the log
-    alog.output(ss.str());
+    //TODO mutex here?
+    if(MyOSPConfig::getAnalyzeLogFile() == NULL) {
+    	cerr << ss << endl;
+    }
+    else {
+    	fprintf(MyOSPConfig::getAnalyzeLogFile(), "%s", ss.str().c_str());
+    	fflush(MyOSPConfig::getAnalyzeLogFile());
+    }
 }
 
 void cleanup() {
@@ -462,7 +469,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         // store connection info so it can be retrieved in mysql_select_db in separate call
         getResourceMap()->setConnectInfo(mysql, info);
 
-        if(alog.isDebugEnabled()) {
+        if(MyOSPConfig::isShardAnalyze()) {
         	struct timeval tstart; gettimeofday(&tstart, NULL);
 			if (db != NULL) {
 				if (-1 == mysql_select_db(mysql, db)) {
@@ -483,8 +490,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	log_entry_for_analyser("", (void *) mysql, 0,
         			"mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, \
                     const char *_passwd, const char *db, unsigned int port, const char *unix_socket, \
-        			unsigned long clientflag)", params, 8, "", &tstart, &tend,
-                    alog);
+        			unsigned long clientflag)", params, 8, "", &tstart, &tend);
         	delete [] params;
         }
         else {
@@ -511,7 +517,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 int mysql_select_db(MYSQL *mysql, const char *db) {
 	//Work to be done in mysql_select_db makes adding shard logging directly complicated.
     int result;
-    if(alog.isDebugEnabled()) {
+    if(MyOSPConfig::isShardAnalyze()) {
     	struct timeval tstart; gettimeofday(&tstart, NULL);
         result = mysql_select_db_actual(mysql, db);
     	struct timeval tend; gettimeofday(&tend, NULL);
@@ -520,8 +526,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     	params[1] = db;
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_select_db(MYSQL *mysql, const char *db)",
-    			params, 2, "", &tstart, &tend,
-                alog);
+    			params, 2, "", &tstart, &tend);
     	delete [] params;
     	return result;
     }
@@ -839,7 +844,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     }
 
     int result;
-    if(alog.isDebugEnabled()) {
+    if(MyOSPConfig::isShardAnalyze()) {
     	struct timeval tstart; gettimeofday(&tstart, NULL);
         result = conn->mysql_real_query(mysql, sql, length);
     	struct timeval tend; gettimeofday(&tend, NULL);
@@ -849,8 +854,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     	params[2] = Util::toString(length);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length)",
-    			params, 3, "", &tstart, &tend,
-                alog);
+    			params, 3, "", &tstart, &tend);
     	delete [] params;
     }
     else {
@@ -936,7 +940,7 @@ my_bool mysql_commit(MYSQL * mysql) {
     }
 
     my_bool result;
-    if(alog.isDebugEnabled()) {
+    if(MyOSPConfig::isShardAnalyze()) {
     	struct timeval tstart; gettimeofday(&tstart, NULL);
         result = conn->mysql_commit(mysql) ;
     	struct timeval tend; gettimeofday(&tend, NULL);
@@ -944,8 +948,7 @@ my_bool mysql_commit(MYSQL * mysql) {
     	params[0] = Util::toString(mysql);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_commit(MYSQL * mysql)",
-    			params, 1, "", &tstart, &tend,
-                alog);
+    			params, 1, "", &tstart, &tend);
     	delete [] params;
     }
     else {
@@ -986,7 +989,7 @@ my_bool mysql_rollback(MYSQL * mysql) {
     }
 
     my_bool result;
-    if(alog.isDebugEnabled()) {
+    if(MyOSPConfig::isShardAnalyze()) {
     	struct timeval tstart; gettimeofday(&tstart, NULL);
         result = conn->mysql_rollback(mysql);
     	struct timeval tend; gettimeofday(&tend, NULL);
@@ -994,8 +997,7 @@ my_bool mysql_rollback(MYSQL * mysql) {
     	params[0] = Util::toString(mysql);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_rollback(MYSQL * mysql)",
-    			params, 1, "", &tstart, &tend,
-                alog);
+    			params, 1, "", &tstart, &tend);
     	delete [] params;
     	return result;
     }
@@ -1046,8 +1048,7 @@ void mysql_close(MYSQL *mysql) {
     }
 
     // close the connection
-    my_bool result;
-    if(alog.isDebugEnabled()) {
+    if(MyOSPConfig::isShardAnalyze()) {
     	string * params = new string[1];
     	params[0] = Util::toString(mysql);
     	struct timeval tstart; gettimeofday(&tstart, NULL);
@@ -1055,8 +1056,7 @@ void mysql_close(MYSQL *mysql) {
     	struct timeval tend; gettimeofday(&tend, NULL);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_close(MYSQL *mysql)",
-    			params, 1, "", &tstart, &tend,
-                alog);
+    			params, 1, "", &tstart, &tend);
     	delete [] params;
     }
     else {
@@ -1185,7 +1185,7 @@ my_ulonglong mysql_insert_id(MYSQL *mysql) {
     }
 
     my_ulonglong result;
-    if(alog.isDebugEnabled()) {
+    if(MyOSPConfig::isShardAnalyze()) {
     	struct timeval tstart; gettimeofday(&tstart, NULL);
         result = conn->mysql_insert_id(mysql);
     	struct timeval tend; gettimeofday(&tend, NULL);
@@ -1193,8 +1193,7 @@ my_ulonglong mysql_insert_id(MYSQL *mysql) {
     	params[0] = Util::toString(mysql);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_insert_id(MYSQL *mysql)",
-    			params, 1, "", &tstart, &tend,
-                alog);
+    			params, 1, "", &tstart, &tend);
     	delete [] params;
     	return result;
     }

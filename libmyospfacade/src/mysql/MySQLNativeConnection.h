@@ -44,7 +44,6 @@ private:
 
     // logger
     static Logger &log;
-    static Logger &alog; // used by LOG_ANALYSER
 
     // an actual MySQL connection handle
     MYSQL *mysql;
