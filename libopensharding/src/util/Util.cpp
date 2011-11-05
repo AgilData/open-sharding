@@ -264,30 +264,27 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return 0 == _strnicmp(str1, str2, len);
 }
 
-/*static*/ string Util::toString(long int i) {
+/*static*/ string Util::toString(const long int i) {
     char temp[256];
     sprintf(temp, "%ld", i);
     return string(temp);
 }
 
-/*static*/ string Util::toString(int i) {
+/*static*/ string Util::toString(const int i) {
     char temp[256];
     sprintf(temp, "%d", i);
     return string(temp);
 }
 
-/*static*/ string Util::toString(unsigned int i) {
-    char temp[256];
-    sprintf(temp, "%u", i);
-    return string(temp);
+/*static*/ string toString(const unsigned long int i){
+	char temp[256];
+	sprintf(temp, "%lu", i);
+	return string(temp);
 }
 
-/*static*/ string Util::toString(void *p) {
-    if (p==NULL) {
-        return string("NULL");
-    }
+/*static*/ string Util::toString(const unsigned int i) {
     char temp[256];
-    sprintf(temp, "%p", p);
+    sprintf(temp, "%u", i);
     return string(temp);
 }
 

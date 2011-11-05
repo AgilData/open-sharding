@@ -58,10 +58,10 @@ public:
     static bool equalsIgnoreCase(const char *str1, const char *str2);
     static bool _strnicmp(const char *str1, const char *str2, int l);
 
-    static string toString(long int i);
-    static string toString(int i);
-    static string toString(unsigned int i);
-    static string toString(void *p);
+    static string toString(const long int i);
+    static string toString(const int i);
+    static string toString(const unsigned long int i);
+    static string toString(const unsigned int i);
     static string toString(const void *p);
     static string toString(const int *s, int s_length);
     static string toString(const unsigned int *s, int s_length);

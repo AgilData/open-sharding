@@ -65,11 +65,16 @@ using namespace opensharding;
 /* GLOBAL VARIABLES */
 
 static Logger &xlog = Logger::getLogger("MySQLDriver");
+static Logger &alog = Logger::getLogger("ShardAnalyze");
+static unsigned int Pid = 0;
 
 static bool bannerDisplayed = false;
 
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
+
+/* Wrapper function to simplify shard logging for mysql_select_db */
+int mysql_select_db_actual(MYSQL *mysql, const char *db);
 
 /*
  * Map of MYSQL* to corresponding error state. This is required since we may
@@ -209,6 +214,42 @@ void trace(const char *name, MYSQL_STMT *stmt) {
 string getLogPrefix(MYSQL *mysql) {
     string ret = "[mysql=" + Util::toString(mysql) + "] ";
     return ret;
+}
+
+#define LOGVERSION "1.1"
+#define DRIVERNAME "MyOSP"
+#define DBMS "MySQL"
+void log_entry_for_analyser(string domain, void *connId,
+							int stmtId, string methodSignature, string* params,
+							int nParams, string returnVal,
+                            struct timeval *tstart, struct timeval *tend,
+                            Logger &alog) {
+	// [LOGSTART][logVersion][driverName][domain][dbms][pid][threadId][connId][stmtId][start][dur][methodSignature(){params}{returnVal}]\n[LOGEND]
+    struct timeval tdiff;
+    timersub(tend, tstart, &tdiff);
+    char sdiff[64];
+    sprintf(sdiff, "%ld.%06ld", tdiff.tv_sec, tdiff.tv_usec);
+    unsigned long long ts = (tstart->tv_sec * 1000) + tstart->tv_usec;
+    if(!Pid) Pid=getpid(); //Pid is a global unsigned int.
+	unsigned int ThreadId = (unsigned int) pthread_self();
+    stringstream ss;
+    ss   << "[LOGSTART]"
+    	 << "[" << LOGVERSION			 << "]"
+    	 << "[" << DRIVERNAME			 << "]"
+    	 << "[" << domain				 << "]"  //TODO domain will be an empty string for now.
+    	 << "[" << DBMS					 << "]"
+         << "[" << Pid                   << "]"
+         << "[" << ThreadId				 << "]"
+         << "[" << Util::toString(connId) << "]"
+         << "[" << ts                    << "]"
+         << "[" << sdiff                 << "]"
+		 << "[" << methodSignature       << "]"
+		 << Util::buildParamList(params, nParams, SQUIGGLY_BRACKETS)
+		 << "{" << returnVal             << "}"
+         << "\n[LOGEND]"                   ;
+
+    // output to the log
+    alog.output(ss.str());
 }
 
 void cleanup() {
@@ -421,11 +462,38 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         // store connection info so it can be retrieved in mysql_select_db in separate call
         getResourceMap()->setConnectInfo(mysql, info);
 
-        if (db != NULL) {
-            if (-1 == mysql_select_db(mysql, db)) {
-                setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
-                return NULL;
-            }
+        if(alog.isDebugEnabled()) {
+        	struct timeval tstart; gettimeofday(&tstart, NULL);
+			if (db != NULL) {
+				if (-1 == mysql_select_db(mysql, db)) {
+					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
+					return NULL;
+				}
+			}
+        	struct timeval tend;   gettimeofday(&tend, NULL);
+        	string * params = new string[8];
+        	params[0] = Util::toString(mysql);
+        	params[1] = _host;
+        	params[2] = _user;
+        	params[3] = ""; //Don't log the password value
+        	params[4] = db;
+        	params[5] = Util::toString(port);
+        	params[6] = unix_socket;
+        	params[7] = Util::toString(clientflag);
+        	log_entry_for_analyser("", (void *) mysql, 0,
+        			"mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, \
+                    const char *_passwd, const char *db, unsigned int port, const char *unix_socket, \
+        			unsigned long clientflag)", params, 8, "", &tstart, &tend,
+                    alog);
+        	delete [] params;
+        }
+        else {
+			if (db != NULL) {
+				if (-1 == mysql_select_db(mysql, db)) {
+					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
+					return NULL;
+				}
+			}
         }
 
         return mysql;
@@ -441,6 +509,28 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 }
 
 int mysql_select_db(MYSQL *mysql, const char *db) {
+	//Work to be done in mysql_select_db makes adding shard logging directly complicated.
+    int result;
+    if(alog.isDebugEnabled()) {
+    	struct timeval tstart; gettimeofday(&tstart, NULL);
+        result = mysql_select_db_actual(mysql, db);
+    	struct timeval tend; gettimeofday(&tend, NULL);
+    	string * params = new string[2];
+    	params[0] = Util::toString(mysql);
+    	params[1] = db;
+    	log_entry_for_analyser("", (void *) mysql, 0,
+    			"mysql_select_db(MYSQL *mysql, const char *db)",
+    			params, 2, "", &tstart, &tend,
+                alog);
+    	delete [] params;
+    	return result;
+    }
+    else {
+        return mysql_select_db_actual(mysql, db);
+    }
+}
+
+int mysql_select_db_actual(MYSQL *mysql, const char *db) {
     //trace("mysql_select_db", mysql);
     if (db==NULL) {
         setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_select_db() passed NULL database name", "DBS01");
@@ -748,7 +838,24 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
         return -1;
     }
 
-    int result = conn->mysql_real_query(mysql, sql, length);
+    int result;
+    if(alog.isDebugEnabled()) {
+    	struct timeval tstart; gettimeofday(&tstart, NULL);
+        result = conn->mysql_real_query(mysql, sql, length);
+    	struct timeval tend; gettimeofday(&tend, NULL);
+    	string * params = new string[3];
+    	params[0] = Util::toString(mysql);
+    	params[1] = sql;
+    	params[2] = Util::toString(length);
+    	log_entry_for_analyser("", (void *) mysql, 0,
+    			"mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length)",
+    			params, 3, "", &tstart, &tend,
+                alog);
+    	delete [] params;
+    }
+    else {
+    	result = conn->mysql_real_query(mysql, sql, length);
+    }
 
     //gettimeofday(&tvEnd, NULL);
 
@@ -827,7 +934,23 @@ my_bool mysql_commit(MYSQL * mysql) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_commit but there is no current connection");
         return false;
     }
-    my_bool ret = conn->mysql_commit(mysql);
+
+    my_bool result;
+    if(alog.isDebugEnabled()) {
+    	struct timeval tstart; gettimeofday(&tstart, NULL);
+        result = conn->mysql_commit(mysql) ;
+    	struct timeval tend; gettimeofday(&tend, NULL);
+    	string * params = new string[1];
+    	params[0] = Util::toString(mysql);
+    	log_entry_for_analyser("", (void *) mysql, 0,
+    			"mysql_commit(MYSQL * mysql)",
+    			params, 1, "", &tstart, &tend,
+                alog);
+    	delete [] params;
+    }
+    else {
+        result = conn->mysql_commit(mysql);
+    }
 
     //gettimeofday(&tvEnd, NULL);
 
@@ -851,7 +974,7 @@ my_bool mysql_commit(MYSQL * mysql) {
     }
     */
 
-    return ret;
+    return result;
 }
 
 my_bool mysql_rollback(MYSQL * mysql) {
@@ -861,7 +984,24 @@ my_bool mysql_rollback(MYSQL * mysql) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_rollback but there is no current connection");
         return false;
     }
-    return conn->mysql_rollback(mysql);
+
+    my_bool result;
+    if(alog.isDebugEnabled()) {
+    	struct timeval tstart; gettimeofday(&tstart, NULL);
+        result = conn->mysql_rollback(mysql);
+    	struct timeval tend; gettimeofday(&tend, NULL);
+    	string * params = new string[1];
+    	params[0] = Util::toString(mysql);
+    	log_entry_for_analyser("", (void *) mysql, 0,
+    			"mysql_rollback(MYSQL * mysql)",
+    			params, 1, "", &tstart, &tend,
+                alog);
+    	delete [] params;
+    	return result;
+    }
+    else {
+        return conn->mysql_rollback(mysql);
+    }
 }
 
 void mysql_close(MYSQL *mysql) {
@@ -906,7 +1046,22 @@ void mysql_close(MYSQL *mysql) {
     }
 
     // close the connection
-    conn->mysql_close(mysql);
+    my_bool result;
+    if(alog.isDebugEnabled()) {
+    	string * params = new string[1];
+    	params[0] = Util::toString(mysql);
+    	struct timeval tstart; gettimeofday(&tstart, NULL);
+        conn->mysql_close(mysql);
+    	struct timeval tend; gettimeofday(&tend, NULL);
+    	log_entry_for_analyser("", (void *) mysql, 0,
+    			"mysql_close(MYSQL *mysql)",
+    			params, 1, "", &tstart, &tend,
+                alog);
+    	delete [] params;
+    }
+    else {
+        conn->mysql_close(mysql);
+    }
 
     if (xlog.isDebugEnabled()) {
         xlog.debug("AFTER delegate mysql_close(), BEFORE delete connection object");
@@ -1028,7 +1183,24 @@ my_ulonglong mysql_insert_id(MYSQL *mysql) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_insert_id but there is no current connection");
         return 0;
     }
-    return conn->mysql_insert_id(mysql);
+
+    my_ulonglong result;
+    if(alog.isDebugEnabled()) {
+    	struct timeval tstart; gettimeofday(&tstart, NULL);
+        result = conn->mysql_insert_id(mysql);
+    	struct timeval tend; gettimeofday(&tend, NULL);
+    	string * params = new string[1];
+    	params[0] = Util::toString(mysql);
+    	log_entry_for_analyser("", (void *) mysql, 0,
+    			"mysql_insert_id(MYSQL *mysql)",
+    			params, 1, "", &tstart, &tend,
+                alog);
+    	delete [] params;
+    	return result;
+    }
+    else {
+    	return conn->mysql_insert_id(mysql);
+    }
 }
 
 unsigned int mysql_warning_count(MYSQL *mysql) {

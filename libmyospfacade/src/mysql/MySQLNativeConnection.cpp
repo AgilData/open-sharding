@@ -46,11 +46,6 @@ using namespace logger;
 
 Logger &MySQLNativeConnection::log = Logger::getLogger("MySQLNativeConnection");
 
-// LOG_ANALYSER LOG_ANALYSER LOG_ANALYSER LOG_ANALYSER LOG_ANALYSER
-Logger &MySQLNativeConnection::alog = Logger::getLogger("LogAnalyzer"); // use DEBUG setting
-static unsigned int Pid = 0;    // GLOBAL VARIABLE
-
-
 MySQLNativeConnection::MySQLNativeConnection(MYSQL *mysql, MySQLClient *mysqlClient, MySQLConnMap *mysqlResourceMap) {
 
     this->mysql = mysql;
@@ -92,38 +87,11 @@ void MySQLNativeConnection::trace(const char *name, MYSQL *mysql) {
     }
 }
 
-#define SET_START_TIME struct timeval tstart; gettimeofday(&tstart, NULL);
-#define SET_END_TIME   struct timeval tend;   gettimeofday(&tend, NULL);
-#define LOG_COMMAND_FOR_ANALYZER                                              \
-        log_entry_for_analyser(Pid, (void *)mysql, &tstart, &tend, ss.str(), alog);
-
-void log_entry_for_analyser(unsigned int    pid,    void           *mysql,
-                            struct timeval *tstart, struct timeval *tend,
-                            string          msg, Logger &alog) {
-    struct timeval tdiff;
-    timersub(tend, tstart, &tdiff);
-    char sdiff[64];
-    sprintf(sdiff, "%ld.%06ld", tdiff.tv_sec, tdiff.tv_usec);
-    unsigned long long ts = (tstart->tv_sec * 1000) + tstart->tv_usec;
-    stringstream ss;
-    ss   << "[LOGSTART]"
-         << "[" << Pid                   << "]"
-         << "[" << Util::toString(mysql) << "]"
-         << "[" << ts                    << "]"
-         << "[" << sdiff                 << "]"
-         << "[" << msg                   << "]"
-         << "[LOGEND]"                   ;
-
-    // output to the log
-    alog.output(ss.str());
-}
-
 void *MySQLNativeConnection::get_mysql_function(const char *name) {
     if (mysqlClient==NULL) {
         log.error(string("mysqlClient is NULL"));
         return NULL;
     }
-    if (!Pid) Pid = getpid();
     return mysqlClient->get_mysql_function(name);
 }
 
@@ -151,21 +119,12 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         mysql_real_connectFnType* tempFunction =
             (mysql_real_connectFnType*)get_mysql_function("mysql_real_connect");
 
-
-        //TODO: this method doesn't follow the same pattern for logging as the other methods and we
-        // are incurring overhead of calling gettimeofday() even when analyze logging is disabled
-
-        SET_START_TIME
         if (!tempFunction(mysql, server, user, password, database,
                           port, unix_socket, clientflag)) {
             log.warn(string("Failed to connect to DB. Error = [") +
                              Util::toString((int)this->mysql_errno(mysql)) +
                              string("] ") + string(this->mysql_error(mysql)));
             return false;
-        }
-        SET_END_TIME
-        if (alog.isDebugEnabled()) {
-            LOG_COMMAND_FOR_ANALYZER
         }
 
         if (log.isDebugEnabled()) {
@@ -207,21 +166,7 @@ int MySQLNativeConnection::mysql_real_query(MYSQL *mysql, const char *_sql, unsi
                 (mysql_real_queryFnType*)get_mysql_function("mysql_real_query");
     }
 
-    if (alog.isDebugEnabled()) {
-        // analyze logging
-        string sql(_sql);
-        stringstream ss;
-        ss << "mysql_real_query(" << sql <<  ")";;
-        SET_START_TIME
-        int tempValue = mysql_real_queryFn(mysql, _sql, length);
-        SET_END_TIME
-        LOG_COMMAND_FOR_ANALYZER
-        return tempValue;
-    }
-    else {
-        // no analyze logging
-        return mysql_real_queryFn(mysql, _sql, length);
-    }
+    return mysql_real_queryFn(mysql, _sql, length);
 }
 
 my_ulonglong MySQLNativeConnection::mysql_insert_id(MYSQL *mysql){
@@ -231,20 +176,7 @@ my_ulonglong MySQLNativeConnection::mysql_insert_id(MYSQL *mysql){
         mysql_insert_idFn = (mysql_insert_idFnType*)get_mysql_function("mysql_insert_id");
     }
 
-    if  (alog.isDebugEnabled()) {
-        // analyze logging
-        stringstream ss;
-        SET_START_TIME
-        my_ulonglong tempValue = mysql_insert_idFn(mysql);
-        SET_END_TIME
-        ss << "mysql_insert_id(" << tempValue << ")";
-        LOG_COMMAND_FOR_ANALYZER
-        return tempValue;
-    }
-    else {
-        // no analyze logging
-        return mysql_insert_idFn(mysql);
-    }
+    return mysql_insert_idFn(mysql);
 }
 
 int MySQLNativeConnection::mysql_select_db(MYSQL *mysql, const char *db){
@@ -255,20 +187,7 @@ int MySQLNativeConnection::mysql_select_db(MYSQL *mysql, const char *db){
     mysql_select_dbFnType* tempFunction =
                   (mysql_select_dbFnType*)get_mysql_function("mysql_select_db");
 
-    if  (alog.isDebugEnabled()) {
-        // analyze logging
-        stringstream ss;
-        if (alog.isDebugEnabled()) { ss << "mysql_select_db(" << db << ")"; }
-        SET_START_TIME
-        int tempValue = tempFunction(mysql, db);
-        SET_END_TIME
-        LOG_COMMAND_FOR_ANALYZER
-        return tempValue;
-    }
-    else {
-        // no analyze logging
-        return tempFunction(mysql, db);
-    }
+	return tempFunction(mysql, db);
 }
 
 my_bool MySQLNativeConnection::mysql_rollback(MYSQL *mysql){
@@ -283,21 +202,7 @@ my_bool MySQLNativeConnection::mysql_rollback(MYSQL *mysql){
         mysql_rollbackFn = (mysql_rollbackFnType*)get_mysql_function("mysql_rollback");
     }
 
-    if  (alog.isDebugEnabled()) {
-        // analyze logging
-        stringstream ss;
-        ss << "mysql_rollback()";
-        SET_START_TIME
-        my_bool tempValue = mysql_rollbackFn(mysql);
-        SET_END_TIME
-        LOG_COMMAND_FOR_ANALYZER
-        return tempValue;
-    }
-    else {
-        // no analyze logging
-        return mysql_rollbackFn(mysql);
-    }
-
+    return mysql_rollbackFn(mysql);
 }
 
 my_bool MySQLNativeConnection::mysql_commit(MYSQL * mysql){
@@ -312,21 +217,7 @@ my_bool MySQLNativeConnection::mysql_commit(MYSQL * mysql){
         mysql_commitFn = (mysql_commitFnType*)get_mysql_function("mysql_commit");
     }
 
-    if (alog.isDebugEnabled()) {
-        // analyze logging
-        stringstream ss;
-        ss << "mysql_commit()";
-        SET_START_TIME
-        my_bool tempValue = mysql_commitFn(mysql);
-        SET_END_TIME
-        LOG_COMMAND_FOR_ANALYZER
-        return tempValue;
-    }
-    else {
-        // no analyze logging
-        return mysql_commitFn(mysql);
-    }
-
+    return mysql_commitFn(mysql);
 }
 
 void MySQLNativeConnection::mysql_close(MYSQL *mysql){
@@ -335,20 +226,7 @@ void MySQLNativeConnection::mysql_close(MYSQL *mysql){
     mysql_closeFnType* tempFunction =
                           (mysql_closeFnType*)get_mysql_function("mysql_close");
 
-    if (alog.isDebugEnabled()) {
-        // analyze logging
-        stringstream ss;
-        ss << "mysql_close()";
-        SET_START_TIME
-        tempFunction(mysql);
-        SET_END_TIME
-        LOG_COMMAND_FOR_ANALYZER
-    }
-    else {
-        // no analyze logging
-        tempFunction(mysql);
-    }
-
+    tempFunction(mysql);
 }
 
 // MYSQL API METHODS    - TODO move these to MySQLClient and delegate to mysqlclient here 
