@@ -42,6 +42,9 @@ private:
     OSPFileInputStream *is;
     OSPFileOutputStream *os;
 
+    string requestPipeFilename;
+    string responsePipeFilename;
+
     int nextRequestID;
 
     char *buffer;
