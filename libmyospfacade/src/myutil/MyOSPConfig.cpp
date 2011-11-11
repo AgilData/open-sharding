@@ -30,6 +30,10 @@ using namespace std;
 
 namespace util {
 
+/*static*/ bool MyOSPConfig::shardAnalyze = false;
+/*static*/ bool MyOSPConfig::shardAnalyzeInit = false;
+/*static*/ FILE * MyOSPConfig::shardAnalyzeLog = NULL;
+
 MyOSPConfig::MyOSPConfig() {
 }
 
@@ -50,7 +54,7 @@ MyOSPConfig::~MyOSPConfig() {
 /*static*/ FILE * MyOSPConfig::getAnalyzeLogFile() {
 	if(shardAnalyze && !shardAnalyzeLog) {
 		string logDir;
-		if((logDir = MyOSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
+		if((logDir = OSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
 			//TODO if no log file is defined, use stdout or stderr?
 			shardAnalyzeLog = NULL;
 		}
@@ -64,6 +68,15 @@ MyOSPConfig::~MyOSPConfig() {
 		}
 	}
 	return shardAnalyzeLog;
+}
+
+//TODO move shardAnalyze to OSPConfig.cpp so we can be guaranteed it's initialized, and can drop shardAnalyzeInit check?
+/*static*/ bool MyOSPConfig::isShardAnalyze() {
+	if(!shardAnalyzeInit) {
+		shardAnalyze = Util::equalsIgnoreCase(OSPConfig::getConfigMap()["shard.analyze.log"], "TRUE");
+		shardAnalyzeInit = true;
+	}
+	return shardAnalyze;
 }
 
 } //namespace util

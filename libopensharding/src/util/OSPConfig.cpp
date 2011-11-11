@@ -32,8 +32,7 @@ using namespace std;
 
 namespace util {
 /*static*/ bool OSPConfig::init=false;
-/*static*/ bool OSPConfig::shardAnalyze=false;
-/*static*/ map<string,string> OSPConfig::configMap;
+/*static*/ map<string, string> OSPConfig::configMap;
 /*static*/ string OSPConfig::configFile = "";
 
 OSPConfig::OSPConfig() {
@@ -83,11 +82,6 @@ OSPConfig::~OSPConfig() {
 		}
 		confFile.close();
 	}
-	shardAnalyze = Util::equalsIgnoreCase(configMap["shard.analyze.log"], "TRUE");
-}
-
-/*static*/ bool OSPConfig::isShardAnalyze() {
-	return shardAnalyze;
 }
 
 } //end namespace util

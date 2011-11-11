@@ -276,7 +276,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
-/*static*/ string toString(const unsigned long int i){
+/*static*/ string Util::toString(const unsigned long int i){
 	char temp[256];
 	sprintf(temp, "%lu", i);
 	return string(temp);

@@ -249,13 +249,12 @@ void log_entry_for_analyser(string domain, void *connId,
          << "\n[LOGEND]"                   ;
 
     // output to the log
-    //TODO mutex here?
-    if(MyOSPConfig::getAnalyzeLogFile() == NULL) {
-    	cerr << ss << endl;
-    }
-    else {
+    if(MyOSPConfig::getAnalyzeLogFile()) {
     	fprintf(MyOSPConfig::getAnalyzeLogFile(), "%s", ss.str().c_str());
     	fflush(MyOSPConfig::getAnalyzeLogFile());
+    }
+    else {
+    	cerr << ss.str() << endl;
     }
 }
 
@@ -473,6 +472,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	struct timeval tstart; gettimeofday(&tstart, NULL);
 			if (db != NULL) {
 				if (-1 == mysql_select_db(mysql, db)) {
+					cerr << "Called mysql_select_db\n";
 					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
 					return NULL;
 				}
@@ -480,17 +480,17 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	struct timeval tend;   gettimeofday(&tend, NULL);
         	string * params = new string[8];
         	params[0] = Util::toString(mysql);
-        	params[1] = _host;
-        	params[2] = _user;
+        	params[1] = (_host ? _host : "NULL");
+        	params[2] = (_user ? _user : "NULL");
         	params[3] = ""; //Don't log the password value
-        	params[4] = db;
+        	params[4] = (db ? db : "NULL");
         	params[5] = Util::toString(port);
-        	params[6] = unix_socket;
+        	params[6] = (unix_socket ? unix_socket : "NULL");
         	params[7] = Util::toString(clientflag);
         	log_entry_for_analyser("", (void *) mysql, 0,
-        			"mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, \
-                    const char *_passwd, const char *db, unsigned int port, const char *unix_socket, \
-        			unsigned long clientflag)", params, 8, "", &tstart, &tend);
+        			"mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
+                    "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
+        			"unsigned long clientflag)", params, 8, "", &tstart, &tend);
         	delete [] params;
         }
         else {
@@ -523,7 +523,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     	struct timeval tend; gettimeofday(&tend, NULL);
     	string * params = new string[2];
     	params[0] = Util::toString(mysql);
-    	params[1] = db;
+    	params[1] = (db ? db : "NULL");
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_select_db(MYSQL *mysql, const char *db)",
     			params, 2, "", &tstart, &tend);
@@ -850,7 +850,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     	struct timeval tend; gettimeofday(&tend, NULL);
     	string * params = new string[3];
     	params[0] = Util::toString(mysql);
-    	params[1] = sql;
+    	params[1] = (sql ? sql : "NULL");
     	params[2] = Util::toString(length);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length)",

@@ -29,8 +29,7 @@ namespace util {
 class MyOSPConfig : public OSPConfig {
 	friend class OSPConfig;
 private:
-	static bool init;
-	static map<string, string> configMap;
+	static bool shardAnalyze, shardAnalyzeInit;
 	static FILE * shardAnalyzeLog;
 
 public:
@@ -39,8 +38,7 @@ public:
 
 	static string getConfFile();
 	static FILE * getAnalyzeLogFile();
-//    static void loadConfigs(string fileName);
-//    static map<string, string> getConfigMap();
+	static bool isShardAnalyze();
 };
 
 } //end namespace util

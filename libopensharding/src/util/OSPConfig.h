@@ -33,7 +33,7 @@ namespace util {
 
 class OSPConfig {
 protected:
-	static bool init, shardAnalyze;
+	static bool init;
 	static map<string, string> configMap;
 	static string configFile;
 
@@ -44,7 +44,6 @@ public:
 	static string getConfFile();
     static void loadConfigs(string fileName);
     static map<string, string> getConfigMap();
-	static bool isShardAnalyze();
 };
 
 } //end namespace util

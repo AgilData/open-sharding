@@ -20,17 +20,14 @@
 using namespace std;
 using namespace util;
 
-//TODO increase this
-#define FLUSH_LIMIT 0 //Lines to let into buffer before flushing.
-
 namespace logger {
 
 /*static*/ bool MyOSPLogger::init = false;
 
-/*static*/ Logger &MyOSPLogger::getLogger(string name) {
+/*static*/ Logger & MyOSPLogger::getLogger(string name) {
 	if(!init) {
 		//Load configs into static map in super class Logger
-		MyOSPLogger::configure(MyOSPConfig::getConfFile());
+		Logger::configure(MyOSPConfig::getConfFile());
 		init = true;
 	}
 	return Logger::getLogger(name);
