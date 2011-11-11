@@ -1048,6 +1048,9 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         ospConn->stop();
         delete ospConn;
         ospConn = NULL;
+
+        // remove the connection from the map
+
     }
     catch (...) {
         log.error("mysql_close() FAILED - perhaps OSP died or restarted?");

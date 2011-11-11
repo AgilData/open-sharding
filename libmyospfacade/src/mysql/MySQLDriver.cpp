@@ -532,7 +532,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             string key = Util::toString((void*) mysql) + string(":") + databaseName;
 
             // get named pipe connection for this MySLQ handle and this database
-            OSPConnection *ospConn = getResourceMap()->getOSPConn(key);
+            OSPConnection *ospConn = NULL; //getResourceMap()->getOSPConn(key);
             if (!ospConn) {
 
                 // create TCP connection
@@ -602,7 +602,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
                 // store the OSP connection for all future interaction with this OSP server for this database
-                getResourceMap()->setOSPConn(key, ospConn);
+                //getResourceMap()->setOSPConn(key, ospConn);
 
                 // delete the wire response now we have the info
                 delete wireResponse;
@@ -869,7 +869,7 @@ my_bool mysql_rollback(MYSQL * mysql) {
 void mysql_close(MYSQL *mysql) {
 
     if (xlog.isDebugEnabled()) {
-        xlog.debug("mysql_close()");
+        xlog.debug(("mysql_close(") + Util::toString((void*)mysql) + string(")"));
     }
 
     //trace("mysql_close", mysql);
