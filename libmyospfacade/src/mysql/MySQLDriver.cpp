@@ -249,12 +249,17 @@ void log_entry_for_analyser(string domain, void *connId,
          << "\n[LOGEND]"                   ;
 
     // output to the log
-    if(MyOSPConfig::getAnalyzeLogFile()) {
-    	fprintf(MyOSPConfig::getAnalyzeLogFile(), "%s", ss.str().c_str());
-    	fflush(MyOSPConfig::getAnalyzeLogFile());
+    try {
+		if(MyOSPConfig::getAnalyzeLogFile()) {
+			fprintf(MyOSPConfig::getAnalyzeLogFile(), "%s", ss.str().c_str());
+			fflush(MyOSPConfig::getAnalyzeLogFile());
+		}
+		else {
+			cerr << ss.str() << endl;
+		}
     }
-    else {
-    	cerr << ss.str() << endl;
+    catch (...) {
+    	cerr << "Unable to write to log file in " << OSPConfig::getConfigMap()["shard.analyze.log.dir"] << endl;
     }
 }
 
