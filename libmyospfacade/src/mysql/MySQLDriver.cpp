@@ -527,9 +527,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             string databaseName = string(mysql->db).substr(4);
 
             // we need a mutex here in case multiple threads are connecting to the database at the same time....
-            boost::mutex::scoped_lock lock(initMutex);
+            //boost::mutex::scoped_lock lock(initMutex);
 
-            string key = Util::toString((void*) mysql) + string(":") + databaseName;
+            //string key = Util::toString((void*) mysql) + string(":") + databaseName;
 
             // get named pipe connection for this MySLQ handle and this database
             OSPConnection *ospConn = NULL; //getResourceMap()->getOSPConn(key);
