@@ -545,6 +545,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     xlog.debug(string("Creating ") + string(requestPipeName));
                 }
 
+                // delete first just in case there was an issue before
+                unlink(requestPipeName);
+
                 umask(0);
                 if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
                     xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
@@ -552,6 +555,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (request)", "OSP01");
                     return -1;
                 }
+
+                // delete first just in case there was an issue before
+                unlink(responsePipeName);
 
                 umask(0);
                 if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
