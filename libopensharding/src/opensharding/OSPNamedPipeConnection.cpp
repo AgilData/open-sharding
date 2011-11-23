@@ -59,6 +59,9 @@ OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, strin
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
+    this->requestPipeFilename  = requestPipeFilename;
+    this->responsePipeFilename = responsePipeFilename;
+
     // blocking read
     this->is = new OSPFileInputStream(responsePipe, 0);
 
@@ -74,15 +77,7 @@ OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, strin
 }
 
 OSPNamedPipeConnection::~OSPNamedPipeConnection() {
-    if (buffer) {
-        delete [] buffer;
-    }
-    if (is) {
-        delete is;
-    }
-    if (os) {
-        delete os;
-    }
+    this->stop();
 }
 
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message) {
@@ -200,9 +195,22 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 }
 
 void OSPNamedPipeConnection::stop() {
+
     if (DEBUG) log.debug("Closing pipes");
-    fclose(requestPipe);
-    fclose(responsePipe);
+
+    if (requestPipe) {
+        fclose(requestPipe);
+        requestPipe = NULL;
+    }
+
+    if (responsePipe) {
+        fclose(responsePipe);
+        responsePipe = NULL;
+    }
+
+    // delete files
+    unlink(requestPipeFilename.c_str());
+    unlink(responsePipeFilename.c_str());
 
     if (buffer) {
         delete [] buffer;

@@ -633,12 +633,6 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
             OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
             if (!ospConn) {
 
-                // create TCP connection
-                OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
-
-                // connect to OSP server via TCP
-                OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT");
-
                 // construct filename for request pipe
                 char requestPipeName[256];
                 sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, databaseName.c_str(), getpid());
@@ -651,27 +645,39 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
                     xlog.debug(string("Creating ") + string(requestPipeName));
                 }
 
+                // delete first just in case there was an issue before
+                unlink(requestPipeName);
+
                 umask(0);
                 if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("' - permissions issue?"));
-                    //TODO: set error code and message
+                    xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
                     perror("Error creating pipe");
+                    setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (request)", "OSP01");
                     return -1;
                 }
+
+                // delete first just in case there was an issue before
+                unlink(responsePipeName);
 
                 umask(0);
                 if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("' - permissions issue?"));
-                    //TODO: set error code and message
+                    xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("'"));
                     perror("Error creating pipe");
+                    setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (response)", "OSP01");
+
+                    // important that we delete the request pipe
+                    unlink(requestPipeName);
+
                     return -1;
                 }
 
+                // create TCP connection
+                OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
+
+                // prepare an OSPConnectRequest with the names of the named pipe files
+                OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
                 request.setRequestPipe(requestPipeName);
                 request.setResponsePipe(responsePipeName);
-
-                //TODO: if DbsClient is not running then the following code will throw an exception - need to delete the pipes
-                // in this case so that they can be re-created on a future attempt
 
                 OSPWireResponse* wireResponse = NULL;
                 try {
@@ -682,12 +688,18 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
                         delete wireResponse;
                         ospTcpConn->stop();
                         delete ospTcpConn;
-                    	//TODO: set error code and message
+
+                        // important that we delete the pipes as the next attempt will try and create them again
+                        unlink(requestPipeName);
+                        unlink(responsePipeName);
+
+                        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection refused", "OSP01");
                         return -1;
                     }
                 } catch (...) {
                     xlog.error("OSP communication error - OSP process dead?");
-                    // important that we delete the pipes as the next attempt will create them again
+
+                    // important that we delete the pipes as the next attempt will try and create them again
                     unlink(requestPipeName);
                     unlink(responsePipeName);
 

@@ -1032,15 +1032,25 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
     try {
         OSPDisconnectRequest request(connID);
         OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
-        if (wireResponse->isErrorResponse()) {
-            OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-            log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-            throw "OSP_ERROR";
-        }
-
         if (wireResponse) {
+            if (wireResponse->isErrorResponse()) {
+                OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                throw "OSP_ERROR";
+            }
             delete wireResponse;
         }
+        else {
+            // is this possible?
+        }
+
+        // close the named pipe
+        //ospConn->stop();
+        //delete ospConn;
+        //ospConn = NULL;
+
+        // remove the connection from the map
+
     }
     catch (...) {
         log.error("mysql_close() FAILED - perhaps OSP died or restarted?");
