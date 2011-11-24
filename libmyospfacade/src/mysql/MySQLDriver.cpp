@@ -32,6 +32,7 @@
 #include <fstream>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <syslog.h>
 
 #include <boost/thread/mutex.hpp>
 
@@ -250,13 +251,19 @@ void log_entry_for_analyser(string domain, void *connId,
 
     // output to the log
     try {
-		if(MyOSPConfig::getAnalyzeLogFile()) {
+    	if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_SYSLOG) {
+			syslog(LOG_DEBUG, "%s", ss.str().c_str());
+    	}
+    	else if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_STDERR) {
+			cerr << ss.str() << endl;
+        }
+    	else if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_STDOUT) {
+			cout << ss.str() << endl;
+        }
+    	else if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_FILE) {
 			fprintf(MyOSPConfig::getAnalyzeLogFile(), "%s", ss.str().c_str());
 			fflush(MyOSPConfig::getAnalyzeLogFile());
-		}
-		else {
-			cerr << ss.str() << endl;
-		}
+        }
     }
     catch (...) {
     	cerr << "Unable to write to log file in " << OSPConfig::getConfigMap()["shard.analyze.log.dir"] << endl;

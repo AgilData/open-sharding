@@ -30,7 +30,7 @@ using namespace std;
 
 namespace util {
 
-/*static*/ bool MyOSPConfig::shardAnalyze = false;
+/*static*/ int MyOSPConfig::shardAnalyze = 0;
 /*static*/ bool MyOSPConfig::shardAnalyzeInit = false;
 /*static*/ FILE * MyOSPConfig::shardAnalyzeLog = NULL;
 
@@ -52,7 +52,7 @@ MyOSPConfig::~MyOSPConfig() {
 }
 
 /*static*/ FILE * MyOSPConfig::getAnalyzeLogFile() {
-	if(shardAnalyze && !shardAnalyzeLog) {
+	if((shardAnalyze == ANALYZE_LOG_OUTPUT_FILE) && !shardAnalyzeLog) {
 		string logDir;
 		if((logDir = OSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
 			//TODO if no log file is defined, use stdout or stderr?
@@ -71,10 +71,32 @@ MyOSPConfig::~MyOSPConfig() {
 }
 
 //TODO move shardAnalyze to OSPConfig.cpp so we can be guaranteed it's initialized, and can drop shardAnalyzeInit check?
-/*static*/ bool MyOSPConfig::isShardAnalyze() {
+/*static*/ int MyOSPConfig::isShardAnalyze() {
 	if(!shardAnalyzeInit) {
-		shardAnalyze = Util::equalsIgnoreCase(OSPConfig::getConfigMap()["shard.analyze.log"], "TRUE");
 		shardAnalyzeInit = true;
+		string s = MyOSPConfig::getConfigMap()["shard.analyze.log"];
+		if(s != "") {
+			if(Util::equalsIgnoreCase(s, "STDERR")) {
+				shardAnalyze = ANALYZE_LOG_OUTPUT_STDERR;
+			}
+			else if(Util::equalsIgnoreCase(s, "STDOUT")) {
+				shardAnalyze = ANALYZE_LOG_OUTPUT_STDOUT;
+			}
+			else if(Util::equalsIgnoreCase(s, "SYSLOG")) {
+				shardAnalyze = ANALYZE_LOG_OUTPUT_SYSLOG;
+			}
+			else if(Util::equalsIgnoreCase(s, "FILE")) {
+				string logDir;
+				if((logDir = MyOSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
+					logDir = string("/var/log/");
+				}
+				string fileName = logDir + string("/myosp-analyze.log");
+				shardAnalyzeLog = fopen(fileName.c_str(), "a");
+				if(!shardAnalyzeLog) {
+					cerr << "Failed to load shard analyze log file: " << fileName << endl;
+				}
+			}
+		}
 	}
 	return shardAnalyze;
 }

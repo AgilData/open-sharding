@@ -16,6 +16,11 @@
 #ifndef MYOSPCONFIG_H_
 #define MYOSPCONFIG_H_
 
+#define ANALYZE_LOG_OUTPUT_STDERR 1
+#define ANALYZE_LOG_OUTPUT_STDOUT 2
+#define ANALYZE_LOG_OUTPUT_SYSLOG 3
+#define ANALYZE_LOG_OUTPUT_FILE 4
+
 #include <string>
 #include <map>
 #include <stdio.h>
@@ -29,7 +34,8 @@ namespace util {
 class MyOSPConfig : public OSPConfig {
 	friend class OSPConfig;
 private:
-	static bool shardAnalyze, shardAnalyzeInit;
+	static int shardAnalyze;
+	static bool shardAnalyzeInit;
 	static FILE * shardAnalyzeLog;
 
 public:
@@ -38,7 +44,7 @@ public:
 
 	static string getConfFile();
 	static FILE * getAnalyzeLogFile();
-	static bool isShardAnalyze();
+	static int isShardAnalyze();
 };
 
 } //end namespace util
