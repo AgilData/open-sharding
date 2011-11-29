@@ -242,12 +242,13 @@ void log_entry_for_analyser(string domain, void *connId,
          << "[" << Pid                   << "]"
          << "[" << ThreadId				 << "]"
          << "[" << Util::toString(connId) << "]"
+         << "[" << stmtId                << "]"
          << "[" << ts                    << "]"
          << "[" << sdiff                 << "]"
 		 << "[" << methodSignature       << "]"
 		 << Util::buildParamList(params, nParams, SQUIGGLY_BRACKETS)
-		 << "{" << returnVal             << "}"
-         << "\n[LOGEND]"                   ;
+		 << "{" << returnVal             << "}" << endl
+         << "[LOGEND]"                 << endl  << endl;
 
     // output to the log
     try {
@@ -255,10 +256,10 @@ void log_entry_for_analyser(string domain, void *connId,
 			syslog(LOG_DEBUG, "%s", ss.str().c_str());
     	}
     	else if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_STDERR) {
-			cerr << ss.str() << endl;
+			cerr << ss.str();
         }
     	else if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_STDOUT) {
-			cout << ss.str() << endl;
+			cout << ss.str();
         }
     	else if(MyOSPConfig::isShardAnalyze() == ANALYZE_LOG_OUTPUT_FILE) {
 			fprintf(MyOSPConfig::getAnalyzeLogFile(), "%s", ss.str().c_str());
@@ -494,7 +495,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	params[0] = Util::toString(mysql);
         	params[1] = (_host ? _host : "NULL");
         	params[2] = (_user ? _user : "NULL");
-        	params[3] = ""; //Don't log the password value
+        	params[3] = "hidden"; //Don't log the password value
         	params[4] = (db ? db : "NULL");
         	params[5] = Util::toString(port);
         	params[6] = (unix_socket ? unix_socket : "NULL");

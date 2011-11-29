@@ -75,6 +75,7 @@ MyOSPConfig::~MyOSPConfig() {
 	if(!shardAnalyzeInit) {
 		shardAnalyzeInit = true;
 		string s = MyOSPConfig::getConfigMap()["shard.analyze.log"];
+		//cerr << "isShardAnanalyze found " << s << endl;
 		if(s != "") {
 			if(Util::equalsIgnoreCase(s, "STDERR")) {
 				shardAnalyze = ANALYZE_LOG_OUTPUT_STDERR;
@@ -86,6 +87,7 @@ MyOSPConfig::~MyOSPConfig() {
 				shardAnalyze = ANALYZE_LOG_OUTPUT_SYSLOG;
 			}
 			else if(Util::equalsIgnoreCase(s, "FILE")) {
+				shardAnalyze = ANALYZE_LOG_OUTPUT_FILE;
 				string logDir;
 				if((logDir = MyOSPConfig::getConfigMap()["shard.analyze.log.dir"]) == "" ) {
 					logDir = string("/var/log/");
@@ -94,6 +96,7 @@ MyOSPConfig::~MyOSPConfig() {
 				shardAnalyzeLog = fopen(fileName.c_str(), "a");
 				if(!shardAnalyzeLog) {
 					cerr << "Failed to load shard analyze log file: " << fileName << endl;
+					shardAnalyze = ANALYZE_LOG_OUTPUT_SYSLOG;
 				}
 			}
 		}
