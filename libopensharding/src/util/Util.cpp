@@ -355,7 +355,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 		if(i > 0) {
 			ret << ", ";
 		}
-		ret << (s[i] ? "NULL" : s[i]);
+		ret << "\"" << (Util::escapeQuotes(s[i] ? "NULL" : s[i])) << "\"";
 	}
 	switch (bracketType)
 	{
@@ -379,7 +379,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 		if(i > 0) {
 			ret << ", ";
 		}
-		ret << (s[i]=="" ? "NULL" : s[i]);
+		ret << "\"" << (Util::escapeQuotes(s[i]=="" ? "NULL" : s[i])) << "\"";
 	}
 	switch (bracketType)
 	{
