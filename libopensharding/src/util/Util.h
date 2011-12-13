@@ -66,8 +66,9 @@ public:
     static string toString(const int *s, int s_length);
     static string toString(const unsigned int *s, int s_length);
     static string toString(const unsigned long int *s, int s_length);
-    static string buildParamList(const char * const * s, int s_length, int bracketType);
-    static string buildParamList(string * s, int s_length, int bracketType);
+    static string toEscapedStringLiteral(string);
+    static string buildParamList(const char * const * s, int s_length, int bracketType, bool toEscapedStringLiterals);
+    static string buildParamList(string * s, int s_length, int bracketType, bool toEscapedStringLiterals);
 
     static string trim(string);
     static string removeQuotes(string);

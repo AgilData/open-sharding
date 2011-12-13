@@ -229,8 +229,8 @@ void log_entry_for_analyser(string domain, void *connId,
     struct timeval tdiff;
     timersub(tend, tstart, &tdiff);
     char sdiff[64];
-    sprintf(sdiff, "%ld", tdiff.tv_sec*1000 + tdiff.tv_usec);
-    unsigned long long ts = (tstart->tv_sec * 1000) + tstart->tv_usec;
+    sprintf(sdiff, "%ld", tdiff.tv_sec*1000 + tdiff.tv_usec/1000);
+    unsigned long long ts = (tstart->tv_sec * 1000) + (tstart->tv_usec/1000);
     if(!Pid) Pid=getpid(); //Pid is a global unsigned int.
 	unsigned int ThreadId = (unsigned int) pthread_self();
     stringstream ss;
@@ -245,10 +245,10 @@ void log_entry_for_analyser(string domain, void *connId,
          << "[" << stmtId                << "]"
          << "[" << ts                    << "]"
          << "[" << sdiff                 << "]"
-		 << "[" << methodSignature       << "]"
-		 << Util::buildParamList(params, nParams, SQUIGGLY_BRACKETS)
-		 << "{" << returnVal             << "}" << endl
-         << "[LOGEND]"                 << endl  << endl;
+		 << "[" << methodSignature
+		 << Util::buildParamList(params, nParams, SQUIGGLY_BRACKETS, false)
+		 << "{" << returnVal             << "}]" << endl
+         << "[LOGEND]"                 << endl;
 
     // output to the log
     try {
@@ -875,7 +875,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     	struct timeval tend; gettimeofday(&tend, NULL);
     	string * params = new string[3];
     	params[0] = Util::toString(mysql);
-    	params[1] = (sql ? sql : "NULL");
+    	params[1] = (sql ? Util::toEscapedStringLiteral(sql) : "NULL");
     	params[2] = Util::toString(length);
     	log_entry_for_analyser("", (void *) mysql, 0,
     			"mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length)",
