@@ -26,7 +26,7 @@
         <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_VERSION &quot;${version}.${buildnum}&quot;${line.separator}" append="false" />
         <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_BUILD_TSTAMP &quot;${DSTAMP}T${TSTAMP}&quot;${line.separator}" append="true" />
         <!-- call bash script to build four versions of wrapper -->
-        <exec executable="bash">
+        <exec executable="bash" failonerror="true">
             <arg value="scripts/build.sh" />
             <arg value="${osname-full}" />
     	    <arg value="libs" />
