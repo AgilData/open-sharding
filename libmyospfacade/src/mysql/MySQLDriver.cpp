@@ -230,7 +230,7 @@ void log_entry_for_analyser(string domain, void *connId,
     timersub(tend, tstart, &tdiff);
     char sdiff[64];
     sprintf(sdiff, "%ld", tdiff.tv_sec*1000 + tdiff.tv_usec/1000);
-    unsigned long long ts = (tstart->tv_sec * 1000) + (tstart->tv_usec/1000);
+    long long ts = (tstart->tv_sec * 1000) + (tstart->tv_usec/1000);
     if(!Pid) Pid=getpid(); //Pid is a global unsigned int.
 	unsigned int ThreadId = (unsigned int) pthread_self();
     stringstream ss;
