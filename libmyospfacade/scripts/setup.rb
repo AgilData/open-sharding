@@ -1,4 +1,4 @@
-#!/bin/env ruby
+#!/usr/bin/env ruby
 
 require 'fileutils'
 require 'find'
@@ -40,7 +40,18 @@ end
 puts 'Found mysql library, using ' + mysqlclient_lib
 
 puts 'Creating symlinks...'
-pwd = ENV["PWD"] + "/"
+
+pwd = ENV['PWD']
+
+if pwd == nil
+  puts 'Unable to read PWD environment variable.'
+  puts 'If you are using sudo, try "sudo -E ruby setup.rb ..."'
+  puts '   to preserve environment variables.'
+  exit 1
+end
+
+pwd = pwd + "/"
+
 FileUtils.ln_s(pwd + 'libmyosp.so.' + mysql_client_vers,
                pwd + 'libmysqlclient.so.' + mysql_client_vers)
 

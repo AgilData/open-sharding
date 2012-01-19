@@ -18,6 +18,9 @@
 Usage is "ruby setup.rb [5.0|5.1]" where the argument is the version of the
 mysql client to use; 5.0 or 5.1.
 
+** If using sudo to run setup.rb, use the -E option
+   so that the script has access to the PWD environment variable **
+
   This directory needs to be on the library path ahead of the native mysql
 driver so that applications load it instead of the native driver. To do this,
 export LD_LIBRARY_PATH=/usr/lib/myosp/ in the application's environment.
