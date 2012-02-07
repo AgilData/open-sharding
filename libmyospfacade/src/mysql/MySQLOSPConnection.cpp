@@ -316,6 +316,9 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
     try {
         OSPResultSetRequest request(connID, stmtID, resultSetID);
         ospConn->sendMessage(&request, true, this);
+
+        //TODO: check for error result and set mysql_errno/error
+
     }
     catch (...) {
         log.error("mysql_store_result() failed to retrieve results from OSP server");
