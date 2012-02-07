@@ -315,9 +315,15 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
     // fetch results from OSP server
     try {
         OSPResultSetRequest request(connID, stmtID, resultSetID);
-        ospConn->sendMessage(&request, true, this);
-
-        //TODO: check for error result and set mysql_errno/error
+        OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true, this));
+        if (wireResponse) {
+            if (wireResponse->isErrorResponse()) {
+                OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                throw "OSP_ERROR";
+            }
+            delete wireResponse;
+        }
 
     }
     catch (...) {
