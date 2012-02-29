@@ -17,7 +17,7 @@ end
 puts 'Removing old symlinks...'
 FileUtils.remove_file('libmysqlclient.so.' + mysql_client_vers, :force => true)
 FileUtils.remove_file('libmysqlclient_r.so.' + mysql_client_vers, :force => true)
-FileUtils.remove_file('libmysqlclient_real_r.so.' + mysql_client_vers, :force => true)
+FileUtils.remove_file('libmysqlclient_real_r.so.' + mysql_client_vers + '.0.0', :force => true)
 FileUtils.remove_file('libopensharding.so', :force => true)
 
 puts 'Finding MySQL installation...'
