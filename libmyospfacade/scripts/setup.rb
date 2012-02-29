@@ -61,5 +61,5 @@ FileUtils.ln_s(pwd + 'libmyosp_r.so.' + mysql_client_vers,
 FileUtils.ln_s(pwd + 'libopensharding.so.1.0.0', pwd + 'libopensharding.so')
 
 FileUtils.ln_s(mysqlclient_lib,
-               'libmysqlclient_real_r.so.' + mysql_client_vers + '0.0')
+               'libmysqlclient_real_r.so.' + mysql_client_vers + '.0.0')
 puts 'Installation Complete'
