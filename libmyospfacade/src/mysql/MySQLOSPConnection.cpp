@@ -294,7 +294,7 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
 
     if (resultSetID<0) {
         // set error code and return NULL response to indicate an error
-        my_errno = response->getErrorCode();
+        my_errno = 999;
         my_error = "mysql_store_result() negative resultSetID";
         return NULL;
     }
