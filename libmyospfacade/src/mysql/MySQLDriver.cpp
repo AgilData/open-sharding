@@ -1219,8 +1219,8 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
     //trace("mysql_options", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
-        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_options but there is no connection");
-        return -1;
+        if (xlog.isDebugEnabled()) xlog.debug("Ignoring call to mysql_options and faking success because there is no connection");
+        return 0;
     }
     return conn->mysql_options(mysql, option, arg);
 }
@@ -1230,8 +1230,8 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg) {
     //trace("mysql_options", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
-        if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_options but there is no connection");
-        return -1;
+        if (xlog.isDebugEnabled()) xlog.debug("Ignoring call to mysql_options and faking success because there is no connection");
+        return 0;
     }
     return conn->mysql_options(mysql, option, arg);
 }
