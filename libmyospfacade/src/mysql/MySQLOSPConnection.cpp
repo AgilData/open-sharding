@@ -324,11 +324,12 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
                 log.error(string("mysql_store_result() failed due to OSP error: ")
                     + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage()
                 );
-                delete wireResponse;
 
                 // set error code and return NULL response to indicate an error
                 my_errno = response->getErrorCode();
                 my_error = "mysql_store_result() failed to fetch results due to OSP error - see logs for detail";
+
+                delete wireResponse;
                 return NULL;
             }
             // we have already processed the results via the callback handler so we can just

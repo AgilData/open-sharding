@@ -3,3 +3,4 @@ cf*.properties
 /_classes
 /_temp
 *.iml
+.idea
