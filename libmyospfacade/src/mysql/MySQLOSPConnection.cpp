@@ -321,26 +321,15 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
         if (wireResponse) {
             if (wireResponse->isErrorResponse()) {
                 OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                log.error(string("mysql_store_result() failed due to OSP error: ")
-                    + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage()
-                );
-
-                // set error code and return NULL response to indicate an error
-                my_errno = response->getErrorCode();
-                my_error = "mysql_store_result() failed to fetch results due to OSP error - see logs for detail";
-
-                delete wireResponse;
-                return NULL;
+                log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                throw "OSP_ERROR";
             }
-            // we have already processed the results via the callback handler so we can just
-            // delete the wire response
             delete wireResponse;
         }
 
     }
     catch (...) {
-        log.error("mysql_store_result() failed due to unhandled exception");
-        //TODO: set error code and message
+        log.error("mysql_store_result() failed to retrieve results from OSP server");
         return NULL;
     }
 
