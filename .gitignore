@@ -4,3 +4,5 @@ cf*.properties
 /_temp
 *.iml
 .idea
+*.d
+*.o
