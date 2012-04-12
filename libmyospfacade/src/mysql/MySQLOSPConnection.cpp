@@ -317,19 +317,12 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
     // fetch results from OSP server
     try {
         OSPResultSetRequest request(connID, stmtID, resultSetID);
-        OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true, this));
-        if (wireResponse) {
-            if (wireResponse->isErrorResponse()) {
-                OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-                throw "OSP_ERROR";
-            }
-            delete wireResponse;
-        }
-
+        ospConn->sendMessage(&request, true, this);
     }
     catch (...) {
         log.error("mysql_store_result() failed to retrieve results from OSP server");
+        my_errno = 999;
+        my_error = "mysql_store_result() failed to retrieve results from OSP server";
         return NULL;
     }
 
