@@ -32,7 +32,7 @@ using namespace std;
 
 namespace util {
 /*static*/ bool OSPConfig::init=false;
-/*static*/ map<string,string> OSPConfig::configMap;
+/*static*/ map<string, string> OSPConfig::configMap;
 /*static*/ string OSPConfig::configFile = "";
 
 OSPConfig::OSPConfig() {

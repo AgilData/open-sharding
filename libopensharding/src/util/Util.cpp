@@ -264,30 +264,27 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return 0 == _strnicmp(str1, str2, len);
 }
 
-/*static*/ string Util::toString(long int i) {
+/*static*/ string Util::toString(const long int i) {
     char temp[256];
     sprintf(temp, "%ld", i);
     return string(temp);
 }
 
-/*static*/ string Util::toString(int i) {
+/*static*/ string Util::toString(const int i) {
     char temp[256];
     sprintf(temp, "%d", i);
     return string(temp);
 }
 
-/*static*/ string Util::toString(unsigned int i) {
-    char temp[256];
-    sprintf(temp, "%u", i);
-    return string(temp);
+/*static*/ string Util::toString(const unsigned long int i){
+	char temp[256];
+	sprintf(temp, "%lu", i);
+	return string(temp);
 }
 
-/*static*/ string Util::toString(void *p) {
-    if (p==NULL) {
-        return string("NULL");
-    }
+/*static*/ string Util::toString(const unsigned int i) {
     char temp[256];
-    sprintf(temp, "%p", p);
+    sprintf(temp, "%u", i);
     return string(temp);
 }
 
@@ -345,7 +342,11 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string Util::buildParamList(const char * const * s, int s_length, int bracketType) {
+/*static*/ string Util::toEscapedStringLiteral(string s) {
+	return string("\"" + Util::escapeQuotes(s) + "\"");
+}
+
+/*static*/ string Util::buildParamList(const char * const * s, int s_length, int bracketType, bool toEscapedStringLiterals) {
 	stringstream ret;
 	int i;
 	switch (bracketType)
@@ -356,9 +357,17 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	}
 	for(i=0; i<s_length; i++) {
 		if(i > 0) {
-			ret << ", ";
+			ret << ",";
 		}
-		ret << (s[i] ? "NULL" : s[i]);
+		if(!s[i]) {
+			ret << "NULL";
+		}
+		else if(toEscapedStringLiterals) {
+			ret << Util::toEscapedStringLiteral(s[i]);
+		}
+		else {
+			ret << s[i];
+		}
 	}
 	switch (bracketType)
 	{
@@ -369,7 +378,7 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	return ret.str();
 }
 
-/*static*/ string Util::buildParamList(string * s, int s_length, int bracketType) {
+/*static*/ string Util::buildParamList(string * s, int s_length, int bracketType, bool toEscapedStringLiterals) {
 	stringstream ret;
 	int i;
 	switch (bracketType)
@@ -380,9 +389,17 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 	}
 	for(i=0; i<s_length; i++) {
 		if(i > 0) {
-			ret << ", ";
+			ret << ",";
 		}
-		ret << (s[i]=="" ? "NULL" : s[i]);
+		if(s[i]=="") {
+			ret << "NULL";
+		}
+		else if(toEscapedStringLiterals) {
+			ret << Util::toEscapedStringLiteral(s[i]);
+		}
+		else {
+			ret << s[i];
+		}
 	}
 	switch (bracketType)
 	{
