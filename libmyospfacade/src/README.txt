@@ -25,6 +25,8 @@ mysql client to use; 5.0 or 5.1.
 driver so that applications load it instead of the native driver. To do this,
 export LD_LIBRARY_PATH=/usr/lib/myosp/ in the application's environment.
 
+  If your application runs in an server, such as Apache, you must set the LD_LIBRARY_PATH environment variable in the server so that all application code can access the environment variable at runtime. For Apache this can be done in the apachectl and /etc/init.d/httpd script. In Apache2 there is a configuration file available for setting environment variables. Alternatively you can set the environment variable in a global location, such as /etc/profile (this may require a system reboot to take affect). To verify that the LD_LIBRARY_PATH is set properly, run 'ldd' on the library module that accesses the MySQL database. For example, with PHP you can run:ldd mysqli.soNear the top of the output you should see a library listed in the /usr/lib/myosp install directory. If so, then everything is set up correctly.  Because application servers have their own scripts and environments, it is useful to output ldd from the application server startup for full verification.
+
 -- Configuration --
   The default location for myosp configs is /etc/osp/myosp.conf. The directory
 can be set using the environment variable "MYOSP_CONF_DIR=/path/to/configdir/"
