@@ -392,10 +392,12 @@ unsigned int mysql_errno(MYSQL *mysql) {
     } else {
         // no error
         if (xlog.isDebugEnabled()) {
-            xlog.debug("mysql_errno() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
         }
-        //HACK:
-        return CR_SERVER_GONE_ERROR; // 2006
+        //HACK: but this could problems with customers
+//            xlog.debug("mysql_errno() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
+//        return CR_SERVER_GONE_ERROR; // 2006
+            xlog.debug("mysql_errno() called but there is no error and no connection! Faking success and returning 0");
+        return 0; // 2006
     }
 }
 
