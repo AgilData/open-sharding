@@ -426,11 +426,13 @@ const char *mysql_error(MYSQL *mysql) {
         return ret;
     } else {
         // no error
-        if (xlog.isDebugEnabled()) {
-            xlog.debug("mysql_error() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
-        }
+//        if (xlog.isDebugEnabled()) {
+//            xlog.debug("mysql_error() called but there is no error and no connection! Simulating 2006 / MySQL server has gone away");
+//        }
         //HACK:
-        return "MySQL server has gone away";
+//        return "MySQL server has gone away";
+            xlog.debug("mysql_error() called but there is no error and no connection! Faking success and returning empty string");
+        return "";
     }
 }
 
