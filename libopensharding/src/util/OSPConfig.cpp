@@ -149,13 +149,13 @@ OSPConfig::~OSPConfig() {
             // good
         }
         else {
-            throw string("The protocol is invalid. Valid values: pipes|tcp. value ") + protocol;
+            throw Util::createException((string("The protocol is invalid. Valid values: pipes|tcp. value ") + protocol).c_str());
         }
 
         //push protocol to ret[1]
         ret.push_back(protocol);
 
-        if (strncmp(host_url.substr(pos2, 3), "://") != 0) {
+        if (host_url.substr(pos2, 3) == "://") {
             //Catch 23 at end of try to consolidate throws
             throw 23;
         }
@@ -206,7 +206,7 @@ OSPConfig::~OSPConfig() {
         if (pos2 == string::npos) {
             // this the last item in the url
             string dbms = host_url.substr(pos1);
-            ret.pus_back(dbms);
+            ret.push_back(dbms);
             return ret;
         }
 
@@ -224,16 +224,15 @@ OSPConfig::~OSPConfig() {
             ret.push_back(schema);
         }
         else {
-            string schema = host_url.substr(pos1, pos2-pos1)
+            string schema = host_url.substr(pos1, pos2-pos1);
             ret.push_back(schema);
         }
         //ignoring user= and password= for now.
     
         return ret;
     }
-    catch (23) {
-        throw Util::createException(string("Invalid host url: ") + host_url + string("\nSee myosp.sample.conf for proper syntax"));
-        return NULL;
+    catch (int e) {
+        throw Util::createException((string("Invalid host url: ") + host_url).c_str());
     }
 }
 

@@ -73,7 +73,7 @@ static unsigned int Pid = 0;
 static bool bannerDisplayed = false;
 
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
-static map<MYSQL*, bool> mysqlAllocMap = new map<MYSQL*, bool>();
+static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
@@ -355,7 +355,7 @@ MYSQL *mysql_init(MYSQL *mysql) {
     if (mysql == NULL) {
         mysql = new MYSQL();
         // keep track of this because we have to delete it later
-        mysqlAllocMap[mysql] = true;
+        (*mysqlAllocMap)[mysql] = true;
     }
 
     // call mysql_init on real driver
@@ -481,7 +481,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             
             //ignoring all but actual_host, port, and schema for now.
             try {
-                host_url = MyOSPConfig::getHostUrl(_host)
+                host_url = MyOSPConfig::getHostUrl(_host);
                 conn_info = MyOSPConfig::parseVirtualHostUrl(host_url);
             }
             catch (char* e) {
@@ -490,10 +490,9 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
     
             const char* real_host=conn_info[2].c_str();
-            unsigned int real_port
+            unsigned int real_port;
             stringstream ss(conn_info[3]);
             ss >> real_port;
-            real_port=port;
             const char* real_db=(db ? db:conn_info[6].c_str());
             
             // A little logging in case connection strings aren't behaving the way we expect.
@@ -1052,8 +1051,8 @@ void mysql_close(MYSQL *mysql) {
 
     // we delete the mysql structure if it was created by us in mysql_init or mysql_connect (we are required
     // to do this according to the MySQL documentation)
-    if (mysqlAllocMap.find(mysql) != map::end) {
-        mysqlAllocMap.erase(mysql);
+    if (mysqlAllocMap->find(mysql) != mysqlAllocMap->end()) {
+        mysqlAllocMap->erase(mysql);
         delete mysql;
     }
 
