@@ -523,7 +523,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
-                + string("host=") + info->host + string(", ")
+                + string("virtual-host=") + _host + string(", ")
+                + string("real-host=") + info->host + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
