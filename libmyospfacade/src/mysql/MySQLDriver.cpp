@@ -458,7 +458,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         const char *_passwd, const char *db, unsigned int port,
         const char *unix_socket, unsigned long clientflag) {
     //trace("mysql_real_connect", mysql);
-
     try {
         bool ospMode = MyOSPConfig::isOspHost(_host);
 
@@ -472,10 +471,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         }
         
         ConnectInfo *info = new ConnectInfo();
-        string databaseName = db;
+        
+        string databaseName;
+        databaseName = (db ? string(db) : "");
         
     	if(ospMode) {
-    	
             string host_url;
             vector<string> conn_info;
             
@@ -489,12 +489,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	    return mysql;
             }
             
-            cerr << "in MySQLDriver.cpp" << endl;
-            cerr << "host: " << conn_info[2] << endl;
-            cerr << "port: " << conn_info[3] << endl;
-            cerr << "db: " << conn_info[6] << endl;
-            
-    
             const char* real_host=conn_info[2].c_str();
             unsigned int real_port;
             if (conn_info[3] == "0") {
@@ -509,8 +503,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             if (string(databaseName)=="") {
                 databaseName=conn_info[6];
             }
-            
-            cerr << "now db: " << databaseName << endl;
             
             info->host = real_host;
             info->user = _user==NULL ? string("") : string(_user);
@@ -550,7 +542,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	struct timeval tstart; gettimeofday(&tstart, NULL);
 			if (db != NULL) {
 				if (-1 == mysql_select_db(mysql, databaseName.c_str())) {
-					cerr << "Called mysql_select_db\n";
 					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
 					return NULL;
 				}

@@ -99,10 +99,8 @@ OSPConfig::~OSPConfig() {
 		OSPConfig::loadConfigs(getConfFile());
 		init=true;
 	}
-
 	bool ret = false;
 	for(size_t i=0; i<ospHosts.size() && !ret; i++) {
-		//cerr << "ospHost #" << i << ": " << ospHosts[i] << endl;
 		ret = (_host.compare(ospHosts[i]) == 0);
 	}
 	return ret;
@@ -130,7 +128,7 @@ OSPConfig::~OSPConfig() {
 	size_t pos1=0;
 	size_t pos2=host_url.find(":");
 	size_t pos3=0;
-
+	
 	//push vendor name to ret[0]
 	ret.push_back(host_url.substr(pos1, pos2-pos1));
 
@@ -177,10 +175,6 @@ OSPConfig::~OSPConfig() {
 	}
 	ret.push_back(host);
 	ret.push_back(port);
-	
-	cerr << "In OSPConfig.cpp" << endl;
-	cerr << "host: " << host << endl;
-	cerr << "port: " << port << endl;
 
 	//Check that url defined a host name
 	if (host == "") {
