@@ -36,7 +36,7 @@ using namespace logger;
 using namespace opensharding;
 
 struct ConnectInfo {
-    string host, user, passwd;
+    string virtual_host, host, user, passwd;
     unsigned int port;
     const char *unix_socket;
     unsigned long clientflag;

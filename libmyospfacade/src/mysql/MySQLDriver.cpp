@@ -459,7 +459,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         const char *unix_socket, unsigned long clientflag) {
     //trace("mysql_real_connect", mysql);
     try {
-        bool ospMode = MyOSPConfig::isOspHost(_host);
 
         if (db!=NULL) {
 			//Check for osp: in database name for attempts to use deprecated functionality.
@@ -471,9 +470,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         }
         
         ConnectInfo *info = new ConnectInfo();
+        info->virtual_host=(_host==NULL ? string("") : string(_host));
+        
+        bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
         
         string databaseName;
-        databaseName = (db ? string(db) : "");
+        databaseName = (db ? string(db) : string(""));
         
     	if(ospMode) {
             string host_url;
@@ -523,7 +525,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
-                + string("virtual-host=") + _host + string(", ")
+                + string("virtual-host=") + info->virtual_host + string(", ")
                 + string("real-host=") + info->host + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
@@ -682,7 +684,7 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
             return -1;
         }
         
-        bool ospMode = MyOSPConfig::isOspHost(info->host);
+        bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
 
         if (mysql->db!=NULL) {
 			//Check for osp: in database name for attempts to use deprecated functionality.
