@@ -229,7 +229,6 @@ OSPConfig::~OSPConfig() {
 	//ignoring user= and password= for now.
 
 	return ret;
-    }
 }
 
 } //end namespace util
