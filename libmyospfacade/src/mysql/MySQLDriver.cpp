@@ -472,6 +472,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         }
         
         ConnectInfo *info = new ConnectInfo();
+        string databaseName = db;
         
     	if(ospMode) {
     	
@@ -505,7 +506,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
             
             //Replace a NULL db with the one supplied by host url
-            db=(db ? db : conn_info[6].c_str());
+            if (string(databaseName)=="") {
+                databaseName=conn_info[6];
+            }
+            
+            cerr << "now db: " << databaseName << endl;
             
             info->host = real_host;
             info->user = _user==NULL ? string("") : string(_user);
@@ -528,7 +533,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + Util::toString(mysql) + string(", ")
                 + string("host=") + info->host + string(", ")
                 + string("user=") + info->user + string(", ")
-                + string("db=") + (db==NULL ? "NULL" : db) 
+                + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
             ); 
         }
@@ -544,7 +549,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         if(MyOSPConfig::isShardAnalyze()) {
         	struct timeval tstart; gettimeofday(&tstart, NULL);
 			if (db != NULL) {
-				if (-1 == mysql_select_db(mysql, db)) {
+				if (-1 == mysql_select_db(mysql, databaseName.c_str())) {
 					cerr << "Called mysql_select_db\n";
 					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
 					return NULL;
@@ -567,8 +572,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	delete [] params;
         }
         else {
-			if (db != NULL) {
-				if (-1 == mysql_select_db(mysql, db)) {
+			if (databaseName != "") {
+				if (-1 == mysql_select_db(mysql, databaseName.c_str())) {
 					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
 					return NULL;
 				}
