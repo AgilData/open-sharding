@@ -154,8 +154,7 @@ OSPConfig::~OSPConfig() {
 	//push protocol to ret[1]
 	ret.push_back(protocol);
 
-	if (host_url.substr(pos2, 3) == "://") {
-		//Catch 23 at end of try to consolidate throws
+	if (host_url.substr(pos2, 3) != "://") {
 		throw Util::createException((string("The URL is invalid, the host must start with '://'. url: ") + host_url).c_str());
 	}
 
@@ -229,7 +228,6 @@ OSPConfig::~OSPConfig() {
 	//ignoring user= and password= for now.
 
 	return ret;
-    }
 }
 
 } //end namespace util
