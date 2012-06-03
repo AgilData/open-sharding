@@ -78,10 +78,8 @@ static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
 
-// Private function for opening connections in osp mode.
-static bool myosp_real_connect(MYSQL *mysql, const char *_host, const char *_user,
-        const char *_passwd, const char *db, unsigned int port,
-        const char *unix_socket, unsigned long clientflag);
+/* Wrapper function to simplify shard logging for mysql_select_db */
+int mysql_select_db_actual(MYSQL *mysql, const char *db);
 
 /*
  * Map of MYSQL* to corresponding error state. This is required since we may
@@ -492,7 +490,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
     
             const char* real_host=conn_info[2].c_str();
             unsigned int real_port;
-            if (conninfo[3] == 0) {
+            if (conn_info[3] == "0") {
                 real_port = port;
             }
             else {
@@ -692,14 +690,14 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
 			}
         }
 
-        if (strlen(mysql->db)>=4 && strncmp("osp:", mysql->db, 4)==0) {
+        if (ospMode) {
 
+            //For use in ospConnMap.
+            string databaseName = string(mysql->db);
+            
             if (xlog.isDebugEnabled()) {
                 xlog.debug("Creating OSP connection");
             }
-
-            // osp:databasename
-            string databaseName = string(mysql->db).substr(4);
 
             // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
             boost::mutex::scoped_lock lock(initMutex);
@@ -710,11 +708,11 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
 
                 // construct filename for request pipe
                 char requestPipeName[256];
-                sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, databaseName.c_str(), getpid());
+                sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, mysql->db, getpid());
 
                 // construct filename for response pipe
                 char responsePipeName[256];
-                sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, databaseName.c_str(), getpid());
+                sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, mysql->db, getpid());
 
                 if (xlog.isDebugEnabled()) {
                     xlog.debug(string("Creating ") + string(requestPipeName));
@@ -799,7 +797,7 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
 
             // create MySQL OSP connection object
             try {
-                conn = new MySQLOSPConnection(info->host, info->port, databaseName, info->user, info->passwd, getResourceMap(), ospConn);
+                conn = new MySQLOSPConnection(info->host, info->port, mysql->db, info->user, info->passwd, getResourceMap(), ospConn);
             }
             catch (...) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
