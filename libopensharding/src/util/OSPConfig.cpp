@@ -124,62 +124,82 @@ OSPConfig::~OSPConfig() {
 	//TODO better checks on url syntax
 	
     //virtual_host string format: 
-    //[vendor]:[protocol]://[actual_host]:[port]/[domain]/[rdms]/[schema]?user=[username]&password=[password]
+    //[vendor]:[protocol]://[actual_host]:[port]/[domain]/[dbms]/[schema]?user=[username]&password=[password]
 	
-    vector<string> ret;
-    size_t pos1=0;
-    size_t pos2=host_url.find(":");
-    size_t pos3=0;
+	try {
+        vector<string> ret;
+        size_t pos1=0;
+        size_t pos2=host_url.find(":");
+        size_t pos3=0;
     
-    //push vendor name to ret[0]
-    ret.push_back(host_url.substr(pos1, pos2-pos1));
-    
-    pos1=pos2+1;
-    pos2=host_url.find(":", pos1);
-    
-    //push protocol to ret[1]
-    ret.push_back(host_url.substr(pos1, pos2-pos1));
-    
-    //this time we skip 3 chars, '://'
-    pos1=pos2+3;
-    pos2=host_url.find("/", pos1);
-    
-    pos3=host_url.find(":", pos1);
-    
-    //push actual_host and port to ret[2] and ret[3]
-    if(pos3 == string::npos || pos3 > pos2) {
+        //push vendor name to ret[0]
         ret.push_back(host_url.substr(pos1, pos2-pos1));
-        //port not defined, value of 0 is translated to default by rdms-specific extension.
-        ret.push_back("0");
-    }
-    else {
-        ret.push_back(host_url.substr(pos1, pos3-pos1));
-        ret.push_back(host_url.substr(pos3+1, pos3-pos2-1));
-    }
     
-    pos1=pos2+1;
-    pos2=host_url.find("/", pos1);
+        //Check that url defined a vendor name
+        if (ret[0] == "") {
+            throw 23;
+        }
+        
+        pos1=pos2+1;
+        pos2=host_url.find(":", pos1);
     
-    //push domain to ret[4]
-    ret.push_back(host_url.substr(pos1, pos2-pos1));
-    pos1=pos2+1;
-    pos2=host_url.find("/", pos1);
-    
-    //push rdms to ret[5]
-    ret.push_back(host_url.substr(pos1, pos2-pos1));
-    pos1=pos2+1;
-    pos2=host_url.find("?", pos1);
-    
-    //push schema to ret[6]
-    if (pos2 == string::npos) {
-        ret.push_back(string(""));
-    }
-    else {
+        //push protocol to ret[1]
         ret.push_back(host_url.substr(pos1, pos2-pos1));
-    }
-    //ignoring user= and password= for now.
     
-    return ret;
+        if (strncmp(host_url.substr(pos1, 3), "://") != 0) {
+            //Catch 23 at end of try to consolidate throws
+            throw 23;
+        }
+    
+        //this time we skip 3 chars, '://'
+        pos1=pos2+3;
+        pos2=host_url.find("/", pos1);
+        pos3=host_url.find(":", pos1);
+    
+        //push actual_host and port to ret[2] and ret[3]
+        if(pos3 == string::npos || pos3 > pos2) {
+            ret.push_back(host_url.substr(pos1, pos2-pos1));
+            //port not defined, value of 0 is translated to default by rdms-specific extension.
+            ret.push_back("0");
+        }
+        else {
+            ret.push_back(host_url.substr(pos1, pos3-pos1));
+            ret.push_back(host_url.substr(pos3+1, pos2-pos3-1));
+        }
+    
+        //Check that url defined a host name
+        if (ret[2] == "") {
+            throw 23;
+        }
+        
+        pos1=pos2+1;
+        pos2=host_url.find("/", pos1);
+    
+        //push domain to ret[4]
+        ret.push_back(host_url.substr(pos1, pos2-pos1));
+        pos1=pos2+1;
+        pos2=host_url.find("/", pos1);
+    
+        //push dbms to ret[5]
+        ret.push_back(host_url.substr(pos1, pos2-pos1));
+        pos1=pos2+1;
+        pos2=host_url.find("?", pos1);
+    
+        //push schema to ret[6]
+        if (pos2 == string::npos) {
+            ret.push_back(string(""));
+        }
+        else {
+            ret.push_back(host_url.substr(pos1, pos2-pos1));
+        }
+        //ignoring user= and password= for now.
+    
+        return ret;
+    }
+    catch (23) {
+        throw Util::createException(string("Invalid host url: ") + host_url + string("\nSee myosp.sample.conf for proper syntax"));
+        return NULL;
+    }
 }
 
 } //end namespace util
