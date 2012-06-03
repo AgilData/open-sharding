@@ -139,14 +139,23 @@ OSPConfig::~OSPConfig() {
         if (ret[0] == "") {
             throw 23;
         }
-        
+
+        // parse protocol
         pos1=pos2+1;
         pos2=host_url.find(":", pos1);
     
+        string protocol = host_url.substr(pos1, pos2-pos1);
+        if (Util::toLower(protocol) == "pipes" || Util::toLower(protocol) == "tcp") {
+            // good
+        }
+        else {
+            throw string("The protocol is invalid. Valid values: pipes|tcp. value ") + protocol;
+        }
+
         //push protocol to ret[1]
-        ret.push_back(host_url.substr(pos1, pos2-pos1));
-    
-        if (strncmp(host_url.substr(pos1, 3), "://") != 0) {
+        ret.push_back(protocol);
+
+        if (strncmp(host_url.substr(pos2, 3), "://") != 0) {
             //Catch 23 at end of try to consolidate throws
             throw 23;
         }
@@ -157,40 +166,66 @@ OSPConfig::~OSPConfig() {
         pos3=host_url.find(":", pos1);
     
         //push actual_host and port to ret[2] and ret[3]
+        string host;
+        string port;
         if(pos3 == string::npos || pos3 > pos2) {
-            ret.push_back(host_url.substr(pos1, pos2-pos1));
+            host = host_url.substr(pos1, pos2-pos1);
             //port not defined, value of 0 is translated to default by rdms-specific extension.
-            ret.push_back("0");
+            port = "0";
         }
         else {
-            ret.push_back(host_url.substr(pos1, pos3-pos1));
-            ret.push_back(host_url.substr(pos3+1, pos2-pos3-1));
+            host = host_url.substr(pos1, pos3-pos1);
+            port = host_url.substr(pos3+1, pos2-pos3-1);
         }
-    
+            ret.push_back(host);
+            ret.push_back(port);
+
         //Check that url defined a host name
-        if (ret[2] == "") {
+        if (host == "") {
             throw 23;
         }
-        
+
+        // parse domain
         pos1=pos2+1;
         pos2=host_url.find("/", pos1);
+        if (pos2 == string::npos) {
+            throw 23; // no domain
+        }
     
         //push domain to ret[4]
-        ret.push_back(host_url.substr(pos1, pos2-pos1));
+        string domain = host_url.substr(pos1, pos2-pos1);
+        if (domain == "") {
+            throw 23;
+        }
+        ret.push_back(domain);
+
+        // parse dbms
         pos1=pos2+1;
         pos2=host_url.find("/", pos1);
-    
+
+        if (pos2 == string::npos) {
+            // this the last item in the url
+            string dbms = host_url.substr(pos1);
+            ret.pus_back(dbms);
+            return ret;
+        }
+
         //push dbms to ret[5]
-        ret.push_back(host_url.substr(pos1, pos2-pos1));
+        string dbms = host_url.substr(pos1, pos2-pos1);
+        ret.push_back(dbms);
+
+        // parse schema
         pos1=pos2+1;
         pos2=host_url.find("?", pos1);
-    
+
         //push schema to ret[6]
         if (pos2 == string::npos) {
-            ret.push_back(string(""));
+            string schema = host_url.substr(pos1);
+            ret.push_back(schema);
         }
         else {
-            ret.push_back(host_url.substr(pos1, pos2-pos1));
+            string schema = host_url.substr(pos1, pos2-pos1)
+            ret.push_back(schema);
         }
         //ignoring user= and password= for now.
     
