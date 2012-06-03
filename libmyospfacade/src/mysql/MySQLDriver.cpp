@@ -72,6 +72,9 @@ static unsigned int Pid = 0;
 
 static bool bannerDisplayed = false;
 
+/* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
+static map<MYSQL*, bool> mysqlAllocMap = new map<MYSQL*, bool>();
+
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
 
@@ -351,6 +354,8 @@ MYSQL *mysql_init(MYSQL *mysql) {
     // the API docs say we have to allocate the pointer if it does not already exist
     if (mysql == NULL) {
         mysql = new MYSQL();
+        // keep track of this because we have to delete it later
+        mysqlAllocMap[mysql] = true;
     }
 
     // call mysql_init on real driver
@@ -1045,8 +1050,12 @@ void mysql_close(MYSQL *mysql) {
         xlog.debug("AFTER delete connection object. END of mysql_close().");
     }
 
-     //TODO: we should delete the mysql structure if it was created by us in mysql_init or mysql_connect, according
-    // to the MySQL documentation
+    // we delete the mysql structure if it was created by us in mysql_init or mysql_connect (we are required
+    // to do this according to the MySQL documentation)
+    if (mysqlAllocMap.find(mysql) != map::end) {
+        mysqlAllocMap.erase(mysql);
+        delete mysql;
+    }
 
 }
 
