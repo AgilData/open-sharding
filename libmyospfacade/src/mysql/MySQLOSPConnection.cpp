@@ -60,6 +60,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
 
     this->user = user;
     this->password = password;
+    this->database = database;
 
     if (database != "") {
 		// request a database connection
@@ -1244,6 +1245,12 @@ my_bool MySQLOSPConnection::mysql_change_user(MYSQL *mysql, const char *user,
 
 int MySQLOSPConnection::mysql_select_db(MYSQL *mysql, const char *db) {
 
+/*
+    if (this->database == string(db)) {
+        //Already connected to this database, return success
+        return 0;
+    }
+    
     //TODO close old ospConn
     
 	// request a database connection
@@ -1281,9 +1288,10 @@ int MySQLOSPConnection::mysql_select_db(MYSQL *mysql, const char *db) {
 	delete wireResponse;
 
 	return 0;
+    */
 
-    //notImplementedPtr("MySQLOSPConnection::mysql_select_db");
-    //return -1;
+    notImplementedPtr("MySQLOSPConnection::mysql_select_db");
+    return -1;
 }
 
 my_bool MySQLOSPConnection::mysql_master_query(MYSQL *mysql, const char *q,

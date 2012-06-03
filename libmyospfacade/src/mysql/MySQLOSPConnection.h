@@ -59,6 +59,7 @@ private:
 
     string user;
     string password;
+    string database;
     
     /* OSP connection ID */
     string connID;

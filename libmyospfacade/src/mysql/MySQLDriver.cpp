@@ -493,7 +493,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             unsigned int real_port;
             stringstream ss(conn_info[3]);
             ss >> real_port;
-            const char* real_db=(db ? db:conn_info[6].c_str());
+            const char* real_db=(db ? db : conn_info[6].c_str());
             
             // A little logging in case connection strings aren't behaving the way we expect.
             if(xlog.isDebugEnabled()) {
