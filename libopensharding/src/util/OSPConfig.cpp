@@ -210,6 +210,9 @@ OSPConfig::~OSPConfig() {
 
 	//push dbms to ret[5]
 	string dbms = host_url.substr(pos1, pos2-pos1);
+	if (dbms == "") {
+		throw Util::createException((string("The URL is invalid, dbms is required. url: ") + host_url).c_str());
+	}
 	ret.push_back(dbms);
 
 	// parse schema
@@ -224,6 +227,9 @@ OSPConfig::~OSPConfig() {
 	else {
 		string schema = host_url.substr(pos1, pos2-pos1);
 		ret.push_back(schema);
+	}
+	if (ret[6] == "") {
+		throw Util::createException((string("The URL is invalid, schema is required. url: ") + host_url).c_str());
 	}
 	//ignoring user= and password= for now.
 
