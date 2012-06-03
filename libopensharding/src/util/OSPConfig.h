@@ -25,7 +25,10 @@
 
 #include <string>
 #include <map>
+#include <vector>
 #include <stdio.h>
+
+#define OSP_VIRTUAL_HOST_LIST "osp.virtual.host.list"
 
 using namespace std;
 
@@ -36,6 +39,8 @@ protected:
 	static bool init;
 	static map<string, string> configMap;
 	static string configFile;
+	static vector<string> ospHosts;
+	static vector<string> hostUrl;
 
 public:
     OSPConfig();
@@ -44,6 +49,9 @@ public:
 	static string getConfFile();
     static void loadConfigs(string fileName);
     static map<string, string> getConfigMap();
+    static bool isOspHost(string host);
+    static string getHostUrl(string host);
+    static vector<string> parseVirtualHostUrl(string host_url);
 };
 
 } //end namespace util

@@ -57,6 +57,9 @@ private:
 
     OSPConnection *ospConn;
 
+    string user;
+    string password;
+    
     /* OSP connection ID */
     string connID;
 

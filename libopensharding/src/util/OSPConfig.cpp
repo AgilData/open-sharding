@@ -23,6 +23,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <vector>
 
 #include <util/Util.h>
 #include <logger/Logger.h>
@@ -33,6 +34,7 @@ using namespace std;
 namespace util {
 /*static*/ bool OSPConfig::init=false;
 /*static*/ map<string, string> OSPConfig::configMap;
+/*static*/ vector<string> OSPConfig::ospHosts;
 /*static*/ string OSPConfig::configFile = "";
 
 OSPConfig::OSPConfig() {
@@ -55,9 +57,6 @@ OSPConfig::~OSPConfig() {
 
 /*static*/ void OSPConfig::loadConfigs(string fileName) {
 
-	//Add default values
-	configMap["osp.mode"]="delegate";
-
 	string line;
 	ifstream confFile(fileName.c_str());
 	if(confFile.is_open()) {
@@ -77,11 +76,110 @@ OSPConfig::~OSPConfig() {
 			}
 			string className = Util::trim(line.substr(0,pos));
 			string levelName = Util::trim(line.substr(pos+1));
-
 			configMap[className]=levelName;
 		}
 		confFile.close();
+		
+		//Populate ospHosts vector with values from the config file.
+		size_t pos1 = 0, pos2 = 0;
+		string hosts = configMap[OSP_VIRTUAL_HOST_LIST];
+		while( pos1 < hosts.length() && pos2 != string::npos )  {
+			pos2 = hosts.find_first_of(',',pos1);
+			ospHosts.push_back( Util::trim(hosts.substr(pos1,pos2-pos1)) );
+			pos1 = pos2+1;
+		}
 	}
+}
+
+/**
+ * Returns true if the host string is defined as an osp host in the config file.
+ */
+/*static*/ bool OSPConfig::isOspHost(string _host) {
+	if(!init) {
+		OSPConfig::loadConfigs(getConfFile());
+		init=true;
+	}
+
+	bool ret = false;
+	for(size_t i=0; i<ospHosts.size() && !ret; i++) {
+		//cerr << "ospHost #" << i << ": " << ospHosts[i] << endl;
+		ret = (_host.compare(ospHosts[i]) == 0);
+	}
+	return ret;
+}
+
+/*static*/ string OSPConfig::getHostUrl(string virtual_host) {
+	string key = virtual_host + ".url";
+    string host_url = getConfigMap()[key];
+    if(host_url == "") {
+        throw Util::createException((string("No host.url defined for hostname ") + virtual_host).c_str());
+    }
+    return host_url;
+}
+
+/**
+ * Parse host.url and return values in a vector
+ */
+/*static*/ vector<string> OSPConfig::parseVirtualHost(string host_url){
+	//TODO better checks on url syntax
+	
+    //virtual_host string format: 
+    //[vendor]:[protocol]://[actual_host]:[port]/[domain]/[rdms]/[schema]?user=[username]&password=[password]
+	
+    vector<string> ret;
+    size_t pos1=0;
+    size_t pos2=host_url.find(":");
+    size_t pos3=0;
+    
+    //push vendor name to ret[0]
+    ret.push_back(host_url.substr(pos1, pos2-pos1));
+    
+    pos1=pos2+1;
+    pos2=host_url.find(":", pos1);
+    
+    //push protocol to ret[1]
+    ret.push_back(host_url.substr(pos1, pos2-pos1));
+    
+    //this time we skip 3 chars, '://'
+    pos1=pos2+3;
+    pos2=host_url.find("/", pos1);
+    
+    pos3=host_url.find(":", pos1);
+    
+    //push actual_host and port to ret[2] and ret[3]
+    if(pos3 == string::npos || pos3 > pos2) {
+        ret.push_back(host_url.substr(pos1, pos2-pos1));
+        //port not defined, value of 0 is translated to default by rdms-specific extension.
+        ret.push_back("0");
+    }
+    else {
+        ret.push_back(host_url.substr(pos1, pos3-pos1));
+        ret.push_back(host_url.substr(pos3+1, pos3-pos2-1));
+    }
+    
+    pos1=pos2+1;
+    pos2=host_url.find("/", pos1);
+    
+    //push domain to ret[4]
+    ret.push_back(host_url.substr(pos1, pos2-pos1));
+    pos1=pos2+1;
+    pos2=host_url.find("/", pos1);
+    
+    //push rdms to ret[5]
+    ret.push_back(host_url.substr(pos1, pos2-pos1));
+    pos1=pos2+1;
+    pos2=host_url.find("?", pos1);
+    
+    //push schema to ret[6]
+    if (pos2 == string::npos) {
+        ret.push_back(string(""));
+    }
+    else {
+        ret.push_back(host_url.substr(pos1, pos2-pos1));
+    }
+    //ignoring user= and password= for now.
+    
+    return ret;
 }
 
 } //end namespace util

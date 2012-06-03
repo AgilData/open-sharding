@@ -29,9 +29,11 @@ namespace opensharding {
 /*static*/ Logger &OSPResultSetResponse::log = Logger::getLogger("OSPResultSetResponse");
 
 OSPResultSetResponse::OSPResultSetResponse() {
+    tableName = NULL;
     columnCount = 0;
     columnName = NULL;
     columnType = NULL;
+    tableNameIndex = 0;
     columnNameIndex = 0;
     columnTypeIndex = 0;
     fieldIndex = 0;
@@ -39,6 +41,14 @@ OSPResultSetResponse::OSPResultSetResponse() {
 }
 
 OSPResultSetResponse::~OSPResultSetResponse() {
+	if (tableName) {
+		// delete tableName OSPStrings
+		for (unsigned int i=0; i<tableNameIndex; i++) {
+			delete tableName[i];
+		}
+		delete [] tableName;
+	}
+	
     if (columnName) {
         // delete columnName OSPStrings
         for (unsigned int i=0; i<columnNameIndex; i++) {
@@ -47,6 +57,7 @@ OSPResultSetResponse::~OSPResultSetResponse() {
         delete [] columnName;
         delete [] columnType;
     }
+    
     list<OSPString**>::iterator it;
     for (it=resultRows.begin(); it!=resultRows.end(); it++) {
         OSPString **row = *it;
@@ -117,6 +128,15 @@ void OSPResultSetResponse::setField(int fieldNum, char *buffer, unsigned int off
             }
             break;
         }
+        case 5:
+        {
+            // create copy of string data
+            char *strdata = new char[length+1];
+            memcpy(strdata, buffer+offset, length);
+            strdata[length] = 0;
+            tableName[tableNameIndex++] = new OSPString(strdata, 0, length, true);
+            break;
+        }
         default:
             throw "OSPResultSetResponse::setField() invalid fieldNum";
     }
@@ -126,8 +146,14 @@ void OSPResultSetResponse::setField(int fieldNum, int value) {
     switch (fieldNum) {
         case 1:
             columnCount = (unsigned int) value;
+            tableName = new OSPString*[columnCount];
             columnName = new OSPString*[columnCount];
             columnType = new int[columnCount];
+            for(unsigned int i=0; i<columnCount; i++) {
+            	//initialize pointers to NULL to avoid uninitialized values.
+            	tableName[i]=NULL;
+            	columnName[i]=NULL;
+            }
             break;
         case 3:
             columnType[columnTypeIndex++] = value;

@@ -413,8 +413,14 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
 /*static*/ string Util::trim(string str) {
     string whitespace = string(" \t\f\v\n\r");
     size_t start = str.find_first_not_of(whitespace);
-    size_t end = str.find_last_not_of(whitespace);
-    return str.substr(start, end+1);
+    if( start != string::npos) {
+      size_t len = str.find_last_not_of(whitespace)+1-start;
+      return str.substr(start, len);
+    }
+    else {
+      //str is all whitespace, or empty
+      return string("");
+    }
 }
 
 /*static*/ string Util::removeQuotes(string keyValue) {

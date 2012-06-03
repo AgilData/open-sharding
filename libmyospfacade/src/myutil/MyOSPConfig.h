@@ -21,6 +21,8 @@
 #define ANALYZE_LOG_OUTPUT_SYSLOG 3
 #define ANALYZE_LOG_OUTPUT_FILE 4
 
+#define OSP_CLIENT_HOST_LIST "osp.client.host.list"
+
 #include <string>
 #include <map>
 #include <stdio.h>

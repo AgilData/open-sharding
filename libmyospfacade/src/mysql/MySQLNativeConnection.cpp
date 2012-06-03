@@ -104,16 +104,16 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
 
         //TODO: this is inefficient because we create stringstream even when logging is not enabled
 
-        stringstream ss;
         if (log.isDebugEnabled()) {
+            stringstream ss;
             string us; if (unix_socket) us = unix_socket;
             string db; if (database)    db = database;
             ss << "connect(server: "      << server
                <<        " database: "    << db
                <<        " port: "        << port
                <<        " unix_socket: " << us     << ")";
+               log.debug(ss.str());
         }
-        if (log.isDebugEnabled()) { log.debug(ss.str()); }
 
         //TODO: we should be caching this function pointer instead of looking it up each time
         mysql_real_connectFnType* tempFunction =
