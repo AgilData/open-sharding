@@ -126,113 +126,109 @@ OSPConfig::~OSPConfig() {
     //virtual_host string format: 
     //[vendor]:[protocol]://[actual_host]:[port]/[domain]/[dbms]/[schema]?user=[username]&password=[password]
 	
-	try {
-        vector<string> ret;
-        size_t pos1=0;
-        size_t pos2=host_url.find(":");
-        size_t pos3=0;
-    
-        //push vendor name to ret[0]
-        ret.push_back(host_url.substr(pos1, pos2-pos1));
-    
-        //Check that url defined a vendor name
-        if (ret[0] == "") {
-            throw 23;
-        }
+	vector<string> ret;
+	size_t pos1=0;
+	size_t pos2=host_url.find(":");
+	size_t pos3=0;
 
-        // parse protocol
-        pos1=pos2+1;
-        pos2=host_url.find(":", pos1);
-    
-        string protocol = host_url.substr(pos1, pos2-pos1);
-        if (Util::toLower(protocol) == "pipes" || Util::toLower(protocol) == "tcp") {
-            // good
-        }
-        else {
-            throw Util::createException((string("The protocol is invalid. Valid values: pipes|tcp. value ") + protocol).c_str());
-        }
+	//push vendor name to ret[0]
+	ret.push_back(host_url.substr(pos1, pos2-pos1));
 
-        //push protocol to ret[1]
-        ret.push_back(protocol);
+	//Check that url defined a vendor name
+	if (ret[0] == "") {
+		throw Util::createException((string("The URL is invalid, vendor name is required. url: ") + host_url).c_str());
+	}
 
-        if (host_url.substr(pos2, 3) == "://") {
-            //Catch 23 at end of try to consolidate throws
-            throw 23;
-        }
-    
-        //this time we skip 3 chars, '://'
-        pos1=pos2+3;
-        pos2=host_url.find("/", pos1);
-        pos3=host_url.find(":", pos1);
-    
-        //push actual_host and port to ret[2] and ret[3]
-        string host;
-        string port;
-        if(pos3 == string::npos || pos3 > pos2) {
-            host = host_url.substr(pos1, pos2-pos1);
-            //port not defined, value of 0 is translated to default by rdms-specific extension.
-            port = "0";
-        }
-        else {
-            host = host_url.substr(pos1, pos3-pos1);
-            port = host_url.substr(pos3+1, pos2-pos3-1);
-        }
-            ret.push_back(host);
-            ret.push_back(port);
+	// parse protocol
+	pos1=pos2+1;
+	pos2=host_url.find(":", pos1);
 
-        //Check that url defined a host name
-        if (host == "") {
-            throw 23;
-        }
+	string protocol = host_url.substr(pos1, pos2-pos1);
+	if (Util::toLower(protocol) == "pipes" || Util::toLower(protocol) == "tcp") {
+		// good
+	}
+	else {
+		throw Util::createException((string("The URL is invalid, the protocol contains a non-valid value. Valid values: pipes|tcp. value ") + protocol).c_str());
+	}
 
-        // parse domain
-        pos1=pos2+1;
-        pos2=host_url.find("/", pos1);
-        if (pos2 == string::npos) {
-            throw 23; // no domain
-        }
-    
-        //push domain to ret[4]
-        string domain = host_url.substr(pos1, pos2-pos1);
-        if (domain == "") {
-            throw 23;
-        }
-        ret.push_back(domain);
+	//push protocol to ret[1]
+	ret.push_back(protocol);
 
-        // parse dbms
-        pos1=pos2+1;
-        pos2=host_url.find("/", pos1);
+	if (host_url.substr(pos2, 3) == "://") {
+		//Catch 23 at end of try to consolidate throws
+		throw Util::createException((string("The URL is invalid, the host must start with '://'. url: ") + host_url).c_str());
+	}
 
-        if (pos2 == string::npos) {
-            // this the last item in the url
-            string dbms = host_url.substr(pos1);
-            ret.push_back(dbms);
-            return ret;
-        }
+	//this time we skip 3 chars, '://'
+	pos1=pos2+3;
+	pos2=host_url.find("/", pos1);
+	pos3=host_url.find(":", pos1);
 
-        //push dbms to ret[5]
-        string dbms = host_url.substr(pos1, pos2-pos1);
-        ret.push_back(dbms);
+	//push actual_host and port to ret[2] and ret[3]
+	string host;
+	string port;
+	if(pos3 == string::npos || pos3 > pos2) {
+		host = host_url.substr(pos1, pos2-pos1);
+		//port not defined, value of 0 is translated to default by rdms-specific extension.
+		port = "0";
+	}
+	else {
+		host = host_url.substr(pos1, pos3-pos1);
+		port = host_url.substr(pos3+1, pos2-pos3-1);
+	}
+		ret.push_back(host);
+		ret.push_back(port);
 
-        // parse schema
-        pos1=pos2+1;
-        pos2=host_url.find("?", pos1);
+	//Check that url defined a host name
+	if (host == "") {
+		throw Util::createException((string("The URL is invalid, host is required. url: ") + host_url).c_str());
+	}
 
-        //push schema to ret[6]
-        if (pos2 == string::npos) {
-            string schema = host_url.substr(pos1);
-            ret.push_back(schema);
-        }
-        else {
-            string schema = host_url.substr(pos1, pos2-pos1);
-            ret.push_back(schema);
-        }
-        //ignoring user= and password= for now.
-    
-        return ret;
-    }
-    catch (int e) {
-        throw Util::createException((string("Invalid host url: ") + host_url).c_str());
+	// parse domain
+	pos1=pos2+1;
+	pos2=host_url.find("/", pos1);
+	if (pos2 == string::npos) {
+		throw Util::createException((string("The URL is invalid, domain is required. url: ") + host_url).c_str());
+	}
+
+	//push domain to ret[4]
+	string domain = host_url.substr(pos1, pos2-pos1);
+	if (domain == "") {
+		throw Util::createException((string("The URL is invalid, domain is required. url: ") + host_url).c_str());
+	}
+	ret.push_back(domain);
+
+	// parse dbms
+	pos1=pos2+1;
+	pos2=host_url.find("/", pos1);
+
+	if (pos2 == string::npos) {
+		// this the last item in the url
+		string dbms = host_url.substr(pos1);
+		ret.push_back(dbms);
+		return ret;
+	}
+
+	//push dbms to ret[5]
+	string dbms = host_url.substr(pos1, pos2-pos1);
+	ret.push_back(dbms);
+
+	// parse schema
+	pos1=pos2+1;
+	pos2=host_url.find("?", pos1);
+
+	//push schema to ret[6]
+	if (pos2 == string::npos) {
+		string schema = host_url.substr(pos1);
+		ret.push_back(schema);
+	}
+	else {
+		string schema = host_url.substr(pos1, pos2-pos1);
+		ret.push_back(schema);
+	}
+	//ignoring user= and password= for now.
+
+	return ret;
     }
 }
 
