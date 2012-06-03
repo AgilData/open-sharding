@@ -477,7 +477,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             //ignoring all but actual_host, port, and schema for now.
             try {
                 host_url = MyOSPConfig::getHostUrl(_host)
-                conn_info = MyOSPConfig::parseVirtualHost(host_url);
+                conn_info = MyOSPConfig::parseVirtualHostUrl(host_url);
             }
             catch (char* e) {
         	    setErrorState(mysql, CR_UNKNOWN_ERROR, e, "OSP01");

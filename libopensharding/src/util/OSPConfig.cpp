@@ -120,7 +120,7 @@ OSPConfig::~OSPConfig() {
 /**
  * Parse host.url and return values in a vector
  */
-/*static*/ vector<string> OSPConfig::parseVirtualHost(string host_url){
+/*static*/ vector<string> OSPConfig::parseVirtualHostUrl(string host_url){
 	//TODO better checks on url syntax
 	
     //virtual_host string format: 
