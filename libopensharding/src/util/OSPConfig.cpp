@@ -168,15 +168,19 @@ OSPConfig::~OSPConfig() {
 	string port;
 	if(pos3 == string::npos || pos3 > pos2) {
 		host = host_url.substr(pos1, pos2-pos1);
-		//port not defined, value of 0 is translated to default by rdms-specific extension.
+		//port not defined, value of 0 is translated to default by dbms-specific extension.
 		port = "0";
 	}
 	else {
 		host = host_url.substr(pos1, pos3-pos1);
 		port = host_url.substr(pos3+1, pos2-pos3-1);
 	}
-		ret.push_back(host);
-		ret.push_back(port);
+	ret.push_back(host);
+	ret.push_back(port);
+	
+	cerr << "In OSPConfig.cpp" << endl;
+	cerr << "host: " << host << endl;
+	cerr << "port: " << port << endl;
 
 	//Check that url defined a host name
 	if (host == "") {

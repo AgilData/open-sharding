@@ -487,6 +487,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	    setErrorState(mysql, CR_UNKNOWN_ERROR, e, "OSP01");
         	    return mysql;
             }
+            
+            cerr << "in MySQLDriver.cpp" << endl;
+            cerr << "host: " << conn_info[2] << endl;
+            cerr << "port: " << conn_info[3] << endl;
+            cerr << "db: " << conn_info[6] << endl;
+            
     
             const char* real_host=conn_info[2].c_str();
             unsigned int real_port;
@@ -501,7 +507,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             //Replace a NULL db with the one supplied by host url
             db=(db ? db : conn_info[6].c_str());
             
-            info->host = real_host==NULL ? string("") : string(_host);
+            info->host = real_host;
             info->user = _user==NULL ? string("") : string(_user);
             info->passwd = _passwd==NULL ? string("") : string(_passwd);
             info->port = real_port;
