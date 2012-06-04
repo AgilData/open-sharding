@@ -687,15 +687,15 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
         bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
 
         if (mysql->db!=NULL) {
-			if (strlen(mysql->db == 0) {
-			    setErrorState(mysql, CR_UNKNOWN_ERROR, "The database name is required", "OSP05");
-			return NULL;
+			if (strlen(mysql->db) == 0) {
+			    setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
+			return -1;
 			}
 			//Check for osp: in database name for attempts to use deprecated functionality.
 			if (strncmp(mysql->db, "osp:", 4)==0) {
 				//setErrorState writes message to xlog.error()
 				setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
-				return NULL;
+				return -1;
 			}
         }
 
