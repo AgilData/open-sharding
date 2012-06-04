@@ -687,6 +687,10 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
         bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
 
         if (mysql->db!=NULL) {
+			if (strlen(mysql->db == 0) {
+			    setErrorState(mysql, CR_UNKNOWN_ERROR, "The database name is required", "DBS05");
+			return NULL;
+			}
 			//Check for osp: in database name for attempts to use deprecated functionality.
 			if (strncmp(mysql->db, "osp:", 4)==0) {
 				//setErrorState writes message to xlog.error()
