@@ -545,7 +545,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         	struct timeval tstart; gettimeofday(&tstart, NULL);
 			if (db != NULL) {
 				if (-1 == mysql_select_db(mysql, databaseName.c_str())) {
-					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
+					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
 					return NULL;
 				}
 			}
@@ -568,7 +568,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         else {
 			if (databaseName != "") {
 				if (-1 == mysql_select_db(mysql, databaseName.c_str())) {
-					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "DBS01");
+					setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
 					return NULL;
 				}
 			}
@@ -577,11 +577,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         return mysql;
     } catch (const char *ex1) {
         xlog.error(string("mysql_real_connect() failed: ") + string(ex1));
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [2]", "DBS01");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [2]", "OSP01");
         return NULL;
     } catch (...) {
         xlog.error(string("mysql_real_connect() failed due to exception"));
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [3]", "DBS01");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [3]", "OSP01");
         return NULL;
     }
 }
@@ -610,7 +610,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 int mysql_select_db_actual(MYSQL *mysql, const char *db) {
     //trace("mysql_select_db", mysql);
     if (db==NULL) {
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_select_db() passed NULL database name", "DBS01");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_select_db() passed NULL database name", "OSP01");
         xlog.error("failed to init mysqlClient");
         return -1;
     }
@@ -619,7 +619,7 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
     }
 
     if (!getMySQLClient()->init()) {
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "DBS01");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
         xlog.error("failed to init mysqlClient");
         return -1;
     }
@@ -680,7 +680,7 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
 
         if (info == NULL) {
             xlog.error("No ConnInfo in map");
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "DBS01");
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
             return -1;
         }
         
@@ -688,7 +688,7 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
 
         if (mysql->db!=NULL) {
 			if (strlen(mysql->db == 0) {
-			    setErrorState(mysql, CR_UNKNOWN_ERROR, "The database name is required", "DBS05");
+			    setErrorState(mysql, CR_UNKNOWN_ERROR, "The database name is required", "OSP05");
 			return NULL;
 			}
 			//Check for osp: in database name for attempts to use deprecated functionality.
