@@ -42,19 +42,16 @@ def run_command(cmd)
 end
 
 #################################################################################################
-## Retrieve Opensharding Rep
+## Pull Opensharding Branch
 #################################################################################################
 def clone_rep(branch_name)
+  # This method depends on having the repo checked out already in the current folder.
     puts "Cloning Opensharding Repositories"
-    if File.exists? "open-sharding"
-        puts "WARN: open-sharding Found"
-        puts "WARN: moving open-sharding to open-sharding.bak"
-        if File.exists? "open-sharding.bak"
-            run_command "rm -rf open-sharding.bak"
-        end
-        run_command "mv open-sharding open-sharding.bak"
+    if !File.exists? "open-sharding"
+        puts "WARN: open-sharding Not Found, aborting."
+        return
     end
-    cmd = "git clone -b #{branch_name} \"#{REPOSITORY}\""
+    cmd = "git pull origin #{branch_name}"
     run_command cmd
 end
 
