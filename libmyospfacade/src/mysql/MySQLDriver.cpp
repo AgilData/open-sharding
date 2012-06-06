@@ -483,8 +483,19 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             
             //ignoring all but actual_host, port, and schema for now.
             try {
+
+                xlog.debug(string("mysql_real_connect() host = ") + string(_host==NULL ? "NULL" : _host));
                 host_url = MyOSPConfig::getHostUrl(_host);
+
+                xlog.debug(string("MyOSPConfig::getHostUrl() returned ") + string(host_url==NULL ? "NULL" : host_url));
                 conn_info = MyOSPConfig::parseVirtualHostUrl(host_url);
+
+                xlog.debug("MyOSPConfig::parseVirtualHostUrl() returned:");
+                vector<string>::iterator it;
+                for ( it=conn_info.begin() ; it < conn_info.end(); it++ ) {
+                    xlog.debug(string("\t") + it);
+                }
+
             }
             catch (char* e) {
         	    setErrorState(mysql, CR_UNKNOWN_ERROR, e, "OSP01");
@@ -494,7 +505,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             const char* real_host=conn_info[2].c_str();
             unsigned int real_port;
             if (conn_info[3] == "0") {
-                real_port = port;
+                xlog.debug("Port was 0, defaulting to 4545");
+                real_port = 4545;
             }
             else {
                 stringstream ss(conn_info[3]);
