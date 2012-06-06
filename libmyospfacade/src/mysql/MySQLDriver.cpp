@@ -527,6 +527,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + Util::toString(mysql) + string(", ")
                 + string("virtual-host=") + info->virtual_host + string(", ")
                 + string("real-host=") + info->host + string(", ")
+                + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
