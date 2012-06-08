@@ -487,13 +487,13 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 xlog.debug(string("mysql_real_connect() host = ") + string(_host==NULL ? "NULL" : _host));
                 host_url = MyOSPConfig::getHostUrl(_host);
 
-                xlog.debug(string("MyOSPConfig::getHostUrl() returned ") + string(host_url==NULL ? "NULL" : host_url));
+                xlog.debug(string("MyOSPConfig::getHostUrl() returned ") + host_url);
                 conn_info = MyOSPConfig::parseVirtualHostUrl(host_url);
 
                 xlog.debug("MyOSPConfig::parseVirtualHostUrl() returned:");
                 vector<string>::iterator it;
                 for ( it=conn_info.begin() ; it < conn_info.end(); it++ ) {
-                    xlog.debug(string("\t") + it);
+                    xlog.debug(string("\t") + (*it));
                 }
 
             }
