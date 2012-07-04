@@ -35,11 +35,15 @@ using namespace std;
 using namespace logger;
 using namespace opensharding;
 
+const int OSP_PROTOCOL_TCP = 1;
+const int OSP_PROTOCOL_PIPES = 2;
+
 struct ConnectInfo {
-    string virtual_host, host, user, passwd;
+    string osp_vendor, virtual_host, host, osp_domain, target_dbms, target_schema_name, user, passwd;
     unsigned int port;
     const char *unix_socket;
     unsigned long clientflag;
+    int protocol;
 };
 
 
