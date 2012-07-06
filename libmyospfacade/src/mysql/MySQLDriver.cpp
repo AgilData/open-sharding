@@ -588,11 +588,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
                         // construct filename for request pipe
                         char requestPipeName[256];
-                        sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, mysql->db, getpid());
+                        sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, databaseName, getpid());
 
                         // construct filename for response pipe
                         char responsePipeName[256];
-                        sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, mysql->db, getpid());
+                        sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, databaseName, getpid());
 
                         if (xlog.isDebugEnabled()) {
                             xlog.debug(string("Creating ") + string(requestPipeName));
