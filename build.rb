@@ -18,7 +18,7 @@ require 'fileutils'
 
 BRANCH = "master"
 REPOSITORY = "git://git.assembla.com/open-sharding.git"
-BRANCH_LIST = ["HEAD", "logging_changes", "master", "myospbinlog", "mysql_compatibility", "osp-client-host-list", "threaded_fifo", "windows"]
+BRANCH_LIST = ["HEAD", "logging_changes", "osp-virtual-hosts","master", "myospbinlog", "mysql_compatibility", "osp-client-host-list", "threaded_fifo", "windows"]
 BOOST_VER = "1.38.0"
 BOOST_DIR = "boost_1_38_0"
 BOOST_TAR = "boost_1_38_0.tar.gz"

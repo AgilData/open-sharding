@@ -31,6 +31,29 @@ using namespace logger;
 
 Logger &MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
 
+/*
+bool MySQLConnMap::operator==(const ConnectInfo& A, const ConnectInfo& B)
+{  
+
+    bool value=false;
+    if(A->osp_vendor == B->osp_vendor)
+        if(A->virtual_host == B->virtual_host)
+            if(A->host == B->host)
+                if(A->osp_domain == B->osp_domain)
+                    if(A->target_dbms == B->target_dbms)
+                        if(A->target_schema_name == B->target_schema_name)
+                            if(A->user == B->user)
+                                if(A->passwd == B->passwd)
+                                    if(A->port == B->port)
+                                        if(A->unix_socket == B->unix_socket)
+                                            if(A->clientflag == B->clientflag)
+                                                if(A->protocol == B->protocol)
+                                                    value=true;
+    return value;
+
+}
+*/
+
 MySQLConnMap::MySQLConnMap() {
     pid = getpid();
     if (_log.isTraceEnabled()) {
