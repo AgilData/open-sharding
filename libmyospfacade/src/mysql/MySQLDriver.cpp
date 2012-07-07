@@ -1155,7 +1155,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         return NULL;
     }
 }
-
+}
 
 int mysql_select_db_actual(MYSQL *mysql, const char *db) {
     //trace("mysql_select_db", mysql);
