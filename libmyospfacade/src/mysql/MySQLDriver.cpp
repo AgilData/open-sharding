@@ -757,7 +757,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + toString(protocol) + string(",")
+                + string("protocol=") + Util::toString(protocol) + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
