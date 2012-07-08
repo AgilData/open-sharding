@@ -1094,7 +1094,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     if (ospMode){
 
-        if (mysql->db != NULL && strcmp(mysql->db, db)==0)
+        if (mysql->db != NULL && strcmp(mysql->db, db)==0) {
             if (xlog.isDebugEnabled()) {
                     xlog.debug("mysql_select_db() re-using existing connection");
                 }
@@ -1197,7 +1197,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             delete [] params;
             return result;
         }
-         else {
+        else {
             return mysql_select_db_actual(mysql, db);
         }
     }
