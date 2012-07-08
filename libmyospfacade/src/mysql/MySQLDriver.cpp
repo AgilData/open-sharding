@@ -598,7 +598,7 @@ int do_mysql_connect(MYSQL *mysql, const char *db)
             ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
             // store the OSP connection for all future interaction with this OSP server for this database
-            getResourceMap()->setOSPConn(databaseName, ospConn);
+            getResourceMap()->setOSPConn(info->target_schema_name, ospConn);
 
             // delete the wire response now we have the info
             delete wireResponse;
@@ -742,6 +742,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
 
             if (xlog.isDebugEnabled()) {
+                char buffer [33];
                 xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
                 + string("virtual-host=") + info->virtual_host + string(", ")
@@ -957,7 +958,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 log_entry_for_analyser("", (void *) mysql, 0,
                         "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
                         "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8);
+                        "unsigned long clientflag)", params, 8, "", tstart , tend);
                 delete [] params;
             }
             else {
