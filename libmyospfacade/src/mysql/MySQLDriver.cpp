@@ -456,6 +456,195 @@ const char * mysql_sqlstate(MYSQL *mysql) {
     return conn->mysql_sqlstate(mysql);
 }
 
+/******************************************************************/
+/*************Added function do_mysql_connect****************/
+/******************************************************************/
+
+int do_mysql_connect(MYSQL *mysql, const char *db)
+{
+    int result = 0;
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+    }
+
+    if (!getMySQLClient()->init()) {
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
+        xlog.error("failed to init mysqlClient");
+        result = -1;
+        return result;
+    }
+
+    MySQLAbstractConnection *conn = getConnection(mysql, false);
+
+    try {
+
+        // get the connection info that should have been stored in the previous call to mysql_real_connect()
+
+        ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
+
+        if (info == NULL) {
+            xlog.error("No ConnInfo in map");
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
+            result = -1;
+            return result;
+        }
+
+        if (mysql->db!=NULL) {
+            if (strlen(mysql->db) == 0) {
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
+                result = -1;
+                return result;
+            }
+            //Check for osp: in database name for attempts to use deprecated functionality.
+            if (strncmp(mysql->db, "osp:", 4)==0) {
+                //setErrorState writes message to xlog.error()
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
+                result = -1;
+                return result;
+            }
+        }
+
+        if (xlog.isDebugEnabled()) {
+             xlog.debug("Creating OSP connection");
+        }
+
+        // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
+        boost::mutex::scoped_lock lock(initMutex);
+
+        // get named pipe connection for this osp database
+        OSPConnection *ospConn = getResourceMap()->getOSPConn(info->target_schema_name);
+        if (!ospConn) {
+
+            // construct filename for request pipe
+            char requestPipeName[256];
+            sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, mysql->db, getpid());
+
+            // construct filename for response pipe
+            char responsePipeName[256];
+            sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, mysql->db, getpid());
+
+            if (xlog.isDebugEnabled()) {
+                xlog.debug(string("Creating ") + string(requestPipeName));
+            }
+
+            // delete first just in case there was an issue before
+            unlink(requestPipeName);
+
+            umask(0);
+            if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
+                perror("Error creating pipe");
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (request)", "OSP01");
+                result = -1;
+                return result;
+            }
+
+            // delete first just in case there was an issue before
+            unlink(responsePipeName);
+
+            umask(0);
+            if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+                xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("'"));
+                perror("Error creating pipe");
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (response)", "OSP01");
+
+                // important that we delete the request pipe
+                unlink(requestPipeName);
+
+                result = -1;
+                return result;
+            }
+
+            // create TCP connection
+            OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
+
+            // prepare an OSPConnectRequest with the names of the named pipe files
+            OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
+            request.setRequestPipe(requestPipeName);
+            request.setResponsePipe(responsePipeName);
+
+            OSPWireResponse* wireResponse = NULL;
+            try {
+                wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+                if (wireResponse->isErrorResponse()) {
+                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                    delete wireResponse;
+                    ospTcpConn->stop();
+                    delete ospTcpConn;
+
+                    // important that we delete the pipes as the next attempt will try and create them again
+                    unlink(requestPipeName);
+                    unlink(responsePipeName);
+
+                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection refused", "OSP01");
+                    result = -1;
+                    return result;
+                }
+            } catch (...) {
+                xlog.error("OSP communication error - OSP process dead?");
+
+                // important that we delete the pipes as the next attempt will try and create them again
+                unlink(requestPipeName);
+                unlink(responsePipeName);
+
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP communications error", "OSP01");
+                result = -1;
+                return result;
+            }
+
+            // now connect via named pipes
+            OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
+            ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
+
+            // store the OSP connection for all future interaction with this OSP server for this database
+            getResourceMap()->setOSPConn(databaseName, ospConn);
+
+            // delete the wire response now we have the info
+            delete wireResponse;
+
+            // close the temporary TCP connection
+            ospTcpConn->stop();
+            delete ospTcpConn;
+            
+        }
+
+        // create MySQL OSP connection object
+        try {
+            conn = new MySQLOSPConnection(info->host, info->port, mysql->db, info->user, info->passwd, getResourceMap(), ospConn);
+        }
+        catch (...) {
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
+            result = -1;
+            return result;
+        }
+
+        // store mapping from the MYSQL structure to the ODBC connection
+        getResourceMap()->setConnection(mysql, conn);
+
+        // success
+        getResourceMap()->clearErrorState(mysql);
+
+        if (xlog.isDebugEnabled()) {
+            xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+        }
+
+                
+
+    } catch (const char *exception) {
+        xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
+        result = -1;
+        return result;
+    } catch (...) {
+        xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
+        result = -1;
+        return result;
+    }
+
+}
+
 /********************************************************************************/
 /****This is only a temporary fix, the new 2.6 MyOSP will not have this issue.***/
 /********************************************************************************/
@@ -560,7 +749,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + itoa(info->protocol) + string(",")
+                + string("protocol=") + itoa(info->protocol,buffer,10) + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
@@ -627,14 +816,14 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 log_entry_for_analyser("", (void *) mysql, 0,
                         "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
                         "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8);
+                        "unsigned long clientflag)", params, 8,"", &tstart, &tend);
                 delete [] params;
 
             }   
             else {
                 if (databaseName != "") {
                      if (db != NULL) {
-                        if (-1 == mysql_select_db(mysql, databaseName.c_str())) {
+                        if (-1 == do_mysql_connect(mysql, databaseName.c_str())) {
                             setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
                             return NULL;
                         }
@@ -867,194 +1056,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB [3]", "OSP01");
         return NULL;
     }
-}
-/******************************************************************/
-/*************Added function for mysql_real_connect****************/
-/******************************************************************/
-
-int do_mysql_connect(MYSQL *mysql, const char *db)
-{
-    int result = 0;
-    if (xlog.isDebugEnabled()) {
-        xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
-    }
-
-    if (!getMySQLClient()->init()) {
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
-        xlog.error("failed to init mysqlClient");
-        result = -1;
-        return result;
-    }
-
-    MySQLAbstractConnection *conn = getConnection(mysql, false);
-
-    try {
-
-        // get the connection info that should have been stored in the previous call to mysql_real_connect()
-
-        ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
-
-        if (info == NULL) {
-            xlog.error("No ConnInfo in map");
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
-            result = -1;
-            return result;
-        }
-
-        if (mysql->db!=NULL) {
-            if (strlen(mysql->db) == 0) {
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
-                rresult = -1;
-                return result;
-            }
-            //Check for osp: in database name for attempts to use deprecated functionality.
-            if (strncmp(mysql->db, "osp:", 4)==0) {
-                //setErrorState writes message to xlog.error()
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
-                result = -1;
-                return result;
-            }
-        }
-
-        if (xlog.isDebugEnabled()) {
-             xlog.debug("Creating OSP connection");
-        }
-
-        // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
-        boost::mutex::scoped_lock lock(initMutex);
-
-        // get named pipe connection for this osp database
-        OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
-        if (!ospConn) {
-
-            // construct filename for request pipe
-            char requestPipeName[256];
-            sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, mysql->db, getpid());
-
-            // construct filename for response pipe
-            char responsePipeName[256];
-            sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, mysql->db, getpid());
-
-            if (xlog.isDebugEnabled()) {
-                xlog.debug(string("Creating ") + string(requestPipeName));
-            }
-
-            // delete first just in case there was an issue before
-            unlink(requestPipeName);
-
-            umask(0);
-            if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
-                perror("Error creating pipe");
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (request)", "OSP01");
-                result = -1;
-                return result;
-            }
-
-            // delete first just in case there was an issue before
-            unlink(responsePipeName);
-
-            umask(0);
-            if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("'"));
-                perror("Error creating pipe");
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (response)", "OSP01");
-
-                // important that we delete the request pipe
-                unlink(requestPipeName);
-
-                result = -1;
-                return result;
-            }
-
-            // create TCP connection
-            OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
-
-            // prepare an OSPConnectRequest with the names of the named pipe files
-            OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
-            request.setRequestPipe(requestPipeName);
-            request.setResponsePipe(responsePipeName);
-
-            OSPWireResponse* wireResponse = -1;
-            try {
-                wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
-                if (wireResponse->isErrorResponse()) {
-                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-                    delete wireResponse;
-                    ospTcpConn->stop();
-                    delete ospTcpConn;
-
-                    // important that we delete the pipes as the next attempt will try and create them again
-                    unlink(requestPipeName);
-                    unlink(responsePipeName);
-
-                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection refused", "OSP01");
-                    rresult = -1;
-                    return result;
-                }
-            } catch (...) {
-                xlog.error("OSP communication error - OSP process dead?");
-
-                // important that we delete the pipes as the next attempt will try and create them again
-                unlink(requestPipeName);
-                unlink(responsePipeName);
-
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP communications error", "OSP01");
-                result = -1;
-                return result;
-            }
-
-            // now connect via named pipes
-            OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
-            ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
-
-            // store the OSP connection for all future interaction with this OSP server for this database
-            getResourceMap()->setOSPConn(databaseName, ospConn);
-
-            // delete the wire response now we have the info
-            delete wireResponse;
-
-            // close the temporary TCP connection
-            ospTcpConn->stop();
-            delete ospTcpConn;
-            
-        }
-
-        // create MySQL OSP connection object
-        try {
-            conn = new MySQLOSPConnection(info->host, info->port, mysql->db, info->user, info->passwd, getResourceMap(), ospConn);
-        }
-        catch (...) {
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
-            result = -1;
-            return result;
-        }
-
-        // store mapping from the MYSQL structure to the ODBC connection
-        getResourceMap()->setConnection(mysql, conn);
-
-        // success
-        getResourceMap()->clearErrorState(mysql);
-
-        if (xlog.isDebugEnabled()) {
-            xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
-        }
-
-                
-
-    } catch (const char *exception) {
-        xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-        result = -1;
-        return result;
-    } catch (...) {
-        xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
-        result = -1;
-        return result;
-    }
-
 }
 
 /**************************************/
