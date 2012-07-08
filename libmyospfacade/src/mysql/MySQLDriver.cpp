@@ -470,6 +470,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
     try {
 
+        if (conn == NULL)
+        {
+          xlog.error("MySQLAbstractConnection is NULL")
+          setErrorState(mysql, CR_UNKNOWN_ERROR, "Null Connection", "OSP01");
+          result = -1;
+          return result;
+        }
+
         if (info == NULL) {
             xlog.error("No ConnInfo in map");
             setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
@@ -477,14 +485,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
             return result;
         }
 
-        if (mysql->db!=NULL) {
+        if (db!=NULL) {
             if (strlen(mysql->db) == 0) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
                 result = -1;
                 return result;
             }
             //Check for osp: in database name for attempts to use deprecated functionality.
-            if (strncmp(mysql->db, "osp:", 4)==0) {
+            if (strncmp(db, "osp:", 4)==0) {
                 //setErrorState writes message to xlog.error()
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
                 result = -1;
@@ -599,7 +607,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
         // create MySQL OSP connection object
         try {
-            conn = new MySQLOSPConnection(info->host, info->port, mysql->db, info->user, info->passwd, getResourceMap(), ospConn);
+            conn = new MySQLOSPConnection(info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
@@ -653,6 +661,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
         }
         
+        if (!getMySQLClient()->init()) {
+          setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
+          xlog.error("failed to init mysqlClient");
+          return -1;
+        }
+
         ConnectInfo *info = new ConnectInfo();
         info->virtual_host=(_host==NULL ? string("") : string(_host));
         
