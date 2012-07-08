@@ -1154,7 +1154,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                   getResourceMap()->setConnectInfo(mysql, info);
                   
 
-                result = do_mysql_connect(mysql,db, info, conn);
+                result = do_osp_connect(mysql,db, info, conn);
 
                 return result;
             }
