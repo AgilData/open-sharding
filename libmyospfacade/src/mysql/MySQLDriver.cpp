@@ -460,7 +460,7 @@ const char * mysql_sqlstate(MYSQL *mysql) {
 /*************Added function do_osp_connect****************/
 /******************************************************************/
 
-int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLNativeConnection *conn)
+int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstractConnection *conn)
 {
     int result = 0;
     if (xlog.isDebugEnabled()) {
