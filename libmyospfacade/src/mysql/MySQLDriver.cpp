@@ -740,7 +740,9 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             info->target_dbms = target_dbms;
             info->target_schema_name = databaseName;
 
-
+           stringstream sp;//create a stringstream
+           sp << protocol;//add number to the stream
+           
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
@@ -749,7 +751,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + sc + string(",")
+                + string("protocol=") + sp.str() + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
