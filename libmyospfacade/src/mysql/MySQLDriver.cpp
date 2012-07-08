@@ -470,20 +470,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
     try {
 
-        if (conn == NULL)
-        {
-          xlog.error("MySQLAbstractConnection is NULL")
-          setErrorState(mysql, CR_UNKNOWN_ERROR, "Null Connection", "OSP01");
-          result = -1;
-          return result;
-        }
 
-        if (info == NULL) {
-            xlog.error("No ConnInfo in map");
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
-            result = -1;
-            return result;
-        }
 
         if (db!=NULL) {
             if (strlen(mysql->db) == 0) {
@@ -498,6 +485,22 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 result = -1;
                 return result;
             }
+        }
+
+
+        if (info == NULL) {
+            xlog.error("No ConnInfo in map");
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
+            result = -1;
+            return result;
+        }
+
+        if (conn == NULL)
+        {
+          xlog.error("MySQLAbstractConnection is NULL")
+          setErrorState(mysql, CR_UNKNOWN_ERROR, "Null Connection", "OSP01");
+          result = -1;
+          return result;
         }
 
         if (xlog.isDebugEnabled()) {
@@ -785,13 +788,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 // reset reference
                 conn = NULL;
 
-                // store the connection info in the map again
-                getResourceMap()->setConnectInfo(mysql, info);
             }
-            else {
-                // store connection info so it can be retrieved in separate call
-                getResourceMap()->setConnectInfo(mysql, info);
-            }
+
+            // store the connection info in the map again
+            getResourceMap()->setConnectInfo(mysql, info);
+           
 
             if(MyOSPConfig::isShardAnalyze()) {
                 struct timeval tstart; gettimeofday(&tstart, NULL);
@@ -818,11 +819,10 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             }   
             else {
-                        if (-1 == do_osp_connect(mysql, databaseName.c_str(), info, conn)) {
-                            setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
-                            return NULL;
-                        }
-           
+                  if (-1 == do_osp_connect(mysql, databaseName.c_str(), info, conn)) {
+                      setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
+                      return NULL;
+                  }
             }
         }
         else { //This is also known as delegate mode...
@@ -864,13 +864,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
                     }
 
-                    if (!getMySQLClient()->init()) {
-                        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
-                        xlog.error("failed to init mysqlClient");
-                        return NULL;
-                    }
-
-                    MySQLAbstractConnection *conn = getConnection(mysql, false);
+                    MySQLAbstractConnection *conn = NULL;
 
                     try {
 
@@ -959,13 +953,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
                     }
 
-                    if (!getMySQLClient()->init()) {
-                        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
-                        xlog.error("failed to init mysqlClient");
-                        return NULL;
-                    }
-
-                    MySQLAbstractConnection *conn = getConnection(mysql, false);
+                    MySQLAbstractConnection *conn = NULL;
 
                     try {
 
@@ -1065,12 +1053,6 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
     }
 
-    if (!getMySQLClient()->init()) {
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
-        xlog.error("failed to init mysqlClient");
-        return -1;
-    }
-
     // get the connection info that should have been stored in the previous call to mysql_real_connect()
     ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
 
@@ -1089,13 +1071,11 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
       return -1;
     }
 
-
-
     bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
 
     if (ospMode){
 
-        if (mysql->db != NULL && strcmp(mysql->db, db)==0) {
+        if (strcmp(info->target_schema_name, db)==0) {
             if (xlog.isDebugEnabled()) {
                     xlog.debug("mysql_select_db() re-using existing connection");
                 }
@@ -1174,7 +1154,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
             }
         }
     }
-    else {
+    else { //This is also delegate mode
         if(MyOSPConfig::isShardAnalyze()) {
             struct timeval tstart; gettimeofday(&tstart, NULL);
             //ADD NEW CODE
@@ -1184,8 +1164,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                   xlog.debug("Creating native connection");
               }
 
-              // create native connection
-              conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
+              conn->mysql_select_db(mysql,db);
 
               // store mapping from the MYSQL structure to the native connection
               getResourceMap()->setConnection(mysql, conn);
@@ -1238,9 +1217,8 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                   xlog.debug("Creating native connection");
               }
 
-              // create native connection
-              conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
-
+              conn->mysql_select_db(mysql,db);
+              
               // store mapping from the MYSQL structure to the native connection
               getResourceMap()->setConnection(mysql, conn);
 
