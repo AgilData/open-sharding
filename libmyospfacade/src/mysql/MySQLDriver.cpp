@@ -573,8 +573,37 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 delete old_info;
             }
 
-            // store connection info so it can be retrieved in separate call
-            getResourceMap()->setConnectInfo(mysql, info);
+            MySQLAbstractConnection *conn = getConnection(mysql, false);
+
+            if (conn) {
+
+                xlog.info(
+                    string("mysql_real_connect() switching from ")
+                    + (mysql->db ? string(mysql->db) : string("NULL"))
+                    + string(" to ")
+                    + (db ? string(db) : string("NULL"))
+                );
+
+                // a different db is being selected so we need to close the old connection now
+                conn->mysql_close(mysql);
+
+                // erase all resources for this mysql handle
+                getResourceMap()->erase(mysql);
+
+                // delete the connection
+                delete conn;
+
+                // reset reference
+                conn = NULL;
+
+                // store the connection info in the map again
+                getResourceMap()->setConnectInfo(mysql, info);
+            }
+            else
+            {
+                // store connection info so it can be retrieved in separate call
+                getResourceMap()->setConnectInfo(mysql, info);
+            }
 
             if(MyOSPConfig::isShardAnalyze()) {
                 struct timeval tstart; gettimeofday(&tstart, NULL);
@@ -839,9 +868,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         return NULL;
     }
 }
-
 /******************************************************************/
-/*************Added function for do_mysql_connect****************/
+/*************Added function for mysql_real_connect****************/
 /******************************************************************/
 
 int do_mysql_connect (MYSQL *mysql, const char *db)
@@ -1029,24 +1057,146 @@ int do_mysql_connect (MYSQL *mysql, const char *db)
 
 }
 
+/**************************************/
+/*****New Method for Mysql_Select_DB***/
+/**************************************/
 int mysql_select_db(MYSQL *mysql, const char *db) {
-  //Work to be done in mysql_select_db makes adding shard logging directly complicated.
     int result;
-    if(MyOSPConfig::isShardAnalyze()) {
-      struct timeval tstart; gettimeofday(&tstart, NULL);
-        result = mysql_select_db_actual(mysql, db);
-      struct timeval tend; gettimeofday(&tend, NULL);
-      string * params = new string[2];
-      params[0] = Util::toString(mysql);
-      params[1] = (db ? db : "NULL");
-      log_entry_for_analyser("", (void *) mysql, 0,
-          "mysql_select_db(MYSQL *mysql, const char *db)",
-          params, 2, "", &tstart, &tend);
-      delete [] params;
-      return result;
+
+    if (db==NULL) {
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Passed NULL database name", "OSP01");
+        xlog.error("failed to init mysqlClient");
+        return -1;
     }
-    else {
-        return mysql_select_db_actual(mysql, db);
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+    }
+
+    if (!getMySQLClient()->init()) {
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
+        xlog.error("failed to init mysqlClient");
+        return -1;
+    }
+
+    // get the connection info that should have been stored in the previous call to mysql_real_connect()
+    ConnectInfo *info = getResourceMap()->getConnectInfo(mysql);
+
+    if (info == NULL) {
+        xlog.error("No ConnInfo in map");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
+        return -1;
+    }
+    
+    bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
+
+    if (ospMode){
+
+        if (mysql->db != NULL && strcmp(mysql->db, db)==0)
+            if (xlog.isDebugEnabled()) {
+                    xlog.debug("mysql_select_db() re-using existing connection");
+                }
+            // success
+            return 0;
+        }
+        else
+        {
+            
+            if(MyOSPConfig::isShardAnalyze()) {
+                struct timeval tstart; gettimeofday(&tstart, NULL);
+                
+                MySQLAbstractConnection *conn = getConnection(mysql, false);
+
+                if (conn) {
+
+                    xlog.info(
+                        string("mysql_select_db() switching from ")
+                        + (mysql->db ? string(mysql->db) : string("NULL"))
+                        + string(" to ")
+                        + (db ? string(db) : string("NULL"))
+                    );
+
+                    // a different db is being selected so we need to close the old connection now
+                    conn->mysql_close(mysql);
+
+                    // erase all resources for this mysql handle
+                    getResourceMap()->erase(mysql);
+
+                    // delete the connection
+                    delete conn;
+
+                    // reset reference
+                    conn = NULL;
+
+                    // store the connection info in the map again
+                    getResourceMap()->setConnectInfo(mysql, info);
+                    
+                }
+
+                result = do_mysql_connect(mysql,db);
+
+                struct timeval tend; gettimeofday(&tend, NULL);
+                string * params = new string[2];
+                params[0] = Util::toString(mysql);
+                params[1] = (db ? db : "NULL");
+                log_entry_for_analyser("", (void *) mysql, 0,
+                        "mysql_select_db(MYSQL *mysql, const char *db)",
+                        params, 2, "", &tstart, &tend);
+                delete [] params;
+                return result;
+            }
+            else {
+                MySQLAbstractConnection *conn = getConnection(mysql, false);
+
+                if (conn) {
+
+                    xlog.info(
+                        string("mysql_select_db() switching from ")
+                        + (mysql->db ? string(mysql->db) : string("NULL"))
+                        + string(" to ")
+                        + (db ? string(db) : string("NULL"))
+                    );
+
+                    // a different db is being selected so we need to close the old connection now
+                    conn->mysql_close(mysql);
+
+                    // erase all resources for this mysql handle
+                    getResourceMap()->erase(mysql);
+
+                    // delete the connection
+                    delete conn;
+
+                    // reset reference
+                    conn = NULL;
+
+                    // store the connection info in the map again
+                    getResourceMap()->setConnectInfo(mysql, info);
+                    
+                }
+
+                result = do_mysql_connect(mysql,db);
+
+                return result;
+            }
+        }
+    }
+    else
+    {
+        if(MyOSPConfig::isShardAnalyze()) {
+            struct timeval tstart; gettimeofday(&tstart, NULL);
+            result = mysql_select_db_actual(mysql, db);
+            struct timeval tend; gettimeofday(&tend, NULL);
+            string * params = new string[2];
+            params[0] = Util::toString(mysql);
+            params[1] = (db ? db : "NULL");
+            log_entry_for_analyser("", (void *) mysql, 0,
+                    "mysql_select_db(MYSQL *mysql, const char *db)",
+                    params, 2, "", &tstart, &tend);
+            delete [] params;
+            return result;
+        }
+         else {
+            return mysql_select_db_actual(mysql, db);
+        }
     }
 }
 
