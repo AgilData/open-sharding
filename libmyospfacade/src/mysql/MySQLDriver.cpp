@@ -643,6 +643,8 @@ int do_mysql_connect(MYSQL *mysql, const char *db)
         return result;
     }
 
+    return result;
+
 }
 
 /********************************************************************************/
