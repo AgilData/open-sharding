@@ -560,7 +560,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + info->protocol + string(",")
+                + string("protocol=") + itoa(info->protocol) + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
@@ -872,7 +872,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 /*************Added function for mysql_real_connect****************/
 /******************************************************************/
 
-int do_mysql_connect (MYSQL *mysql, const char *db)
+int do_mysql_connect(MYSQL *mysql, const char *db)
 {
     int result = 0;
     if (xlog.isDebugEnabled()) {
