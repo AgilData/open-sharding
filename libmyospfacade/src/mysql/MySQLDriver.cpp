@@ -742,7 +742,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
 
             if (xlog.isDebugEnabled()) {
-                char buffer [33];
                 xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
                 + string("virtual-host=") + info->virtual_host + string(", ")
@@ -750,7 +749,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + itoa(info->protocol,buffer,10) + string(",")
+                + string("protocol=") + sc + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
@@ -958,7 +957,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 log_entry_for_analyser("", (void *) mysql, 0,
                         "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
                         "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8, "", tstart , tend);
+                        "unsigned long clientflag)", params, 8, "", &tstart, &tend);
                 delete [] params;
             }
             else {
