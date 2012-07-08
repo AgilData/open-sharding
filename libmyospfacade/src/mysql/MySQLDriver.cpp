@@ -667,7 +667,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         if (!getMySQLClient()->init()) {
           setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to load MySQL driver", "OSP01");
           xlog.error("failed to init mysqlClient");
-          return -1;
+          return NULL;
         }
 
         ConnectInfo *info = new ConnectInfo();
@@ -747,9 +747,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             info->target_dbms = target_dbms;
             info->target_schema_name = databaseName;
 
-            //Done in order to provide log output.
-            stringstream sp;
-            sp << protocol;
+           
            
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect(")
@@ -759,7 +757,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + sp.str() + string(",")
+                + string("protocol=") + toString(protocol) + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
@@ -1075,7 +1073,10 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
 
     if (ospMode){
 
-        if (strcmp(info->target_schema_name, db)==0) {
+        //Done for strcmp
+        const char * c = info->target_schema_name.c_str();
+
+        if (strcmp(c, db)==0) {
             if (xlog.isDebugEnabled()) {
                     xlog.debug("mysql_select_db() re-using existing connection");
                 }
@@ -1218,7 +1219,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
               }
 
               conn->mysql_select_db(mysql,db);
-              
+
               // store mapping from the MYSQL structure to the native connection
               getResourceMap()->setConnection(mysql, conn);
 
