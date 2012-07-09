@@ -474,11 +474,12 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         xlog.debug("Check 1");
 
         if (db!=NULL) {
-            if (strlen(mysql->db) == 0) {
+            if (strlen(db) == 0) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
                 result = -1;
                 return result;
             }
+
             xlog.debug("Check 2");
             //Check for osp: in database name for attempts to use deprecated functionality.
             if (strncmp(db, "osp:", 4)==0) {
