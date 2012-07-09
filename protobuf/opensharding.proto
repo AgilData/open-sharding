@@ -31,6 +31,15 @@ message OSPCreateStatementResponse {
 
 }
 
+message OSPCloseStatementRequest {
+    required string connID = 1;
+    required int32 stmtID = 2;
+}
+
+message OSPCloseStatementResponse {
+    required int32 stmtID = 1;
+}
+
 message OSPExecuteRequest {
     required string connID = 1;
     required int32  stmtID = 2;
@@ -59,6 +68,7 @@ message OSPFetchResultsResponse {
     repeated string columnNames  = 2;
     repeated int32  columnTypes  = 3 [packed=true];
     repeated string columnValues = 4;
+    repeated string tableNames   = 5;
 }
 
 message OSPDisconnectRequest {
@@ -71,8 +81,8 @@ message OSPDisconnectResponse {
 
 // if a request fails due to an unexpected error, OSPWireResponse will contain an OSPErrorResponse
 message OSPErrorResponse {
-    required int32  errorCode;
-    required string errorMessage;
+    required int32  errorCode = 1;
+    required string errorMessage = 2;
 }
 
 message OSPWireRequest {
@@ -83,6 +93,7 @@ message OSPWireRequest {
     execute         = 3;
     fetchResults    = 4;
     disconnect      = 5;
+    closeStatement  = 6;
   }
 
   required int32       requestID   = 1;
@@ -95,6 +106,7 @@ message OSPWireRequest {
   optional OSPExecuteRequest         executeRequest         = 102;
   optional OSPFetchResultsRequest    fetchResultsRequest    = 103;
   optional OSPDisconnectRequest      disconnectRequest      = 104;
+  optional OSPCloseStatementRequest  closeStatementRequest  = 105;
 }
 
 message OSPWireResponse {
@@ -105,6 +117,7 @@ message OSPWireResponse {
     execute         = 3;
     fetchResults    = 4;
     disconnect      = 5;
+    closeStatement  = 6;
   }
 
   // required header information
@@ -118,4 +131,5 @@ message OSPWireResponse {
   optional OSPExecuteResponse         executeResponse         = 102;
   optional OSPFetchResultsResponse    fetchResultsResponse    = 103;
   optional OSPDisconnectResponse      disconnectResponse      = 104;
+  optional OSPCloseStatementResponse  closeStatementResponse  = 105;
 }
