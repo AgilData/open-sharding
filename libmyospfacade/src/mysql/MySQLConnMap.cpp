@@ -206,14 +206,13 @@ void MySQLConnMap::clearErrorState(MYSQL *mysql) {
 
 
 void MySQLConnMap::setOSPConn(string virtualHost, OSPConnection *ospConn) {
-    LOCK_MUTEX
-    ospConnMap[virtualHost] = ospConn;
+    LOCK_MUTEX
+    ospConnMap[virtualHost] = ospConn;
 }
 
 OSPConnection* MySQLConnMap::getOSPConn(string virtualHost) {
-    LOCK_MUTEX
+    LOCK_MUTEX
     return ospConnMap[virtualHost];
 }
-
 
 
