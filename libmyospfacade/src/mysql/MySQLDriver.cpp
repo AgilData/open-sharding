@@ -602,7 +602,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
             ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
 
             // store the OSP connection for all future interaction with this OSP server for this database
-            getResourceMap()->setOSPConn(info->target_schema_name, ospConn);
+            getResourceMap()->setOSPConn(info->virtual_host, ospConn);
 
             // delete the wire response now we have the info
             delete wireResponse;
