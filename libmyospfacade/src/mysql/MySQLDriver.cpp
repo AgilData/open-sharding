@@ -499,15 +499,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
             result = -1;
             return result;
         }
-        /*
-        if (conn == NULL)
-        {
-          xlog.error("MySQLAbstractConnection is NULL");
-          setErrorState(mysql, CR_UNKNOWN_ERROR, "Null Connection", "OSP01");
-          result = -1;
-          return result;
-        }
-        */
+    
         if (xlog.isDebugEnabled()) {
              xlog.debug("Creating OSP connection");
         }
