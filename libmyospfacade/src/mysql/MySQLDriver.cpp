@@ -471,6 +471,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
     try {
 
 
+        xlog.debug("Check 1");
 
         if (db!=NULL) {
             if (strlen(mysql->db) == 0) {
@@ -478,6 +479,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 result = -1;
                 return result;
             }
+            xlog.debug("Check 2");
             //Check for osp: in database name for attempts to use deprecated functionality.
             if (strncmp(db, "osp:", 4)==0) {
                 //setErrorState writes message to xlog.error()
@@ -486,6 +488,8 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 return result;
             }
         }
+
+         xlog.debug("Check 3");
 
 
         if (info == NULL) {
