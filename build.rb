@@ -33,12 +33,28 @@ LIBMYOSP_TAR = "libmyosp-#{OPERSYS}-#{ARCH}-#{LIBMYOSP_VER}.tar.gz"
 #################################################################################################
 ## Run an operating system command
 #################################################################################################
-def run_command(cmd)
+def run_command(cmd, failonerror=true)
     puts "Executing: #{cmd}"
     if ! system cmd
-        puts "FAILED to execute #{cmd}"
-        exit 1
+        if failonerror
+            raise "FAILED to execute #{cmd}"
+        else
+            puts "FAILED to execute #{cmd}"
+        end
     end
+end
+
+#################################################################################################
+## Generate opensharding.jar from opensharding.proto file
+#################################################################################################
+def generate_opensharding_jar
+  run_command "rm -rf _protobuf"
+  run_command "mkdir _protobuf", false
+  run_command "protoc -I=protobuf --java_out=_protobuf protobuf/opensharding.proto"
+  run_command "mkdir dist", false
+  run_command "rm -f dist/opensharding.jar"
+  run_command "jar cf dist/opensharding.jar -C _protobuf org"
+  #run_command "rm -rf _protobuf"
 end
 
 #################################################################################################
@@ -186,7 +202,12 @@ begin
     end
     
     option = ARGV[0]
-    
+
+    if option == "generate_opensharding_jar"
+        generate_opensharding_jar
+        exit
+    end
+
     username = `whoami`.strip
     if username != 'root'
         puts "This script must be run as the root user (not as '#{username}')"

@@ -2,6 +2,8 @@ cf*.properties
 /bin
 /_classes
 /_temp
+/dist
+/_protobuf
 *.iml
 .idea
 *.d
