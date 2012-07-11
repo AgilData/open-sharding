@@ -1407,7 +1407,29 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
     //trace("mysql_options", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
-        if (xlog.isDebugEnabled()) xlog.debug("Ignoring call to mysql_options and faking success because there is no connection");
+        if (xlog.isDebugEnabled()) {
+
+            const char *optionName = NULL;
+            switch (option) {
+                case MYSQL_INIT_COMMAND:
+                    optionName = "MYSQL_INIT_COMMAND";
+                    break;
+                case MYSQL_SET_CHARSET_DIR:
+                    optionName = "MYSQL_SET_CHARSET_DIR";
+                    break;
+                case MYSQL_SET_CHARSET_NAME:
+                    optionName = "MYSQL_SET_CHARSET_NAME";
+                    break;
+                default:
+                    optionName = "UNKNOWN";
+                    break;
+            }
+
+            xlog.debug(string("Ignoring call to mysql_options for option '")
+                        + string(optionName)
+                        + string("' and faking success because there is no connection"));
+        }
+
         return 0;
     }
     return conn->mysql_options(mysql, option, arg);
