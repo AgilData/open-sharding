@@ -470,9 +470,6 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
     try {
 
-
-        xlog.debug("Check 1");
-
         if (db!=NULL) {
             if (strlen(db) == 0) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
@@ -480,17 +477,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 return result;
             }
 
-            xlog.debug("Check 2");
-            //Check for osp: in database name for attempts to use deprecated functionality.
-            if (strncmp(db, "osp:", 4)==0) {
-                //setErrorState writes message to xlog.error()
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
-                result = -1;
-                return result;
-            }
-        }
-
-         xlog.debug("Check 3");
+       }
+          //Check for osp: in database name for attempts to use deprecated functionality.
+          if (strncmp(db, "osp:", 4)==0) {
+              //setErrorState writes message to xlog.error()
+              setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
+              result = -1;
+              return result;
+          }
 
 
         if (info == NULL) {
@@ -622,18 +616,18 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         getResourceMap()->clearErrorState(mysql);
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+            xlog.debug(string("do_osp_select(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
         }
 
                 
 
     } catch (const char *exception) {
-        xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
+        xlog.error(string("do_osp_select() failed due to exception: ") + exception);
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
         result = -1;
         return result;
     } catch (...) {
-        xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+        xlog.error(string("do_osp_connect(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
         result = -1;
         return result;
