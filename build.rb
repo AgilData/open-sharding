@@ -53,8 +53,9 @@ def generate_opensharding_jar
   run_command "protoc -I=protobuf --java_out=_protobuf protobuf/opensharding.proto"
   run_command "mkdir dist", false
   run_command "rm -f dist/opensharding.jar"
+  run_command "javac _protobuf/org/opensharding/protocol/Opensharding.java -d _protobuf/ -classpath 3rdparty/protobuf/protobuf-java-2.4.1.jar"
   run_command "jar cf dist/opensharding.jar -C _protobuf org"
-  #run_command "rm -rf _protobuf"
+  run_command "rm -rf _protobuf"
 end
 
 #################################################################################################
