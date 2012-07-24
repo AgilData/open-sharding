@@ -41,6 +41,7 @@ public:
 
     unsigned char getMessageType() { return 0xa6; }
     OSPMessage *getResponse() { return response; }
+    int getRequestID() {return requestID;}
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
 

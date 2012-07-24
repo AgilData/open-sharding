@@ -15,3 +15,6 @@ make clean; make sixteen || exit 2;       cp libmyosp* $LIB_DIR
 make clean; make sixteen_r || exit 2;     cp libmyosp* $LIB_DIR
 #make clean; make sixteen_debug || exit 2; cp libmyosp* $LIB_DIR/DEBUG/
 
+make clean; make eighteen || exit 2;       cp libmyosp* $LIB_DIR
+make clean; make eighteen_r || exit 2;     cp libmyosp* $LIB_DIR
+#make clean; make sixteen_debug || exit 2; cp libmyosp* $LIB_DIR/DEBUG/

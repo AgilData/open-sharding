@@ -19,7 +19,51 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
+#include <map>
+
+// if we want to support all mysql symbols we need to *at least* import these headers, but
+// these cause conflicts with boost min/max symbols
+//#include <my_global.h>
+//#include <m_ctype.h>
+
+//#include <mysql.h>
+//#include <errmsg.h>
+
+#include <string>
+#include <iostream>
+#include <fstream>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <syslog.h>
+
+#include <boost/thread/mutex.hpp>
+
+//#include <mysql/BuildInfo.h>
+//#include <mysql/MySQLClient.h>
+//#include <mysql/MySQLAbstractConnection.h>
+//#include <mysql/MySQLOSPConnection.h>
+//#include <mysql/MySQLNativeConnection.h>
+#include <opensharding/OSPConnection.h>
+#include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
+#include <opensharding/OSPWireRequest.h>
+#include <opensharding/OSPConnectRequest.h>
+#include <opensharding/OSPWireResponse.h>
+#include <opensharding/OSPConnectResponse.h>
+#include <opensharding/OSPErrorResponse.h>
+#include <logger/Logger.h>
+//#include <myutil/MyOSPLogger.h>
+//#include <myutil/MyOSPConfig.h>
+#include <util/Util.h>
+
+//#include <mysql/MySQLDriver.h>
+//#include <mysql/MySQLAbstractConnection.h>
+//#include <mysql/MySQLConnMap.h>
+//#include <mysql/MySQLErrorState.h>
 
 #include <stdio.h>
 
@@ -28,10 +72,8 @@
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPFileOutputStream.h>
 #include <opensharding/OSPMessageDecoder.h>
-#include <opensharding/OSPWireRequest.h>
-#include <opensharding/OSPWireResponse.h>
 #include <opensharding/OSPByteBuffer.h>
-#include <util/Util.h>
+
 
 #define DEBUG log.isDebugEnabled()
 
@@ -43,7 +85,11 @@ namespace opensharding {
 
 logger::Logger &OSPNamedPipeConnection::log = Logger::getLogger("OSPNamedPipeConnection");
 
-OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, string responsePipeFilename) {
+
+
+
+// threadedResponseFifo must be set to true for multithreaded apps
+OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, string responsePipeFilename, bool threadedResponseFifo) {
 
     if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
     requestPipe  = fopen(requestPipeFilename.c_str(), "wb");
@@ -62,6 +108,93 @@ OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, strin
     this->requestPipeFilename  = requestPipeFilename;
     this->responsePipeFilename = responsePipeFilename;
 
+    m_fifosCreated = false;
+    m_fifosOpened = false;
+
+    requestPipe = NULL;
+    responsePipe = NULL;
+
+    m_threadedResponseFifo = threadedResponseFifo;
+
+    is = NULL;
+    os = NULL;
+
+    bufferSize = 8192;
+    buffer = new char[bufferSize];
+
+    m_thread=NULL;
+
+    nextRequestID = 1;
+}
+
+
+OSPNamedPipeConnection::~OSPNamedPipeConnection() {
+    this->stop();
+}
+
+
+int OSPNamedPipeConnection::makeFifos() {
+
+    boost::unique_lock<boost::mutex> lock(m_mutex);
+
+    if (DEBUG) log.debug(string("Creating FIFO ") + requestPipeFilename);
+
+    // delete first just in case there was an issue before
+    unlink(requestPipeFilename.c_str());
+
+    umask(0);
+    if (0 != mkfifo(requestPipeFilename.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+        return OSPNP_CREATE_REQUEST_PIPE_ERROR;
+    }
+
+    if (DEBUG) log.debug(string("Creating FIFO ") + responsePipeFilename);
+
+    // delete first just in case there was an issue before
+    unlink(responsePipeFilename.c_str());
+
+    umask(0);
+    if (0 != mkfifo(responsePipeFilename.c_str(), S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
+
+        // important that we delete the request pipe
+        unlink(requestPipeFilename.c_str());
+
+        return OSPNP_CREATE_RESPONSE_PIPE_ERROR;
+    }
+
+    this->m_fifosCreated = true;
+
+    return OSPNP_SUCCESS;
+}
+
+
+
+void OSPNamedPipeConnection::startResponseThread() {
+    m_thread=new boost::thread(boost::ref(*this));
+}
+
+
+
+int OSPNamedPipeConnection::openFifos() {
+
+    boost::unique_lock<boost::mutex> lock(m_mutex);
+
+    if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
+    requestPipe  = fopen(requestPipeFilename.c_str(), "wb");
+    if (!requestPipe) {
+        log.error("Failed to open request pipe for writing");
+        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
+    }
+
+    if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
+    responsePipe = fopen(responsePipeFilename.c_str(), "rb");
+    if (!responsePipe) {
+        log.error("Failed to open response pipe for reading");
+        fclose(requestPipe);
+        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
+    }
+
+    if (DEBUG) log.debug("Creating pipe I/O streams");
+
     // blocking read
     this->is = new OSPFileInputStream(responsePipe, 0);
 
@@ -70,30 +203,112 @@ OSPNamedPipeConnection::OSPNamedPipeConnection(string requestPipeFilename, strin
 
     this->os = new OSPFileOutputStream(requestPipe, 0); //TODO: specify buffer size
 
-    bufferSize = 8192;
-    buffer = new char[bufferSize];
+    this->m_fifosOpened = true;
 
-    nextRequestID = 1;
+    if (m_threadedResponseFifo && (m_thread == NULL)) {
+        startResponseThread();
+    }
+
+    return OSPNP_SUCCESS;
 }
 
-OSPNamedPipeConnection::~OSPNamedPipeConnection() {
-    this->stop();
-}
 
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message) {
     return sendMessage(message, false);
 }
 
+
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expectACK) {
     return sendMessage(message, expectACK, NULL);
 }
 
+
 OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expectACK, OSPMessageConsumer *consumer) {
 
-    //TODO: add mutex / make thread-safe
+    int requestID = sendOnly(message, expectACK);
+
+    // read responses
+    OSPWireResponse *response = NULL;
+
+    while (true) {
+
+        if (DEBUG) log.debug("BEFORE read message length from response pipe");
+
+        if (m_threadedResponseFifo) {
+            boost::unique_lock<boost::mutex> lock(m_mutex);
+
+            // if there is nothing in the queue that matches this messages request id, relinquish control to other threads
+            while (!((m_responses.count(requestID) > 0) && (m_responses[requestID].size() > 0))) {
+              m_cond.wait(lock);
+            }
+
+            // Grab the response (to return to the caller or send to the consumer), then remove queue entry
+            response = m_responses[requestID].front();
+            m_responses[requestID].pop();
+
+            if (m_responses[requestID].size() == 0) {
+                // If queue empty, remove map entry for that request id.
+                // TODO: Probably best to move this out of the loop for efficiency.
+                m_responses.erase(m_responses.find(requestID)); 
+            }
+
+            if (DEBUG) log.debug("sendMessage (threaded) got response, RequestID=" + Util::toString(requestID));
+
+            m_cond.notify_all();
+        }
+        else {
+            // no background thread, wait for message directly
+            response = dynamic_cast<OSPWireResponse*>(waitForResponse());
+            if (DEBUG) log.debug("sendMessage (non-threaded) got response, RequestID=" + Util::toString(requestID));
+        }
+
+        if (response == NULL) {
+            break;
+        }
+
+        bool isFinalResponse = response->isFinalResponse();
+
+        if (consumer) {
+            consumer->processMessage(response);
+            //NOTE: consumer will destroy the response object so don't access it after this
+        }
+
+        if (isFinalResponse) {
+            if (DEBUG) {
+                log.debug("Received final response.");
+            }
+
+            break;
+        }
+
+        if (DEBUG) {
+            log.debug("That was not the final message so expecting more responses for this request ....");
+        }
+    } // while
+
+    if (DEBUG) log.debug("DONE Reading message(s) from response pipe");
+
+    // if there is no consumer, then we simply return the final message (there should only
+    // be one message when there is no consumer)
+    return response;
+
+}
+
+
+
+int OSPNamedPipeConnection::sendOnly(OSPMessage *message, bool flush) {
+
+    boost::unique_lock<boost::mutex> lock(m_send_mutex);
+
+    // not likely to happen, but just to be safe
+    if (nextRequestID >= OSPNP_MAX_REQUEST_ID) {
+        nextRequestID = 1;
+    }
 
     // allocate next request ID
     int requestID = nextRequestID++;
+
+    if (DEBUG) log.debug("Sending message to resquest pipe, RequestID=" + Util::toString(requestID));
 
     OSPWireRequest request(requestID, message->getMessageType(), message);
 
@@ -128,76 +343,104 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 #endif
 
     // flush the pipe if we are waiting for a response
-    if (expectACK) {
+    if (flush) {
         log.debug("Flushing request pipe");
         os->flush();
     }
 
-    // read responses
+    return requestID;
+}
+
+
+
+OSPMessage* OSPNamedPipeConnection::waitForResponse() {
+
     OSPWireResponse *response = NULL;
 
-    while (true) {
+    if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
-        if (DEBUG) log.debug("BEFORE read message length from response pipe");
+    unsigned int messageLength = is->readInt();
 
-        unsigned int messageLength = is->readInt();
+    if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));
 
-        if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));
+// THREAD SAFE?  MAYBE SHOULD MAKE BUFFER LOCAL.  SEEMS LIKE ONLY USED BY ONE THREAD.
+    // make sure our read buffer is large enough
+    if (messageLength > bufferSize) {
+        delete [] buffer;
+        bufferSize = messageLength + 1024;
+        buffer = new char[bufferSize];
+    }
 
-        // make sure our read buffer is large enough
-        if (messageLength > bufferSize) {
-            delete [] buffer;
-            bufferSize = messageLength + 1024;
-            buffer = new char[bufferSize];
-        }
+    // it is perfectly OK to have 0-length messages
+    if (messageLength > 0) {
 
-        // it is perfectly OK to have 0-length messages
-        if (messageLength>0) {
+        if (DEBUG) log.debug("BEFORE readBytes() from response pipe");
+        is->readBytes(buffer, 0, messageLength);
+        if (DEBUG) log.debug("AFTER readBytes() from response pipe");
 
-            if (DEBUG) log.debug("BEFORE readBytes() from response pipe");
-            is->readBytes(buffer, 0, messageLength);
-            if (DEBUG) log.debug("AFTER readBytes() from response pipe");
+        OSPByteBuffer byteBuffer(buffer, messageLength);
 
-            OSPByteBuffer byteBuffer(buffer, messageLength);
+        OSPMessageDecoder decoder;
+        response = new OSPWireResponse();
+        decoder.decode(response, &byteBuffer);
 
-            OSPMessageDecoder decoder;
-            response = new OSPWireResponse();
-            decoder.decode(response, &byteBuffer);
+    //if (DEBUG) log.debug("After reading message from response pipe, RequestID=" + Util::toString(response->getRequestID()));
 
-            //response->read(&byteBuffer);
-
-            bool isFinalResponse = response->isFinalResponse();
-
-            if (consumer) {
-                consumer->processMessage(response);
-                //NOTE: consumer will destroy the response object so don't access it after this
-            }
-
-            if (isFinalResponse) {
-                break;
-            }
-        }
-        else {
-            log.error("messageLength was <= 0 so aborting");
-            break;
-        }
-
-        if (DEBUG) {
-            log.debug("That was not the final message so expecting more responses for this request ....");
-        }
+        //response->read(&byteBuffer);
+    }
+    else {
+        log.error("messageLength was <= 0");
     }
 
     if (DEBUG) log.debug("DONE Reading message from response pipe");
 
-    // if there is no consumer, then we simple return the final message (normally we expect only one message
-    // if there is no consumer)
     return response;
 }
 
+
+void OSPNamedPipeConnection::operator () () {
+
+    do
+    {
+        OSPWireResponse *response = NULL;
+
+        if (DEBUG) log.debug("Background thread, waiting for response");
+
+        response = dynamic_cast<OSPWireResponse*>(waitForResponse());
+
+        if (DEBUG) log.debug("Background thread, got response");
+
+        if (response != NULL) {
+            boost::unique_lock<boost::mutex> lock(m_mutex);
+ 
+            int requestID = response->getRequestID();
+
+            if (DEBUG) log.debug("Background thread adding to map, RequestID=" + Util::toString(requestID));
+
+            m_responses[requestID].push(response);
+
+            // Let other threads get the response
+            m_cond.notify_all();
+//            m_cond.wait(lock);
+        }
+        else {
+            if (DEBUG) log.debug("Background thread, NULL response");
+        }
+    } while(true);
+}
+
+
+
 void OSPNamedPipeConnection::stop() {
+
+    if (m_threadedResponseFifo && (m_thread != NULL)) {
+        m_thread->join();
+        delete m_thread;
+    }
 
     if (DEBUG) log.debug("Closing pipes");
 
+    // TODO: Add flag to indicate to indicate shutdown to background thread
     if (requestPipe) {
         fclose(requestPipe);
         requestPipe = NULL;
@@ -227,5 +470,6 @@ void OSPNamedPipeConnection::stop() {
         os = NULL;
     }
 }
+
 
 } // namespace

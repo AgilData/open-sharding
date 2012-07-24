@@ -3,18 +3,27 @@
 require 'fileutils'
 require 'find'
 
-MYSQL_SUPPORTED = "5.0|5.1"
+MYSQL_SUPPORTED = "5.0|5.1|5.5"
 
 if ARGV[0] == "5.0"
   mysql_client_vers="15"
 elsif ARGV[0] == "5.1"
   mysql_client_vers="16"
+elsif ARGV[0] == "5.5"
+  mysql_client_vers="18"
 else
   puts "Usage: ruby setup.rb " + MYSQL_SUPPORTED + "[/clientlib/search/path/]"
   exit 2
 end
 
-libdir = "/usr/"
+os_arch = `/usr/`
+
+if ARGV[1] != nil
+  libdir = ARGV[1]
+end
+
+puts 'Checking in the directory for mysql lib: ' + os_arch
+
 if ARGV[1] != nil
   libdir = ARGV[1]
 end
