@@ -2,7 +2,7 @@
 Open Sharding Protocol Driver Readme
 =====================================
 
-INTRODUCTION
+----INTRODUCTION
 
 The Open Sharding Protocol (OSP) provides a generic, open source framework for support of high-performance
 database sharding to virtually any DBMS. The official OSP Web site is located at:
