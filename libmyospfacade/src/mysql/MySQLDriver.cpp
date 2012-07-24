@@ -80,8 +80,11 @@ static bool bannerDisplayed = false;
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
 static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 
+/* Mutex for accessing _mysqlResourceMap */
+static boost::mutex resourceMapMutex;
+
 /* Mapping of MYSQL structues to wrapper structures */
-static MySQLConnMap *_mysqlResourceMap = NULL;
+static MySQLConnMap *c = NULL;
 
 /* Wrapper function to simplify shard logging for mysql_select_db */
 int mysql_select_db_actual(MYSQL *mysql, const char *db);
@@ -92,8 +95,6 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db);
  * a connection object to delegate to.
  */
 static boost::mutex initMutex;
-
-static boost::mutex resourceMapMutex;
 
 /* Wrapper around libmysqlclient.so */
 static MySQLClient *mysqlclient = NULL;
@@ -164,10 +165,14 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
+	log.debug("getResourceMap() BEFORE lock mutex");
     boost::mutex::scoped_lock lock(resourceMapMutex);
+	log.debug("getResourceMap() AFTER lock mutex");
     if (_mysqlResourceMap==NULL) {
+		log.debug("getResourceMap() create map");
         _mysqlResourceMap = new MySQLConnMap();
     }
+	log.debug("getResourceMap() return map");
     return _mysqlResourceMap;
 }
 
