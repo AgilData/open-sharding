@@ -93,6 +93,8 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db);
  */
 static boost::mutex initMutex;
 
+static boost::mutex resourceMapMutex;
+
 /* Wrapper around libmysqlclient.so */
 static MySQLClient *mysqlclient = NULL;
 
@@ -162,7 +164,7 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
-    boost::mutex::scoped_lock lock(initMutex);
+    boost::mutex::scoped_lock lock(resourceMapMutex);
     if (_mysqlResourceMap==NULL) {
         _mysqlResourceMap = new MySQLConnMap();
     }
