@@ -162,7 +162,7 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
-    //TODO: we need a dedicated mutex for this function
+    boost::mutex::scoped_lock lock(initMutex);
     if (_mysqlResourceMap==NULL) {
         _mysqlResourceMap = new MySQLConnMap();
     }
