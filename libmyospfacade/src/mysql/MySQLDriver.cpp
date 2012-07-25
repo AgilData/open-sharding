@@ -462,7 +462,6 @@ const char * mysql_sqlstate(MYSQL *mysql) {
 
 int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstractConnection *conn)
 {
-    int result = 0;
     if (xlog.isDebugEnabled()) {
         xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
     }
@@ -473,8 +472,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         if (db!=NULL) {
             if (strlen(db) == 0) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
-                result = -1;
-                return result;
+                return -1;
             }
 
        }
@@ -482,16 +480,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
           if (strncmp(db, "osp:", 4)==0) {
               //setErrorState writes message to xlog.error()
               setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
-              result = -1;
-              return result;
+              return -1;
           }
 
 
         if (info == NULL) {
             xlog.error("No ConnInfo in map");
             setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
-            result = -1;
-            return result;
+            return -1;
         }
     
         if (xlog.isDebugEnabled()) {
@@ -505,99 +501,127 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         OSPConnection *ospConn = getResourceMap()->getOSPConn(info->target_schema_name);
         if (!ospConn) {
 
-            // construct filename for request pipe
-            char requestPipeName[256];
-            sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, mysql->db, getpid());
-
-            // construct filename for response pipe
-            char responsePipeName[256];
-            sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, mysql->db, getpid());
-
-            if (xlog.isDebugEnabled()) {
-                xlog.debug(string("Creating ") + string(requestPipeName));
-            }
-
-            // delete first just in case there was an issue before
-            unlink(requestPipeName);
-
-            umask(0);
-            if (0 != mkfifo(requestPipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
-                perror("Error creating pipe");
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (request)", "OSP01");
-                result = -1;
-                return result;
-            }
-
-            // delete first just in case there was an issue before
-            unlink(responsePipeName);
-
-            umask(0);
-            if (0 != mkfifo(responsePipeName, S_IWUSR | S_IRUSR | S_IRGRP | S_IROTH | S_IWGRP | S_IWOTH)) {
-                xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("'"));
-                perror("Error creating pipe");
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (response)", "OSP01");
-
-                // important that we delete the request pipe
-                unlink(requestPipeName);
-
-                result = -1;
-                return result;
-            }
-
-            // create TCP connection
-            OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
-
-            // prepare an OSPConnectRequest with the names of the named pipe files
-            OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
-            request.setRequestPipe(requestPipeName);
-            request.setResponsePipe(responsePipeName);
-
-            OSPWireResponse* wireResponse = NULL;
-            try {
-                wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
-                if (wireResponse->isErrorResponse()) {
-                    OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                    xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-                    delete wireResponse;
-                    ospTcpConn->stop();
-                    delete ospTcpConn;
-
-                    // important that we delete the pipes as the next attempt will try and create them again
-                    unlink(requestPipeName);
-                    unlink(responsePipeName);
-
-                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection refused", "OSP01");
-                    result = -1;
-                    return result;
-                }
-            } catch (...) {
-                xlog.error("OSP communication error - OSP process dead?");
-
-                // important that we delete the pipes as the next attempt will try and create them again
-                unlink(requestPipeName);
-                unlink(responsePipeName);
-
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP communications error", "OSP01");
-                result = -1;
-                return result;
-            }
-
-            // now connect via named pipes
-            OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
-            ospConn = new OSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
-
-            // store the OSP connection for all future interaction with this OSP server for this database
-            getResourceMap()->setOSPConn(info->virtual_host, ospConn);
-
-            // delete the wire response now we have the info
-            delete wireResponse;
-
-            // close the temporary TCP connection
-            ospTcpConn->stop();
-            delete ospTcpConn;
-            
-        }
+			int npRetval = OSPNP_SUCCESS;
+	
+			if (!g_ospNpConn) {
+				// Currently we use only one named pipe connection for all database connections
+				// so on first call to this routine, create the global object.  We still add 
+				// pointers to the global into each connection in the resource map so that we
+				// can use multiple named pipe connections in the future if we wish to.
+	
+	
+				// construct filename for request pipe
+				char requestPipeName[256];
+				sprintf(requestPipeName,  "%s/mysqlosp_%d_request.fifo",  P_tmpdir, getpid());
+	
+				// construct filename for response pipe
+				char responsePipeName[256];
+				sprintf(responsePipeName, "%s/mysqlosp_%d_response.fifo", P_tmpdir, getpid());
+	
+				g_ospNpConn = new OSPNamedPipeConnection(requestPipeName, responsePipeName, true);
+	
+				if (xlog.isDebugEnabled()) {
+					xlog.debug(string("Creating ") + string(requestPipeName) + string(" and ") + string(responsePipeName));
+				}
+	
+				npRetval = g_ospNpConn->makeFifos();
+	
+				if (npRetval == OSPNP_CREATE_REQUEST_PIPE_ERROR) {
+					xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
+					perror("Error creating pipe");
+					setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (request)", "OSP01");
+					return -1; 
+				}
+	
+				if (npRetval == OSPNP_CREATE_RESPONSE_PIPE_ERROR) {
+					xlog.error(string("Failed to create named pipe '") + string(responsePipeName) + string("'"));
+					perror("Error creating pipe");
+					setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipe (response)", "OSP01");
+					return -1;
+				}
+	
+				if (npRetval != OSPNP_SUCCESS) {
+					xlog.error(string("Failed to create named pipes"));
+					perror("Error creating pipe");
+					setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to create named pipes", "OSP01");
+					return -1; 
+				}
+	
+			}
+	
+			// create TCP connection
+			OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
+	
+			// prepare an OSPConnectRequest with the names of the named pipe files
+			OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
+			request.setRequestPipe(g_ospNpConn->getRequestPipeFilename());
+			request.setResponsePipe(g_ospNpConn->getResponsePipeFilename());
+	
+			OSPWireResponse* wireResponse = NULL;
+			try {
+				wireResponse = dynamic_cast<OSPWireResponse*>(ospTcpConn->sendMessage(&request, true));
+				if (wireResponse->isErrorResponse()) {
+					OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+					xlog.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+					delete wireResponse;
+					ospTcpConn->stop();
+					delete ospTcpConn;
+	
+					// important that we delete the pipes as the next attempt will try and create them again
+	// now handled by OSPNamedPipeConnection
+	//                        unlink(requestPipeName);
+	//                        unlink(responsePipeName);
+	
+					setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection refused", "OSP01");
+					return -1;
+				}
+			} catch (...) {
+				xlog.error("OSP communication error - OSP process dead?");
+	
+				// important that we delete the pipes as the next attempt will try and create them again
+	// now handled by OSPNamedPipeConnection
+	//                    unlink(requestPipeName);
+	//                    unlink(responsePipeName);
+	
+				setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP communications error", "OSP01");
+				return -1;
+			}
+	
+			// now connect via named pipes
+			OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
+	
+			ospConn = g_ospNpConn;
+	
+			if (xlog.isDebugEnabled()) {
+				xlog.debug("TCP Response RequestPipeFileName=" + response->getRequestPipeFilename() + ", ResponsePipeFilename=" + response->getResponsePipeFilename());
+			}
+	
+	//                retval = ospConnOSPNamedPipeConnection(response->getRequestPipeFilename(), response->getResponsePipeFilename());
+	
+			npRetval = g_ospNpConn->openFifos();
+	
+			if (npRetval != OSPNP_SUCCESS) {
+				xlog.error(string("Failed to open named pipes"));
+				perror("Error opening pipe");
+				setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to open named pipes", "OSP01");
+	
+				// clean up
+				delete wireResponse;
+				ospTcpConn->stop();
+				delete ospTcpConn;
+				return -1; 
+			}
+	
+			// store the OSP connection for all future interaction with this OSP server for this database
+			getResourceMap()->setOSPConn(databaseName, ospConn);
+	
+			// delete the wire response now we have the info
+			delete wireResponse;
+	
+			// close the temporary TCP connection
+			ospTcpConn->stop();
+			delete ospTcpConn;
+		}
 
         // create MySQL OSP connection object
         try {
@@ -605,8 +629,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
-            result = -1;
-            return result;
+            return -1;
         }
 
         // store mapping from the MYSQL structure to the ODBC connection
@@ -624,16 +647,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
     } catch (const char *exception) {
         xlog.error(string("do_osp_select() failed due to exception: ") + exception);
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-        result = -1;
-        return result;
+        return -1;
     } catch (...) {
         xlog.error(string("do_osp_connect(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
-        result = -1;
-        return result;
+        return -1;
     }
 
-    return result;
+    return 0;
 
 }
 
