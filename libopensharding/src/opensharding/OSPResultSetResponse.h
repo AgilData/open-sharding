@@ -37,14 +37,12 @@ namespace opensharding {
 class OSPResultSetResponse : public OSPMessage {
 private:
 
-	OSPString        **tableName;
     unsigned int       columnCount;
     OSPString        **columnName;
     int               *columnType;
     list<OSPString**>  resultRows;
 
 
-    unsigned int       tableNameIndex;
     unsigned int       columnNameIndex;
     unsigned int       columnTypeIndex;
     unsigned int       fieldIndex;
@@ -65,8 +63,7 @@ public:
     void setField(int fieldNum, int value);
 
     unsigned int       getColumnCount() { return columnCount; }
-    int*               getColumnTypes() { return columnType; }
-    OSPString        **getTableNames()  { return tableName; }
+    int*       getColumnTypes() { return columnType; }
     OSPString        **getColumnNames() { return columnName; }
     list<OSPString**> *getResultRows()  { return &resultRows; }
 

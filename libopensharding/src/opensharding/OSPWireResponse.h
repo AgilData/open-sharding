@@ -50,6 +50,7 @@ public:
     bool isErrorResponse() { return errorResponse; }
     bool isFinalResponse() { return finalResponse; }
 
+    int getRequestID() { return requestID; }
 
 };
 
