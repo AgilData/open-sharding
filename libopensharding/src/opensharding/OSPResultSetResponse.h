@@ -38,11 +38,13 @@ class OSPResultSetResponse : public OSPMessage {
 private:
 
     unsigned int       columnCount;
+    OSPString        **tableName;
     OSPString        **columnName;
     int               *columnType;
     list<OSPString**>  resultRows;
 
 
+    unsigned int       tableNameIndex;
     unsigned int       columnNameIndex;
     unsigned int       columnTypeIndex;
     unsigned int       fieldIndex;
@@ -64,6 +66,7 @@ public:
 
     unsigned int       getColumnCount() { return columnCount; }
     int*       getColumnTypes() { return columnType; }
+    OSPString        **getTableNames() { return tableName; }
     OSPString        **getColumnNames() { return columnName; }
     list<OSPString**> *getResultRows()  { return &resultRows; }
 
