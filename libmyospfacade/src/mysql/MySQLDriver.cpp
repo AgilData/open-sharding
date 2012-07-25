@@ -72,6 +72,8 @@ using namespace opensharding;
 static Logger &xlog = MyOSPLogger::getLogger("MySQLDriver");
 static unsigned int Pid = 0;
 
+static OSPNamedPipeConnection *g_ospNpConn = NULL;
+
 static bool bannerDisplayed = false;
 
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
@@ -613,7 +615,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 			}
 	
 			// store the OSP connection for all future interaction with this OSP server for this database
-			getResourceMap()->setOSPConn(databaseName, ospConn);
+			getResourceMap()->setOSPConn(db, ospConn);
 	
 			// delete the wire response now we have the info
 			delete wireResponse;
