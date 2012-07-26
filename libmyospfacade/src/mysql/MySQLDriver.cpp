@@ -77,6 +77,9 @@ static bool bannerDisplayed = false;
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
 static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 
+/* Mutex for accessing _mysqlResourceMap */
+static boost::mutex resourceMapMutex;
+
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
 
@@ -159,7 +162,7 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
-    //TODO: we need a dedicated mutex for this function
+    boost::mutex::scoped_lock lock(resourceMapMutex);
     if (_mysqlResourceMap==NULL) {
         _mysqlResourceMap = new MySQLConnMap();
     }
