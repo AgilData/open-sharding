@@ -510,7 +510,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
 			int npRetval = OSPNP_SUCCESS;
 
-			OSPNamedPipeConnection ospNpConn = NULL;
+			OSPNamedPipeConnection *ospNpConn = NULL;
 	
             if (useSingleNamedPipeConnectionPerDatabase) {
 				// Currently we use only one named pipe connection for all database connections
