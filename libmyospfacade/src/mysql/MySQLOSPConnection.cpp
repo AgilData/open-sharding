@@ -55,6 +55,11 @@ Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
 MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
 
+    if (!ospConn) {
+        log.error("NULL ospConn");
+        throw "NULL ospConn";
+    }
+
     this->mysqlResourceMap = mysqlResourceMap;
     this->ospConn = ospConn;
 
