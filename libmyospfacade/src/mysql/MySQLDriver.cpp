@@ -503,6 +503,9 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         // there is no OSP connection yet so we have to create one
         if (!ospConn) {
 
+            //NOTE: this is for future use - currently this has to be true
+            bool useSingleNamedPipeConnectionPerDatabase = true;
+
             // construct filename for request pipe
             char requestPipeName[256];
             if (useSingleNamedPipeConnectionPerDatabase) {
@@ -965,6 +968,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 delete [] params;
             }
             else {
+
                 if (db != "") {
 
                     if (xlog.isDebugEnabled()) {
