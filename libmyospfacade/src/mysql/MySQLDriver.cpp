@@ -618,38 +618,38 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                     return -1;
                 }
 
+                // now connect via named pipes
+                OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
+
                 if (xlog.isDebugEnabled()) {
                     xlog.debug("TCP Response RequestPipeFileName=" + response->getRequestPipeFilename() + ", ResponsePipeFilename=" + response->getResponsePipeFilename());
                 }
-            }
-	
-			// now connect via named pipes
-			OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
 
-	        // now open the named pipes for read/write
-			npRetval = ospNpConn->openFifos();
-	
-			if (npRetval != OSPNP_SUCCESS) {
-				xlog.error(string("Failed to open named pipes"));
-				perror("Error opening pipe");
-				setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to open named pipes", "OSP01");
-	
-				// clean up
-				delete wireResponse;
-				ospTcpConn->stop();
-				delete ospTcpConn;
-				return -1; 
-			}
-	
+                // now open the named pipes for read/write
+                npRetval = ospNpConn->openFifos();
+
+                if (npRetval != OSPNP_SUCCESS) {
+                    xlog.error(string("Failed to open named pipes"));
+                    perror("Error opening pipe");
+                    setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to open named pipes", "OSP01");
+
+                    // clean up
+                    delete wireResponse;
+                    ospTcpConn->stop();
+                    delete ospTcpConn;
+                    return -1;
+                }
+
+                // delete the wire response now we have the info
+                delete wireResponse;
+
+                // close the temporary TCP connection
+                ospTcpConn->stop();
+                delete ospTcpConn;
+            }
+
 			// store the OSP connection for all future interaction with this OSP server for this database
 			getResourceMap()->setOSPConn(db, ospConn);
-	
-			// delete the wire response now we have the info
-			delete wireResponse;
-	
-			// close the temporary TCP connection
-			ospTcpConn->stop();
-			delete ospTcpConn;
 		}
 
         // create MySQL OSP connection object
