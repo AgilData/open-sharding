@@ -72,7 +72,7 @@ using namespace opensharding;
 static Logger &xlog = MyOSPLogger::getLogger("MySQLDriver");
 static unsigned int Pid = 0;
 
-static OSPNamedPipeConnection *g_ospConn = NULL;
+static OSPNamedPipeConnection *g_ospNpConn = NULL;
 
 static bool bannerDisplayed = false;
 
@@ -510,15 +510,17 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
 			int npRetval = OSPNP_SUCCESS;
 
+			OSPNamedPipeConnection *ospNpConn = NULL;
+
             if (useSingleNamedPipeConnectionPerDatabase) {
 				// Currently we use only one named pipe connection for all database connections
 				// so on first call to this routine, create the global object.  We still add
 				// pointers to the global into each connection in the resource map so that we
 				// can use multiple named pipe connections in the future if we wish to.
-                ospConn = g_ospConn;
+                ospNpConn = g_ospNpConn;
             }
 
-			if (!ospConn) {
+			if (!ospNpConn) {
 
 				// construct filename for request pipe
 				char requestPipeName[256];
@@ -543,14 +545,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 }
 
 	            // create the named pipe connection object
-				ospConn = new OSPNamedPipeConnection(requestPipeName, responsePipeName, true);
+				ospNpConn = new OSPNamedPipeConnection(requestPipeName, responsePipeName, true);
 	
 				if (xlog.isDebugEnabled()) {
 					xlog.debug(string("Creating ") + string(requestPipeName) + string(" and ") + string(responsePipeName));
 				}
 
 	            // actually create the pipes
-				npRetval = ospConn->makeFifos();
+				npRetval = ospNpConn->makeFifos();
 	
 				if (npRetval == OSPNP_CREATE_REQUEST_PIPE_ERROR) {
 					xlog.error(string("Failed to create named pipe '") + string(requestPipeName) + string("'"));
@@ -575,7 +577,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
 				if (useSingleNamedPipeConnectionPerDatabase) {
 				    // store this as a global variable for future use
-				    g_ospConn = ospConn;
+				    g_ospNpConn = ospNpConn;
 				}
 	
                 // now use a TCP connection to tell DbsClient about this new named pipe and set up the server thread to process it
@@ -583,8 +585,8 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
                 // prepare an OSPConnectRequest with the names of the named pipe files
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
-                request.setRequestPipe(ospConn->getRequestPipeFilename());
-                request.setResponsePipe(ospConn->getResponsePipeFilename());
+                request.setRequestPipe(ospNpConn->getRequestPipeFilename());
+                request.setResponsePipe(ospNpConn->getResponsePipeFilename());
 
                 OSPWireResponse* wireResponse = NULL;
                 try {
@@ -624,7 +626,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 }
 
                 // now open the named pipes for read/write
-                npRetval = ospConn->openFifos();
+                npRetval = ospNpConn->openFifos();
 
                 if (npRetval != OSPNP_SUCCESS) {
                     xlog.error(string("Failed to open named pipes"));
@@ -646,21 +648,23 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
                 delete ospTcpConn;
             }
 
-			// store the OSP connection for all future interaction with this OSP server for this database
-			getResourceMap()->setOSPConn(db, ospConn);
+            // create MySQL OSP connection object
+            try {
+                ospConn = new MySQLOSPConnection(info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospNpConn);
+            }
+            catch (...) {
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
+                return -1;
+            }
+
+            if (useSingleNamedPipeConnectionPerDatabase) {
+                // store the OSP connection for all future interaction with this OSP server for this database
+                getResourceMap()->setOSPConn(db, ospConn);
+            }
 		}
 
-        // create MySQL OSP connection object
-        try {
-            conn = new MySQLOSPConnection(info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
-        }
-        catch (...) {
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
-            return -1;
-        }
-
-        // store mapping from the MYSQL structure to the ODBC connection
-        getResourceMap()->setConnection(mysql, conn);
+        // store mapping from the MYSQL structure to the OSP connection
+        getResourceMap()->setConnection(mysql, ospConn);
 
         // success
         getResourceMap()->clearErrorState(mysql);
