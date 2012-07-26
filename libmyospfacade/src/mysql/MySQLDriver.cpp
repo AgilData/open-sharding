@@ -969,7 +969,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
             else {
 
-                if (db != "") {
+                if (db && string(db) != "") {
 
                     if (xlog.isDebugEnabled()) {
                         xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
