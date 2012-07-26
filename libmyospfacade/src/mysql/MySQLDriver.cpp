@@ -585,8 +585,8 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
                 // prepare an OSPConnectRequest with the names of the named pipe files
                 OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
-                request.setRequestPipe(npConn->getRequestPipeFilename());
-                request.setResponsePipe(npConn->getResponsePipeFilename());
+                request.setRequestPipe(ospNpConn->getRequestPipeFilename());
+                request.setResponsePipe(ospNpConn->getResponsePipeFilename());
 
                 OSPWireResponse* wireResponse = NULL;
                 try {
