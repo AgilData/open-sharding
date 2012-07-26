@@ -244,6 +244,14 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         delete wireResponse;
 
     }
+    catch (const char *exception) {
+        log.error(string("Failed to execute query [") + string(exception) + string("]. ConnID = ") + connID + string("; SQL=") + string(sql));
+        resultSetID = 0;
+        affectedRows = 0;
+        fieldCount = 0;
+        my_errno = CR_UNKNOWN_ERROR; // MySQL unknown error
+        my_error = "Query failed due to OSP error";
+    }
     catch (...) {
         log.error(string("Failed to execute query [unhandled exception]. ConnID = ") + connID + string("; SQL=") + string(sql));
         resultSetID = 0;
