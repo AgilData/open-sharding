@@ -69,7 +69,7 @@ DynLib::DynLib(const char *libraryName) {
         lib_handle = dlopen(libraryName, RTLD_LAZY | RTLD_LOCAL);
         if (NULL == lib_handle) {
             //logger.info << "Failed to load dynamic library " << libraryName << endl;
-            LOG.error(string("Failed to load dynamic library ") + libraryName);
+            LOG.error(string("Failed to load dynamic library ") + libraryName + string(" - try running ldd on this file to check for missing dependencies!"));
         } else {
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Loaded OK");
