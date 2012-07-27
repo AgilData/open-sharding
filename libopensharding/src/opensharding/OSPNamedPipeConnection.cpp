@@ -140,13 +140,11 @@ int OSPNamedPipeConnection::openFifos() {
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
-    // blocking read
+    //TODO: we are not using a buffered output stream - this will cause excessive calls to the kernel i/o routines
     this->is = new OSPFileInputStream(responsePipe, 0);
 
-    // non-blocking read
-    //this->is = new OSPFileInputStream(responsePipe, 8192); //TODO: re-instate this
-
-    this->os = new OSPFileOutputStream(requestPipe, 0); //TODO: specify buffer size
+    //TODO: we are not using a buffered output stream - this will cause excessive calls to the kernel i/o routines
+    this->os = new OSPFileOutputStream(requestPipe, 0);
 
     this->m_fifosOpened = true;
 

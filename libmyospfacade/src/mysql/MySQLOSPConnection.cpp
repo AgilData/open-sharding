@@ -240,7 +240,9 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         else {
             // success
 
-            log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
+            if (log.isDebugEnabled()) {
+                log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
+            }
 
             ret = 0;
         }
