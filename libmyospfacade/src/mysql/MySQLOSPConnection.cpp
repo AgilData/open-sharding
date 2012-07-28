@@ -210,6 +210,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         if (wireResponse->isErrorResponse()) {
             OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
             log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+            delete wireResponse;
             throw "OSP_ERROR";
         }
 
@@ -362,6 +363,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     if (wireResponse->isErrorResponse()) {
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
         log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        delete wireResponse;
         throw "OSP_ERROR";
     }
 
@@ -1071,6 +1073,7 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
             if (wireResponse->isErrorResponse()) {
                 OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
                 log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                delete wireResponse;
                 throw "OSP_ERROR";
             }
             delete wireResponse;
