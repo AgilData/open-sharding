@@ -56,8 +56,7 @@ Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
 
     if (!ospConn) {
-        log.error("NULL ospConn");
-        throw "NULL ospConn";
+        throw Util::createException("NULL ospConn");
     }
 
     this->mysqlResourceMap = mysqlResourceMap;
@@ -70,7 +69,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
         log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
         delete wireResponse;
-        throw "OSP_CONNECT_ERROR";
+        throw Util::createException("OSP_CONNECT_ERROR");
     }
 
     //log.info(("wireResponse = ") + Util::toString((void*)wireResponse));
@@ -88,7 +87,7 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
         log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
         delete wireResponse;
-        throw "OSP_ERROR";
+        throw Util::createException("OSP_ERROR");
     }
 
     OSPCreateStatementResponse* response2 = dynamic_cast<OSPCreateStatementResponse*>(wireResponse->getResponse());
@@ -205,27 +204,17 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         if (log.isDebugEnabled()) {
             log.debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
         }
+
         OSPExecuteRequest request(connID, stmtID, string(sql));
         OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
         if (wireResponse->isErrorResponse()) {
-            OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-            log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-            delete wireResponse;
-            throw "OSP_ERROR";
-        }
 
-        OSPExecuteResponse *executeResponse = dynamic_cast<OSPExecuteResponse*>(wireResponse->getResponse());
-        resultSetID = executeResponse->getResultSetID();
-        fieldCount = executeResponse->getResultSetColumnCount();
-        affectedRows = executeResponse->getUpdateCount();
-        insertID = executeResponse->getGeneratedID();
-
-        if (executeResponse->getErrorCode()) {
+            OSPErrorResponse* errorResponse = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
 
             log.error(
                 string("Failed to execute query. ")
-                + string("Error Code: ") + Util::toString(executeResponse->getErrorCode())
-                + string("; Error Text: ") + executeResponse->getErrorMessage()
+                + string("Error Code: ") + Util::toString(errorResponse->getErrorCode())
+                + string("; Error Text: ") + errorResponse->getErrorMessage()
                 + string("; ConnID = ") + connID + string("; SQL=") + string(sql)
             );
 
@@ -233,22 +222,49 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             affectedRows = 0;
             fieldCount = 0;
 
-            my_errno = executeResponse->getErrorCode();
+            my_errno = errorResponse->getErrorCode();
             //TODO: this is a memory leak ... do we care? what can we do about it?
-            my_error = Util::createString(executeResponse->getErrorMessage().c_str());
+            my_error = Util::createString(errorResponse->getErrorMessage().c_str());
 
         }
         else {
-            // success
 
-            if (log.isDebugEnabled()) {
-                log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
+            OSPExecuteResponse *executeResponse = dynamic_cast<OSPExecuteResponse*>(wireResponse->getResponse());
+            resultSetID = executeResponse->getResultSetID();
+            fieldCount = executeResponse->getResultSetColumnCount();
+            affectedRows = executeResponse->getUpdateCount();
+            insertID = executeResponse->getGeneratedID();
+
+            if (executeResponse->getErrorCode()) {
+
+                log.error(
+                    string("Failed to execute query. ")
+                    + string("Error Code: ") + Util::toString(executeResponse->getErrorCode())
+                    + string("; Error Text: ") + executeResponse->getErrorMessage()
+                    + string("; ConnID = ") + connID + string("; SQL=") + string(sql)
+                );
+
+                resultSetID = 0;
+                affectedRows = 0;
+                fieldCount = 0;
+
+                my_errno = executeResponse->getErrorCode();
+                //TODO: this is a memory leak ... do we care? what can we do about it?
+                my_error = Util::createString(executeResponse->getErrorMessage().c_str());
+
             }
+            else {
+                // success
 
-            ret = 0;
+                if (log.isDebugEnabled()) {
+                    log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
+                }
+
+                ret = 0;
+            }
         }
 
-        // delete wire response (this will also delete the execute response)
+        // delete wire response (this will also delete the execute or error response)
         delete wireResponse;
 
     }
@@ -362,9 +378,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse *>(message);
     if (wireResponse->isErrorResponse()) {
         OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-        log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+        log.error(string("processMessage() received OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
         delete wireResponse;
-        throw "OSP_ERROR";
+        throw Util::createException("OSP_ERROR");
     }
 
     OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
@@ -1072,9 +1088,9 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         if (wireResponse) {
             if (wireResponse->isErrorResponse()) {
                 OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-                log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+                log.error(string("mysql_close() OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
                 delete wireResponse;
-                throw "OSP_ERROR";
+                throw processMessage("OSP_ERROR");
             }
             delete wireResponse;
         }
