@@ -141,7 +141,8 @@ int OSPNamedPipeConnection::openFifos() {
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
     //TODO: we are not using a buffered output stream - this will cause excessive calls to the kernel i/o routines
-    this->is = new OSPFileInputStream(responsePipe, 8192);
+    //TOFIX: This buffered stream does not work correctly needs to be fixed
+    this->is = new OSPFileInputStream(responsePipe, 0);
 
     //TODO: we are not using a buffered output stream - this will cause excessive calls to the kernel i/o routines
    //The out put stream encodes each message into a single byte array making it efficient 
