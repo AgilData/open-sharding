@@ -1090,7 +1090,7 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
                 OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
                 log.error(string("mysql_close() OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
                 delete wireResponse;
-                throw processMessage("OSP_ERROR");
+                throw Util::createException("mysql_close() failed due to earlier OSP error");
             }
             delete wireResponse;
         }
