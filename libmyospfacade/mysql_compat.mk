@@ -148,7 +148,6 @@ MYSQL50_OBJ=$(MYSTRINGS50_OBJ) $(MYSYS50_OBJ) $(MYCMN50_OBJ) $(MYDEP50_OBJ)
 # mystrings lib
 MYSTRINGS51_PATH=$(MYSQL51_SRC_PATH)/libmysql/.libs
 MYSTRINGS51_OBJ=$(MYSTRINGS51_PATH)/bchange.o \
-	$(MYSTRINGS51_PATH)/bcmp.o \
 	$(MYSTRINGS51_PATH)/bmove.o \
 	$(MYSTRINGS51_PATH)/bmove_upp.o \
 	$(MYSTRINGS51_PATH)/ctype-big5.o \
@@ -188,7 +187,6 @@ MYSTRINGS51_OBJ=$(MYSTRINGS51_PATH)/bchange.o \
 	$(MYSTRINGS51_PATH)/strmov.o \
 	$(MYSTRINGS51_PATH)/strnlen.o \
 	$(MYSTRINGS51_PATH)/strnmov.o \
-#	$(MYSTRINGS51_PATH)/strto.o \
 	$(MYSTRINGS51_PATH)/strtod.o \
 	$(MYSTRINGS51_PATH)/strtoll.o \
 	$(MYSTRINGS51_PATH)/strtoull.o \
@@ -201,12 +199,18 @@ MYSTRINGS51_OBJ=$(MYSTRINGS51_PATH)/bchange.o \
 MYSYS51_PATH=$(MYSQL51_SRC_PATH)/libmysql/.libs
 MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/charset.o \
+	$(MYSYS51_PATH)/client.o \
 	$(MYSYS51_PATH)/charset-def.o \
+	$(MYSYS51_PATH)/dbug.o \
 	$(MYSYS51_PATH)/default.o \
 	$(MYSYS51_PATH)/default_modify.o \
+	$(MYSYS51_PATH)/errmsg.o \
 	$(MYSYS51_PATH)/errors.o \
+	$(MYSYS51_PATH)/get_password.o \
 	$(MYSYS51_PATH)/hash.o \
 	$(MYSYS51_PATH)/list.o \
+	$(MYSYS51_PATH)/libmysql.o \
+	$(MYSYS51_PATH)/manager.o \
 	$(MYSYS51_PATH)/md5.o \
 	$(MYSYS51_PATH)/mf_arr_appstr.o \
 	$(MYSYS51_PATH)/mf_cache.o \
@@ -233,7 +237,6 @@ MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/my_file.o \
 	$(MYSYS51_PATH)/my_fopen.o \
 	$(MYSYS51_PATH)/my_fstream.o \
-	$(MYSYS51_PATH)/my_gethostbyname.o \
 	$(MYSYS51_PATH)/my_getopt.o \
 	$(MYSYS51_PATH)/my_getsystime.o \
 	$(MYSYS51_PATH)/my_getwd.o \
@@ -244,7 +247,6 @@ MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/my_net.o \
 	$(MYSYS51_PATH)/my_once.o \
 	$(MYSYS51_PATH)/my_open.o \
-	$(MYSYS51_PATH)/my_port.o \
 	$(MYSYS51_PATH)/my_pread.o \
 	$(MYSYS51_PATH)/my_pthread.o \
 	$(MYSYS51_PATH)/my_read.o \
@@ -255,13 +257,21 @@ MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/my_static.o \
 	$(MYSYS51_PATH)/my_symlink.o \
 	$(MYSYS51_PATH)/my_sync.o \
+	$(MYSYS51_PATH)/my_time.o \
 	$(MYSYS51_PATH)/my_thr_init.o \
 	$(MYSYS51_PATH)/my_write.o \
+	$(MYSYS51_PATH)/password.o \
 	$(MYSYS51_PATH)/safemalloc.o \
 	$(MYSYS51_PATH)/sha1.o \
 	$(MYSYS51_PATH)/string.o \
 	$(MYSYS51_PATH)/thr_mutex.o \
+	$(MYSYS51_PATH)/net.o \
+	$(MYSYS51_PATH)/pack.o \
+	$(MYSYS51_PATH)/vio.o \
 	$(MYSYS51_PATH)/typelib.o \
+	$(MYSYS51_PATH)/viosocket.o \
+	$(MYSYS51_PATH)/viossl.o \
+	$(MYSYS51_PATH)/viosslfactories.o
 
 
 # common
