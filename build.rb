@@ -81,13 +81,14 @@ def build(branch_name)
     run_command "./configure"
     run_command "sudo make install"
     Dir.chdir OS_DIR
-=end
+
     puts "Building and installing libopensharding"
     Dir.chdir "libopensharding"
     run_command "make clean"
     run_command "make"
     run_command "sudo make install"
     Dir.chdir OS_DIR
+=end
     puts "Building libmyosp"
     Dir.chdir "libmyospfacade"
     run_command "ant"
