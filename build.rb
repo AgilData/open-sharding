@@ -24,7 +24,7 @@ BOOST_DIR = "boost_1_38_0"
 BOOST_TAR = "boost_1_38_0.tar.gz"
 BOOST_DOWNLOAD = "http://downloads.sourceforge.net/project/boost/boost/#{BOOST_VER}/#{BOOST_TAR}"
 INIT_DIR = Dir.pwd
-OS_DIR = "#{INIT_DIR}/open-sharding"
+OS_DIR = "#{INIT_DIR}"
 OPERSYS = "ubuntu1104" # update this to set the build operating system
 ARCH = "x64" # update this to set the build architecture
 LIBMYOSP_VER = "pre-release-1.1.113" # update this to set the libmyosp version
@@ -60,6 +60,7 @@ end
 #################################################################################################
 def build(branch_name)
     check_dep
+=begin
     puts "Building from branch #{branch_name}"
     clone_rep branch_name
     puts "Downloading Boost Libraries"
@@ -80,6 +81,7 @@ def build(branch_name)
     run_command "./configure"
     run_command "sudo make install"
     Dir.chdir OS_DIR
+=end
     puts "Building and installing libopensharding"
     Dir.chdir "libopensharding"
     run_command "make clean"

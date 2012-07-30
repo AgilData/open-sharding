@@ -4,11 +4,8 @@
 # This is temporary, we need to settle how we are going to do the final build across all platforms
 # Currently, you must have the mysql 5.0 and 5.1 source installed and compiled to build myosp
 
-MYSQL51_SRC_PATH=/usr/local/src/mysql-5.1.36
-MYSQL50_SRC_PATH=/usr/local/src/mysql-5.0.45
-
-
-#target_ldflags = -version-info 16:0:0 
+#MYSQL51_SRC_PATH=/usr/local/src/mysql-5.1.36
+MYSQL51_SRC_PATH=/root/mysql-5.1.62
 
 ###############
 #  MYSQL 5.0  #
@@ -141,6 +138,7 @@ MYSQL50_OBJ=$(MYSTRINGS50_OBJ) $(MYSYS50_OBJ) $(MYCMN50_OBJ) $(MYDEP50_OBJ)
 
 
 
+
 ###############
 #  MYSQL 5.1  #
 ###############
@@ -199,18 +197,12 @@ MYSTRINGS51_OBJ=$(MYSTRINGS51_PATH)/bchange.o \
 MYSYS51_PATH=$(MYSQL51_SRC_PATH)/libmysql/.libs
 MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/charset.o \
-	$(MYSYS51_PATH)/client.o \
 	$(MYSYS51_PATH)/charset-def.o \
-	$(MYSYS51_PATH)/dbug.o \
 	$(MYSYS51_PATH)/default.o \
 	$(MYSYS51_PATH)/default_modify.o \
-	$(MYSYS51_PATH)/errmsg.o \
 	$(MYSYS51_PATH)/errors.o \
-	$(MYSYS51_PATH)/get_password.o \
 	$(MYSYS51_PATH)/hash.o \
 	$(MYSYS51_PATH)/list.o \
-	$(MYSYS51_PATH)/libmysql.o \
-	$(MYSYS51_PATH)/manager.o \
 	$(MYSYS51_PATH)/md5.o \
 	$(MYSYS51_PATH)/mf_arr_appstr.o \
 	$(MYSYS51_PATH)/mf_cache.o \
@@ -252,26 +244,21 @@ MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/my_read.o \
 	$(MYSYS51_PATH)/my_realloc.o \
 	$(MYSYS51_PATH)/my_rename.o \
+	$(MYSYS51_PATH)/my_static.o \
 	$(MYSYS51_PATH)/my_seek.o \
 	$(MYSYS51_PATH)/my_sleep.o \
-	$(MYSYS51_PATH)/my_static.o \
 	$(MYSYS51_PATH)/my_symlink.o \
 	$(MYSYS51_PATH)/my_sync.o \
-	$(MYSYS51_PATH)/my_time.o \
 	$(MYSYS51_PATH)/my_thr_init.o \
 	$(MYSYS51_PATH)/my_write.o \
-	$(MYSYS51_PATH)/password.o \
 	$(MYSYS51_PATH)/safemalloc.o \
 	$(MYSYS51_PATH)/sha1.o \
 	$(MYSYS51_PATH)/string.o \
 	$(MYSYS51_PATH)/thr_mutex.o \
-	$(MYSYS51_PATH)/net.o \
-	$(MYSYS51_PATH)/pack.o \
-	$(MYSYS51_PATH)/vio.o \
-	$(MYSYS51_PATH)/typelib.o \
-	$(MYSYS51_PATH)/viosocket.o \
-	$(MYSYS51_PATH)/viossl.o \
-	$(MYSYS51_PATH)/viosslfactories.o
+	$(MYSYS51_PATH)/typelib.o 
+
+
+
 
 
 # common
@@ -280,7 +267,7 @@ MYCMN51_OBJ=$(MYCMN51_PATH)/net.o $(MYCMN51_PATH)/get_password.o $(MYCMN51_PATH)
 
 # more dependencies found in testing
 MYDEP51_PATH=$(MYSQL51_SRC_PATH)/libmysql/.libs
-MYDEP51_OBJ=$(MYDEP51_PATH)/vio.o $(MYDEP51_PATH)/viosocket.o
+MYDEP51_OBJ=$(MYDEP51_PATH)/vio.o $(MYDEP51_PATH)/viosocket.o $(MYDEP51_PATH)/viosslfactories.o
 
 MYSQL51_OBJ=$(MYSTRINGS51_OBJ) $(MYSYS51_OBJ) $(MYCMN51_OBJ) $(MYDEP51_OBJ)
 

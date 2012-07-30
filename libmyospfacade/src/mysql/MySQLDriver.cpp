@@ -20,6 +20,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <map>
+#include <my_global.h>
 
 // if we want to support all mysql symbols we need to *at least* import these headers, but
 // these cause conflicts with boost min/max symbols
