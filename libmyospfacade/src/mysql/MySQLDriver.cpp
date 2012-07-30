@@ -367,7 +367,12 @@ MYSQL *mysql_init(MYSQL *mysql) {
 
     return mysql;
 }
-
+//Test Add 
+const char *sql_protocol_names_lib[] =
+{ "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
+TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
+				sql_protocol_names_lib, NULL};
+				
 unsigned int mysql_errno(MYSQL *mysql) {
     //trace("mysql_errno", mysql);
     MySQLErrorState *errorState = getResourceMap()->getErrorState(mysql);

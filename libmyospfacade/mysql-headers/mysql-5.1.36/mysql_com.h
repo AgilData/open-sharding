@@ -1,4 +1,4 @@
-/* Copyright (C) 2000 MySQL AB
+/* Copyright (c) 2000, 2010, Oracle and/or its affiliates. All rights reserved.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -277,6 +277,16 @@ typedef struct st_net {
   /** Client library sqlstate buffer. Set along with the error message. */
   char sqlstate[SQLSTATE_LENGTH+1];
   void *extension;
+#if defined(MYSQL_SERVER) && !defined(EMBEDDED_LIBRARY)
+  /*
+    Controls whether a big packet should be skipped.
+
+    Initially set to FALSE by default. Unauthenticated sessions must have
+    this set to FALSE so that the server can't be tricked to read packets
+    indefinitely.
+  */
+  my_bool skip_big_packet;
+#endif
 } NET;
 
 
