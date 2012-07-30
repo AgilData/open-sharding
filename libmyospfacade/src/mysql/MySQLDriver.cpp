@@ -1,5 +1,4 @@
 
-
 /* Copyright (C) 2010 CodeFutures Corporation
 
    This program is free software; you can redistribute it and/or modify
@@ -20,7 +19,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <map>
-#include <my_global.h>
+//#include <my_global.h>
 
 // if we want to support all mysql symbols we need to *at least* import these headers, but
 // these cause conflicts with boost min/max symbols
