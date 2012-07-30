@@ -12,8 +12,8 @@ MYSQL51_SRC_PATH=/root/mysql-5.1.62
 ###############
 
 # mystrings lib
-MYSTRINGS50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
-MYSTRINGS50_OBJ=$(MYSTRINGS50_PATH)/bchange.o \
+#MYSTRINGS50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
+#MYSTRINGS50_OBJ=$(MYSTRINGS50_PATH)/bchange.o \
 	$(MYSTRINGS50_PATH)/bcmp.o \
 	$(MYSTRINGS50_PATH)/bmove.o \
 	$(MYSTRINGS50_PATH)/bmove_upp.o \
@@ -64,8 +64,8 @@ MYSTRINGS50_OBJ=$(MYSTRINGS50_PATH)/bchange.o \
 
 
 # mysys lib
-MYSYS50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
-MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
+#MYSYS50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
+#MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/charset.o \
 	$(MYSYS50_PATH)/charset-def.o \
 	$(MYSYS50_PATH)/default.o \
@@ -127,14 +127,14 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 
 
 # common
-MYCMN50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
-MYCMN50_OBJ=$(MYCMN50_PATH)/net.o $(MYCMN50_PATH)/get_password.o $(MYCMN50_PATH)/pack.o $(MYCMN50_PATH)/my_time.o
+#MYCMN50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
+#MYCMN50_OBJ=$(MYCMN50_PATH)/net.o $(MYCMN50_PATH)/get_password.o $(MYCMN50_PATH)/pack.o $(MYCMN50_PATH)/my_time.o
 
 # more dependencies found in testing
-MYDEP50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
-MYDEP50_OBJ=$(MYDEP50_PATH)/vio.o $(MYDEP50_PATH)/viosocket.o
+#MYDEP50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
+#MYDEP50_OBJ=$(MYDEP50_PATH)/vio.o $(MYDEP50_PATH)/viosocket.o
 
-MYSQL50_OBJ=$(MYSTRINGS50_OBJ) $(MYSYS50_OBJ) $(MYCMN50_OBJ) $(MYDEP50_OBJ)
+#MYSQL50_OBJ=$(MYSTRINGS50_OBJ) $(MYSYS50_OBJ) $(MYCMN50_OBJ) $(MYDEP50_OBJ)
 
 
 
