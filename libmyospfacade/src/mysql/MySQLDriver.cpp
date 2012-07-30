@@ -19,7 +19,7 @@
 #include <time.h>
 #include <stdlib.h>
 #include <map>
-#include <my_global.h>
+//#include <my_global.h>
 
 // if we want to support all mysql symbols we need to *at least* import these headers, but
 // these cause conflicts with boost min/max symbols
@@ -60,6 +60,9 @@
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLConnMap.h>
 #include <mysql/MySQLErrorState.h>
+
+#define NullS		(char *) 0
+#define array_elements(A) ((uint) (sizeof(A)/sizeof(A[0])))
 
 using namespace mysql;
 using namespace logger;
