@@ -28,6 +28,8 @@
 #include <mysql/MySQLOSPConnection.h>
 #include <mysql/MySQLOSPResultSet.h>
 #include <mysql/MySQLConnMap.h>
+#include <mysql/MySQLOSPResultSet.h>
+
 #include <opensharding/OSPConnection.h>
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
@@ -370,10 +372,10 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         throw "OSP_ERROR";
     }
 
-    //OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
+    MySQLOSPResultSet *response = dynamic_cast<MySQLOSPResultSet *>(wireResponse->getResponse());
 
     // how many columns?
-    int columnCount = wireResponse->getColumnCount();
+    int columnCount = response->mysql_num_fields();
 
     if (log.isTraceEnabled()) {
         log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
@@ -423,7 +425,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              } MYSQL_FIELD;
              */
 
-        	OSPString *tableName = wireResponse->getTableNames()[i];
+        	OSPString *tableName = response->getTableNames()[i];
 
         	if (tableName == NULL) {
         		res->fields[i].table = emptyString;
@@ -566,7 +568,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
      */
 
     // iterate over result set
-    list<OSPString**> *resultRows = wireResponse->getResultRows();
+    list<OSPString**> *resultRows = response->getResultRows();
     list<OSPString**>::iterator it;
     for (it=resultRows->begin(); it!=resultRows->end(); it++) {
 

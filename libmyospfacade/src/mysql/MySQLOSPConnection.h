@@ -23,6 +23,7 @@
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLConnMap.h>
 #include <mysql/MySQLOSPConnection.h>
+#include <mysql/MySQLOSPResultSet.h>
 
 #include <opensharding/OSPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
