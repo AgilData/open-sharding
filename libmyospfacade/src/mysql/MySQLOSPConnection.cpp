@@ -373,7 +373,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     }
 
    // OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
-    MyOSPResultSet *response = dynamic_cast<MyOSPResultSet *>(wireResponse->getResponse());
+    MySQLOSPResultSet *response = dynamic_cast<MySQLOSPResultSet *>(wireResponse->getResponse());
     // how many columns?
     //int columnCount = response->getColumnCount();
     
