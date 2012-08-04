@@ -1,8 +1,0 @@
-To build:
-
-make clean
-make
-sudo make install
-
-
-This will install headers and shared objects to /usr/local/opensharding
