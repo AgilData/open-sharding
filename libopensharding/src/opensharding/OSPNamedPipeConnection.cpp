@@ -51,7 +51,7 @@ logger::Logger &OSPNamedPipeConnection::log = Logger::getLogger("OSPNamedPipeCon
 OSPNamedPipeConnection::OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo){
 	int initRetVal = init(info, threadedResponseFifo);
 	if (initRetVal != 0) {
-	    logger.error("Failed to create OSPNamedPipeConnection");
+	    log.error("Failed to create OSPNamedPipeConnection");
 	    throw "Failed to create OSPNamedPipeConnection";
 	}
 }
@@ -214,14 +214,14 @@ int OSPNamedPipeConnection::openFifos() {
     if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
     requestPipe  = fopen(requestPipeFilename.c_str(), "wb");
     if (!requestPipe) {
-        log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing");
+        log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
         return OSPNP_OPEN_REQUEST_PIPE_ERROR;
     }
 
     if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
     responsePipe = fopen(responsePipeFilename.c_str(), "rb");
     if (!responsePipe) {
-        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for writing");
+        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for writing"));
         fclose(requestPipe);
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
