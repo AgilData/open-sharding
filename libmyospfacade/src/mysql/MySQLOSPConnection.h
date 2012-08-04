@@ -33,8 +33,6 @@
 #include <opensharding/OSPCreateStatementRequest.h>
 #include <opensharding/OSPCreateStatementResponse.h>
 #include <opensharding/OSPExecuteRequest.h>
-#include <opensharding/OSPExecuteResponse.h>
-#include <opensharding/OSPResultSetRequest.h>
 #include <opensharding/OSPResultSetResponse.h>
 #include <opensharding/OSPDisconnectRequest.h>
 #include <opensharding/OSPDisconnectResponse.h>

@@ -370,10 +370,10 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         throw "OSP_ERROR";
     }
 
-    OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
+    //OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
 
     // how many columns?
-    int columnCount = response->getColumnCount();
+    int columnCount = wireresponse->getColumnCount();
 
     if (log.isTraceEnabled()) {
         log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
