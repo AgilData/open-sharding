@@ -377,7 +377,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     // how many columns?
     //int columnCount = response->getColumnCount();
     
-    int columnCount = MySQLOSPResultSet::mysql_num_fields(currentRes);
+    int columnCount = MySQLOSPResultSet::mysql_num_fields(res);
 
     if (log.isTraceEnabled()) {
         log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
