@@ -1,0 +1,35 @@
+-- OpenSharding MyOSP Driver --
+
+-- Installation --
+
+  Packaged in the .tar.gz archive are the following files:
+    libboost_thread-gcc41-mt-1_38.so.1.38.0
+    libmyosp.so.15
+    libmyosp_r.so.15
+    libmyosp.so.16
+    libmyosp_r.so.16
+    libopensharding.so.1.0.0
+    setup.rb
+    myosp.conf
+
+  The tar should be extracted to its own directory. We recommend /usr/lib/myosp/
+
+  setup.rb will create the necessary symlinks within the installation directory.
+Usage is "ruby setup.rb [5.0|5.1]" where the argument is the version of the
+mysql client to use; 5.0 or 5.1.
+
+** If using sudo to run setup.rb, use the -E option
+   so that the script has access to the PWD environment variable **
+
+  This directory needs to be on the library path ahead of the native mysql
+driver so that applications load it instead of the native driver. To do this,
+export LD_LIBRARY_PATH=/usr/lib/myosp/ in the application's environment.
+
+  If your application runs in an server, such as Apache, you must set the LD_LIBRARY_PATH environment variable in the server so that all application code can access the environment variable at runtime. For Apache this can be done in the apachectl and /etc/init.d/httpd script. In Apache2 there is a configuration file available for setting environment variables. Alternatively you can set the environment variable in a global location, such as /etc/profile (this may require a system reboot to take affect). To verify that the LD_LIBRARY_PATH is set properly, run 'ldd' on the library module that accesses the MySQL database. For example, with PHP you can run:ldd mysqli.soNear the top of the output you should see a library listed in the /usr/lib/myosp install directory. If so, then everything is set up correctly.  Because application servers have their own scripts and environments, it is useful to output ldd from the application server startup for full verification.
+
+-- Configuration --
+  The default location for myosp configs is /etc/osp/myosp.conf. The directory
+can be set using the environment variable "MYOSP_CONF_DIR=/path/to/configdir/"
+The driver will look for myosp.conf in the directory set.
+  A sample myosp.conf file is supplied in the archive which explains
+configuration options.

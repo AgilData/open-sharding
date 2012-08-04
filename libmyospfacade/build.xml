@@ -1,0 +1,58 @@
+<project name="libmyosp" default="release">
+
+    <property name="version" value="1.2" />
+    <property name="buildnum" value="012" />
+    <property name="buildtype" value="RC.osp-virtual-hosts" />
+
+    <target name="init" >
+        <delete dir=".">
+            <include name="lib*" />
+        </delete>
+        <exec executable="bash" failonerror="true">
+        	<arg value="./scripts/mkbuildprops.sh" />
+        </exec>
+        <property file="build.properties" />
+
+		<echo message="" />
+        <echo message="Operating System    : ${osname-full}" />
+		<echo message="Binaries Directory  : ${bin-dir}" />
+		<echo message="Build Number        : ${buildnum}" />
+                <echo message="Build Type          : ${buildtype}" />
+    </target>
+
+    <target name="build" depends="init">
+        <delete dir="libs" />
+        <mkdir dir="libs" />
+        <!-- generate header file with version/build number and build timestamp -->
+        <tstamp />
+        <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_VERSION &quot;${version}.${buildnum}-${buildtype}&quot;${line.separator}" append="false" />
+        <echo file="src/mysql/BuildInfo.h" message="#define WRAPPER_BUILD_TSTAMP &quot;${DSTAMP}T${TSTAMP}&quot;${line.separator}" append="true" />
+        <!-- call bash script to build four versions of wrapper -->
+        <exec executable="bash" failonerror="true">
+            <arg value="scripts/build.sh" />
+            <arg value="${osname-full}" />
+    	    <arg value="libs" />
+        </exec>
+    </target>
+
+    <target name="release" depends="build">
+        <property name="tarfile" value="libmyosp-${version}.${buildnum}-${osname-full}-${buildtype}.tar.gz" />
+        <property file="build.properties" />
+        <echo message="Creating ${tarfile}" />
+        <exec executable="bash">
+            <arg value="scripts/mktarball.sh" />
+            <arg value="${tarfile}" />
+            <arg value="libs" />
+        </exec>
+    </target>
+
+     <target name="autobuild" depends="release">
+         <property name="tarfile" value="libmyosp-${version}.${buildnum}-${osname-full}.tar.gz" />
+         <echo message="Installing ${tarfile}" />
+         <exec executable="bash">
+             <arg value="scripts/install.sh" />
+             <arg value="${tarfile}" />
+         </exec>
+     </target>
+
+</project>

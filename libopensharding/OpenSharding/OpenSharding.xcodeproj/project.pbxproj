@@ -1,0 +1,539 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		50149BDA09E781A5002DEE6A /* OpenSharding.h in Headers */ = {isa = PBXBuildFile; fileRef = 50149BD909E781A5002DEE6A /* OpenSharding.h */; };
+		5073E0CB09E734E500EC74B6 /* OpenSharding.cp in Sources */ = {isa = PBXBuildFile; fileRef = 5073E0C409E734A800EC74B6 /* OpenSharding.cp */; };
+		D114647615C96EDF00A8DCA0 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114642F15C96EDF00A8DCA0 /* Logger.cpp */; };
+		D114647715C96EDF00A8DCA0 /* Logger.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643015C96EDF00A8DCA0 /* Logger.h */; };
+		D114647815C96EDF00A8DCA0 /* jdbc_types.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643215C96EDF00A8DCA0 /* jdbc_types.h */; };
+		D114647915C96EDF00A8DCA0 /* OSPByteBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643315C96EDF00A8DCA0 /* OSPByteBuffer.cpp */; };
+		D114647A15C96EDF00A8DCA0 /* OSPByteBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643415C96EDF00A8DCA0 /* OSPByteBuffer.h */; };
+		D114647B15C96EDF00A8DCA0 /* OSPConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643515C96EDF00A8DCA0 /* OSPConnection.cpp */; };
+		D114647C15C96EDF00A8DCA0 /* OSPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643615C96EDF00A8DCA0 /* OSPConnection.h */; };
+		D114647D15C96EDF00A8DCA0 /* OSPConnectionInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643715C96EDF00A8DCA0 /* OSPConnectionInfo.cpp */; };
+		D114647E15C96EDF00A8DCA0 /* OSPConnectionInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643815C96EDF00A8DCA0 /* OSPConnectionInfo.h */; };
+		D114647F15C96EDF00A8DCA0 /* OSPConnectionPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643915C96EDF00A8DCA0 /* OSPConnectionPool.cpp */; };
+		D114648015C96EDF00A8DCA0 /* OSPConnectionPool.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643A15C96EDF00A8DCA0 /* OSPConnectionPool.h */; };
+		D114648115C96EDF00A8DCA0 /* OSPConnectRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643B15C96EDF00A8DCA0 /* OSPConnectRequest.cpp */; };
+		D114648215C96EDF00A8DCA0 /* OSPConnectRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643C15C96EDF00A8DCA0 /* OSPConnectRequest.h */; };
+		D114648315C96EDF00A8DCA0 /* OSPConnectResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643D15C96EDF00A8DCA0 /* OSPConnectResponse.cpp */; };
+		D114648415C96EDF00A8DCA0 /* OSPConnectResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114643E15C96EDF00A8DCA0 /* OSPConnectResponse.h */; };
+		D114648515C96EDF00A8DCA0 /* OSPCreateStatementRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114643F15C96EDF00A8DCA0 /* OSPCreateStatementRequest.cpp */; };
+		D114648615C96EDF00A8DCA0 /* OSPCreateStatementRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644015C96EDF00A8DCA0 /* OSPCreateStatementRequest.h */; };
+		D114648715C96EDF00A8DCA0 /* OSPCreateStatementResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644115C96EDF00A8DCA0 /* OSPCreateStatementResponse.cpp */; };
+		D114648815C96EDF00A8DCA0 /* OSPCreateStatementResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644215C96EDF00A8DCA0 /* OSPCreateStatementResponse.h */; };
+		D114648915C96EDF00A8DCA0 /* OSPDisconnectRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644315C96EDF00A8DCA0 /* OSPDisconnectRequest.cpp */; };
+		D114648A15C96EDF00A8DCA0 /* OSPDisconnectRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644415C96EDF00A8DCA0 /* OSPDisconnectRequest.h */; };
+		D114648B15C96EDF00A8DCA0 /* OSPDisconnectResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644515C96EDF00A8DCA0 /* OSPDisconnectResponse.cpp */; };
+		D114648C15C96EDF00A8DCA0 /* OSPDisconnectResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644615C96EDF00A8DCA0 /* OSPDisconnectResponse.h */; };
+		D114648D15C96EDF00A8DCA0 /* OSPErrorResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644715C96EDF00A8DCA0 /* OSPErrorResponse.cpp */; };
+		D114648E15C96EDF00A8DCA0 /* OSPErrorResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644815C96EDF00A8DCA0 /* OSPErrorResponse.h */; };
+		D114648F15C96EDF00A8DCA0 /* OSPException.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644915C96EDF00A8DCA0 /* OSPException.cpp */; };
+		D114649015C96EDF00A8DCA0 /* OSPException.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644A15C96EDF00A8DCA0 /* OSPException.h */; };
+		D114649115C96EDF00A8DCA0 /* OSPExecuteRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644B15C96EDF00A8DCA0 /* OSPExecuteRequest.cpp */; };
+		D114649215C96EDF00A8DCA0 /* OSPExecuteRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644C15C96EDF00A8DCA0 /* OSPExecuteRequest.h */; };
+		D114649315C96EDF00A8DCA0 /* OSPExecuteResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644D15C96EDF00A8DCA0 /* OSPExecuteResponse.cpp */; };
+		D114649415C96EDF00A8DCA0 /* OSPExecuteResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114644E15C96EDF00A8DCA0 /* OSPExecuteResponse.h */; };
+		D114649515C96EDF00A8DCA0 /* OSPFileInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114644F15C96EDF00A8DCA0 /* OSPFileInputStream.cpp */; };
+		D114649615C96EDF00A8DCA0 /* OSPFileInputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645015C96EDF00A8DCA0 /* OSPFileInputStream.h */; };
+		D114649715C96EDF00A8DCA0 /* OSPFileOutputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645115C96EDF00A8DCA0 /* OSPFileOutputStream.cpp */; };
+		D114649815C96EDF00A8DCA0 /* OSPFileOutputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645215C96EDF00A8DCA0 /* OSPFileOutputStream.h */; };
+		D114649915C96EDF00A8DCA0 /* OSPInputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645315C96EDF00A8DCA0 /* OSPInputStream.cpp */; };
+		D114649A15C96EDF00A8DCA0 /* OSPInputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645415C96EDF00A8DCA0 /* OSPInputStream.h */; };
+		D114649B15C96EDF00A8DCA0 /* OSPMessage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645515C96EDF00A8DCA0 /* OSPMessage.cpp */; };
+		D114649C15C96EDF00A8DCA0 /* OSPMessage.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645615C96EDF00A8DCA0 /* OSPMessage.h */; };
+		D114649D15C96EDF00A8DCA0 /* OSPMessageConsumer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645715C96EDF00A8DCA0 /* OSPMessageConsumer.cpp */; };
+		D114649E15C96EDF00A8DCA0 /* OSPMessageConsumer.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645815C96EDF00A8DCA0 /* OSPMessageConsumer.h */; };
+		D114649F15C96EDF00A8DCA0 /* OSPMessageDecoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645915C96EDF00A8DCA0 /* OSPMessageDecoder.cpp */; };
+		D11464A015C96EDF00A8DCA0 /* OSPMessageDecoder.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645A15C96EDF00A8DCA0 /* OSPMessageDecoder.h */; };
+		D11464A115C96EDF00A8DCA0 /* OSPNamedPipeConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645B15C96EDF00A8DCA0 /* OSPNamedPipeConnection.cpp */; };
+		D11464A215C96EDF00A8DCA0 /* OSPNamedPipeConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645C15C96EDF00A8DCA0 /* OSPNamedPipeConnection.h */; };
+		D11464A315C96EDF00A8DCA0 /* OSPOutputStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645D15C96EDF00A8DCA0 /* OSPOutputStream.cpp */; };
+		D11464A415C96EDF00A8DCA0 /* OSPOutputStream.h in Headers */ = {isa = PBXBuildFile; fileRef = D114645E15C96EDF00A8DCA0 /* OSPOutputStream.h */; };
+		D11464A515C96EDF00A8DCA0 /* OSPResultSetMetaResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114645F15C96EDF00A8DCA0 /* OSPResultSetMetaResponse.cpp */; };
+		D11464A615C96EDF00A8DCA0 /* OSPResultSetMetaResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646015C96EDF00A8DCA0 /* OSPResultSetMetaResponse.h */; };
+		D11464A715C96EDF00A8DCA0 /* OSPResultSetRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646115C96EDF00A8DCA0 /* OSPResultSetRequest.cpp */; };
+		D11464A815C96EDF00A8DCA0 /* OSPResultSetRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646215C96EDF00A8DCA0 /* OSPResultSetRequest.h */; };
+		D11464A915C96EDF00A8DCA0 /* OSPResultSetResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646315C96EDF00A8DCA0 /* OSPResultSetResponse.cpp */; };
+		D11464AA15C96EDF00A8DCA0 /* OSPResultSetResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646415C96EDF00A8DCA0 /* OSPResultSetResponse.h */; };
+		D11464AB15C96EDF00A8DCA0 /* OSPResultSetRowResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646515C96EDF00A8DCA0 /* OSPResultSetRowResponse.cpp */; };
+		D11464AC15C96EDF00A8DCA0 /* OSPResultSetRowResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646615C96EDF00A8DCA0 /* OSPResultSetRowResponse.h */; };
+		D11464AD15C96EDF00A8DCA0 /* OSPString.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646715C96EDF00A8DCA0 /* OSPString.cpp */; };
+		D11464AE15C96EDF00A8DCA0 /* OSPString.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646815C96EDF00A8DCA0 /* OSPString.h */; };
+		D11464AF15C96EDF00A8DCA0 /* OSPTCPConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646915C96EDF00A8DCA0 /* OSPTCPConnection.cpp */; };
+		D11464B015C96EDF00A8DCA0 /* OSPTCPConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646A15C96EDF00A8DCA0 /* OSPTCPConnection.h */; };
+		D11464B115C96EDF00A8DCA0 /* OSPWireRequest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646B15C96EDF00A8DCA0 /* OSPWireRequest.cpp */; };
+		D11464B215C96EDF00A8DCA0 /* OSPWireRequest.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646C15C96EDF00A8DCA0 /* OSPWireRequest.h */; };
+		D11464B315C96EDF00A8DCA0 /* OSPWireResponse.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114646D15C96EDF00A8DCA0 /* OSPWireResponse.cpp */; };
+		D11464B415C96EDF00A8DCA0 /* OSPWireResponse.h in Headers */ = {isa = PBXBuildFile; fileRef = D114646E15C96EDF00A8DCA0 /* OSPWireResponse.h */; };
+		D11464B515C96EDF00A8DCA0 /* DynLib.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114647015C96EDF00A8DCA0 /* DynLib.cpp */; };
+		D11464B615C96EDF00A8DCA0 /* DynLib.h in Headers */ = {isa = PBXBuildFile; fileRef = D114647115C96EDF00A8DCA0 /* DynLib.h */; };
+		D11464B715C96EDF00A8DCA0 /* OSPConfig.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114647215C96EDF00A8DCA0 /* OSPConfig.cpp */; };
+		D11464B815C96EDF00A8DCA0 /* OSPConfig.h in Headers */ = {isa = PBXBuildFile; fileRef = D114647315C96EDF00A8DCA0 /* OSPConfig.h */; };
+		D11464B915C96EDF00A8DCA0 /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D114647415C96EDF00A8DCA0 /* Util.cpp */; };
+		D11464BA15C96EDF00A8DCA0 /* Util.h in Headers */ = {isa = PBXBuildFile; fileRef = D114647515C96EDF00A8DCA0 /* Util.h */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		32BAE0B70371A74B00C91783 /* OpenSharding_Prefix.pch */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenSharding_Prefix.pch; sourceTree = "<group>"; };
+		50149BD909E781A5002DEE6A /* OpenSharding.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenSharding.h; sourceTree = "<group>"; };
+		5073E0C409E734A800EC74B6 /* OpenSharding.cp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = OpenSharding.cp; sourceTree = "<group>"; };
+		5073E0C609E734A800EC74B6 /* OpenShardingProj.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = OpenShardingProj.xcconfig; sourceTree = "<group>"; };
+		5073E0C709E734A800EC74B6 /* OpenShardingTarget.xcconfig */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = text.xcconfig; path = OpenShardingTarget.xcconfig; sourceTree = "<group>"; };
+		50B2938909F016FC00694E55 /* OpenShardingPriv.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OpenShardingPriv.h; sourceTree = "<group>"; };
+		D114642F15C96EDF00A8DCA0 /* Logger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Logger.cpp; sourceTree = "<group>"; };
+		D114643015C96EDF00A8DCA0 /* Logger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Logger.h; sourceTree = "<group>"; };
+		D114643215C96EDF00A8DCA0 /* jdbc_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = jdbc_types.h; sourceTree = "<group>"; };
+		D114643315C96EDF00A8DCA0 /* OSPByteBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPByteBuffer.cpp; sourceTree = "<group>"; };
+		D114643415C96EDF00A8DCA0 /* OSPByteBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPByteBuffer.h; sourceTree = "<group>"; };
+		D114643515C96EDF00A8DCA0 /* OSPConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPConnection.cpp; sourceTree = "<group>"; };
+		D114643615C96EDF00A8DCA0 /* OSPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPConnection.h; sourceTree = "<group>"; };
+		D114643715C96EDF00A8DCA0 /* OSPConnectionInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPConnectionInfo.cpp; sourceTree = "<group>"; };
+		D114643815C96EDF00A8DCA0 /* OSPConnectionInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPConnectionInfo.h; sourceTree = "<group>"; };
+		D114643915C96EDF00A8DCA0 /* OSPConnectionPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPConnectionPool.cpp; sourceTree = "<group>"; };
+		D114643A15C96EDF00A8DCA0 /* OSPConnectionPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPConnectionPool.h; sourceTree = "<group>"; };
+		D114643B15C96EDF00A8DCA0 /* OSPConnectRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPConnectRequest.cpp; sourceTree = "<group>"; };
+		D114643C15C96EDF00A8DCA0 /* OSPConnectRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPConnectRequest.h; sourceTree = "<group>"; };
+		D114643D15C96EDF00A8DCA0 /* OSPConnectResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPConnectResponse.cpp; sourceTree = "<group>"; };
+		D114643E15C96EDF00A8DCA0 /* OSPConnectResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPConnectResponse.h; sourceTree = "<group>"; };
+		D114643F15C96EDF00A8DCA0 /* OSPCreateStatementRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPCreateStatementRequest.cpp; sourceTree = "<group>"; };
+		D114644015C96EDF00A8DCA0 /* OSPCreateStatementRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPCreateStatementRequest.h; sourceTree = "<group>"; };
+		D114644115C96EDF00A8DCA0 /* OSPCreateStatementResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPCreateStatementResponse.cpp; sourceTree = "<group>"; };
+		D114644215C96EDF00A8DCA0 /* OSPCreateStatementResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPCreateStatementResponse.h; sourceTree = "<group>"; };
+		D114644315C96EDF00A8DCA0 /* OSPDisconnectRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPDisconnectRequest.cpp; sourceTree = "<group>"; };
+		D114644415C96EDF00A8DCA0 /* OSPDisconnectRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPDisconnectRequest.h; sourceTree = "<group>"; };
+		D114644515C96EDF00A8DCA0 /* OSPDisconnectResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPDisconnectResponse.cpp; sourceTree = "<group>"; };
+		D114644615C96EDF00A8DCA0 /* OSPDisconnectResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPDisconnectResponse.h; sourceTree = "<group>"; };
+		D114644715C96EDF00A8DCA0 /* OSPErrorResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPErrorResponse.cpp; sourceTree = "<group>"; };
+		D114644815C96EDF00A8DCA0 /* OSPErrorResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPErrorResponse.h; sourceTree = "<group>"; };
+		D114644915C96EDF00A8DCA0 /* OSPException.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPException.cpp; sourceTree = "<group>"; };
+		D114644A15C96EDF00A8DCA0 /* OSPException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPException.h; sourceTree = "<group>"; };
+		D114644B15C96EDF00A8DCA0 /* OSPExecuteRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPExecuteRequest.cpp; sourceTree = "<group>"; };
+		D114644C15C96EDF00A8DCA0 /* OSPExecuteRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPExecuteRequest.h; sourceTree = "<group>"; };
+		D114644D15C96EDF00A8DCA0 /* OSPExecuteResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPExecuteResponse.cpp; sourceTree = "<group>"; };
+		D114644E15C96EDF00A8DCA0 /* OSPExecuteResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPExecuteResponse.h; sourceTree = "<group>"; };
+		D114644F15C96EDF00A8DCA0 /* OSPFileInputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPFileInputStream.cpp; sourceTree = "<group>"; };
+		D114645015C96EDF00A8DCA0 /* OSPFileInputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPFileInputStream.h; sourceTree = "<group>"; };
+		D114645115C96EDF00A8DCA0 /* OSPFileOutputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPFileOutputStream.cpp; sourceTree = "<group>"; };
+		D114645215C96EDF00A8DCA0 /* OSPFileOutputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPFileOutputStream.h; sourceTree = "<group>"; };
+		D114645315C96EDF00A8DCA0 /* OSPInputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPInputStream.cpp; sourceTree = "<group>"; };
+		D114645415C96EDF00A8DCA0 /* OSPInputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPInputStream.h; sourceTree = "<group>"; };
+		D114645515C96EDF00A8DCA0 /* OSPMessage.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPMessage.cpp; sourceTree = "<group>"; };
+		D114645615C96EDF00A8DCA0 /* OSPMessage.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPMessage.h; sourceTree = "<group>"; };
+		D114645715C96EDF00A8DCA0 /* OSPMessageConsumer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPMessageConsumer.cpp; sourceTree = "<group>"; };
+		D114645815C96EDF00A8DCA0 /* OSPMessageConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPMessageConsumer.h; sourceTree = "<group>"; };
+		D114645915C96EDF00A8DCA0 /* OSPMessageDecoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPMessageDecoder.cpp; sourceTree = "<group>"; };
+		D114645A15C96EDF00A8DCA0 /* OSPMessageDecoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPMessageDecoder.h; sourceTree = "<group>"; };
+		D114645B15C96EDF00A8DCA0 /* OSPNamedPipeConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPNamedPipeConnection.cpp; sourceTree = "<group>"; };
+		D114645C15C96EDF00A8DCA0 /* OSPNamedPipeConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPNamedPipeConnection.h; sourceTree = "<group>"; };
+		D114645D15C96EDF00A8DCA0 /* OSPOutputStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPOutputStream.cpp; sourceTree = "<group>"; };
+		D114645E15C96EDF00A8DCA0 /* OSPOutputStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPOutputStream.h; sourceTree = "<group>"; };
+		D114645F15C96EDF00A8DCA0 /* OSPResultSetMetaResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPResultSetMetaResponse.cpp; sourceTree = "<group>"; };
+		D114646015C96EDF00A8DCA0 /* OSPResultSetMetaResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPResultSetMetaResponse.h; sourceTree = "<group>"; };
+		D114646115C96EDF00A8DCA0 /* OSPResultSetRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPResultSetRequest.cpp; sourceTree = "<group>"; };
+		D114646215C96EDF00A8DCA0 /* OSPResultSetRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPResultSetRequest.h; sourceTree = "<group>"; };
+		D114646315C96EDF00A8DCA0 /* OSPResultSetResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPResultSetResponse.cpp; sourceTree = "<group>"; };
+		D114646415C96EDF00A8DCA0 /* OSPResultSetResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPResultSetResponse.h; sourceTree = "<group>"; };
+		D114646515C96EDF00A8DCA0 /* OSPResultSetRowResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPResultSetRowResponse.cpp; sourceTree = "<group>"; };
+		D114646615C96EDF00A8DCA0 /* OSPResultSetRowResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPResultSetRowResponse.h; sourceTree = "<group>"; };
+		D114646715C96EDF00A8DCA0 /* OSPString.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPString.cpp; sourceTree = "<group>"; };
+		D114646815C96EDF00A8DCA0 /* OSPString.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPString.h; sourceTree = "<group>"; };
+		D114646915C96EDF00A8DCA0 /* OSPTCPConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPTCPConnection.cpp; sourceTree = "<group>"; };
+		D114646A15C96EDF00A8DCA0 /* OSPTCPConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPTCPConnection.h; sourceTree = "<group>"; };
+		D114646B15C96EDF00A8DCA0 /* OSPWireRequest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPWireRequest.cpp; sourceTree = "<group>"; };
+		D114646C15C96EDF00A8DCA0 /* OSPWireRequest.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPWireRequest.h; sourceTree = "<group>"; };
+		D114646D15C96EDF00A8DCA0 /* OSPWireResponse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPWireResponse.cpp; sourceTree = "<group>"; };
+		D114646E15C96EDF00A8DCA0 /* OSPWireResponse.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPWireResponse.h; sourceTree = "<group>"; };
+		D114647015C96EDF00A8DCA0 /* DynLib.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DynLib.cpp; sourceTree = "<group>"; };
+		D114647115C96EDF00A8DCA0 /* DynLib.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DynLib.h; sourceTree = "<group>"; };
+		D114647215C96EDF00A8DCA0 /* OSPConfig.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPConfig.cpp; sourceTree = "<group>"; };
+		D114647315C96EDF00A8DCA0 /* OSPConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPConfig.h; sourceTree = "<group>"; };
+		D114647415C96EDF00A8DCA0 /* Util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Util.cpp; sourceTree = "<group>"; };
+		D114647515C96EDF00A8DCA0 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Util.h; sourceTree = "<group>"; };
+		D2AAC09D05546B4700DB518D /* libOpenSharding.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libOpenSharding.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		D2AAC09B05546B4700DB518D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		034768DDFF38A45A11DB9C8B /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				D2AAC09D05546B4700DB518D /* libOpenSharding.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		0867D691FE84028FC02AAC07 /* OpenSharding */ = {
+			isa = PBXGroup;
+			children = (
+				D114642D15C96EDF00A8DCA0 /* src */,
+				5073E0CA09E734BC00EC74B6 /* Configuration Files */,
+				08FB77ACFE841707C02AAC07 /* Source */,
+				0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */,
+				034768DDFF38A45A11DB9C8B /* Products */,
+			);
+			name = OpenSharding;
+			sourceTree = "<group>";
+		};
+		0867D69AFE84028FC02AAC07 /* External Frameworks and Libraries */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "External Frameworks and Libraries";
+			sourceTree = "<group>";
+		};
+		08FB77ACFE841707C02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				32BAE0B70371A74B00C91783 /* OpenSharding_Prefix.pch */,
+				50149BD909E781A5002DEE6A /* OpenSharding.h */,
+				50B2938909F016FC00694E55 /* OpenShardingPriv.h */,
+				5073E0C409E734A800EC74B6 /* OpenSharding.cp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		5073E0CA09E734BC00EC74B6 /* Configuration Files */ = {
+			isa = PBXGroup;
+			children = (
+				5073E0C609E734A800EC74B6 /* OpenShardingProj.xcconfig */,
+				5073E0C709E734A800EC74B6 /* OpenShardingTarget.xcconfig */,
+			);
+			name = "Configuration Files";
+			sourceTree = "<group>";
+		};
+		D114642D15C96EDF00A8DCA0 /* src */ = {
+			isa = PBXGroup;
+			children = (
+				D114642E15C96EDF00A8DCA0 /* logger */,
+				D114643115C96EDF00A8DCA0 /* opensharding */,
+				D114646F15C96EDF00A8DCA0 /* util */,
+			);
+			name = src;
+			path = ../src;
+			sourceTree = SOURCE_ROOT;
+		};
+		D114642E15C96EDF00A8DCA0 /* logger */ = {
+			isa = PBXGroup;
+			children = (
+				D114642F15C96EDF00A8DCA0 /* Logger.cpp */,
+				D114643015C96EDF00A8DCA0 /* Logger.h */,
+			);
+			path = logger;
+			sourceTree = "<group>";
+		};
+		D114643115C96EDF00A8DCA0 /* opensharding */ = {
+			isa = PBXGroup;
+			children = (
+				D114643215C96EDF00A8DCA0 /* jdbc_types.h */,
+				D114643315C96EDF00A8DCA0 /* OSPByteBuffer.cpp */,
+				D114643415C96EDF00A8DCA0 /* OSPByteBuffer.h */,
+				D114643515C96EDF00A8DCA0 /* OSPConnection.cpp */,
+				D114643615C96EDF00A8DCA0 /* OSPConnection.h */,
+				D114643715C96EDF00A8DCA0 /* OSPConnectionInfo.cpp */,
+				D114643815C96EDF00A8DCA0 /* OSPConnectionInfo.h */,
+				D114643915C96EDF00A8DCA0 /* OSPConnectionPool.cpp */,
+				D114643A15C96EDF00A8DCA0 /* OSPConnectionPool.h */,
+				D114643B15C96EDF00A8DCA0 /* OSPConnectRequest.cpp */,
+				D114643C15C96EDF00A8DCA0 /* OSPConnectRequest.h */,
+				D114643D15C96EDF00A8DCA0 /* OSPConnectResponse.cpp */,
+				D114643E15C96EDF00A8DCA0 /* OSPConnectResponse.h */,
+				D114643F15C96EDF00A8DCA0 /* OSPCreateStatementRequest.cpp */,
+				D114644015C96EDF00A8DCA0 /* OSPCreateStatementRequest.h */,
+				D114644115C96EDF00A8DCA0 /* OSPCreateStatementResponse.cpp */,
+				D114644215C96EDF00A8DCA0 /* OSPCreateStatementResponse.h */,
+				D114644315C96EDF00A8DCA0 /* OSPDisconnectRequest.cpp */,
+				D114644415C96EDF00A8DCA0 /* OSPDisconnectRequest.h */,
+				D114644515C96EDF00A8DCA0 /* OSPDisconnectResponse.cpp */,
+				D114644615C96EDF00A8DCA0 /* OSPDisconnectResponse.h */,
+				D114644715C96EDF00A8DCA0 /* OSPErrorResponse.cpp */,
+				D114644815C96EDF00A8DCA0 /* OSPErrorResponse.h */,
+				D114644915C96EDF00A8DCA0 /* OSPException.cpp */,
+				D114644A15C96EDF00A8DCA0 /* OSPException.h */,
+				D114644B15C96EDF00A8DCA0 /* OSPExecuteRequest.cpp */,
+				D114644C15C96EDF00A8DCA0 /* OSPExecuteRequest.h */,
+				D114644D15C96EDF00A8DCA0 /* OSPExecuteResponse.cpp */,
+				D114644E15C96EDF00A8DCA0 /* OSPExecuteResponse.h */,
+				D114644F15C96EDF00A8DCA0 /* OSPFileInputStream.cpp */,
+				D114645015C96EDF00A8DCA0 /* OSPFileInputStream.h */,
+				D114645115C96EDF00A8DCA0 /* OSPFileOutputStream.cpp */,
+				D114645215C96EDF00A8DCA0 /* OSPFileOutputStream.h */,
+				D114645315C96EDF00A8DCA0 /* OSPInputStream.cpp */,
+				D114645415C96EDF00A8DCA0 /* OSPInputStream.h */,
+				D114645515C96EDF00A8DCA0 /* OSPMessage.cpp */,
+				D114645615C96EDF00A8DCA0 /* OSPMessage.h */,
+				D114645715C96EDF00A8DCA0 /* OSPMessageConsumer.cpp */,
+				D114645815C96EDF00A8DCA0 /* OSPMessageConsumer.h */,
+				D114645915C96EDF00A8DCA0 /* OSPMessageDecoder.cpp */,
+				D114645A15C96EDF00A8DCA0 /* OSPMessageDecoder.h */,
+				D114645B15C96EDF00A8DCA0 /* OSPNamedPipeConnection.cpp */,
+				D114645C15C96EDF00A8DCA0 /* OSPNamedPipeConnection.h */,
+				D114645D15C96EDF00A8DCA0 /* OSPOutputStream.cpp */,
+				D114645E15C96EDF00A8DCA0 /* OSPOutputStream.h */,
+				D114645F15C96EDF00A8DCA0 /* OSPResultSetMetaResponse.cpp */,
+				D114646015C96EDF00A8DCA0 /* OSPResultSetMetaResponse.h */,
+				D114646115C96EDF00A8DCA0 /* OSPResultSetRequest.cpp */,
+				D114646215C96EDF00A8DCA0 /* OSPResultSetRequest.h */,
+				D114646315C96EDF00A8DCA0 /* OSPResultSetResponse.cpp */,
+				D114646415C96EDF00A8DCA0 /* OSPResultSetResponse.h */,
+				D114646515C96EDF00A8DCA0 /* OSPResultSetRowResponse.cpp */,
+				D114646615C96EDF00A8DCA0 /* OSPResultSetRowResponse.h */,
+				D114646715C96EDF00A8DCA0 /* OSPString.cpp */,
+				D114646815C96EDF00A8DCA0 /* OSPString.h */,
+				D114646915C96EDF00A8DCA0 /* OSPTCPConnection.cpp */,
+				D114646A15C96EDF00A8DCA0 /* OSPTCPConnection.h */,
+				D114646B15C96EDF00A8DCA0 /* OSPWireRequest.cpp */,
+				D114646C15C96EDF00A8DCA0 /* OSPWireRequest.h */,
+				D114646D15C96EDF00A8DCA0 /* OSPWireResponse.cpp */,
+				D114646E15C96EDF00A8DCA0 /* OSPWireResponse.h */,
+			);
+			path = opensharding;
+			sourceTree = "<group>";
+		};
+		D114646F15C96EDF00A8DCA0 /* util */ = {
+			isa = PBXGroup;
+			children = (
+				D114647015C96EDF00A8DCA0 /* DynLib.cpp */,
+				D114647115C96EDF00A8DCA0 /* DynLib.h */,
+				D114647215C96EDF00A8DCA0 /* OSPConfig.cpp */,
+				D114647315C96EDF00A8DCA0 /* OSPConfig.h */,
+				D114647415C96EDF00A8DCA0 /* Util.cpp */,
+				D114647515C96EDF00A8DCA0 /* Util.h */,
+			);
+			path = util;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		D2AAC09905546B4700DB518D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				50149BDA09E781A5002DEE6A /* OpenSharding.h in Headers */,
+				D114647715C96EDF00A8DCA0 /* Logger.h in Headers */,
+				D114647815C96EDF00A8DCA0 /* jdbc_types.h in Headers */,
+				D114647A15C96EDF00A8DCA0 /* OSPByteBuffer.h in Headers */,
+				D114647C15C96EDF00A8DCA0 /* OSPConnection.h in Headers */,
+				D114647E15C96EDF00A8DCA0 /* OSPConnectionInfo.h in Headers */,
+				D114648015C96EDF00A8DCA0 /* OSPConnectionPool.h in Headers */,
+				D114648215C96EDF00A8DCA0 /* OSPConnectRequest.h in Headers */,
+				D114648415C96EDF00A8DCA0 /* OSPConnectResponse.h in Headers */,
+				D114648615C96EDF00A8DCA0 /* OSPCreateStatementRequest.h in Headers */,
+				D114648815C96EDF00A8DCA0 /* OSPCreateStatementResponse.h in Headers */,
+				D114648A15C96EDF00A8DCA0 /* OSPDisconnectRequest.h in Headers */,
+				D114648C15C96EDF00A8DCA0 /* OSPDisconnectResponse.h in Headers */,
+				D114648E15C96EDF00A8DCA0 /* OSPErrorResponse.h in Headers */,
+				D114649015C96EDF00A8DCA0 /* OSPException.h in Headers */,
+				D114649215C96EDF00A8DCA0 /* OSPExecuteRequest.h in Headers */,
+				D114649415C96EDF00A8DCA0 /* OSPExecuteResponse.h in Headers */,
+				D114649615C96EDF00A8DCA0 /* OSPFileInputStream.h in Headers */,
+				D114649815C96EDF00A8DCA0 /* OSPFileOutputStream.h in Headers */,
+				D114649A15C96EDF00A8DCA0 /* OSPInputStream.h in Headers */,
+				D114649C15C96EDF00A8DCA0 /* OSPMessage.h in Headers */,
+				D114649E15C96EDF00A8DCA0 /* OSPMessageConsumer.h in Headers */,
+				D11464A015C96EDF00A8DCA0 /* OSPMessageDecoder.h in Headers */,
+				D11464A215C96EDF00A8DCA0 /* OSPNamedPipeConnection.h in Headers */,
+				D11464A415C96EDF00A8DCA0 /* OSPOutputStream.h in Headers */,
+				D11464A615C96EDF00A8DCA0 /* OSPResultSetMetaResponse.h in Headers */,
+				D11464A815C96EDF00A8DCA0 /* OSPResultSetRequest.h in Headers */,
+				D11464AA15C96EDF00A8DCA0 /* OSPResultSetResponse.h in Headers */,
+				D11464AC15C96EDF00A8DCA0 /* OSPResultSetRowResponse.h in Headers */,
+				D11464AE15C96EDF00A8DCA0 /* OSPString.h in Headers */,
+				D11464B015C96EDF00A8DCA0 /* OSPTCPConnection.h in Headers */,
+				D11464B215C96EDF00A8DCA0 /* OSPWireRequest.h in Headers */,
+				D11464B415C96EDF00A8DCA0 /* OSPWireResponse.h in Headers */,
+				D11464B615C96EDF00A8DCA0 /* DynLib.h in Headers */,
+				D11464B815C96EDF00A8DCA0 /* OSPConfig.h in Headers */,
+				D11464BA15C96EDF00A8DCA0 /* Util.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		D2AAC09C05546B4700DB518D /* OpenSharding */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "OpenSharding" */;
+			buildPhases = (
+				D2AAC09905546B4700DB518D /* Headers */,
+				D2AAC09B05546B4700DB518D /* Frameworks */,
+				D2AAC09A05546B4700DB518D /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = OpenSharding;
+			productName = libOpenSharding;
+			productReference = D2AAC09D05546B4700DB518D /* libOpenSharding.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		0867D690FE84028FC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB916408733D950010E9CD /* Build configuration list for PBXProject "OpenSharding" */;
+			compatibilityVersion = "Xcode 3.1";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 0867D691FE84028FC02AAC07 /* OpenSharding */;
+			productRefGroup = 034768DDFF38A45A11DB9C8B /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				D2AAC09C05546B4700DB518D /* OpenSharding */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D2AAC09A05546B4700DB518D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				5073E0CB09E734E500EC74B6 /* OpenSharding.cp in Sources */,
+				D114647615C96EDF00A8DCA0 /* Logger.cpp in Sources */,
+				D114647915C96EDF00A8DCA0 /* OSPByteBuffer.cpp in Sources */,
+				D114647B15C96EDF00A8DCA0 /* OSPConnection.cpp in Sources */,
+				D114647D15C96EDF00A8DCA0 /* OSPConnectionInfo.cpp in Sources */,
+				D114647F15C96EDF00A8DCA0 /* OSPConnectionPool.cpp in Sources */,
+				D114648115C96EDF00A8DCA0 /* OSPConnectRequest.cpp in Sources */,
+				D114648315C96EDF00A8DCA0 /* OSPConnectResponse.cpp in Sources */,
+				D114648515C96EDF00A8DCA0 /* OSPCreateStatementRequest.cpp in Sources */,
+				D114648715C96EDF00A8DCA0 /* OSPCreateStatementResponse.cpp in Sources */,
+				D114648915C96EDF00A8DCA0 /* OSPDisconnectRequest.cpp in Sources */,
+				D114648B15C96EDF00A8DCA0 /* OSPDisconnectResponse.cpp in Sources */,
+				D114648D15C96EDF00A8DCA0 /* OSPErrorResponse.cpp in Sources */,
+				D114648F15C96EDF00A8DCA0 /* OSPException.cpp in Sources */,
+				D114649115C96EDF00A8DCA0 /* OSPExecuteRequest.cpp in Sources */,
+				D114649315C96EDF00A8DCA0 /* OSPExecuteResponse.cpp in Sources */,
+				D114649515C96EDF00A8DCA0 /* OSPFileInputStream.cpp in Sources */,
+				D114649715C96EDF00A8DCA0 /* OSPFileOutputStream.cpp in Sources */,
+				D114649915C96EDF00A8DCA0 /* OSPInputStream.cpp in Sources */,
+				D114649B15C96EDF00A8DCA0 /* OSPMessage.cpp in Sources */,
+				D114649D15C96EDF00A8DCA0 /* OSPMessageConsumer.cpp in Sources */,
+				D114649F15C96EDF00A8DCA0 /* OSPMessageDecoder.cpp in Sources */,
+				D11464A115C96EDF00A8DCA0 /* OSPNamedPipeConnection.cpp in Sources */,
+				D11464A315C96EDF00A8DCA0 /* OSPOutputStream.cpp in Sources */,
+				D11464A515C96EDF00A8DCA0 /* OSPResultSetMetaResponse.cpp in Sources */,
+				D11464A715C96EDF00A8DCA0 /* OSPResultSetRequest.cpp in Sources */,
+				D11464A915C96EDF00A8DCA0 /* OSPResultSetResponse.cpp in Sources */,
+				D11464AB15C96EDF00A8DCA0 /* OSPResultSetRowResponse.cpp in Sources */,
+				D11464AD15C96EDF00A8DCA0 /* OSPString.cpp in Sources */,
+				D11464AF15C96EDF00A8DCA0 /* OSPTCPConnection.cpp in Sources */,
+				D11464B115C96EDF00A8DCA0 /* OSPWireRequest.cpp in Sources */,
+				D11464B315C96EDF00A8DCA0 /* OSPWireResponse.cpp in Sources */,
+				D11464B515C96EDF00A8DCA0 /* DynLib.cpp in Sources */,
+				D11464B715C96EDF00A8DCA0 /* OSPConfig.cpp in Sources */,
+				D11464B915C96EDF00A8DCA0 /* Util.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB916108733D950010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5073E0C709E734A800EC74B6 /* OpenShardingTarget.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = OpenSharding_Prefix.pch;
+			};
+			name = Debug;
+		};
+		1DEB916208733D950010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5073E0C709E734A800EC74B6 /* OpenShardingTarget.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				GCC_PRECOMPILE_PREFIX_HEADER = YES;
+				GCC_PREFIX_HEADER = OpenSharding_Prefix.pch;
+				STRIP_INSTALLED_PRODUCT = YES;
+				STRIP_STYLE = "non-global";
+			};
+			name = Release;
+		};
+		1DEB916508733D950010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5073E0C609E734A800EC74B6 /* OpenShardingProj.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		1DEB916608733D950010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 5073E0C609E734A800EC74B6 /* OpenShardingProj.xcconfig */;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB916008733D950010E9CD /* Build configuration list for PBXNativeTarget "OpenSharding" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB916108733D950010E9CD /* Debug */,
+				1DEB916208733D950010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB916408733D950010E9CD /* Build configuration list for PBXProject "OpenSharding" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB916508733D950010E9CD /* Debug */,
+				1DEB916608733D950010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 0867D690FE84028FC02AAC07 /* Project object */;
+}
