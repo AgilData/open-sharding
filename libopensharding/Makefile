@@ -38,7 +38,6 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/opensharding/OSPNamedPipeConnection.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPOutputStream.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPResultSetMetaResponse.cpp
-	@g++ $(CPPFLAGS) src/opensharding/OSPResultSetRequest.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPResultSetResponse.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPResultSetRowResponse.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPString.cpp
