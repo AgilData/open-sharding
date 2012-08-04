@@ -373,7 +373,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     //OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
 
     // how many columns?
-    int columnCount = wireresponse->getColumnCount();
+    int columnCount = wireResponse->getColumnCount();
 
     if (log.isTraceEnabled()) {
         log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
@@ -423,7 +423,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              } MYSQL_FIELD;
              */
 
-        	OSPString *tableName = response->getTableNames()[i];
+        	OSPString *tableName = wireResponse->getTableNames()[i];
 
         	if (tableName == NULL) {
         		res->fields[i].table = emptyString;
@@ -566,7 +566,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
      */
 
     // iterate over result set
-    list<OSPString**> *resultRows = response->getResultRows();
+    list<OSPString**> *resultRows = wireResponse->getResultRows();
     list<OSPString**>::iterator it;
     for (it=resultRows->begin(); it!=resultRows->end(); it++) {
 
