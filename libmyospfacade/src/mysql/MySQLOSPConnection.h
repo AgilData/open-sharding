@@ -33,7 +33,7 @@
 #include <opensharding/OSPCreateStatementRequest.h>
 #include <opensharding/OSPCreateStatementResponse.h>
 #include <opensharding/OSPExecuteRequest.h>
-#include <opensharding/OSPResultSetResponse.h>
+#include <opensharding/OSPExecuteResponse.h>
 #include <opensharding/OSPDisconnectRequest.h>
 #include <opensharding/OSPDisconnectResponse.h>
 #include <opensharding/jdbc_types.h>
