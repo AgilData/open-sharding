@@ -27,7 +27,7 @@
 #include <opensharding/OSPConnectResponse.h>
 #include <opensharding/OSPCreateStatementResponse.h>
 #include <opensharding/OSPExecuteResponse.h>
-#include <opensharding/OSPResultSetResponse.h>
+
 #include <opensharding/OSPDisconnectResponse.h>
 #include <opensharding/OSPErrorResponse.h>
 #include <opensharding/OSPMessageDecoder.h>
@@ -63,8 +63,8 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
         case 102:
             response = new OSPExecuteResponse();
             break;
-        case 103:
-            response = new OSPResultSetResponse();
+        //case 103:
+          //  response = new OSPResultSetResponse();
             break;
         case 104:
             response = new OSPDisconnectResponse();
