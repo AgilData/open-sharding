@@ -19,8 +19,8 @@
  * WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-#ifndef __OSPResultSetResponse_h__
-#define __OSPResultSetResponse_h__
+#ifndef __OSPResultSetRowResponse_h__
+#define __OSPResultSetRowResponse_h__
 
 #include <opensharding/OSPMessage.h>
 #include <opensharding/OSPByteBuffer.h>
@@ -34,28 +34,17 @@ using namespace logger;
 
 namespace opensharding {
 
-class OSPResultSetResponse : public OSPMessage {
+class OSPResultSetRowResponse : public OSPMessage {
 private:
 
-    unsigned int       columnCount;
-    OSPString        **tableName;
-    OSPString        **columnName;
-    int               *columnType;
-    list<OSPString**>  resultRows;
-
-
-    unsigned int       tableNameIndex;
-    unsigned int       columnNameIndex;
-    unsigned int       columnTypeIndex;
     unsigned int       fieldIndex;
     OSPString        **currentRow;
 
     static Logger &log;
 
-
 public:
-    OSPResultSetResponse();
-    virtual ~OSPResultSetResponse();
+    OSPResultSetRowResponse();
+    virtual ~OSPResultSetRowResponse();
 
     unsigned char getMessageType() { return 0xa7; }
     unsigned int getEstimatedEncodingLength() { return 0; }
@@ -64,11 +53,8 @@ public:
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);
     void setField(int fieldNum, int value);
 
-    unsigned int       getColumnCount() { return columnCount; }
-    int*       getColumnTypes() { return columnType; }
-    OSPString        **getTableNames() { return tableName; }
-    OSPString        **getColumnNames() { return columnName; }
-    list<OSPString**> *getResultRows()  { return &resultRows; }
+    unsigned int      getColumnCount() { return columnCount; }
+    OSPString*       *getResultRow()  { return currentRow; }
 
 
 };
@@ -77,4 +63,4 @@ public:
 
 }
 
-#endif // __OSPResultSetResponse_h__
+#endif // __OSPResultSetRowResponse_h__
