@@ -28,6 +28,7 @@
 
 #include <list>
 #include <string.h>
+#include <vector>
 
 using namespace std;
 using namespace logger;
@@ -40,7 +41,8 @@ private:
     unsigned int       fieldIndex;
     OSPString        **currentRow;
     unsigned int      columnCount;
-
+    vector<OSPString*> resultRows;
+    
     static Logger &log;
 
 public:
