@@ -41,7 +41,7 @@ private:
     unsigned int       fieldIndex;
     OSPString        **currentRow;
     unsigned int      columnCount;
-    vector<OSPString*> resultRows;
+    vector<OSPString**> resultRows;
     
     static Logger &log;
 
