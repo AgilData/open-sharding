@@ -27,7 +27,8 @@
 #include <opensharding/OSPConnectResponse.h>
 #include <opensharding/OSPCreateStatementResponse.h>
 #include <opensharding/OSPExecuteResponse.h>
-
+#include <opensharding/OSPResultSetMetaResponse.h>
+#include <opensharding/OSPResultSetRowResponse.h>
 #include <opensharding/OSPDisconnectResponse.h>
 #include <opensharding/OSPErrorResponse.h>
 #include <opensharding/OSPMessageDecoder.h>
