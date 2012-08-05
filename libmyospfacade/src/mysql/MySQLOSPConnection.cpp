@@ -316,13 +316,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
     // cast to expected message type
     OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse *>(message);
-    if (wireResponse->isErrorResponse()) {
-        OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-        log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-        throw "OSP_ERROR";
+
+
+    if (log.isDebugEnabled()) {
+        log.debug(string("processMessage() messageType=") + Util::toString(wireResponse->getMessageType()));
     }
 
-    //TODO: get this working
     if (wireResponse->getMessageType() == 102 /*OSPExecuteResponseMessage*/) {
         // ignore here, it is handled in mysql_real_query already
     }
@@ -518,8 +517,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         res->data->fields = columnCount;
         res->data->data = NULL; // populate this later
 
-
-        //TODO: get this working
         if (wireResponse->isFinalResponse()) {
 
             // if this is the final message then there is no data - not sure if we need to populate
@@ -529,7 +526,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     }
     else if (wireResponse->getMessageType() == 109 /* OSPResultSetRowResponse */) {
 
-        //TODO: get this working
         // populate data in mysql result structure .. NOTE: we expect to get lots of these messages now (one per row)
         // whereas the code used to get one message containing a batch of rows
 
