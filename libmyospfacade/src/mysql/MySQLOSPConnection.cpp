@@ -572,7 +572,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         OSPString **currentRowData = response->getResultRow();
         if (!currentRowData) {
-            xlog.error("empty response row!");
+            log.error("empty response row!");
             throw "NULL";
         }
 
