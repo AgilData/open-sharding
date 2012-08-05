@@ -685,11 +685,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     }
 
     // memory cleanup
-    if (!wireResponse->isFinalResponse()) {
-        // don't delete the final response because that will be returned by sendMessage() and will be
-        // deleted in mysql_real_query()
-        delete wireResponse;
-    }
+    delete wireResponse;
 }
 
 void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
