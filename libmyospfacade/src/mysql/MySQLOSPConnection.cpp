@@ -284,7 +284,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         );
     }
 
-    if (wireResponse->getMessageType() == 102 /*OSPExecuteResponseMessage*/) {
+    int responseType = wireResponse->getResponse()->getMessageType();
+
+    if (responseType == 3 /*OSPExecuteResponseMessage*/) {
 
         OSPExecuteResponse *executeResponse = dynamic_cast<OSPExecuteResponse *>(wireResponse->getResponse());
 
@@ -318,7 +320,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             }
         }
     }
-    else if (wireResponse->getMessageType() == 200 /*OSPErrorResponse*/) {
+    else if (responseType == 101 /*OSPErrorResponse*/) {
 
         OSPErrorResponse *response = dynamic_cast<OSPErrorResponse *>(wireResponse->getResponse());
 
@@ -336,7 +338,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         //TODO: this is a memory leak ... do we care? what can we do about it?
         my_error = Util::createString(response->getErrorMessage().c_str());
 
-    } else if (wireResponse->getMessageType() == 103 /*OSPResultSetMetaResponse*/) {
+    } else if (responseType == 4 /*OSPResultSetMetaResponse*/) {
 
         // populate meta data in mysql result structure
         OSPResultSetMetaResponse *response = dynamic_cast<OSPResultSetMetaResponse *>(wireResponse->getResponse());
@@ -533,7 +535,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         }
 
     }
-    else if (wireResponse->getMessageType() == 109 /* OSPResultSetRowResponse */) {
+    else if (responseType == 10 /* OSPResultSetRowResponse */) {
 
         // populate data in mysql result structure .. NOTE: we expect to get lots of these messages now (one per row)
         // whereas the code used to get one message containing a batch of rows
