@@ -552,6 +552,10 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // how many columns?
         int columnCount = response->getColumnCount();
 
+        if (log.isDebugEnabled()) {
+            log.debug(string("OSPResultSetRowResponse getColumnCount() returned ") + Util::toString(columnCount()));
+        }
+
         /*
          typedef struct st_mysql_res {
          my_ulonglong row_count;
@@ -572,8 +576,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         OSPString **currentRowData = response->getResultRow();
         if (!currentRowData) {
-            log.error("empty response row!");
-            throw "NULL";
+            throw Util::createException("OSPResultSetRowResponse::getResultRow() returned NULL");
         }
 
         /*
