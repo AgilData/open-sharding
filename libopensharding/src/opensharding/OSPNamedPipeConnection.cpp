@@ -155,8 +155,8 @@ int OSPNamedPipeConnection::init(OSPConnectionInfo *info, bool threadedResponseF
 		return -1;
 	}
 
-	
-
+	// success
+    return 0;
 }
 
 

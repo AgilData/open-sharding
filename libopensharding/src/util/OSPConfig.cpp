@@ -103,6 +103,9 @@ OSPConfig::~OSPConfig() {
 			if(strcmp(mode.c_str(),"PREFORK"))		return 1;
 			if(strcmp(mode.c_str(),"DEDICATED"))		return 2;
 			if(strcmp(mode.c_str(),"POOL"))			return 3;
+
+			// error condition
+			return 0;
 	}
 
 /**
