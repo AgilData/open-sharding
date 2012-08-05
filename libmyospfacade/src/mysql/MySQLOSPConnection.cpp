@@ -355,6 +355,10 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         // create native MySQL result set structure
         currentRes = new MYSQL_RES();
+
+        //TODO: this is a pointless duplicate variable
+        MYSQL_RES *res = currentRes;
+
         memset(currentRes, 0, sizeof(MYSQL_RES));
 
     /*    if (log.isTraceEnabled()) {
