@@ -60,7 +60,7 @@ void OSPResultSetRowResponse::setField(int fieldNum, char *buffer, unsigned int 
         case 2:
         {
             if (!currentRow) {
-                currentRow = new OSPString*[columnCount];
+                throw "OSPResultSetRowResponse::setField() NULL currentRow";
             }
 
             //TODO: gross HACK magic value for NULL strings
@@ -90,7 +90,6 @@ void OSPResultSetRowResponse::setField(int fieldNum, char *buffer, unsigned int 
             }
 
             if (fieldIndex == columnCount) {
-                resultRows.push_back(currentRow);
                 currentRow = NULL;
                 fieldIndex = 0;
             }

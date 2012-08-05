@@ -571,6 +571,10 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
          */
 
         OSPString **currentRowData = response->getResultRow();
+        if (!currentRowData) {
+            xlog.error("no data in response row!")
+            throw "NULL";
+        }
 
         /*
          typedef struct st_mysql_data {

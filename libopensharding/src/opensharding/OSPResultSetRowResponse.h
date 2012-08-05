@@ -38,11 +38,10 @@ namespace opensharding {
 class OSPResultSetRowResponse : public OSPMessage {
 private:
 
-    unsigned int       fieldIndex;
-    OSPString        **currentRow;
     unsigned int      columnCount;
-    vector<OSPString**> resultRows;
-    
+    OSPString        **currentRow;
+    unsigned int       fieldIndex;
+
     static Logger &log;
 
 public:
