@@ -427,7 +427,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              enum enum_field_types type; // Type of field. See mysql_com.h for types
              } MYSQL_FIELD;
              */
-
+/*
         	MYSQL_FIELD  *tableName = response->mysql_fetch_fields(res)[i];///????
 /*
         	if (tableName == NULL) {
@@ -457,7 +457,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                 res->fields[i].name[columnNameLength] = '\0';
             }
 */
-            res->fields[i].name_length = columnNameLength;
+ /*           res->fields[i].name_length = columnNameLength;
             res->fields[i].length = 16; //TODO: get from response object
 
             // set the data type
