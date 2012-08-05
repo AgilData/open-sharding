@@ -393,7 +393,7 @@ OSPMessage* OSPTCPConnection::readResponseMessage(int hSocket, bool *finalMessag
     OSPMessageDecoder decoder;
     decoder.decode(message, &bb);
 
-    *finalResponse = message->isFinalResponse();
+    *finalMessage = message->isFinalResponse();
 
     //message->read(&bb);
 
