@@ -202,8 +202,6 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
     my_error = NULL;
     insertID = -1;
 
-    int ret = -1;
-
     try {
         if (log.isDebugEnabled()) {
             log.debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
@@ -217,11 +215,11 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
 
         // processMessage will set my_errno if anything goes wrong
         if (my_errno) {
-            return NULL;
+            return -1;
         }
 
         // success
-        ret = 0;
+        return 0;
 
     }
     catch (const char *exception) {
@@ -231,6 +229,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         fieldCount = 0;
         my_errno = CR_UNKNOWN_ERROR; // MySQL unknown error
         my_error = "Query failed due to OSP error";
+        return -1;
     }
     catch (...) {
         log.error(string("Failed to execute query [unhandled exception]. ConnID = ") + connID + string("; SQL=") + string(sql));
@@ -239,9 +238,9 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         fieldCount = 0;
         my_errno = CR_UNKNOWN_ERROR; // MySQL unknown error
         my_error = "Query failed due to OSP error";
+        return -1;
     }
 
-    return ret;
 }
 
 int MySQLOSPConnection::mysql_send_query(MYSQL *mysql, const char *q,
