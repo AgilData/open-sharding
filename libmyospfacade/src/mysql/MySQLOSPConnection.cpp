@@ -685,7 +685,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         res->data->rows++;
  */
     }
-}
     // memory cleanup
     delete wireResponse;
 }
