@@ -208,6 +208,8 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         if (log.isDebugEnabled()) {
             log.debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
         }
+        
+        currentRes = NULL;
 
         // send execute request - response messages will be handled by processMessage()
         OSPExecuteRequest request(connID, stmtID, string(sql));
@@ -275,11 +277,8 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
 
 void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
-    MYSQL_RES *res = currentRes;
-
     // cast to expected message type
     OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse *>(message);
-
 
     if (log.isDebugEnabled()) {
         log.debug(string("processMessage() wireResponse->getMessageType()=") + Util::toString(wireResponse->getMessageType())
@@ -347,45 +346,35 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         OSPResultSetMetaResponse *response = dynamic_cast<OSPResultSetMetaResponse *>(wireResponse->getResponse());
 
         // how many columns?
-            int columnCount = response->getColumnCount();
+        int columnCount = response->getColumnCount();
 
         if (log.isTraceEnabled()) {
-            log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
+            log.trace(string("Result set has ") + Util::toString(columnCount) + string(" column(s)"));
         }
 
         // create native MySQL result set structure
         currentRes = new MYSQL_RES();
 
-        //TODO: this is a pointless duplicate variable
-        MYSQL_RES *res = currentRes;
-
         memset(currentRes, 0, sizeof(MYSQL_RES));
-
-    /*    if (log.isTraceEnabled()) {
-            log.trace(string("mysql_store_result(") + Util::toString((void*)mysql)
-                 + string(") creating MYSQL_RES* ")
-                 + Util::toString((void*)currentRes)
-                );
-        }*/
 
         // initialize variables before results start streaming in
         currentRow = NULL;
         prevRow = NULL;
 
-        res->lengths = new unsigned long[columnCount];
-        memset(res->lengths, 0, sizeof(unsigned long[columnCount]));
+        currentRes->lengths = new unsigned long[columnCount];
+        memset(currentRes->lengths, 0, sizeof(unsigned long[columnCount]));
 
-        res->field_count = columnCount;
-        res->row_count = 0;
-        res->current_field = 0;
+        currentRes->field_count = columnCount;
+        currentRes->row_count = 0;
+        currentRes->current_field = 0;
 
         // fields
-        res->fields = new MYSQL_FIELD[res->field_count];
-        memset(res->fields, 0, res->field_count * sizeof(MYSQL_FIELD));
+        currentRes->fields = new MYSQL_FIELD[currentRes->field_count];
+        memset(currentRes->fields, 0, currentRes->field_count * sizeof(MYSQL_FIELD));
 
         char *emptyString = Util::createString("");
 
-        for (unsigned int i = 0; i < res->field_count; i++) {
+        for (unsigned int i = 0; i < currentRes->field_count; i++) {
 
             /*
              typedef struct st_mysql_field {
@@ -415,17 +404,17 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         	OSPString *tableName = response->getTableNames()[i];
 
         	if (tableName == NULL) {
-        		res->fields[i].table = emptyString;
+        		currentRes->fields[i].table = emptyString;
         	}
         	else {
 				int tableNameLength = tableName->getLength();
 				if (tableNameLength<1) {
-					res->fields[i].table = emptyString;
+					currentRes->fields[i].table = emptyString;
 				}
 				else {
-					res->fields[i].table = new char[tableNameLength + 1];
-					memcpy(res->fields[i].table, (const char *) tableName->getBuffer(), tableNameLength); //TODO: avoid this copy
-					res->fields[i].table[tableNameLength] = '\0';
+					currentRes->fields[i].table = new char[tableNameLength + 1];
+					memcpy(currentRes->fields[i].table, (const char *) tableName->getBuffer(), tableNameLength); //TODO: avoid this copy
+					currentRes->fields[i].table[tableNameLength] = '\0';
 				}
         	}
         	
@@ -433,107 +422,107 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             int jdbcType = response->getColumnTypes()[i];
             int columnNameLength = columnName->getLength();
             if (columnNameLength<1) {
-                res->fields[i].name = emptyString;
+                currentRes->fields[i].name = emptyString;
             }
             else {
-                res->fields[i].name = new char[columnNameLength + 1];
-                memcpy(res->fields[i].name, (const char *) columnName->getBuffer(), columnNameLength); //TODO: avoid this copy
-                res->fields[i].name[columnNameLength] = '\0';
+                currentRes->fields[i].name = new char[columnNameLength + 1];
+                memcpy(currentRes->fields[i].name, (const char *) columnName->getBuffer(), columnNameLength); //TODO: avoid this copy
+                currentRes->fields[i].name[columnNameLength] = '\0';
             }
 
-            res->fields[i].name_length = columnNameLength;
-            res->fields[i].length = 16; //TODO: get from response object
+            currentRes->fields[i].name_length = columnNameLength;
+            currentRes->fields[i].length = 16; //TODO: get from response object
 
             // set the data type
-            res->fields[i].type = MYSQL_TYPE_VARCHAR;
+            currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
 
             bool TRACE = true;		
             const char *odbcColumnName = columnName->getBuffer();
 
             switch (jdbcType) {
                 case JDBC_BLOB:
-                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    currentRes->fields[i].type = MYSQL_TYPE_BLOB;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BLOB --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_BINARY:
-                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    currentRes->fields[i].type = MYSQL_TYPE_BLOB;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_VARBINARY:
-                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    currentRes->fields[i].type = MYSQL_TYPE_BLOB;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARBINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_LONGVARBINARY:
-                    res->fields[i].type = MYSQL_TYPE_BLOB;
+                    currentRes->fields[i].type = MYSQL_TYPE_BLOB;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_LONGVARBINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_DATE:
-                    res->fields[i].type = MYSQL_TYPE_DATE;
+                    currentRes->fields[i].type = MYSQL_TYPE_DATE;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TYPE_DATE --> MYSQL_TYPE_DATE"));
                     break;
                 case JDBC_TIME:
-                    res->fields[i].type = MYSQL_TYPE_DATETIME;
+                    currentRes->fields[i].type = MYSQL_TYPE_DATETIME;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TIME --> MYSQL_TYPE_DATETIME"));
                     break;
                 case JDBC_TIMESTAMP:
-                    res->fields[i].type = MYSQL_TYPE_DATETIME;
+                    currentRes->fields[i].type = MYSQL_TYPE_DATETIME;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DATETIME --> MYSQL_TYPE_DATETIME"));
                     break;
                 case JDBC_DECIMAL:
                 case JDBC_NUMERIC:
-                    res->fields[i].type = MYSQL_TYPE_DECIMAL;
+                    currentRes->fields[i].type = MYSQL_TYPE_DECIMAL;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DECIMAL --> MYSQL_TYPE_DECIMAL"));
                     break;
                 case JDBC_BIT:
                 case JDBC_TINYINT:
-                    res->fields[i].type = MYSQL_TYPE_TINY;
+                    currentRes->fields[i].type = MYSQL_TYPE_TINY;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BIT --> MYSQL_TYPE_TINY"));
                     break;
                 case JDBC_SMALLINT:
                 case JDBC_BIGINT:
                 case JDBC_INTEGER:
-                    res->fields[i].type = MYSQL_TYPE_INT24;
+                    currentRes->fields[i].type = MYSQL_TYPE_INT24;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_INTEGER --> MYSQL_TYPE_INT24"));
                     break;
                 case JDBC_REAL:
                 case JDBC_FLOAT:
-                    res->fields[i].type = MYSQL_TYPE_FLOAT;
+                    currentRes->fields[i].type = MYSQL_TYPE_FLOAT;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_FLOAT --> MYSQL_TYPE_FLOAT"));
                     break;
                 case JDBC_DOUBLE:
-                    res->fields[i].type = MYSQL_TYPE_DOUBLE;
+                    currentRes->fields[i].type = MYSQL_TYPE_DOUBLE;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DOUBLE --> MYSQL_TYPE_DOUBLE"));
                     break;
                 case JDBC_CHAR:
                 case JDBC_VARCHAR:
                 case JDBC_LONGVARCHAR:
-                    res->fields[i].type = MYSQL_TYPE_VARCHAR;
+                    currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARCHAR --> MYSQL_TYPE_VARCHAR"));
                     break;
                 case JDBC_CLOB:
-                    res->fields[i].type = MYSQL_TYPE_VARCHAR;
+                    currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
                     if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_CLOB --> MYSQL_TYPE_VARCHAR"));
                     break;
                 default:
-                    res->fields[i].type = MYSQL_TYPE_VARCHAR;
+                    currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
                     log.warn(string("Column ") + string((const char *)odbcColumnName)
                             + string(" used UNKNOWN JDBC datatype (") + Util::toString((int)jdbcType) + string(") --> MYSQL_TYPE_VARCHAR"));
                     break;
             }
 
-            res->fields[i].org_name = emptyString;
-            res->fields[i].org_table = emptyString;
-            res->fields[i].db = emptyString;
-            res->fields[i].catalog = emptyString;
-            res->fields[i].def = emptyString;
-            res->fields[i].max_length = 0; // this must be set to the max length of any data item in the current result set
+            currentRes->fields[i].org_name = emptyString;
+            currentRes->fields[i].org_table = emptyString;
+            currentRes->fields[i].db = emptyString;
+            currentRes->fields[i].catalog = emptyString;
+            currentRes->fields[i].def = emptyString;
+            currentRes->fields[i].max_length = 0; // this must be set to the max length of any data item in the current result set
         }
 
         // create data structure
-        res->data = new MYSQL_DATA();
-        res->data->rows = 0;
-        res->data->fields = columnCount;
-        res->data->data = NULL; // populate this later
+        currentRes->data = new MYSQL_DATA();
+        currentRes->data->rows = 0;
+        currentRes->data->fields = columnCount;
+        currentRes->data->data = NULL; // populate this later
 
         if (wireResponse->isFinalResponse()) {
 
@@ -579,6 +568,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             throw Util::createException("OSPResultSetRowResponse::getResultRow() returned NULL");
         }
 
+        if (!currentRes) {
+            // should never happen since OSPResultSetMetaResponse arrives first and this triggers
+            // creation of currentRes
+            throw Util::createException("OSPResultSetRowResponse received but currentRes is NULL");
+        }
+
         /*
          typedef struct st_mysql_data {
          my_ulonglong rows;
@@ -595,9 +590,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         currentRow->data = new char*[columnCount];
 
         // on the first row, mark this as the result set data
-        if (res->data_cursor == NULL) {
-            res->data_cursor = currentRow;
-            res->data->data = currentRow;
+        if (currentRes->data_cursor == NULL) {
+            currentRes->data_cursor = currentRow;
+            currentRes->data->data = currentRow;
         }
 
         // create buffer to store data for entire row in a contiguous block
@@ -647,8 +642,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                 rowData[rowDataOffset++] = '\0';
 
                 // update max length
-                if (l > res->fields[col - 1].max_length) {
-                    res->fields[col - 1].max_length = l;
+                if (l > currentRes->fields[col - 1].max_length) {
+                    currentRes->fields[col - 1].max_length = l;
                 }
             }
             else {
@@ -685,8 +680,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         }
         prevRow = currentRow;
 
-        res->row_count++;
-        res->data->rows++;
+        currentRes->row_count++;
+        currentRes->data->rows++;
 
         if (wireResponse->isFinalResponse()) {
             // finalize result set structure, now that all response messages have been received and processed (in
