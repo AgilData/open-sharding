@@ -354,6 +354,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         // create native MySQL result set structure
         currentRes = new MYSQL_RES();
+        currentRes->handle = mysql;
+        mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
 
         memset(currentRes, 0, sizeof(MYSQL_RES));
 
@@ -525,9 +527,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         currentRes->data->data = NULL; // populate this later
 
         if (wireResponse->isFinalResponse()) {
-
-            // if this is the final message then there is no data - not sure if we need to populate
-            // anything in MYSQL_RES to indicate this .. might be automatic
+            // finalize result set structure
+            currentRes->eof = 1;
         }
 
     }
@@ -684,13 +685,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         currentRes->data->rows++;
 
         if (wireResponse->isFinalResponse()) {
-            // finalize result set structure, now that all response messages have been received and processed (in
-            // calls to processMessage()).
-            currentRes->handle = mysql;
+            // finalize result set structure
             currentRes->eof = 1;
-
-            // store result set
-            mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
         }
 
     } else {
