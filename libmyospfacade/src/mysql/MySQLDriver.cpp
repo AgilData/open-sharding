@@ -733,7 +733,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             else {
                   if (-1 == do_osp_connect(mysql, databaseName.c_str(), info, conn)) {
                       setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
+                      xlog.error("Call to do_osp_connect FAILED");
                       return NULL;
+                  }
+                  else {
+                      xlog.debug("Call to do_osp_connect SUCCESS");
                   }
             }
         }
@@ -938,6 +942,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 }
             }
         }
+
+        if (xlog.isDebugEnabled()) {
+            xlog.debug(string("mysql_real_connect() SUCCESS Returning ") + Util::toString((void*)mysql));
+        }
+
         return mysql;
 
     } catch (const char *ex1) {
