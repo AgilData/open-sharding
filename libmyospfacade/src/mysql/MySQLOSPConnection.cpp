@@ -279,9 +279,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
 
     if (log.isDebugEnabled()) {
-        log.debug(string("processMessage() wireResponse->getMessageType()=") + Util::toString(wireResponse->getMessageType()))
-            + string("; wireResponse->response->getMessageType() = ") + Util::string(wireResponse->getResponse()->getMessageType())
-        ;
+        log.debug(string("processMessage() wireResponse->getMessageType()=") + Util::toString(wireResponse->getMessageType())
+            + string("; wireResponse->response->getMessageType() = ") + Util::toString(wireResponse->getResponse()->getMessageType())
+        );
     }
 
     if (wireResponse->getMessageType() == 102 /*OSPExecuteResponseMessage*/) {
