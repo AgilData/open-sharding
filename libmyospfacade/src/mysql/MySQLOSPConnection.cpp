@@ -28,8 +28,6 @@
 #include <mysql/MySQLOSPConnection.h>
 #include <mysql/MySQLOSPResultSet.h>
 #include <mysql/MySQLConnMap.h>
-#include <mysql/MySQLOSPResultSet.h>
-
 #include <opensharding/OSPConnection.h>
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
@@ -208,7 +206,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             log.debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
         }
         OSPExecuteRequest request(connID, stmtID, string(sql));
-        OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
+        OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true, this));
         if (wireResponse->isErrorResponse()) {
             OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
             log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
@@ -306,58 +304,6 @@ char *MySQLOSPConnection::ensureCapacity(char *buffer, unsigned int *length, uns
 }
 
 MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
-
-    if (resultSetID==0) {
-        if (log.isDebugEnabled()) {
-            log.debug("mysql_store_result() fetching empty remote result set for CRUD query");
-        }
-        return NULL;
-    }
-
-    if (resultSetID<0) {
-        // set error code and return NULL response to indicate an error
-        my_errno = 999;
-        my_error = "mysql_store_result() negative resultSetID";
-        return NULL;
-    }
-
-    // create native MySQL result set structure
-    currentRes = new MYSQL_RES();
-    memset(currentRes, 0, sizeof(MYSQL_RES));
-
-    if (log.isTraceEnabled()) {
-        log.trace(string("mysql_store_result(") + Util::toString((void*)mysql)
-             + string(") creating MYSQL_RES* ")
-             + Util::toString((void*)currentRes)
-            );
-    }
-
-    // initialize variables before results start streaming in
-    currentRow = NULL;
-    prevRow = NULL;
-
-    // fetch results from OSP server
-    
-    /*try {
-        /OSPResultSetRequest request(connID, stmtID, resultSetID);
-        ospConn->sendMessage(&request, true, this);
-    }
-    catch (...) {
-        log.error("mysql_store_result() failed to retrieve results from OSP server");
-        my_errno = 999;
-        my_error = "mysql_store_result() failed to retrieve results from OSP server";
-        return NULL;
-    }*/
-     
-    // finalize result set structure, now that all response messages have been received and processed (in
-    // calls to processMessage()).
-    currentRes->handle = mysql;
-    currentRes->eof = 1;
-
-    // store result set
-    mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
-
-    // return the result set
     return currentRes;
 }
 
@@ -373,20 +319,38 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         throw "OSP_ERROR";
     }
 
-   // OSPResultSetResponse *response = dynamic_cast<OSPResultSetResponse *>(wireResponse->getResponse());
-    MySQLOSPResultSet *response = dynamic_cast<MySQLOSPResultSet *>(wireResponse->getResponse());
-    // how many columns?
-    //int columnCount = response->getColumnCount();
-    
-    int columnCount = response->mysql_num_fields(res);
+    //TODO: get this working
+    if (wireResponse->getMessageTypeID() == 0x03 /*OSPExecuteResponseMessage*/) {
+        // ignore here, it is handled in mysql_real_query already
+    }
+    else if (wireResponse->getMessageTypeID() == 0xTBD /*OSPErrorResponseMessage*/) {
+        // ignore here, it is handled in mysql_real_query already
+    } else if (wireResponse->getMessageTypeID() == 0xTBD /*OSPResultSetMetaResponse*/) {
 
+        // populate meta data in mysql result structure
+        OSPResultSetMetaResponse *response = dynamic_cast<OSPResultSetMetaResponse *>(wireResponse->getResponse());
+
+    // how many columns?
+        int columnCount = response->getColumnCount();
+    
     if (log.isTraceEnabled()) {
         log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
     }
 
-    bool firstMessage = currentRow==NULL;
+        // create native MySQL result set structure
+        currentRes = new MYSQL_RES();
+        memset(currentRes, 0, sizeof(MYSQL_RES));
 
-    if (firstMessage) {
+        if (log.isTraceEnabled()) {
+            log.trace(string("mysql_store_result(") + Util::toString((void*)mysql)
+                 + string(") creating MYSQL_RES* ")
+                 + Util::toString((void*)currentRes)
+                );
+        }
+
+        // initialize variables before results start streaming in
+        currentRow = NULL;
+        prevRow = NULL;
 
         res->lengths = new unsigned long[columnCount];
         memset(res->lengths, 0, sizeof(unsigned long[columnCount]));
@@ -401,7 +365,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         char *emptyString = Util::createString("");
 
-     //   for (unsigned int i = 0; i < res->field_count; i++) {
+        for (unsigned int i = 0; i < res->field_count; i++) {
 
             /*
              typedef struct st_mysql_field {
@@ -427,14 +391,14 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              enum enum_field_types type; // Type of field. See mysql_com.h for types
              } MYSQL_FIELD;
              */
-/*
-        	MYSQL_FIELD  *tableName = response->mysql_fetch_fields(res)[i];///????
-/*
+
+        	OSPString *tableName = response->getTableNames()[i];
+
         	if (tableName == NULL) {
         		res->fields[i].table = emptyString;
         	}
         	else {
-				int tableNameLength = tableName->mysql_num_fields(res);
+				int tableNameLength = tableName->getLength();
 				if (tableNameLength<1) {
 					res->fields[i].table = emptyString;
 				}
@@ -445,8 +409,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 				}
         	}
         	
-           MYSQL_FIELD *columnName = response-> mysql_fetch_field()[i];
-            long jdbcType = response->mysql_fetch_lengths(res)[i];///????
+            OSPString *columnName = response->getColumnNames()[i];
+            int jdbcType = response->getColumnTypes()[i];
             int columnNameLength = columnName->getLength();
             if (columnNameLength<1) {
                 res->fields[i].name = emptyString;
@@ -456,8 +420,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                 memcpy(res->fields[i].name, (const char *) columnName->getBuffer(), columnNameLength); //TODO: avoid this copy
                 res->fields[i].name[columnNameLength] = '\0';
             }
-*/
- /*           res->fields[i].name_length = columnNameLength;
+
+            res->fields[i].name_length = columnNameLength;
             res->fields[i].length = 16; //TODO: get from response object
 
             // set the data type
@@ -550,7 +514,27 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         res->data->rows = 0;
         res->data->fields = columnCount;
         res->data->data = NULL; // populate this later
+
+
+        //TODO: get this working
+        if (final_message) {
+
+            // if this is the final message then there is no data - not sure if we need to populate
+            // anything in MYSQL_RES to indicate this .. might be automatic
     }
+
+    }
+    else if (message is a OSPResultSetRowResponse message) {
+
+        //TODO: get this working
+        // populate data in mysql result structure .. NOTE: we expect to get lots of these messages now (one per row)
+        // whereas the code used to get one message containing a batch of rows
+
+        OSPResultSetRowResponse *response = dynamic_cast<OSPResultSetRowResponse *>(wireResponse->getResponse());
+
+        // how many columns?
+        int columnCount = response->getColumnCount();
+
 
     /*
      typedef struct st_mysql_res {
@@ -570,12 +554,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
      } MYSQL_RES;
      */
 
-    // iterate over result set
-  /*  list<MYSQL_FIELD**> *resultRows = response->mysql_fetch_row(res);////????
-    list<MYSQL_FIELD**>::iterator it;
-    for (it=resultRows->begin(); it!=resultRows->end(); it++) {
-
-        OSPString **currentRowData = *it;
+            OSPString **currentRowData = response->getCurrentRow();
 
         /*
          typedef struct st_mysql_data {
@@ -586,7 +565,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
          struct embedded_query_result *embedded_info;
          } MYSQL_DATA;
          */
-/*
+
         // create new native row structure
         currentRow = new MYSQL_ROWS();
         currentRow->length = 0;
@@ -683,8 +662,23 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         res->row_count++;
         res->data->rows++;
- */
     }
+
+        //TODO: get this working
+        if (final_message) {
+            // finalize result set structure, now that all response messages have been received and processed (in
+            // calls to processMessage()).
+            currentRes->handle = mysql;
+            currentRes->eof = 1;
+
+            // store result set
+            mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
+        }
+
+    } else {
+        log.error("received unexpected message type");
+    }
+
     // memory cleanup
     delete wireResponse;
 }
