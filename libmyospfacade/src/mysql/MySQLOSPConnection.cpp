@@ -572,7 +572,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         OSPString **currentRowData = response->getResultRow();
         if (!currentRowData) {
-            xlog.error("no data in response row!")
+            xlog.error("empty response row!")
             throw "NULL";
         }
 
@@ -602,7 +602,9 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         int col;
         //log.info("CALC row length");
         for (col = 1; col <= columnCount; col++) {
-            rowDataSize += currentRowData[col-1] ? currentRowData[col-1]->getLength() : 0;
+            if (currentRowData[col-1]) {
+                rowDataSize += currentRowData[col-1]->getLength();
+            }
             rowDataSize += 1; // null terminator
             //log.info(string("interim row data size now is ") + Util::toString((int)rowDataSize));
         }
