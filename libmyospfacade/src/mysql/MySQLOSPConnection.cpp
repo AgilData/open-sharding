@@ -429,12 +429,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              */
 
         	MYSQL_FIELD  *tableName = response->mysql_fetch_fields(res)[i];///????
-
+/*
         	if (tableName == NULL) {
         		res->fields[i].table = emptyString;
         	}
         	else {
-				int tableNameLength = tableName->getLength();
+				int tableNameLength = tableName->mysql_num_fields(res);
 				if (tableNameLength<1) {
 					res->fields[i].table = emptyString;
 				}
@@ -456,7 +456,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                 memcpy(res->fields[i].name, (const char *) columnName->getBuffer(), columnNameLength); //TODO: avoid this copy
                 res->fields[i].name[columnNameLength] = '\0';
             }
-
+*/
             res->fields[i].name_length = columnNameLength;
             res->fields[i].length = 16; //TODO: get from response object
 
@@ -571,7 +571,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
      */
 
     // iterate over result set
-    list<MYSQL_FIELD**> *resultRows = response->mysql_fetch_row(res);////????
+  /*  list<MYSQL_FIELD**> *resultRows = response->mysql_fetch_row(res);////????
     list<MYSQL_FIELD**>::iterator it;
     for (it=resultRows->begin(); it!=resultRows->end(); it++) {
 
@@ -586,7 +586,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
          struct embedded_query_result *embedded_info;
          } MYSQL_DATA;
          */
-
+/*
         // create new native row structure
         currentRow = new MYSQL_ROWS();
         currentRow->length = 0;
@@ -684,7 +684,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         res->row_count++;
         res->data->rows++;
     }
-
+*/
     // memory cleanup
     delete wireResponse;
 }
