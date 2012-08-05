@@ -322,12 +322,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     }
 
     //TODO: get this working
-    if (wireResponse->getMessageTypeID() == 0x03 /*OSPExecuteResponseMessage*/) {
+    if (wireResponse->getMessageType() == 0x03 /*OSPExecuteResponseMessage*/) {
         // ignore here, it is handled in mysql_real_query already
     }
-    else if (wireResponse->getMessageTypeID() == 0xTBD /*OSPErrorResponseMessage*/) {
+    else if (wireResponse->getMessageType() == 0xTBD /*OSPErrorResponseMessage*/) {
         // ignore here, it is handled in mysql_real_query already
-    } else if (wireResponse->getMessageTypeID() == 0xTBD /*OSPResultSetMetaResponse*/) {
+    } else if (wireResponse->getMessageType() == 0xTBD /*OSPResultSetMetaResponse*/) {
 
         // populate meta data in mysql result structure
         OSPResultSetMetaResponse *response = dynamic_cast<OSPResultSetMetaResponse *>(wireResponse->getResponse());
@@ -343,12 +343,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         currentRes = new MYSQL_RES();
         memset(currentRes, 0, sizeof(MYSQL_RES));
 
-        if (log.isTraceEnabled()) {
+    /*    if (log.isTraceEnabled()) {
             log.trace(string("mysql_store_result(") + Util::toString((void*)mysql)
                  + string(") creating MYSQL_RES* ")
                  + Util::toString((void*)currentRes)
                 );
-        }
+        }*/
 
         // initialize variables before results start streaming in
         currentRow = NULL;
