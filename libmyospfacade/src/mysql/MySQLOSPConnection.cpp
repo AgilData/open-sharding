@@ -401,7 +401,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         char *emptyString = Util::createString("");
 
-        for (unsigned int i = 0; i < res->field_count; i++) {
+     //   for (unsigned int i = 0; i < res->field_count; i++) {
 
             /*
              typedef struct st_mysql_field {
