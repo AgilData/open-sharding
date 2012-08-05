@@ -553,7 +553,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         int columnCount = response->getColumnCount();
 
         if (log.isDebugEnabled()) {
-            log.debug(string("OSPResultSetRowResponse getColumnCount() returned ") + Util::toString(columnCount()));
+            log.debug(string("OSPResultSetRowResponse getColumnCount() returned ") + Util::toString(columnCount));
         }
 
         /*
