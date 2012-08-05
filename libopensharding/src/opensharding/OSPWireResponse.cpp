@@ -63,11 +63,14 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
         case 102:
             response = new OSPExecuteResponse();
             break;
-        //case 103:
-          //  response = new OSPResultSetResponse();
+        case 103:
+            response = new OSPResultSetMetaResponse();
             break;
         case 104:
             response = new OSPDisconnectResponse();
+            break;
+        case 109:
+            response = new OSPResultSetRowResponse();
             break;
         case 200:
             response = new OSPErrorResponse();
