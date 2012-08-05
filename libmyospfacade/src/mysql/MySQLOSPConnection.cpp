@@ -208,55 +208,15 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         if (log.isDebugEnabled()) {
             log.debug(string("Sending query to OSP proxy. ConnID = ") + connID + string("; SQL=") + string(sql));
         }
+
+        // send execute request - response messages will be handled by processMessage()
         OSPExecuteRequest request(connID, stmtID, string(sql));
-        OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true, this));
-        if (wireResponse->isErrorResponse()) {
-            OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
-            log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
-            throw "OSP_ERROR";
+        ospConn->sendMessage(&request, true, this);
+
+        // processMessage will set my_errno if anything goes wrong
+        if (my_errno) {
+            return NULL;
         }
-
-        OSPExecuteResponse *executeResponse = dynamic_cast<OSPExecuteResponse*>(wireResponse->getResponse());
-        if(!executeResponse){
-            log.error(string("Null execution response."));
-              throw "Null execution response";
-        }
-
-        resultSetID = executeResponse->getResultSetID();
-        fieldCount = executeResponse->getResultSetColumnCount();
-        affectedRows = executeResponse->getUpdateCount();
-        insertID = executeResponse->getGeneratedID();
-        
-        if (executeResponse->getErrorCode()) {
-
-            log.error(
-                string("Failed to execute query. ")
-                + string("Error Code: ") + Util::toString(executeResponse->getErrorCode())
-                + string("; Error Text: ") + executeResponse->getErrorMessage()
-                + string("; ConnID = ") + connID + string("; SQL=") + string(sql)
-            );
-
-            resultSetID = 0;
-            affectedRows = 0;
-            fieldCount = 0;
-
-            my_errno = executeResponse->getErrorCode();
-            //TODO: this is a memory leak ... do we care? what can we do about it?
-            my_error = Util::createString(executeResponse->getErrorMessage().c_str());
-
-        }
-        else {
-            // success
-
-            if (log.isDebugEnabled()) {
-                log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
-            }
-
-            ret = 0;
-        }
-
-        // delete wire response (this will also delete the execute response)
-        delete wireResponse;
 
     }
     catch (const char *exception) {
@@ -323,10 +283,59 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     }
 
     if (wireResponse->getMessageType() == 102 /*OSPExecuteResponseMessage*/) {
-        // ignore here, it is handled in mysql_real_query already
+
+        OSPExecuteResponse *executeResponse = dynamic_cast<OSPExecuteResponse *>(wireResponse->getResponse());
+
+        resultSetID = executeResponse->getResultSetID();
+        fieldCount = executeResponse->getResultSetColumnCount();
+        affectedRows = executeResponse->getUpdateCount();
+        insertID = executeResponse->getGeneratedID();
+
+        if (executeResponse->getErrorCode()) {
+
+            log.error(
+                string("Failed to execute query. ")
+                + string("Error Code: ") + Util::toString(executeResponse->getErrorCode())
+                + string("; Error Text: ") + executeResponse->getErrorMessage()
+            );
+
+            resultSetID = 0;
+            affectedRows = 0;
+            fieldCount = 0;
+
+            my_errno = response->getErrorCode();
+            //TODO: this is a memory leak ... do we care? what can we do about it?
+            my_error = Util::createString(executeResponse->getErrorMessage().c_str());
+
+        }
+        else {
+            // success
+
+            if (log.isDebugEnabled()) {
+                log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
+            }
+
+            ret = 0;
+        }
     }
-    else if (wireResponse->getMessageType() == 200 /*OSPErrorResponseMessage*/) {
-        // ignore here, it is handled in mysql_real_query already
+    else if (wireResponse->getMessageType() == 200 /*OSPErrorResponse*/) {
+
+        OSPErrorResponse *response = dynamic_cast<OSPErrorResponse *>(wireResponse->getResponse());
+
+        log.error(
+            string("Failed to execute query. ")
+            + string("Error Code: ") + Util::toString(response->getErrorCode())
+            + string("; Error Text: ") + response->getErrorMessage()
+        );
+
+        resultSetID = 0;
+        affectedRows = 0;
+        fieldCount = 0;
+
+        my_errno = response->getErrorCode();
+        //TODO: this is a memory leak ... do we care? what can we do about it?
+        my_error = Util::createString(response->getErrorMessage().c_str());
+
     } else if (wireResponse->getMessageType() == 103 /*OSPResultSetMetaResponse*/) {
 
         // populate meta data in mysql result structure
