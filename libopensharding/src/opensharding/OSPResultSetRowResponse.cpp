@@ -21,8 +21,10 @@
  */
 #include <opensharding/OSPResultSetRowResponse.h>
 #include <logger/Logger.h>
+#include <util/Util.h>
 
 using namespace logger;
+using namespace util;
 
 namespace opensharding {
 
@@ -60,7 +62,11 @@ void OSPResultSetRowResponse::setField(int fieldNum, char *buffer, unsigned int 
         case 2:
         {
             if (!currentRow) {
-                throw "OSPResultSetRowResponse::setField() NULL currentRow";
+                throw Util::createException("OSPResultSetRowResponse::setField() NULL currentRow");
+            }
+
+            if (fieldIndex >= columnCount) {
+                throw Util::createException("OSPResultSetRowResponse::setField() fieldIndex too large");
             }
 
             //TODO: gross HACK magic value for NULL strings
@@ -89,10 +95,6 @@ void OSPResultSetRowResponse::setField(int fieldNum, char *buffer, unsigned int 
                 currentRow[fieldIndex++] = new OSPString(strdata, 0, length, true);
             }
 
-            if (fieldIndex == columnCount) {
-                currentRow = NULL;
-                fieldIndex = 0;
-            }
             break;
         }
         default:
