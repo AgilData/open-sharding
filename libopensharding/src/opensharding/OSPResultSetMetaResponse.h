@@ -52,7 +52,7 @@ public:
     OSPResultSetMetaResponse();
     virtual ~OSPResultSetMetaResponse();
 
-    unsigned char getMessageType() { return 0x04; }
+    unsigned char getMessageType() { return 4; }
     unsigned int getEstimatedEncodingLength() { return 0; }
     void          write(OSPOutputStream *);
 

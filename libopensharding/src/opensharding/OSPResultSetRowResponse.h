@@ -49,7 +49,7 @@ public:
     OSPResultSetRowResponse();
     virtual ~OSPResultSetRowResponse();
 
-    unsigned char getMessageType() { return 0xa7; }
+    unsigned char getMessageType() { return 10; }
     unsigned int getEstimatedEncodingLength() { return 0; }
     void          write(OSPOutputStream *);
 
