@@ -520,7 +520,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         // create MySQL OSP connection object
         try {
             /*CHANGED*/
-            conn = new MySQLOSPConnection(info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConnReal);
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConnReal);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");

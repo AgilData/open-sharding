@@ -55,13 +55,14 @@ using namespace util;
 
 Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
-MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
+MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
 
     if (!ospConn) {
         log.error("NULL ospConn");
         throw "NULL ospConn";
     }
 
+    this->mysql = mysql;
     this->mysqlResourceMap = mysqlResourceMap;
     this->ospConn = ospConn;
 
@@ -664,8 +665,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         res->row_count++;
         res->data->rows++;
 
-        //TODO: get this working
-        if (final_message) {
+        if (wireResponse->isFinalResponse()) {
             // finalize result set structure, now that all response messages have been received and processed (in
             // calls to processMessage()).
             currentRes->handle = mysql;
