@@ -427,7 +427,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
              } MYSQL_FIELD;
              */
 
-        	OSPString *tableName = response->getTableNames()[i];
+        	MYSQL_FIELD  *tableName = response->mysql_fetch_fields(res)[i];///????
 
         	if (tableName == NULL) {
         		res->fields[i].table = emptyString;
@@ -444,8 +444,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 				}
         	}
         	
-            OSPString *columnName = response->getColumnNames()[i];
-            int jdbcType = response->getColumnTypes()[i];
+           MYSQL_FIELD *columnName = response-> mysql_fetch_field()[i];
+            long jdbcType = response->mysql_fetch_lengths(res)[i];///????
             int columnNameLength = columnName->getLength();
             if (columnNameLength<1) {
                 res->fields[i].name = emptyString;
@@ -570,8 +570,8 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
      */
 
     // iterate over result set
-    list<OSPString**> *resultRows = response->getResultRows();
-    list<OSPString**>::iterator it;
+    list<MYSQL_FIELD**> *resultRows = response->mysql_fetch_row(res);////????
+    list<MYSQL_FIELD**>::iterator it;
     for (it=resultRows->begin(); it!=resultRows->end(); it++) {
 
         OSPString **currentRowData = *it;
