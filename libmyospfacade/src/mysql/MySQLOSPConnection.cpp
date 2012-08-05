@@ -322,22 +322,22 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
     }
 
     //TODO: get this working
-    if (wireResponse->getMessageType() == 0x03 /*OSPExecuteResponseMessage*/) {
+    if (wireResponse->getMessageType() == 102 /*OSPExecuteResponseMessage*/) {
         // ignore here, it is handled in mysql_real_query already
     }
-    else if (wireResponse->getMessageType() == 0xTBD /*OSPErrorResponseMessage*/) {
+    else if (wireResponse->getMessageType() == 200 /*OSPErrorResponseMessage*/) {
         // ignore here, it is handled in mysql_real_query already
-    } else if (wireResponse->getMessageType() == 0xTBD /*OSPResultSetMetaResponse*/) {
+    } else if (wireResponse->getMessageType() == 103 /*OSPResultSetMetaResponse*/) {
 
         // populate meta data in mysql result structure
         OSPResultSetMetaResponse *response = dynamic_cast<OSPResultSetMetaResponse *>(wireResponse->getResponse());
 
-    // how many columns?
-        int columnCount = response->getColumnCount();
-    
-    if (log.isTraceEnabled()) {
-        log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
-    }
+        // how many columns?
+            int columnCount = response->getColumnCount();
+
+        if (log.isTraceEnabled()) {
+            log.trace(string("Result set has ") + Util::toString((int)res->field_count) + string(" column(s)"));
+        }
 
         // create native MySQL result set structure
         currentRes = new MYSQL_RES();
@@ -519,14 +519,14 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
 
         //TODO: get this working
-        if (final_message) {
+        if (wireResponse->isFinalResponse()) {
 
             // if this is the final message then there is no data - not sure if we need to populate
             // anything in MYSQL_RES to indicate this .. might be automatic
-    }
+        }
 
     }
-    else if (message is a OSPResultSetRowResponse message) {
+    else if (wireResponse->getMessageType() == 109 /* OSPResultSetRowResponse */) {
 
         //TODO: get this working
         // populate data in mysql result structure .. NOTE: we expect to get lots of these messages now (one per row)
@@ -537,26 +537,25 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // how many columns?
         int columnCount = response->getColumnCount();
 
+        /*
+         typedef struct st_mysql_res {
+         my_ulonglong row_count;
+         MYSQL_FIELD   *fields;
+         MYSQL_DATA    *data;
+         MYSQL_ROWS    *data_cursor;
+         unsigned long *lengths;               // column lengths of current row
+         MYSQL         *handle;                // for unbuffered reads
+         MEM_ROOT      field_alloc;
+         unsigned int  field_count, current_field;
+         MYSQL_ROW     row;                    // If unbuffered read
+         MYSQL_ROW     current_row;            // buffer to current row
+         my_bool       eof;                    // Used by mysql_fetch_row
+         my_bool       unbuffered_fetch_cancelled;
+         const struct st_mysql_methods *methods;
+         } MYSQL_RES;
+         */
 
-    /*
-     typedef struct st_mysql_res {
-     my_ulonglong row_count;
-     MYSQL_FIELD   *fields;
-     MYSQL_DATA    *data;
-     MYSQL_ROWS    *data_cursor;
-     unsigned long *lengths;               // column lengths of current row
-     MYSQL         *handle;                // for unbuffered reads
-     MEM_ROOT      field_alloc;
-     unsigned int  field_count, current_field;
-     MYSQL_ROW     row;                    // If unbuffered read
-     MYSQL_ROW     current_row;            // buffer to current row
-     my_bool       eof;                    // Used by mysql_fetch_row
-     my_bool       unbuffered_fetch_cancelled;
-     const struct st_mysql_methods *methods;
-     } MYSQL_RES;
-     */
-
-            OSPString **currentRowData = response->getCurrentRow();
+        OSPString **currentRowData = response->getResultRow();
 
         /*
          typedef struct st_mysql_data {
@@ -664,7 +663,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         res->row_count++;
         res->data->rows++;
-    }
 
         //TODO: get this working
         if (final_message) {
