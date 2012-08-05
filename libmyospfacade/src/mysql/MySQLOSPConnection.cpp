@@ -303,7 +303,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             affectedRows = 0;
             fieldCount = 0;
 
-            my_errno = response->getErrorCode();
+            my_errno = executeResponse->getErrorCode();
             //TODO: this is a memory leak ... do we care? what can we do about it?
             my_error = Util::createString(executeResponse->getErrorMessage().c_str());
 
@@ -314,8 +314,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             if (log.isDebugEnabled()) {
                 log.debug(string("Query ran OK. Field count: ") + Util::toString(fieldCount));
             }
-
-            ret = 0;
         }
     }
     else if (wireResponse->getMessageType() == 200 /*OSPErrorResponse*/) {
