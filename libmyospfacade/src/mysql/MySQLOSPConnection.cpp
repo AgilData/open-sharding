@@ -338,7 +338,8 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
 
     // fetch results from OSP server
     try {
-        OSPResultSetRequest request(connID, stmtID, resultSetID);
+        //OSPResultSetRequest request(connID, stmtID, resultSetID);
+        MySQLOSPResultSet request(connID, stmtID, resultSetID);
         ospConn->sendMessage(&request, true, this);
     }
     catch (...) {
