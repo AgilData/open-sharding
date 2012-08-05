@@ -218,6 +218,9 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
             return NULL;
         }
 
+        // success
+        ret = 0;
+
     }
     catch (const char *exception) {
         log.error(string("Failed to execute query [") + string(exception) + string("]. ConnID = ") + connID + string("; SQL=") + string(sql));
