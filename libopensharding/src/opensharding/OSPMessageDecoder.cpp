@@ -72,7 +72,7 @@ void OSPMessageDecoder::decode(OSPMessage *message, OSPByteBuffer *bb) {
                 bb->readBytes(fieldValue, 0, fieldLength);
                 fieldValue[fieldLength] = '0';
 
-                if (TRACE) log.trace(string("fieldValue = BINARY DATA; length=") + Util::toString((int)fieldLength));
+                if (TRACE) log.trace(string("fieldValue = BINARY DATA; length=") + Util::toString((int)fieldLength) + string("fieldNumber = ") + Util::toString((int)fieldNumber));
 
                 message->setField(fieldNumber, fieldValue, 0, fieldLength);
 

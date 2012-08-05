@@ -337,9 +337,9 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
     prevRow = NULL;
 
     // fetch results from OSP server
-    /*
-    try {
-        OSPResultSetRequest request(connID, stmtID, resultSetID);
+    
+    /*try {
+        /OSPResultSetRequest request(connID, stmtID, resultSetID);
         ospConn->sendMessage(&request, true, this);
     }
     catch (...) {
@@ -347,8 +347,8 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
         my_errno = 999;
         my_error = "mysql_store_result() failed to retrieve results from OSP server";
         return NULL;
-    }
-     */
+    }*/
+     
     // finalize result set structure, now that all response messages have been received and processed (in
     // calls to processMessage()).
     currentRes->handle = mysql;
