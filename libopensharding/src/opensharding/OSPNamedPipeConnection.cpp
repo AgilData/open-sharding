@@ -228,9 +228,10 @@ int OSPNamedPipeConnection::openFifos() {
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
-    //NOTE: we are not currently using buffered input/output streams but this is handled elsewhere in the code
-    // to minimize interactions with the kernel
-    this->is = new OSPFileInputStream(responsePipe, 0);
+    // create buffered input stream
+    this->is = new OSPFileInputStream(responsePipe, 4096);
+
+    // TODO: we should be using a buffer here - not sure why we're not
     this->os = new OSPFileOutputStream(requestPipe, 0);
 
     this->m_fifosOpened = true;
@@ -328,6 +329,7 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
 int OSPNamedPipeConnection::sendOnly(OSPMessage *message, bool flush) {
 
+    // this mutex is unnecessary if we have a dedicated request pipe
     boost::unique_lock<boost::mutex> lock(m_send_mutex);
 
     // not likely to happen, but just to be safe
