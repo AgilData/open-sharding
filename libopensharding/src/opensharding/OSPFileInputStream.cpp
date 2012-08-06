@@ -191,7 +191,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         }
 
         if (DEBUG) {
-            log.debug("starting select() loop")
+            log.debug("starting select() loop");
         }
 
         // loop until we read something or the file is closed
