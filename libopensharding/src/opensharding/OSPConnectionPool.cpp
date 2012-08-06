@@ -45,6 +45,8 @@ const int    POOL_MODE_DEDICATED = 2;
 const int    POOL_MODE_FIXED_SIZE = 3;
 
 const int       POOL_MODE = POOL_MODE_DEDICATED;
+
+int OSPConnectionPool::nextPipeId = 1;
     
 	logger::Logger &OSPConnectionPool::log = Logger::getLogger("OSPConnectionPool");
 	
@@ -87,8 +89,7 @@ const int       POOL_MODE = POOL_MODE_DEDICATED;
 				connInfo->getPort())));
 		}
 		else if (protocol == PROTOCOL_PIPES) {
-				//pool.at(pool.size()) = new OSPNamedPipeConnection(info,false);
-				pool.push_back(dynamic_cast<OSPConnection*>(new OSPNamedPipeConnection(connInfo,false)));
+				pool.push_back(dynamic_cast<OSPConnection*>(new OSPNamedPipeConnection(connInfo,false,OSPConnectionPool::nextPipeId++)));
 		}
 		else {
 			log.error("Invalid protocol for Connection.");

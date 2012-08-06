@@ -49,6 +49,7 @@ namespace opensharding {
             
         int protocol; 
 		unsigned int index;
+		static int nextPipeId;
 		boost::mutex mutex;
       
 

@@ -68,6 +68,9 @@ typedef std::queue<OSPWireResponse*> fifo_id_msg_queue;
 
 class OSPNamedPipeConnection : public OSPConnection {
 private:
+
+    int pipeId;
+
     FILE *requestPipe;
     FILE *responsePipe;
 
@@ -97,7 +100,7 @@ private:
     static logger::Logger &log;
 
 public:
-    OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo);
+    OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId);
     ~OSPNamedPipeConnection();
     
     int init(OSPConnectionInfo *info, bool threadedResponseFifo);
