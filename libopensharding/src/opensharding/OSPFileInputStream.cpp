@@ -234,6 +234,8 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                         break;
                     }
 
+                    buf_mark += n;
+
                     // reset flag
                     FD_CLR(fd, &readFileDescriptorSet);
                 }
@@ -258,8 +260,6 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             log.error(string("fread() failed due to error"));
             throw "FAIL";
         }
-
-        buf_mark += n;
 
         if (DEBUG) {
             log.debug(string("After fread(): bytesRead=") + Util::toString((int)n)
