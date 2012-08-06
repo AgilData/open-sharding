@@ -46,10 +46,6 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     }
 
-    // selector timeout
-    timeout.tv_sec = 1; //TODO: make configurable
-    timeout.tv_usec = 0;
-
     buf_pos = 0;
     buf_mark = 0;
     if (buf_size==0) {
@@ -211,6 +207,10 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             // set up selector info
             FD_ZERO (&readFileDescriptorSet);
             FD_SET (fd, &readFileDescriptorSet);
+
+            // selector timeout MUST BE SET EVERY TIME BECAUSE select() MODIFIES THE VALUE!
+            timeout.tv_sec = 5; //TODO: make configurable?
+            timeout.tv_usec = 0;
 
             // wait until some data is available to read
             int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, &timeout);
