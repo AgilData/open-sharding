@@ -213,11 +213,22 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 log.error("select() error");
                 perror("select()");
             }
-            else if (fdcount) {
+            else if (fdcount == 1) {
                 // read the available data
                 if (DEBUG) log.debug("data is available!");
+
                 /* FD_ISSET(0, &readFileDescriptorSet) will be true. */
+
                 n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+                if (n==0) {
+                    if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
+                    break;
+                }
+
+                // reset flag
+                FD_CLR(fd, &readFileDescriptorSet);
+
+            }
             else {
                 // no data
             }
