@@ -44,11 +44,6 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
         fd = fileno(file);
         int flags = fcntl(fd, F_GETFL);
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-
-        // set up selector info
-        FD_ZERO (&readFileDescriptorSet);
-        FD_SET (fd, &readFileDescriptorSet);
-
     }
 
     // selector timeout
@@ -205,8 +200,12 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
             if (DEBUG) log.debug("at top of select() loop");
 
+            // set up selector info
+            FD_ZERO (&readFileDescriptorSet);
+            FD_SET (fd, &readFileDescriptorSet);
+
             // wait until some data is available to read
-            int fdcount = select(1, &readFileDescriptorSet, NULL, NULL, &timeout);
+            int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, &timeout);
 
             if (fdcount == -1) {
                 // error
@@ -217,20 +216,25 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 // read the available data
                 if (DEBUG) log.debug("data is available!");
 
-                /* FD_ISSET(0, &readFileDescriptorSet) will be true. */
+                if (FD_ISSET(fd, &readFileDescriptorSet)) {
+                    // this should always be true
+                    if (DEBUG) log.debug("data is available for our FD!");
 
-                n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
-                if (n==0) {
-                    if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
-                    break;
+                    n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+                    if (n==0) {
+                        if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
+                        break;
+                    }
+
+                    // reset flag
+                    FD_CLR(fd, &readFileDescriptorSet);
                 }
-
-                // reset flag
-                FD_CLR(fd, &readFileDescriptorSet);
 
             }
             else {
                 // no data
+                if (DEBUG) log.debug("no data");
+                break;
             }
 
             if (DEBUG) log.debug("at end of select() loop");
