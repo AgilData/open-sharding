@@ -163,31 +163,37 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             log.info("need more data");
         }
 
-        // is there enough space in the buffer?
+        // is there enough space at the end of the buffer
         if (buf_pos+length>buf_size) {
 
-            if (DEBUG) {
-                log.debug("resizing buffer");
-            }
-
             // how many unread data bytes do we have?
-            unsigned int dataBytes = buf_mark-buf_pos;
+            unsigned int unreadDataBytes = buf_mark-buf_pos;
 
-            if (dataBytes+length>buf_size) {
-                //TODO: this could be optimized to do the second memcpy as well, all in one go
-                int new_buf_size = dataBytes + length + 1024;
+            // do we need a larger buffer
+            if (unreadDataBytes+length>buf_size) {
+
+                if (DEBUG) {
+                    log.debug("growing buffer");
+                }
+
+                int new_buf_size = unreadDataBytes + length + 1024;
                 char *newBuffer = new char[new_buf_size];
-                memcpy(newBuffer, buffer, buf_mark);
+                memcpy(newBuffer, buffer+buf_pos, unreadDataBytes);
                 delete [] buffer;
                 buffer = newBuffer;
                 buf_size = new_buf_size;
+                buf_pos = 0;
+                buf_mark = unreadDataBytes;
+
+            }
+            else {
+                // the buffer is large enough, we just need to shift data to the start 
+                // to clear some space 
+                memcpy(buffer, buffer+buf_pos, unreadDataBytes);
+                buf_pos = 0;
+                buf_mark = unreadDataBytes;
             }
 
-            // move data to start of buffer
-            //log.info("moving data to start of buffer");
-            memcpy(buffer, buffer+buf_pos, dataBytes);
-            buf_pos = 0;
-            buf_mark = dataBytes;
         }
 
         if (DEBUG) {
@@ -267,7 +273,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         }
     }
 
-    //TODO: do we need this memcpy? can't we fread() directly into the user buffer?
+    // do we need this memcpy? can't we fread() directly into the user buffer? NO because we usually get more bytes than we ask for
 
     // copy data from fread buffer to user buffer
     memcpy(dest+offset, buffer+buf_pos, length);
