@@ -149,7 +149,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
     bool DEBUG = log.isDebugEnabled();
 
     if (DEBUG) {
-        log.info(string("readBytes(length=") + Util::toString((int)length)
+        log.debug(string("readBytes(length=") + Util::toString((int)length)
             + string("); buf_pos=") + Util::toString((int)buf_pos)
             + string("; buf_mark=") + Util::toString((int)buf_mark)
             + string("; buf_size=") + Util::toString((int)buf_size)
@@ -159,8 +159,10 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
     // get more data, if needed
     if (buf_pos+length>buf_mark) {
 
+        unsigned int bytes_to_read = buf_pos+length - buf_mark;
+
         if (DEBUG) {
-            log.info("need more data");
+            log.debug(string("need more data - need to read ") + Util::toString(bytes_to_read) + " bytes");
         }
 
         // is there enough space at the end of the buffer
@@ -202,7 +204,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
         // loop until we read something or the file is closed
         int n = 0;
-        while (n==0 && !feof(file)) {
+        while (buf_pos+length>buf_mark && !feof(file)) {
 
             if (DEBUG) log.debug("at top of select() loop");
 
