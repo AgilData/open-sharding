@@ -241,8 +241,8 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             }
             else {
                 // no data
-                if (DEBUG) log.debug("no data");
-                break;
+                if (DEBUG) log.debug("no data (timed out)");
+                continue;
             }
 
             if (DEBUG) log.debug("at end of select() loop");
