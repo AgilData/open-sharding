@@ -195,6 +195,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         }
 
         // loop until we read something or the file is closed
+        int n = 0;
         while (n==0 && !feof(file)) {
 
             if (DEBUG) log.debug("at top of select() loop");
@@ -256,6 +257,8 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             throw "FAIL";
         }
     }
+
+    //TODO: do we need this memcpy? can't we fread() directly into the user buffer?
 
     // copy data from fread buffer to user buffer
     memcpy(dest+offset, buffer+buf_pos, length);
