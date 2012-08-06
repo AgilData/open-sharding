@@ -47,7 +47,7 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
     }
 
     // selector timeout
-    timeout.tv_sec = 5; //TODO: make configurable
+    timeout.tv_sec = 1; //TODO: make configurable
     timeout.tv_usec = 0;
 
     buf_pos = 0;
@@ -68,7 +68,11 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
 OSPFileInputStream::~OSPFileInputStream() {
     delete [] intBuffer;
     delete [] stringBuffer;
-    delete [] buffer;
+
+    if (buffer) {
+        delete [] buffer;
+        buffer = NULL;
+    }
 }
 
 int OSPFileInputStream::readInt() {
@@ -104,6 +108,8 @@ string OSPFileInputStream::readString() {
     stringBuffer[stringLength-1] = '\0'; // probably not necessary, but good for safety
     //log.trace(string("readString() returning ") + string(temp));
 
+
+    //TODO: this is a mem cpy
     return string(stringBuffer, stringLength);
 }
 
@@ -116,6 +122,7 @@ OSPString *OSPFileInputStream::readOSPString() {
         return new OSPString("", 0, 0, false);
     }
 
+    //TODO: this is a mem cpy
     char *stringData = new char[stringLength+1];
     readBytes(stringData, 0, stringLength);
     stringData[stringLength-1] = '\0';
@@ -139,21 +146,29 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         return;
     }
 
-    /*
-    log.info(string("readBytes(length=") + Util::toString((int)length)
-        + string("); buf_pos=") + Util::toString((int)buf_pos)
-        + string("; buf_mark=") + Util::toString((int)buf_mark)
-        + string("; buf_size=") + Util::toString((int)buf_size)
-    );
-    */
+    bool DEBUG = log.isDebugEnabled();
+
+    if (DEBUG) {
+        log.info(string("readBytes(length=") + Util::toString((int)length)
+            + string("); buf_pos=") + Util::toString((int)buf_pos)
+            + string("; buf_mark=") + Util::toString((int)buf_mark)
+            + string("; buf_size=") + Util::toString((int)buf_size)
+        );
+    }
 
     // get more data, if needed
     if (buf_pos+length>buf_mark) {
 
-        //log.info("need more data");
+        if (DEBUG) {
+            log.info("need more data");
+        }
 
         // is there enough space in the buffer?
         if (buf_pos+length>buf_size) {
+
+            if (DEBUG) {
+                log.debug("resizing buffer");
+            }
 
             // how many unread data bytes do we have?
             unsigned int dataBytes = buf_mark-buf_pos;
@@ -175,21 +190,27 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             buf_mark = dataBytes;
         }
 
-        // attempt to read from socket without using selector
-        //log.info(string("Attempt #1 to fread ") + Util::toString((int)(buf_size-buf_mark)) + string(" byte(s)"));
-        size_t n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+        if (DEBUG) {
+            log.debug("starting select() loop")
+        }
+
+        // loop until we read something or the file is closed
         while (n==0 && !feof(file)) {
-            // no data available, use select() to block until data is available
+
+            if (DEBUG) log.debug("at top of select() loop");
 
             // set up selector info
-            FD_ZERO (&set);
-            FD_SET (fd, &set);
+            FD_ZERO (&readFileDescriptorSet);
+            FD_SET (fd, &readFileDescriptorSet);
 
             // wait until some data is available to read
-            int fdcount = select (FD_SETSIZE, &set, NULL, NULL, &timeout);
+            int fdcount = select (1, &readFileDescriptorSet, NULL, NULL, &timeout);
+
             if (fdcount==0) {
                 // timeout
-                log.warn("select() timed out; will retry");
+                if (DEBUG) {
+                    log.debug("select() timed out; will retry");
+                }
             }
             else if (fdcount<0) {
                 // error
@@ -203,10 +224,10 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 break;
             }
 
-            // try and fill the rest of the buffer
-            //log.info(string("Attempt #2 to fread ") + Util::toString((int)(buf_size-buf_mark)) + string(" byte(s)"));
-
+            // read the available data
             n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+
+            if (DEBUG) log.debug("at end of select() loop");
         }
 
         if (feof(file)) {
@@ -222,13 +243,13 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
         buf_mark += n;
 
-        /*
-        log.info(string("After fread(): bytesRead=") + Util::toString((int)n)
-            + string("; buf_pos=") + Util::toString((int)buf_pos)
-            + string("; buf_mark=") + Util::toString((int)buf_mark)
-            + string("; buf_size=") + Util::toString((int)buf_size)
-        );
-        */
+        if (DEBUG) {
+            log.debug(string("After fread(): bytesRead=") + Util::toString((int)n)
+                + string("; buf_pos=") + Util::toString((int)buf_pos)
+                + string("; buf_mark=") + Util::toString((int)buf_mark)
+                + string("; buf_size=") + Util::toString((int)buf_size)
+            );
+        }
 
         if (buf_pos+length>buf_mark) {
             log.error("not enough data to fulfil request");
