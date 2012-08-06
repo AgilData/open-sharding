@@ -103,7 +103,7 @@ public:
     OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId);
     ~OSPNamedPipeConnection();
     
-    int init(OSPConnectionInfo *info, bool threadedResponseFifo);
+    int init(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId);
 
     string getRequestPipeFilename() { return requestPipeFilename; }
     string getResponsePipeFilename() { return responsePipeFilename; }

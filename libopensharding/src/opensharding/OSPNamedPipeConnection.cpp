@@ -48,8 +48,8 @@ namespace opensharding {
 
 logger::Logger &OSPNamedPipeConnection::log = Logger::getLogger("OSPNamedPipeConnection");
 
-OSPNamedPipeConnection::OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo){
-	int initRetVal = init(info, threadedResponseFifo);
+OSPNamedPipeConnection::OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId){
+	int initRetVal = init(info, threadedResponseFifo, int pipeId);
 	if (initRetVal != 0) {
 	    log.error("Failed to create OSPNamedPipeConnection");
 	    throw "Failed to create OSPNamedPipeConnection";
