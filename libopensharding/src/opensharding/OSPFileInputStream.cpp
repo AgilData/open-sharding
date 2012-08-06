@@ -44,6 +44,11 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
         fd = fileno(file);
         int flags = fcntl(fd, F_GETFL);
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+
+        // set up selector info
+        FD_ZERO (&readFileDescriptorSet);
+        FD_SET (fd, &readFileDescriptorSet);
+
     }
 
     // selector timeout
@@ -200,33 +205,22 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
             if (DEBUG) log.debug("at top of select() loop");
 
-            // set up selector info
-            FD_ZERO (&readFileDescriptorSet);
-            FD_SET (fd, &readFileDescriptorSet);
-
             // wait until some data is available to read
-            int fdcount = select (1, &readFileDescriptorSet, NULL, NULL, &timeout);
+            int fdcount = select(1, &readFileDescriptorSet, NULL, NULL, &timeout);
 
-            if (fdcount==0) {
-                // timeout
-                if (DEBUG) {
-                    log.debug("select() timed out; will retry");
-                }
-            }
-            else if (fdcount<0) {
+            if (fdcount == -1) {
                 // error
                 log.error("select() error");
                 perror("select()");
-                break;
             }
-            else if (fdcount>1) {
-                // debug code - should never happen
-                log.error("select() returned > 1");
-                break;
+            else if (fdcount) {
+                // read the available data
+                if (DEBUG) log.debug("data is available!");
+                /* FD_ISSET(0, &readFileDescriptorSet) will be true. */
+                n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+            else {
+                // no data
             }
-
-            // read the available data
-            n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
 
             if (DEBUG) log.debug("at end of select() loop");
         }
