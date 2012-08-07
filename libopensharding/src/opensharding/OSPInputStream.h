@@ -39,8 +39,6 @@ public:
     virtual ~OSPInputStream();
 
     virtual int readInt()=0;
-    virtual string readString()=0;
-    virtual OSPString *readOSPString()=0;
     virtual void readBytes(char *buffer, unsigned int offset, unsigned int length)=0;
 
 

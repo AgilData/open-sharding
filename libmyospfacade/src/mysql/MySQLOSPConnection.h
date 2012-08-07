@@ -86,7 +86,7 @@ private:
     /* Mutex for thread-safe access to resultSets */
     //boost::mutex resultSetMutex;
 
-    // temporary variable used to populate
+    // temporary variable used to populate MYSQL_RES structure
     MYSQL_RES  *currentRes;
     MYSQL_ROWS *currentRow;
     MYSQL_ROWS *prevRow;

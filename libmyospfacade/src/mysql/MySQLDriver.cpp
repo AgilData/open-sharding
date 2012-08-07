@@ -505,15 +505,16 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
                 ospConnectionPool = new OSPConnectionPool(info);
                 getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
             }
+        }
 
 
-            // get an OSPConnection instance from the pool
-            OSPConnection *ospConn = ospConnectionPool->getConnection(mysql);
+        // get an OSPConnection instance from the pool
+        OSPConnection *ospConn = ospConnectionPool->getConnection(mysql);
 
-            // create MySQL OSP connection object
-            try {
-                /*CHANGED*/
-                conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
+        // create MySQL OSP connection object
+        try {
+            /*CHANGED*/
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");

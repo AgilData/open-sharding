@@ -71,6 +71,8 @@ private:
 
     int pipeId;
 
+    int requestPipeFD;
+    int responsePipeFD;
     FILE *requestPipe;
     FILE *responsePipe;
 
@@ -100,6 +102,7 @@ private:
     static logger::Logger &log;
 
 private:
+    int makeNonBlocking(int fd);
     int doSendOnly(OSPMessage *message, bool flush);
 
 

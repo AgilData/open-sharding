@@ -216,6 +216,14 @@ void OSPNamedPipeConnection::startResponseThread() {
     m_thread=new boost::thread(boost::ref(*this));
 }
 
+int OSPNamedPipeConnection::makeNonBlocking(int fd) {
+    int flags = fcntl(fd, F_GETFL);
+    if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+        log.error("Failed to set O_NONBLOCK");
+        return -1;
+    }
+    return 0;
+}
 
 
 int OSPNamedPipeConnection::openFifos() {
@@ -228,6 +236,8 @@ int OSPNamedPipeConnection::openFifos() {
         log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
         return OSPNP_OPEN_REQUEST_PIPE_ERROR;
     }
+    int requestPipeFD = fileno(requestPipe);
+    makeNonBlocking(requestPipeFD);
 
     if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
     responsePipe = fopen(responsePipeFilename.c_str(), "rb");
@@ -236,11 +246,47 @@ int OSPNamedPipeConnection::openFifos() {
         fclose(requestPipe);
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
+    int responsePipeFD = fileno(responsePipe);
+    makeNonBlocking(responsePipeFD);
+
+    /*  THIS CODE FAILED WITH
+
+    Failed to open request pipe '/tmp/mysqlosp_18173_1_request.fifo' for writing
+                              failed to open request pipe: No such device or address
+
+    if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
+    requestPipeFD = open(requestPipeFilename.c_str(), O_WRONLY | O_NONBLOCK);
+    if (requestPipeFD == -1) {
+        log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
+        perror("failed to open request pipe");
+        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
+    }
+    requestPipe = fdopen(requestPipeFD, "wb");
+    if (!requestPipe) {
+        log.error(string("Failed to fdopen request pipe '") + requestPipeFilename + string("' for writing"));
+        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
+    }
+
+    if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
+    responsePipeFD = open(responsePipeFilename.c_str(), O_RDONLY | O_NONBLOCK);
+    if (responsePipeFD == -1) {
+        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for reading"));
+        perror("failed to open response pipe");
+        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
+    }
+    responsePipe = fdopen(responsePipeFD, "wb");
+    if (!responsePipe) {
+        log.error(string("Failed to fdopen response pipe '") + responsePipeFilename + string("' for reading"));
+        fclose(requestPipe);
+        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
+    }
+    */
+
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
     // create buffered input stream
-    this->is = new OSPFileInputStream(responsePipe, 4096); //TODO: should be 4096
+    this->is = new OSPFileInputStream(responsePipeFD, 4096);
 
     // TODO: we should be using a buffer here - not sure why we're not
     this->os = new OSPFileOutputStream(requestPipe, 0);
@@ -272,6 +318,7 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
     // read responses
     OSPWireResponse *response = NULL;
 
+    unsigned int count = 0;
     while (true) {
 
         if (DEBUG) log.debug("BEFORE read message length from response pipe");
@@ -301,7 +348,8 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
         else {
             // no background thread, wait for message directly
             response = dynamic_cast<OSPWireResponse*>(waitForResponse());
-            if (DEBUG) log.debug("sendMessage (non-threaded) got response, RequestID=" + Util::toString(requestID));
+            count++;
+            if (DEBUG) log.debug(string("sendMessage (non-threaded) got response number ") + Util::toString(count) + string("; RequestID=") + Util::toString(requestID));
         }
 
         if (response == NULL) {
@@ -434,6 +482,12 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
         is->readBytes(buffer, 0, messageLength);
         if (DEBUG) log.debug("AFTER readBytes() from response pipe");
 
+        /*
+        if (TRACE) {
+            Util::dump(buffer, messageLength, 80);
+        }
+        */
+
         // create byte buffer to wrap the existing buffer (NOTE: this does not perform a memcpy)
         OSPByteBuffer byteBuffer(buffer, messageLength);
 
@@ -443,8 +497,6 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
         // decode the data from the buffer into the newly created object
         OSPMessageDecoder decoder;
         decoder.decode(response, &byteBuffer);
-
-        if (DEBUG) log.debug("After reading message from response pipe, RequestID=" + Util::toString(response->getRequestID()));
 
     }
     else {

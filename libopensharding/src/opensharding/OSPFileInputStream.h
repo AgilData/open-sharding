@@ -40,17 +40,14 @@ namespace opensharding {
 class OSPFileInputStream : public OSPInputStream {
 private:
 
+    // file descriptor
     int fd;
-    FILE *file;
 
     // selector info
-    struct timeval timeout;
     fd_set readFileDescriptorSet;
 
     // temp buffers
     char *intBuffer;
-    char *stringBuffer;
-    int stringBufferSize;
 
     // read buffer
     char *buffer;
@@ -61,13 +58,11 @@ private:
     static Logger &log;
 
 public:
-    OSPFileInputStream(FILE *, int buf_size);
+    OSPFileInputStream(int fd, int buf_size);
     ~OSPFileInputStream();
 
     // read raw data
     int readInt();
-    string readString();
-    OSPString *readOSPString();
     void readBytes(char *buffer, unsigned int offset, unsigned int length);
 };
 
