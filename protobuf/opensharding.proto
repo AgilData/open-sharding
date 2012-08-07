@@ -119,3 +119,26 @@ message OSPWireResponse {
   optional OSPFetchResultsResponse    fetchResultsResponse    = 103;
   optional OSPDisconnectResponse      disconnectResponse      = 104;
 }
+
+// New Streaming message types.
+message OSPMessageControlMessage {
+	// Field IDs 1..10 are reserved for OSP control messages.
+	// Currently only a single field is used, message_control.
+	// This message has 4 required bytes, and 4 optional bytes:
+	//   mode: 1 byte: 1|2 (1 is streaming mode, 2 is fixed-length mode for future support)
+	//   message start/end: 1 byte: 1|2 (1 is the Start of a streaming message, 2 is the End of a streaming message)
+	//   message ID: 2 bytes: 11 - 32767 (the unique ID of a given OSP message; IDs 1 - 10 are reserved)
+	//   message length: 4 bytes: Length of message (applies to fixed-lengh messages only, not used in streaming mode)
+	required bytes message_control = 1;
+}
+
+message OSPResultSetMessage {
+	required OSPResultSetMetaDataMessage  meta_data  = 20;
+	repeated bytes values = 21;
+}
+
+message OSPResultSetMetaDataMessage {
+	required int32 column_count = 20;
+	repeated string column_names = 21;
+	repeated int32 column_types = 22;
+}

@@ -8,3 +8,4 @@ cf*.properties
 .idea
 *.d
 *.o
+OpenSharding/OpenSharding.xcodeproj/project.xcworkspace/xcuserdata/*
