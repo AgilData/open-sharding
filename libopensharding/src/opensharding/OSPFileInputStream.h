@@ -45,7 +45,7 @@ private:
 
     // selector info
     struct timeval timeout;
-    fd_set set;
+    fd_set readFileDescriptorSet;
 
     // temp buffers
     char *intBuffer;

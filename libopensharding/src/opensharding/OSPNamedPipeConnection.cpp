@@ -48,8 +48,8 @@ namespace opensharding {
 
 logger::Logger &OSPNamedPipeConnection::log = Logger::getLogger("OSPNamedPipeConnection");
 
-OSPNamedPipeConnection::OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo){
-	int initRetVal = init(info, threadedResponseFifo);
+OSPNamedPipeConnection::OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId){
+	int initRetVal = init(info, threadedResponseFifo, pipeId);
 	if (initRetVal != 0) {
 	    log.error("Failed to create OSPNamedPipeConnection");
 	    throw "Failed to create OSPNamedPipeConnection";
@@ -60,18 +60,29 @@ OSPNamedPipeConnection::~OSPNamedPipeConnection() {
     stop();
 }
 
-int OSPNamedPipeConnection::init(OSPConnectionInfo *info, bool threadedResponseFifo)
+int OSPNamedPipeConnection::init(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId)
 {
     this->m_threadedResponseFifo = threadedResponseFifo;
+    this->pipeId = pipeId;
 
 	// construct filename for request pipe
 	char lcpRequestPipeName[256];
-	sprintf(lcpRequestPipeName,  "%s/mysqlosp_%d_request.fifo",  P_tmpdir, getpid());
+	if (threadedResponseFifo) {
+	    sprintf(lcpRequestPipeName,  "%s/mysqlosp_%d_request.fifo",  P_tmpdir, getpid());
+    }
+    else {
+	    sprintf(lcpRequestPipeName,  "%s/mysqlosp_%d_%d_request.fifo",  P_tmpdir, getpid(), pipeId);
+    }
 	this->requestPipeFilename  = lcpRequestPipeName;
 
 	// construct filename for response pipe
 	char lcpResponsePipeName[256];
-	sprintf(lcpResponsePipeName, "%s/mysqlosp_%d_response.fifo", P_tmpdir, getpid());
+	if (threadedResponseFifo) {
+    	sprintf(lcpResponsePipeName, "%s/mysqlosp_%d_response.fifo", P_tmpdir, getpid());
+    }
+    else {
+    	sprintf(lcpResponsePipeName, "%s/mysqlosp_%d_%d_response.fifo", P_tmpdir, getpid(), pipeId);
+    }
     this->responsePipeFilename = lcpResponsePipeName;
 
     m_fifosCreated = false;
@@ -228,9 +239,10 @@ int OSPNamedPipeConnection::openFifos() {
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
-    //NOTE: we are not currently using buffered input/output streams but this is handled elsewhere in the code
-    // to minimize interactions with the kernel
-    this->is = new OSPFileInputStream(responsePipe, 0);
+    // create buffered input stream
+    this->is = new OSPFileInputStream(responsePipe, 0); //TODO: should be 4096
+
+    // TODO: we should be using a buffer here - not sure why we're not
     this->os = new OSPFileOutputStream(requestPipe, 0);
 
     this->m_fifosOpened = true;
@@ -328,6 +340,7 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
 int OSPNamedPipeConnection::sendOnly(OSPMessage *message, bool flush) {
 
+    // this mutex is unnecessary if we have a dedicated request pipe
     boost::unique_lock<boost::mutex> lock(m_send_mutex);
 
     // not likely to happen, but just to be safe

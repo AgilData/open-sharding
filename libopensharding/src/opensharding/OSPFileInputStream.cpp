@@ -46,10 +46,6 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
         fcntl(fd, F_SETFL, flags | O_NONBLOCK);
     }
 
-    // selector timeout
-    timeout.tv_sec = 5; //TODO: make configurable
-    timeout.tv_usec = 0;
-
     buf_pos = 0;
     buf_mark = 0;
     if (buf_size==0) {
@@ -68,7 +64,11 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
 OSPFileInputStream::~OSPFileInputStream() {
     delete [] intBuffer;
     delete [] stringBuffer;
-    delete [] buffer;
+
+    if (buffer) {
+        delete [] buffer;
+        buffer = NULL;
+    }
 }
 
 int OSPFileInputStream::readInt() {
@@ -104,6 +104,8 @@ string OSPFileInputStream::readString() {
     stringBuffer[stringLength-1] = '\0'; // probably not necessary, but good for safety
     //log.trace(string("readString() returning ") + string(temp));
 
+
+    //TODO: this is a mem cpy
     return string(stringBuffer, stringLength);
 }
 
@@ -116,6 +118,7 @@ OSPString *OSPFileInputStream::readOSPString() {
         return new OSPString("", 0, 0, false);
     }
 
+    //TODO: this is a mem cpy
     char *stringData = new char[stringLength+1];
     readBytes(stringData, 0, stringLength);
     stringData[stringLength-1] = '\0';
@@ -139,74 +142,112 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         return;
     }
 
-    /*
-    log.info(string("readBytes(length=") + Util::toString((int)length)
-        + string("); buf_pos=") + Util::toString((int)buf_pos)
-        + string("; buf_mark=") + Util::toString((int)buf_mark)
-        + string("; buf_size=") + Util::toString((int)buf_size)
-    );
-    */
+    bool DEBUG = log.isDebugEnabled();
+
+    if (DEBUG) {
+        log.debug(string("readBytes(length=") + Util::toString((int)length)
+            + string("); buf_pos=") + Util::toString((int)buf_pos)
+            + string("; buf_mark=") + Util::toString((int)buf_mark)
+            + string("; buf_size=") + Util::toString((int)buf_size)
+        );
+    }
 
     // get more data, if needed
     if (buf_pos+length>buf_mark) {
 
-        //log.info("need more data");
+        unsigned int bytes_to_read = buf_pos+length - buf_mark;
 
-        // is there enough space in the buffer?
+        if (DEBUG) {
+            log.debug(string("need more data - need to read ") + Util::toString(bytes_to_read) + " bytes");
+        }
+
+        // is there enough space at the end of the buffer
         if (buf_pos+length>buf_size) {
 
             // how many unread data bytes do we have?
-            unsigned int dataBytes = buf_mark-buf_pos;
+            unsigned int unreadDataBytes = buf_mark-buf_pos;
 
-            if (dataBytes+length>buf_size) {
-                //TODO: this could be optimized to do the second memcpy as well, all in one go
-                int new_buf_size = dataBytes + length + 1024;
+            // do we need a larger buffer
+            if (unreadDataBytes+length>buf_size) {
+
+                if (DEBUG) {
+                    log.debug("growing buffer");
+                }
+
+                int new_buf_size = unreadDataBytes + length + 1024;
                 char *newBuffer = new char[new_buf_size];
-                memcpy(newBuffer, buffer, buf_mark);
+                memcpy(newBuffer, buffer+buf_pos, unreadDataBytes);
                 delete [] buffer;
                 buffer = newBuffer;
                 buf_size = new_buf_size;
+                buf_pos = 0;
+                buf_mark = unreadDataBytes;
+
+            }
+            else {
+                // the buffer is large enough, we just need to shift data to the start 
+                // to clear some space 
+                memcpy(buffer, buffer+buf_pos, unreadDataBytes);
+                buf_pos = 0;
+                buf_mark = unreadDataBytes;
             }
 
-            // move data to start of buffer
-            //log.info("moving data to start of buffer");
-            memcpy(buffer, buffer+buf_pos, dataBytes);
-            buf_pos = 0;
-            buf_mark = dataBytes;
         }
 
-        // attempt to read from socket without using selector
-        //log.info(string("Attempt #1 to fread ") + Util::toString((int)(buf_size-buf_mark)) + string(" byte(s)"));
-        size_t n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
-        while (n==0 && !feof(file)) {
-            // no data available, use select() to block until data is available
+        if (DEBUG) {
+            log.debug("starting select() loop");
+        }
+
+        // loop until we read something or the file is closed
+        int n = 0;
+        while (buf_pos+length>buf_mark && !feof(file)) {
+
+            if (DEBUG) log.debug("at top of select() loop");
 
             // set up selector info
-            FD_ZERO (&set);
-            FD_SET (fd, &set);
+            FD_ZERO (&readFileDescriptorSet);
+            FD_SET (fd, &readFileDescriptorSet);
+
+            // selector timeout MUST BE SET EVERY TIME BECAUSE select() MODIFIES THE VALUE!
+            timeout.tv_sec = 5; //TODO: make configurable?
+            timeout.tv_usec = 0;
 
             // wait until some data is available to read
-            int fdcount = select (FD_SETSIZE, &set, NULL, NULL, &timeout);
-            if (fdcount==0) {
-                // timeout
-                log.warn("select() timed out; will retry");
-            }
-            else if (fdcount<0) {
+            int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, &timeout);
+
+            if (fdcount == -1) {
                 // error
                 log.error("select() error");
                 perror("select()");
-                break;
             }
-            else if (fdcount>1) {
-                // debug code - should never happen
-                log.error("select() returned > 1");
-                break;
+            else if (fdcount == 1) {
+                // read the available data
+                if (DEBUG) log.debug("data is available!");
+
+                if (FD_ISSET(fd, &readFileDescriptorSet)) {
+                    // this should always be true
+                    if (DEBUG) log.debug("data is available for our FD!");
+
+                    n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+                    if (n==0) {
+                        if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
+                        break;
+                    }
+
+                    buf_mark += n;
+
+                    // reset flag
+                    FD_CLR(fd, &readFileDescriptorSet);
+                }
+
+            }
+            else {
+                // no data
+                if (DEBUG) log.debug("no data (timed out)");
+                continue;
             }
 
-            // try and fill the rest of the buffer
-            //log.info(string("Attempt #2 to fread ") + Util::toString((int)(buf_size-buf_mark)) + string(" byte(s)"));
-
-            n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+            if (DEBUG) log.debug("at end of select() loop");
         }
 
         if (feof(file)) {
@@ -220,21 +261,21 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             throw "FAIL";
         }
 
-        buf_mark += n;
-
-        /*
-        log.info(string("After fread(): bytesRead=") + Util::toString((int)n)
-            + string("; buf_pos=") + Util::toString((int)buf_pos)
-            + string("; buf_mark=") + Util::toString((int)buf_mark)
-            + string("; buf_size=") + Util::toString((int)buf_size)
-        );
-        */
+        if (DEBUG) {
+            log.debug(string("After fread(): bytesRead=") + Util::toString((int)n)
+                + string("; buf_pos=") + Util::toString((int)buf_pos)
+                + string("; buf_mark=") + Util::toString((int)buf_mark)
+                + string("; buf_size=") + Util::toString((int)buf_size)
+            );
+        }
 
         if (buf_pos+length>buf_mark) {
             log.error("not enough data to fulfil request");
             throw "FAIL";
         }
     }
+
+    // do we need this memcpy? can't we fread() directly into the user buffer? NO because we usually get more bytes than we ask for
 
     // copy data from fread buffer to user buffer
     memcpy(dest+offset, buffer+buf_pos, length);
