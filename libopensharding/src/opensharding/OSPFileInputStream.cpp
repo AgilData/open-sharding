@@ -272,11 +272,6 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
         }
 
-        if (n<1) {
-            log.error(string("fread() failed due to error"));
-            throw "FAIL";
-        }
-
         if (DEBUG) {
             log.debug(string("After non-blocking fread(): bytesRead=") + Util::toString((int)bytes_read)
                 + string("; buf_pos=") + Util::toString((int)buf_pos)
