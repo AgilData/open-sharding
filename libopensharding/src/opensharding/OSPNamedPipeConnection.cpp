@@ -339,9 +339,19 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
 
 int OSPNamedPipeConnection::sendOnly(OSPMessage *message, bool flush) {
+    if (m_threadedResponseFifo) {
+        // make sure we only send one message at a time on a shared request pipe
+        boost::unique_lock<boost::mutex> lock(m_send_mutex);
+        return doSendOnly(message, flush);
+    }
+    else {
+        // no need for a mutex in this case
+        return doSendOnly(message, flush);
+    }
+}
 
-    // this mutex is unnecessary if we have a dedicated request pipe
-    boost::unique_lock<boost::mutex> lock(m_send_mutex);
+int OSPNamedPipeConnection::doSendOnly(OSPMessage *message, bool flush) {
+
 
     // not likely to happen, but just to be safe
     if (nextRequestID >= OSPNP_MAX_REQUEST_ID) {
