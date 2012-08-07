@@ -303,13 +303,6 @@ int setErrorState(MYSQL *mysql, int _errno, const char *_error,
 
 MySQLAbstractConnection *getConnection(MYSQL *mysql, bool createIfNotExist) {
     MySQLAbstractConnection *conn = getResourceMap()->getConnection(mysql);
-    if (createIfNotExist && conn==NULL) {
-        ////xlog.trace(string("Creating new Native MySQL Connection for MYSQL ") +
-                   //Util::toString((void*)mysql));
-        conn = new MySQLNativeConnection(mysql, getMySQLClient(),
-                                         getResourceMap());
-        getResourceMap()->setConnection(mysql, conn);
-    }
     
     /*
     if (xlog.isTraceEnabled()) {
@@ -505,14 +498,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         // get named pipe connection for this osp database
         
         /*CHNAGED*/
-        OSPConnectionPool *ospConn = getResourceMap()->getOSPConn(info->target_schema_name);
-        if (!ospConn) {
-            ospConn = new OSPConnectionPool(info);
-            getResourceMap()->setOSPConn(info->target_schema_name, ospConn);
+        OSPConnectionPool *ospConnectionPool = getResourceMap()->getOSPConn(info->target_schema_name);
+        if (!ospConnectionPool) {
+            ospConnectionPool = new OSPConnectionPool(info);
+            getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
         }
 
-        OSPConnection *ospConnReal;
-        ospConnReal = ospConn->getConnection(mysql);
+        OSPConnection *ospConn;
+        ospConn = ospConnectionPool->getConnection(mysql);
 
         //
        
@@ -520,7 +513,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         // create MySQL OSP connection object
         try {
             /*CHANGED*/
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConnReal);
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
@@ -998,9 +991,9 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     if (ospMode){
 
         //Done for strcmp
-        const char * c = info->target_schema_name.c_str();
+        const char * schema_name = info->target_schema_name.c_str();
 
-        if (strcmp(c, db)==0) {
+        if (strcmp(schema_name, db)==0) {
             if (xlog.isDebugEnabled()) {
                     xlog.debug("mysql_select_db() re-using existing connection");
                 }
@@ -1455,14 +1448,14 @@ void mysql_close(MYSQL *mysql) {
     }
 
     MySQLConnectionInfo *info = getResourceMap()->getConnectInfo(mysql);
-    if (info) {
-        delete info;
-    }
-
     // remove from the map
     getResourceMap()->erase(mysql);
     getResourceMap()->eraseResults(conn);
 
+    // Delete info only after erase method.
+    if (info) {
+        delete info;
+    }
 
     if (xlog.isDebugEnabled()) {
         xlog.debug("AFTER remove from map, BEFORE delegate mysql_close()");
@@ -1481,6 +1474,7 @@ void mysql_close(MYSQL *mysql) {
       delete [] params;
     }
     else {
+        // TODO: This should be done through the pool. The pool should be global.
         conn->mysql_close(mysql);
     }
 
