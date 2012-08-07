@@ -200,6 +200,9 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 memcpy(buffer, buffer+buf_pos, unreadDataBytes);
                 buf_pos = 0;
                 buf_mark = unreadDataBytes;
+
+                // paranoid
+                memset(buffer+buf_mark, 0, buf_size-buf_mark);
             }
 
         }
@@ -252,8 +255,14 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                         buf_mark += n;
                     }
 
-                    // reset flag
-                    FD_CLR(fd, &readFileDescriptorSet);
+                    if (n == buf_size-buf_mark) {
+                        // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA
+                        if (DEBUG) logger.debug("Not calling FD_CLR");
+                    }
+                    else {
+                        // reset flag
+                        FD_CLR(fd, &readFileDescriptorSet);
+                    }
                 }
 
             }

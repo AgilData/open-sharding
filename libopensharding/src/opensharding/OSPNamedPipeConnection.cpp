@@ -272,6 +272,7 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
     // read responses
     OSPWireResponse *response = NULL;
 
+    unsigned int count = 0;
     while (true) {
 
         if (DEBUG) log.debug("BEFORE read message length from response pipe");
@@ -301,7 +302,8 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
         else {
             // no background thread, wait for message directly
             response = dynamic_cast<OSPWireResponse*>(waitForResponse());
-            if (DEBUG) log.debug("sendMessage (non-threaded) got response, RequestID=" + Util::toString(requestID));
+            count++;
+            if (DEBUG) log.debug(string("sendMessage (non-threaded) got response number ") + Util::toString(count) + string("; RequestID=") + Util::toString(requestID));
         }
 
         if (response == NULL) {
@@ -434,6 +436,10 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
         is->readBytes(buffer, 0, messageLength);
         if (DEBUG) log.debug("AFTER readBytes() from response pipe");
 
+        if (DEBUG) {
+            Util::dump(buffer, messageLength, 80);
+        }
+
         // create byte buffer to wrap the existing buffer (NOTE: this does not perform a memcpy)
         OSPByteBuffer byteBuffer(buffer, messageLength);
 
@@ -443,8 +449,6 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
         // decode the data from the buffer into the newly created object
         OSPMessageDecoder decoder;
         decoder.decode(response, &byteBuffer);
-
-        if (DEBUG) log.debug("After reading message from response pipe, RequestID=" + Util::toString(response->getRequestID()));
 
     }
     else {
