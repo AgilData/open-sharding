@@ -354,22 +354,23 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // create native MySQL result set structure
         currentRes = new MYSQL_RES();
         currentRes->handle = mysql;
-        mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
-
         memset(currentRes, 0, sizeof(MYSQL_RES));
+
+        // store mapping for this result set
+        mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
 
         // initialize variables before results start streaming in
         currentRow = NULL;
         prevRow = NULL;
-
-        currentRes->lengths = new unsigned long[columnCount];
-        memset(currentRes->lengths, 0, sizeof(unsigned long[columnCount]));
-
         currentRes->field_count = columnCount;
         currentRes->row_count = 0;
         currentRes->current_field = 0;
 
-        // fields
+        // allocate memory to store column lengths
+        currentRes->lengths = new unsigned long[columnCount];
+        memset(currentRes->lengths, 0, sizeof(unsigned long[columnCount]));
+
+        // allocate memory to store MYSQL_FIELD structures
         currentRes->fields = new MYSQL_FIELD[currentRes->field_count];
         memset(currentRes->fields, 0, currentRes->field_count * sizeof(MYSQL_FIELD));
 

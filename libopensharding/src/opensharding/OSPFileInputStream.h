@@ -48,8 +48,6 @@ private:
 
     // temp buffers
     char *intBuffer;
-    char *stringBuffer;
-    int stringBufferSize;
 
     // read buffer
     char *buffer;
@@ -65,8 +63,6 @@ public:
 
     // read raw data
     int readInt();
-    string readString();
-    OSPString *readOSPString();
     void readBytes(char *buffer, unsigned int offset, unsigned int length);
 };
 

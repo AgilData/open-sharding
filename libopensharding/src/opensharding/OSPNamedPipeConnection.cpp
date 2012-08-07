@@ -482,9 +482,11 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
         is->readBytes(buffer, 0, messageLength);
         if (DEBUG) log.debug("AFTER readBytes() from response pipe");
 
-        if (DEBUG) {
+        /*
+        if (TRACE) {
             Util::dump(buffer, messageLength, 80);
         }
+        */
 
         // create byte buffer to wrap the existing buffer (NOTE: this does not perform a memcpy)
         OSPByteBuffer byteBuffer(buffer, messageLength);

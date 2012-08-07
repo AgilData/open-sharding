@@ -49,14 +49,11 @@ OSPFileInputStream::OSPFileInputStream(int fd, int _buf_size) {
     buffer = new char[buf_size];
 
     intBuffer = new char[4];
-    stringBufferSize = 1024;
-    stringBuffer = new char[stringBufferSize];
 
 }
 
 OSPFileInputStream::~OSPFileInputStream() {
     delete [] intBuffer;
-    delete [] stringBuffer;
 
     if (buffer) {
         delete [] buffer;
@@ -65,58 +62,12 @@ OSPFileInputStream::~OSPFileInputStream() {
 }
 
 int OSPFileInputStream::readInt() {
-    //log.trace("readInt()");
     readBytes(intBuffer, 0, 4);
     int byte0 = (int) (0xFF & *(intBuffer+0));
     int byte1 = (int) (0xFF & *(intBuffer+1));
     int byte2 = (int) (0xFF & *(intBuffer+2));
     int byte3 = (int) (0xFF & *(intBuffer+3));
-    int ret = byte0<<24 | byte1<<16 | byte2<<8 | byte3;
-    //log.trace(string("readInt() returning ") + Util::toString(ret));
-    return ret;
-}
-
-string OSPFileInputStream::readString() {
-    //log.trace("readString()");
-    int stringLength = readInt();
-    if (stringLength<1) {
-        // -1 = NULL
-        // 0 = empty string
-        return string("");
-    }
-
-    //TODO: get rid of this temp string buffer
-    if (stringLength>=stringBufferSize) {
-        // re-allocate buffer
-        delete [] stringBuffer;
-        stringBufferSize = stringLength + 512;
-        stringBuffer = new char[stringBufferSize];
-    }
-
-    readBytes(stringBuffer, 0, stringLength);
-    stringBuffer[stringLength-1] = '\0'; // probably not necessary, but good for safety
-    //log.trace(string("readString() returning ") + string(temp));
-
-
-    //TODO: this is a mem cpy
-    return string(stringBuffer, stringLength);
-}
-
-OSPString *OSPFileInputStream::readOSPString() {
-    //log.trace("readString()");
-    int stringLength = readInt();
-    if (stringLength<1) {
-        // -1 = NULL
-        // 0 = empty string
-        return new OSPString("", 0, 0, false);
-    }
-
-    //TODO: this is a mem cpy
-    char *stringData = new char[stringLength+1];
-    readBytes(stringData, 0, stringLength);
-    stringData[stringLength-1] = '\0';
-
-    return new OSPString(stringData, 0, stringLength, true);
+    return byte0<<24 | byte1<<16 | byte2<<8 | byte3;
 }
 
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
@@ -173,13 +124,9 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                 if (DEBUG) {
                     log.debug(string("Moving ") + Util::toString(unreadDataBytes) + string(" unread bytes to the start of the buffer"));
-//                    log.debug("Buffer BEFORE shift:");
-//                    Util::dump(buffer, buf_size, 128);
                 }
 
-                // the buffer is large enough, we just need to shift data to the start 
-                // to clear some space
-
+                // the buffer is large enough, we just need to shift data to the start to clear some space
                 //NOTE: memcpy not safe if ranges overlap so we manually copy the unread bytes
                 for (unsigned int i=0; i<unreadDataBytes; i++) {
                     buffer[i] = buffer[buf_pos+i];
@@ -190,11 +137,6 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                 // paranoid
                 memset(buffer+buf_mark, 0, buf_size-buf_mark);
-
-//                if (DEBUG) {
-//                    log.debug("Buffer AFTER shift:");
-//                    Util::dump(buffer, buf_size, 128);
-//                }
             }
 
         }
@@ -203,8 +145,13 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         while (bytes_read < bytes_to_read) {
 
             if (DEBUG) {
-                log.debug(string("at top of select() loop; bytes_read=") + Util::toString(bytes_read)
-                        + string("; bytes_to_read=") + Util::toString(bytes_to_read));
+                log.debug(string("at top of select() loop:")
+                    + string("; bytes_read=") + Util::toString(bytes_read)
+                    + string("; bytes_to_read=") + Util::toString(bytes_to_read)
+                    + string("; buf_pos=") + Util::toString(buf_pos)
+                    + string("; buf_mark=") + Util::toString(buf_mark)
+                    + string("; buf_size=") + Util::toString(buf_size)
+                );
             }
 
             // set up selector info
@@ -220,30 +167,23 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 perror("select()");
             }
             else if (fdcount == 1) {
-                // read the available data
-                if (DEBUG) log.debug("data is available!");
+
+                // paranoid checks
+                if (buf_mark < 0 || buf_mark >= buf_size) {
+                    log.error(string("buffer underflow or overflow; buf_mark=") + Util::toString(buf_mark));
+                    throw "buffer underflow or overflow";
+                }
 
                 if (FD_ISSET(fd, &readFileDescriptorSet)) {
-                    // this should always be true
-                    if (DEBUG) log.debug("data is available for our FD!");
-
                     int n = read(fd, buffer+buf_mark, buf_size-buf_mark);
                     if (n==0) {
                         if (DEBUG) log.debug("read() returned 0 -- means connection closed");
-                        // reset flag
-                        //FD_CLR(fd, &readFileDescriptorSet);
                         break;
                     }
                     else {
                         if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
                         bytes_read += n;
-                        // update mark
-                        buf_mark += n;
-
-                        if (buf_mark==buf_size) {
-                            // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
-                            if (DEBUG) log.debug("read() FILLED THE BUFFER THIS TIME");
-                        }
+                        buf_mark   += n;
                     }
                 }
             }
@@ -252,8 +192,6 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 if (DEBUG) log.debug("no data (timed out and will retry)");
                 continue;
             }
-
-            if (DEBUG) log.debug("at end of select() loop");
         }
 
         if (DEBUG) {
@@ -264,17 +202,16 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             );
         }
 
-        if (buf_pos+length>buf_mark) {
+        if (bytes_read < bytes_to_read) {
             log.error("not enough data to fulfil request");
             throw "FAIL";
         }
     }
 
-    // do we need this memcpy? can't we read() directly into the user buffer? NO because we usually get more bytes than we ask for
-
     // copy data from read buffer to user buffer
     memcpy(dest+offset, buffer+buf_pos, length);
     buf_pos += length;
+
 }
 
 }
