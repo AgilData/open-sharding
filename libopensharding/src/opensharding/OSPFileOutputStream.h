@@ -38,7 +38,7 @@ namespace opensharding {
 
 class OSPFileOutputStream : public OSPOutputStream {
 private:
-    int fd;
+    FILE *file;
 
     // temp encoding buffers
     char *varIntBuffer;
@@ -54,7 +54,7 @@ private:
     void writeBytesToFile(const char *buffer, unsigned int offset, unsigned int length);
 
 public:
-    OSPFileOutputStream(int fd, unsigned int writeBufferSize);
+    OSPFileOutputStream(FILE *, unsigned int writeBufferSize);
     ~OSPFileOutputStream();
 
     // write raw data
