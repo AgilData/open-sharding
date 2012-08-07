@@ -273,7 +273,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                         if (buf_mark==buf_size) {
                             // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
-                            if (DEBUG) logger.debug("fread() FILLED THE BUFFER!");
+                            if (DEBUG) log.debug("fread() FILLED THE BUFFER!");
                         }
                         else {
                             // reset flag
