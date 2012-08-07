@@ -136,7 +136,8 @@
 		D1C20D1E15CF1B1200C99279 /* libMyOSPDriver.dylib */ = {
 			isa = PBXReferenceProxy;
 			fileType = "compiled.mach-o.dylib";
-			path = libMyOSPDriver.dylib;
+			name = libMyOSPDriver.dylib;
+			path = liblibmyosp.dylib;
 			remoteRef = D1C20D1D15CF1B1200C99279 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
