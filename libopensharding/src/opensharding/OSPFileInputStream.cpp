@@ -35,9 +35,14 @@ namespace opensharding {
 
 logger::Logger &OSPFileInputStream::log = Logger::getLogger("OSPFileInputStream");
 
-OSPFileInputStream::OSPFileInputStream(int fd, int buf_size) {
+OSPFileInputStream::OSPFileInputStream(int fd, int _buf_size) {
     this->fd = fd;
-    this->buf_size = buf_size;
+    this->buf_size = _buf_size;
+
+    if (buf_size < 1) {
+        // minimum buffer size
+        buf_size = 1024;
+    }
 
     buf_pos = 0;
     buf_mark = 0;
@@ -117,25 +122,6 @@ OSPString *OSPFileInputStream::readOSPString() {
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
 
     bool DEBUG = log.isDebugEnabled();
-
-    if (buf_size==0) {
-        // if no input buffer is available, then do a simple blocking read
-        size_t n = read(fd, dest+offset, length);
-        if (n<1) {
-            log.error(string("read() returned no bytes (EOF?)"));
-            throw "FAIL";
-        }
-        else if (n!=1) {
-            log.error(string("read() returned wrong number of items: ") + Util::toString((int)n));
-            throw "FAIL";
-        }
-
-        if (DEBUG) {
-            log.debug(string("blocking read() returning ") + Util::toString((int)n) + string( "byte(s)"));
-        }
-
-        return;
-    }
 
     if (DEBUG) {
         log.debug(string("readBytes(length=") + Util::toString((int)length)
