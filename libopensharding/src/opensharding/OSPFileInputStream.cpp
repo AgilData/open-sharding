@@ -240,7 +240,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 // read the available data
                 if (DEBUG) log.debug("data is available!");
 
-                while (FD_ISSET(fd, &readFileDescriptorSet)) {
+                if (FD_ISSET(fd, &readFileDescriptorSet)) {
                     // this should always be true
                     if (DEBUG) log.debug("data is available for our FD!");
 
@@ -248,7 +248,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                     if (n==0) {
                         if (DEBUG) log.debug("read() returned 0 -- means connection closed");
                         // reset flag
-                        FD_CLR(fd, &readFileDescriptorSet);
+                        //FD_CLR(fd, &readFileDescriptorSet);
                         break;
                     }
                     else {
@@ -259,6 +259,9 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                         if (buf_mark==buf_size) {
                             // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
+                            if (DEBUG) log.debug("read() FILLED THE BUFFER THIS TIME");
+
+                            /*
                             if (DEBUG) log.debug("read() FILLED THE BUFFER SO GROWING IT!");
 
                             int new_buf_size = buf_size + 1024;
@@ -273,11 +276,10 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                             delete [] buffer;
                             buffer = newBuffer;
                             buf_size = new_buf_size;
+                            */
 
                         }
-                        else {
-                            FD_CLR(fd, &readFileDescriptorSet);
-                        }
+                        //FD_CLR(fd, &readFileDescriptorSet);
                     }
                 }
             }
