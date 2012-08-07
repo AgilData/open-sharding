@@ -226,6 +226,7 @@ int OSPNamedPipeConnection::openFifos() {
     requestPipeFD = open(requestPipeFilename.c_str(), O_WRONLY | O_NONBLOCK);
     if (requestPipeFD == -1) {
         log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
+        perror("failed to open request pipe");
         return OSPNP_OPEN_REQUEST_PIPE_ERROR;
     }
     requestPipe = fdopen(requestPipeFD, "wb");
@@ -238,16 +239,15 @@ int OSPNamedPipeConnection::openFifos() {
     responsePipeFD = open(responsePipeFilename.c_str(), O_RDONLY | O_NONBLOCK);
     if (responsePipeFD == -1) {
         log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for reading"));
+        perror("failed to open response pipe");
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
-    /*
     responsePipe = fdopen(responsePipeFD, "wb");
     if (!responsePipe) {
         log.error(string("Failed to fdopen response pipe '") + responsePipeFilename + string("' for reading"));
         fclose(requestPipe);
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
-    */
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
