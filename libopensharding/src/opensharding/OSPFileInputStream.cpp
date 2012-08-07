@@ -122,6 +122,7 @@ OSPString *OSPFileInputStream::readOSPString() {
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
 
     bool DEBUG = log.isDebugEnabled();
+    bool TRACE = log.isTraceEnabled();
 
     if (DEBUG) {
         log.debug(string("readBytes(length=") + Util::toString((int)length)
@@ -158,10 +159,9 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 char *newBuffer = new char[new_buf_size];
 
                 // paranoid
-                if (DEBUG) {
-                    memset(newBuffer, 0, new_buf_size);
-                }
+                memset(newBuffer, 0, new_buf_size);
 
+                // copy the unread data from the old buffer
                 memcpy(newBuffer, buffer+buf_pos, unreadDataBytes);
                 delete [] buffer;
                 buffer = newBuffer;
@@ -174,28 +174,30 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                 if (DEBUG) {
                     log.debug(string("Moving ") + Util::toString(unreadDataBytes) + string(" unread bytes to the start of the buffer"));
-                    log.debug("Buffer BEFORE shift:");
-                    Util::dump(buffer, buf_size, 128);
+//                    log.debug("Buffer BEFORE shift:");
+//                    Util::dump(buffer, buf_size, 128);
                 }
 
                 // the buffer is large enough, we just need to shift data to the start 
-                // to clear some space 
-                memcpy(buffer, buffer+buf_pos, unreadDataBytes);
+                // to clear some space
+
+                //NOTE: memcpy not safe if ranges overlap so we manually copy the unread bytes
+                for (unsigned int i=0; i<unreadDataBytes; i++) {
+                    buffer[i] = buffer[buf_pos+i];
+                }
+
                 buf_pos = 0;
                 buf_mark = unreadDataBytes;
 
                 // paranoid
-                if (DEBUG) {
-                    memset(buffer+buf_mark, 0, buf_size-buf_mark);
-                    log.debug("Buffer AFTER shift:");
-                    Util::dump(buffer, buf_size, 128);
-                }
+                memset(buffer+buf_mark, 0, buf_size-buf_mark);
+
+//                if (DEBUG) {
+//                    log.debug("Buffer AFTER shift:");
+//                    Util::dump(buffer, buf_size, 128);
+//                }
             }
 
-        }
-
-        if (DEBUG) {
-            log.debug("starting select() loop");
         }
 
         // loop until we read something or the file is closed
@@ -209,10 +211,6 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             // set up selector info
             FD_ZERO (&readFileDescriptorSet);
             FD_SET (fd, &readFileDescriptorSet);
-
-            // selector timeout MUST BE SET EVERY TIME BECAUSE select() MODIFIES THE VALUE!
-            timeout.tv_sec = 0; //TODO: make configurable?
-            timeout.tv_usec = 0;
 
             // wait until some data is available to read
             int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, NULL);
@@ -246,26 +244,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                         if (buf_mark==buf_size) {
                             // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
                             if (DEBUG) log.debug("read() FILLED THE BUFFER THIS TIME");
-
-                            /*
-                            if (DEBUG) log.debug("read() FILLED THE BUFFER SO GROWING IT!");
-
-                            int new_buf_size = buf_size + 1024;
-                            char *newBuffer = new char[new_buf_size];
-
-                            // paranoid
-                            if (DEBUG) {
-                                memset(newBuffer, 0, new_buf_size);
-                            }
-
-                            memcpy(newBuffer, buffer, buf_size);
-                            delete [] buffer;
-                            buffer = newBuffer;
-                            buf_size = new_buf_size;
-                            */
-
                         }
-                        //FD_CLR(fd, &readFileDescriptorSet);
                     }
                 }
             }
