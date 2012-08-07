@@ -121,24 +121,39 @@ message OSPWireResponse {
 }
 
 // New Streaming message types.
+// Message ID: 1
 message OSPMessageControlMessage {
-	// Field IDs 1..10 are reserved for OSP control messages.
+	// Field IDs 1..20 are reserved for OSP control messages.
 	// Currently only a single field is used, message_control.
-	// This message has 4 required bytes, and 4 optional bytes:
-	//   mode: 1 byte: 1|2 (1 is streaming mode, 2 is fixed-length mode for future support)
+	// This message has 4 required bytes:
 	//   message start/end: 1 byte: 1|2 (1 is the Start of a streaming message, 2 is the End of a streaming message)
+	//   mode: 1 byte: 1|2 (1 is streaming mode, 2 is fixed-length mode for future support)
 	//   message ID: 2 bytes: 11 - 32767 (the unique ID of a given OSP message; IDs 1 - 10 are reserved)
-	//   message length: 4 bytes: Length of message (applies to fixed-lengh messages only, not used in streaming mode)
 	required bytes message_control = 1;
+	// Client ID is required for shared connections only.
+	optional int32 client_id = 2;
+	optional int32 request_id = 3;
+	optional int32 message_length = 4;
 }
 
-message OSPResultSetMessage {
-	required OSPResultSetMetaDataMessage  meta_data  = 20;
-	repeated bytes values = 21;
-}
-
+// OSPResultSetMetaDataMessage
+// Message ID: 20
 message OSPResultSetMetaDataMessage {
-	required int32 column_count = 20;
+	optional int32 client_id = 2;
+	optional int32 request_id = 3;
+	required int32 column_count = 2;
 	repeated string column_names = 21;
 	repeated int32 column_types = 22;
 }
+
+// OSPResultSetRowMessage
+// Used for one or more rows
+// Message ID: 30
+message OSPResultSetRowMessage {
+	optional int32 client_id = 2;
+	optional int32 request_id = 3;
+	required bytes values = 30;
+}
+
+
+
