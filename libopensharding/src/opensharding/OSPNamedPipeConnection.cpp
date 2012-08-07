@@ -216,11 +216,43 @@ void OSPNamedPipeConnection::startResponseThread() {
     m_thread=new boost::thread(boost::ref(*this));
 }
 
+int OSPNamedPipeConnection::makeNonBlocking(int fd) {
+    int flags = fcntl(fd, F_GETFL);
+    if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+        log.error("Failed to set O_NONBLOCK");
+        return -1;
+    }
+    return 0;
+}
 
 
 int OSPNamedPipeConnection::openFifos() {
 
     boost::unique_lock<boost::mutex> lock(m_mutex);
+
+    if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
+    requestPipe  = fopen(requestPipeFilename.c_str(), "wb");
+    if (!requestPipe) {
+        log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
+        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
+    }
+    int requestPipeFD = fileno(requestPipe);
+    makeNonBlocking(requestPipeFD);
+
+    if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
+    responsePipe = fopen(responsePipeFilename.c_str(), "rb");
+    if (!responsePipe) {
+        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for writing"));
+        fclose(requestPipe);
+        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
+    }
+    int responsePipeFD = fileno(responsePipe);
+    makeNonBlocking(responsePipeFD);
+
+    /*  THIS CODE FAILED WITH
+
+    Failed to open request pipe '/tmp/mysqlosp_18173_1_request.fifo' for writing
+                              failed to open request pipe: No such device or address
 
     if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
     requestPipeFD = open(requestPipeFilename.c_str(), O_WRONLY | O_NONBLOCK);
@@ -248,6 +280,8 @@ int OSPNamedPipeConnection::openFifos() {
         fclose(requestPipe);
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
+    */
+
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 

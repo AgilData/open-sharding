@@ -102,6 +102,7 @@ private:
     static logger::Logger &log;
 
 private:
+    int makeNonBlocking(int fd);
     int doSendOnly(OSPMessage *message, bool flush);
 
 
