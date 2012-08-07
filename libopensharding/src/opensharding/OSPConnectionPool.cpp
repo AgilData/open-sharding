@@ -89,7 +89,8 @@ int OSPConnectionPool::nextPipeId = 1;
 				connInfo->getPort())));
 		}
 		else if (protocol == PROTOCOL_PIPES) {
-				pool.push_back(dynamic_cast<OSPConnection*>(new OSPNamedPipeConnection(connInfo,false,OSPConnectionPool::nextPipeId++)));
+				pool.push_back(dynamic_cast<OSPConnection*>(new OSPNamedPipeConnection(connInfo,false,
+                    OSPConnectionPool::nextPipeId++)));
 		}
 		else {
 			log.error("Invalid protocol for Connection.");
