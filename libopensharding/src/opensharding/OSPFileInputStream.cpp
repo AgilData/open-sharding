@@ -46,7 +46,7 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
         if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
             log.error("Failed to set O_NONBLOCK - reverting to blocking reads");
             // resort to blocking reads
-            buf_size = 0;
+            this->buf_size = 0;
         }
     }
 
@@ -186,6 +186,12 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                 int new_buf_size = unreadDataBytes + length + 1024;
                 char *newBuffer = new char[new_buf_size];
+
+                // paranoid
+                if (DEBUG) {
+                    memset(newBuffer, 0, new_buf_size);
+                }
+
                 memcpy(newBuffer, buffer+buf_pos, unreadDataBytes);
                 delete [] buffer;
                 buffer = newBuffer;
@@ -195,6 +201,13 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
             }
             else {
+
+                if (DEBUG) {
+                    log.debug(string("Moving ") + Util::toString(unreadDataBytes) + string(" unread bytes to the start of the buffer"));
+                    log.debug("Buffer BEFORE shift:");
+                    Util::dump(buffer, buf_size, 128);
+                }
+
                 // the buffer is large enough, we just need to shift data to the start 
                 // to clear some space 
                 memcpy(buffer, buffer+buf_pos, unreadDataBytes);
@@ -202,7 +215,11 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 buf_mark = unreadDataBytes;
 
                 // paranoid
-                memset(buffer+buf_mark, 0, buf_size-buf_mark);
+                if (DEBUG) {
+                    memset(buffer+buf_mark, 0, buf_size-buf_mark);
+                    log.debug("Buffer AFTER shift:");
+                    Util::dump(buffer, buf_size, 128);
+                }
             }
 
         }
@@ -253,16 +270,17 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                         bytes_read += n;
                         // update mark
                         buf_mark += n;
+
+                        if (buf_mark==buf_size) {
+                            // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
+                            if (DEBUG) logger.debug("fread() FILLED THE BUFFER!");
+                        }
+                        else {
+                            // reset flag
+                            FD_CLR(fd, &readFileDescriptorSet);
+                        }
                     }
 
-                    if (n == buf_size-buf_mark) {
-                        // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA
-                        if (DEBUG) logger.debug("Not calling FD_CLR");
-                    }
-                    else {
-                        // reset flag
-                        FD_CLR(fd, &readFileDescriptorSet);
-                    }
                 }
 
             }
