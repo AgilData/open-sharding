@@ -245,7 +245,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             timeout.tv_usec = 0;
 
             // wait until some data is available to read
-            int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, &timeout);
+            int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, NULL);
 
             if (fdcount == -1) {
                 // error
