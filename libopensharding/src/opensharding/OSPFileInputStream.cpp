@@ -297,8 +297,6 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                     }
                 }
             }
-
-            }
             else {
                 // no data
                 if (DEBUG) log.debug("no data (timed out and will retry)");
