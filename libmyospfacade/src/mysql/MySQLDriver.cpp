@@ -492,28 +492,28 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              xlog.debug("Creating OSP connection");
         }
 
-        // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
-        boost::mutex::scoped_lock lock(initMutex);
+        // synchronized section for creating OSPConnectionPool
+        OSPConnectionPool *ospConnectionPool = NULL;
+        {
+            // we need a mutex here in case multiple threads are connecting to the database at the same time....
+            boost::mutex::scoped_lock lock(initMutex);
 
-        // get named pipe connection for this osp database
-        
-        /*CHNAGED*/
-        OSPConnectionPool *ospConnectionPool = getResourceMap()->getOSPConn(info->target_schema_name);
-        if (!ospConnectionPool) {
-            ospConnectionPool = new OSPConnectionPool(info);
-            getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
-        }
+            // get named pipe connection for this osp database
+            
+            ospConnectionPool = getResourceMap()->getOSPConn(info->target_schema_name);
+            if (!ospConnectionPool) {
+                ospConnectionPool = new OSPConnectionPool(info);
+                getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
+            }
 
-        OSPConnection *ospConn;
-        ospConn = ospConnectionPool->getConnection(mysql);
 
-        //
-       
+            // get an OSPConnection instance from the pool
+            OSPConnection *ospConn = ospConnectionPool->getConnection(mysql);
 
-        // create MySQL OSP connection object
-        try {
-            /*CHANGED*/
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
+            // create MySQL OSP connection object
+            try {
+                /*CHANGED*/
+                conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
@@ -527,12 +527,12 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         getResourceMap()->clearErrorState(mysql);
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("do_osp_select(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+            xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
         }
 
 
     } catch (const char *exception) {
-        xlog.error(string("do_osp_select() failed due to exception: ") + exception);
+        xlog.error(string("do_osp_connect() failed due to exception: ") + exception);
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
         return -1;
     } catch (...) {

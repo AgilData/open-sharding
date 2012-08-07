@@ -99,6 +99,10 @@ private:
 
     static logger::Logger &log;
 
+private:
+    int doSendOnly(OSPMessage *message, bool flush);
+
+
 public:
     OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId);
     ~OSPNamedPipeConnection();

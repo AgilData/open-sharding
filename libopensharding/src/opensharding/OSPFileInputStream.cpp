@@ -43,7 +43,11 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
     if (buf_size>0) {
         fd = fileno(file);
         int flags = fcntl(fd, F_GETFL);
-        fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+        if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
+            log.error("Failed to set O_NONBLOCK - reverting to blocking reads");
+            // resort to blocking reads
+            buf_size = 0;
+        }
     }
 
     buf_pos = 0;
@@ -128,6 +132,8 @@ OSPString *OSPFileInputStream::readOSPString() {
 
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
 
+    bool DEBUG = log.isDebugEnabled();
+
     if (buf_size==0) {
         // if no input buffer is available, then do a simple blocking read
         size_t n = fread(dest+offset, length, 1, file);
@@ -139,10 +145,13 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             log.error(string("fread() returned wrong number of items: ") + Util::toString((int)n));
             throw "FAIL";
         }
+
+        if (DEBUG) {
+            log.debug(string("blocking fread() returning ") + Util::toString((int)n) + string( "byte(s)"));
+        }
+
         return;
     }
-
-    bool DEBUG = log.isDebugEnabled();
 
     if (DEBUG) {
         log.debug(string("readBytes(length=") + Util::toString((int)length)
@@ -156,6 +165,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
     if (buf_pos+length>buf_mark) {
 
         unsigned int bytes_to_read = buf_pos+length - buf_mark;
+        unsigned int bytes_read = 0;
 
         if (DEBUG) {
             log.debug(string("need more data - need to read ") + Util::toString(bytes_to_read) + " bytes");
@@ -199,10 +209,12 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         }
 
         // loop until we read something or the file is closed
-        int n = 0;
-        while (buf_pos+length>buf_mark && !feof(file)) {
+        while (bytes_read < bytes_to_read && !feof(file)) {
 
-            if (DEBUG) log.debug("at top of select() loop");
+            if (DEBUG) {
+                log.debug(string("at top of select() loop; bytes_read=") + Util::toString(bytes_read)
+                        + string("; bytes_to_read=") + Util::toString(bytes_to_read));
+            }
 
             // set up selector info
             FD_ZERO (&readFileDescriptorSet);
@@ -228,13 +240,17 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                     // this should always be true
                     if (DEBUG) log.debug("data is available for our FD!");
 
-                    n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+                    int n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
                     if (n==0) {
                         if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
                         break;
                     }
-
-                    buf_mark += n;
+                    else {
+                        if (DEBUG) log.debug(string("fread() read ") + Util::toString(n) + string(" byte(s)"));
+                        bytes_read += n;
+                        // update mark
+                        buf_mark += n;
+                    }
 
                     // reset flag
                     FD_CLR(fd, &readFileDescriptorSet);
@@ -243,7 +259,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             }
             else {
                 // no data
-                if (DEBUG) log.debug("no data (timed out)");
+                if (DEBUG) log.debug("no data (timed out and will retry)");
                 continue;
             }
 
@@ -256,13 +272,8 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
         }
 
-        if (n<1) {
-            log.error(string("fread() failed due to error"));
-            throw "FAIL";
-        }
-
         if (DEBUG) {
-            log.debug(string("After fread(): bytesRead=") + Util::toString((int)n)
+            log.debug(string("After non-blocking fread(): bytesRead=") + Util::toString((int)bytes_read)
                 + string("; buf_pos=") + Util::toString((int)buf_pos)
                 + string("; buf_mark=") + Util::toString((int)buf_mark)
                 + string("; buf_size=") + Util::toString((int)buf_size)
