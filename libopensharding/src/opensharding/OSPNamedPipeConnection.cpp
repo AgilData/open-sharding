@@ -240,7 +240,7 @@ int OSPNamedPipeConnection::openFifos() {
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
     // create buffered input stream
-    this->is = new OSPFileInputStream(responsePipe, 4096); //TODO: should be 4096
+    this->is = new OSPFileInputStream(responsePipe, 0); //TODO: should be 4096
 
     // TODO: we should be using a buffer here - not sure why we're not
     this->os = new OSPFileOutputStream(requestPipe, 0);
