@@ -397,7 +397,7 @@ int OSPNamedPipeConnection::sendOnly(OSPMessage *message, bool flush) {
 /**
  * Reads a single OSPWireResponse response message from the response pipe. Note that this method is not thread-safe
  * and does not need to be. It can be called directly from the application thread if we are using dedicated pipes
- * per database connection. If we in multi-threaded mode, then a single thread will be calling this method to read
+ * per database connection. If we are in multi-threaded mode, then a single thread will be calling this method to read
  * responses from the pipe and dispatch them to the waiting application threads.
  */
 OSPMessage* OSPNamedPipeConnection::waitForResponse() {
