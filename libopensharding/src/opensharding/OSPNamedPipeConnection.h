@@ -71,6 +71,8 @@ private:
 
     int pipeId;
 
+    int requestPipeFD;
+    int responsePipeFD;
     FILE *requestPipe;
     FILE *responsePipe;
 

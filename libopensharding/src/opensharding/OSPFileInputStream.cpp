@@ -35,11 +35,13 @@ namespace opensharding {
 
 logger::Logger &OSPFileInputStream::log = Logger::getLogger("OSPFileInputStream");
 
-OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
+OSPFileInputStream::OSPFileInputStream(int fd, FILE *file, int buf_size) {
+    this->fd = fd;
     this->file = file;
     this->buf_size = buf_size;
 
     // make sure we are non-blocking if we are using a buffer
+    /*
     if (buf_size>0) {
         fd = fileno(file);
         int flags = fcntl(fd, F_GETFL);
@@ -49,6 +51,7 @@ OSPFileInputStream::OSPFileInputStream(FILE *file, int buf_size) {
             this->buf_size = 0;
         }
     }
+    */
 
     buf_pos = 0;
     buf_mark = 0;

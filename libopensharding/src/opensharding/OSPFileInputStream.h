@@ -61,7 +61,7 @@ private:
     static Logger &log;
 
 public:
-    OSPFileInputStream(FILE *, int buf_size);
+    OSPFileInputStream(int fd, FILE *, int buf_size);
     ~OSPFileInputStream();
 
     // read raw data

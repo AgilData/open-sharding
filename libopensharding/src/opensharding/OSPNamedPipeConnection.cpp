@@ -223,16 +223,26 @@ int OSPNamedPipeConnection::openFifos() {
     boost::unique_lock<boost::mutex> lock(m_mutex);
 
     if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
-    requestPipe  = fopen(requestPipeFilename.c_str(), "wb");
-    if (!requestPipe) {
+    requestPipeFD = open(requestPipeFilename.c_str(), O_WRONLY | O_NONBLOCK);
+    if (requestPipeFD == -1) {
         log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
+        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
+    }
+    requestPipe = fdopen(requestPipeFD, "wb");
+    if (!requestPipe) {
+        log.error(string("Failed to fdopen request pipe '") + requestPipeFilename + string("' for writing"));
         return OSPNP_OPEN_REQUEST_PIPE_ERROR;
     }
 
     if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
-    responsePipe = fopen(responsePipeFilename.c_str(), "rb");
+    responsePipeFD = open(responsePipeFilename.c_str(), O_RDONLY | O_NONBLOCK);
+    if (responsePipeFD == -1) {
+        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for reading"));
+        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
+    }
+    responsePipe = fdopen(responsePipeFD, "wb");
     if (!responsePipe) {
-        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for writing"));
+        log.error(string("Failed to fdopen response pipe '") + responsePipeFilename + string("' for reading"));
         fclose(requestPipe);
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
@@ -240,7 +250,7 @@ int OSPNamedPipeConnection::openFifos() {
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
     // create buffered input stream
-    this->is = new OSPFileInputStream(responsePipe, 4096); //TODO: should be 4096
+    this->is = new OSPFileInputStream(responsePipeFD, 4096); //TODO: should be 4096
 
     // TODO: we should be using a buffer here - not sure why we're not
     this->os = new OSPFileOutputStream(requestPipe, 0);
