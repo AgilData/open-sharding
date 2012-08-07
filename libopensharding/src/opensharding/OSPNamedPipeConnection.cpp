@@ -240,17 +240,19 @@ int OSPNamedPipeConnection::openFifos() {
         log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for reading"));
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
+    /*
     responsePipe = fdopen(responsePipeFD, "wb");
     if (!responsePipe) {
         log.error(string("Failed to fdopen response pipe '") + responsePipeFilename + string("' for reading"));
         fclose(requestPipe);
         return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
     }
+    */
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
     // create buffered input stream
-    this->is = new OSPFileInputStream(responsePipeFD, responsePipeFile, 4096); //TODO: should be 4096
+    this->is = new OSPFileInputStream(responsePipeFD, 4096); //TODO: should be 4096
 
     // TODO: we should be using a buffer here - not sure why we're not
     this->os = new OSPFileOutputStream(requestPipe, 0);

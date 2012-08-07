@@ -41,7 +41,6 @@ class OSPFileInputStream : public OSPInputStream {
 private:
 
     int fd;
-    FILE *file;
 
     // selector info
     struct timeval timeout;
@@ -61,7 +60,7 @@ private:
     static Logger &log;
 
 public:
-    OSPFileInputStream(int fd, FILE *, int buf_size);
+    OSPFileInputStream(int fd, int buf_size);
     ~OSPFileInputStream();
 
     // read raw data

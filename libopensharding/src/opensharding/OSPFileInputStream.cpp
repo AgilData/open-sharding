@@ -35,32 +35,13 @@ namespace opensharding {
 
 logger::Logger &OSPFileInputStream::log = Logger::getLogger("OSPFileInputStream");
 
-OSPFileInputStream::OSPFileInputStream(int fd, FILE *file, int buf_size) {
+OSPFileInputStream::OSPFileInputStream(int fd, int buf_size) {
     this->fd = fd;
-    this->file = file;
     this->buf_size = buf_size;
-
-    // make sure we are non-blocking if we are using a buffer
-    /*
-    if (buf_size>0) {
-        fd = fileno(file);
-        int flags = fcntl(fd, F_GETFL);
-        if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
-            log.error("Failed to set O_NONBLOCK - reverting to blocking reads");
-            // resort to blocking reads
-            this->buf_size = 0;
-        }
-    }
-    */
 
     buf_pos = 0;
     buf_mark = 0;
-    if (buf_size==0) {
-        buffer = NULL;
-    }
-    else {
-        buffer = new char[buf_size];
-    }
+    buffer = new char[buf_size];
 
     intBuffer = new char[4];
     stringBufferSize = 1024;
@@ -139,18 +120,18 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
     if (buf_size==0) {
         // if no input buffer is available, then do a simple blocking read
-        size_t n = fread(dest+offset, length, 1, file);
+        size_t n = read(fd, dest+offset, length);
         if (n<1) {
-            log.error(string("fread() returned no bytes (EOF?)"));
+            log.error(string("read() returned no bytes (EOF?)"));
             throw "FAIL";
         }
         else if (n!=1) {
-            log.error(string("fread() returned wrong number of items: ") + Util::toString((int)n));
+            log.error(string("read() returned wrong number of items: ") + Util::toString((int)n));
             throw "FAIL";
         }
 
         if (DEBUG) {
-            log.debug(string("blocking fread() returning ") + Util::toString((int)n) + string( "byte(s)"));
+            log.debug(string("blocking read() returning ") + Util::toString((int)n) + string( "byte(s)"));
         }
 
         return;
@@ -232,7 +213,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         }
 
         // loop until we read something or the file is closed
-        while (bytes_read < bytes_to_read && !feof(file)) {
+        while (bytes_read < bytes_to_read) {
 
             if (DEBUG) {
                 log.debug(string("at top of select() loop; bytes_read=") + Util::toString(bytes_read)
@@ -263,22 +244,22 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                     // this should always be true
                     if (DEBUG) log.debug("data is available for our FD!");
 
-                    int n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
+                    int n = read(fd, buffer+buf_mark, buf_size-buf_mark);
                     if (n==0) {
-                        if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
+                        if (DEBUG) log.debug("read() returned 0 -- means connection closed");
                         // reset flag
                         FD_CLR(fd, &readFileDescriptorSet);
                         break;
                     }
                     else {
-                        if (DEBUG) log.debug(string("fread() read ") + Util::toString(n) + string(" byte(s)"));
+                        if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
                         bytes_read += n;
                         // update mark
                         buf_mark += n;
 
                         if (buf_mark==buf_size) {
                             // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
-                            if (DEBUG) log.debug("fread() FILLED THE BUFFER SO GROWING IT!");
+                            if (DEBUG) log.debug("read() FILLED THE BUFFER SO GROWING IT!");
 
                             int new_buf_size = buf_size + 1024;
                             char *newBuffer = new char[new_buf_size];
@@ -309,14 +290,8 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             if (DEBUG) log.debug("at end of select() loop");
         }
 
-        if (feof(file)) {
-            log.error(string("fread() failed due to EOF"));
-            throw "EOF";
-
-        }
-
         if (DEBUG) {
-            log.debug(string("After non-blocking fread(): bytesRead=") + Util::toString((int)bytes_read)
+            log.debug(string("After non-blocking read(): bytesRead=") + Util::toString((int)bytes_read)
                 + string("; buf_pos=") + Util::toString((int)buf_pos)
                 + string("; buf_mark=") + Util::toString((int)buf_mark)
                 + string("; buf_size=") + Util::toString((int)buf_size)
@@ -329,9 +304,9 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         }
     }
 
-    // do we need this memcpy? can't we fread() directly into the user buffer? NO because we usually get more bytes than we ask for
+    // do we need this memcpy? can't we read() directly into the user buffer? NO because we usually get more bytes than we ask for
 
-    // copy data from fread buffer to user buffer
+    // copy data from read buffer to user buffer
     memcpy(dest+offset, buffer+buf_pos, length);
     buf_pos += length;
 }
