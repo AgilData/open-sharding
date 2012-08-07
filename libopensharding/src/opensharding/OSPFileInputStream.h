@@ -40,10 +40,10 @@ namespace opensharding {
 class OSPFileInputStream : public OSPInputStream {
 private:
 
+    // file descriptor
     int fd;
 
     // selector info
-    struct timeval timeout;
     fd_set readFileDescriptorSet;
 
     // temp buffers

@@ -122,7 +122,6 @@ OSPString *OSPFileInputStream::readOSPString() {
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
 
     bool DEBUG = log.isDebugEnabled();
-    bool TRACE = log.isTraceEnabled();
 
     if (DEBUG) {
         log.debug(string("readBytes(length=") + Util::toString((int)length)
