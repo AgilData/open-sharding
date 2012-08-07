@@ -241,7 +241,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             FD_SET (fd, &readFileDescriptorSet);
 
             // selector timeout MUST BE SET EVERY TIME BECAUSE select() MODIFIES THE VALUE!
-            timeout.tv_sec = 5; //TODO: make configurable?
+            timeout.tv_sec = 0; //TODO: make configurable?
             timeout.tv_usec = 0;
 
             // wait until some data is available to read
@@ -256,13 +256,15 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                 // read the available data
                 if (DEBUG) log.debug("data is available!");
 
-                if (FD_ISSET(fd, &readFileDescriptorSet)) {
+                while (FD_ISSET(fd, &readFileDescriptorSet)) {
                     // this should always be true
                     if (DEBUG) log.debug("data is available for our FD!");
 
                     int n = fread(buffer+buf_mark, 1, buf_size-buf_mark, file);
                     if (n==0) {
                         if (DEBUG) log.debug("fread() returned 0 -- means connection closed");
+                        // reset flag
+                        FD_CLR(fd, &readFileDescriptorSet);
                         break;
                     }
                     else {
@@ -273,15 +275,28 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
 
                         if (buf_mark==buf_size) {
                             // DO NOT RESET THE FLAG - THERE MIGHT BE MORE DATA SINCE WE FILLED THE BUFFER
-                            if (DEBUG) log.debug("fread() FILLED THE BUFFER!");
+                            if (DEBUG) log.debug("fread() FILLED THE BUFFER SO GROWING IT!");
+
+                            int new_buf_size = buf_size + 1024;
+                            char *newBuffer = new char[new_buf_size];
+
+                            // paranoid
+                            if (DEBUG) {
+                                memset(newBuffer, 0, new_buf_size);
+                            }
+
+                            memcpy(newBuffer, buffer, buf_size);
+                            delete [] buffer;
+                            buffer = newBuffer;
+                            buf_size = new_buf_size;
+
                         }
                         else {
-                            // reset flag
                             FD_CLR(fd, &readFileDescriptorSet);
                         }
                     }
-
                 }
+            }
 
             }
             else {
