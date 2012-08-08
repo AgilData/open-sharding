@@ -51,9 +51,7 @@ int OSPConnectionPool::nextPipeId = 1;
 	logger::Logger &OSPConnectionPool::log = Logger::getLogger("OSPConnectionPool");
 	
 	/*Constructor*/
-	OSPConnectionPool::OSPConnectionPool(OSPConnectionInfo *connInfo) {
-		this->connInfo = connInfo;
-       
+	OSPConnectionPool::OSPConnectionPool() {
 		init();
 	}
 	
@@ -79,7 +77,7 @@ int OSPConnectionPool::nextPipeId = 1;
 	/**
 	 * Create a connection.
 	 */
-	int OSPConnectionPool::do_create_connection_method(){
+	int OSPConnectionPool::do_create_connection_method(OSPConnectionInfo *connInfo){
 
 		protocol = connInfo->getProtocol();
 		
@@ -105,7 +103,7 @@ int OSPConnectionPool::nextPipeId = 1;
 	}
 	
 	/*Returns the next pipe to be used*/
-	OSPConnection*	OSPConnectionPool::getConnection(void* dbHandle) { 
+	OSPConnection*	OSPConnectionPool::getConnection(void* dbHandle, OSPConnectionInfo *connInfo) {
 	 
 		//Variable to catch the index
 		int mapIndex;	 
@@ -114,7 +112,7 @@ int OSPConnectionPool::nextPipeId = 1;
 	 	
 			if(pool.size()==0){
 				LOCK_MUTEX
-				mapIndex = do_create_connection_method();
+				mapIndex = do_create_connection_method(connInfo);
 				connectionIndexByNameMap[dbHandle] = mapIndex;
 			}	 
 		
@@ -126,7 +124,7 @@ int OSPConnectionPool::nextPipeId = 1;
 	 	} else if(POOL_MODE==POOL_MODE_DEDICATED) {
 
 			LOCK_MUTEX
-			mapIndex = do_create_connection_method();
+			mapIndex = do_create_connection_method(connInfo);
 			connectionIndexByNameMap[dbHandle] = mapIndex;
 
 			if(DEBUG) log.debug(string("Returned POOL_MODE_DEDICATED Connection. Index: ") + Util::toString(mapIndex)); 

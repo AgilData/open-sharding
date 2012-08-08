@@ -51,14 +51,12 @@ namespace opensharding {
 		unsigned int index;
 		static int nextPipeId;
 		boost::mutex mutex;
-      
 
-		OSPConnectionInfo *connInfo;
 		map<void*,int> connectionIndexByNameMap;
 		vector<OSPConnection*> pool;
         static logger::Logger &log;
 		
-		int do_create_connection_method();
+		int do_create_connection_method(OSPConnectionInfo *connInfo);
 		void init();
 			
 		public:
@@ -68,7 +66,7 @@ namespace opensharding {
 		OSPConnectionPool(OSPConnectionInfo *connInfo);
 		~OSPConnectionPool();
 		
-		OSPConnection* getConnection(void* dbHandle);
+		OSPConnection* getConnection(void* dbHandle, OSPConnectionInfo *connInfo);
 		void closeConnection(void* dbHandle);
 	
 	};

@@ -500,13 +500,13 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
             
             ospConnectionPool = getResourceMap()->getOSPConn(info->target_schema_name);
             if (!ospConnectionPool) {
-                ospConnectionPool = new OSPConnectionPool(info);
+                ospConnectionPool = new OSPConnectionPool();
                 getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
             }
         }
 
         // get an OSPConnection instance from the pool
-        OSPConnection *ospConn = ospConnectionPool->getConnection(mysql);
+        OSPConnection *ospConn = ospConnectionPool->getConnection(mysql, info);
 
         // create MySQL OSP connection object
         try {
