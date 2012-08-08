@@ -45,7 +45,7 @@ void * run(void*){
         
     if(!connect){
         cout<<"mysql_real_connect() FAILED"<<endl;
-        return;
+        return NULL;
     }
 
     MYSQL_RES *res_set;
@@ -55,9 +55,15 @@ void * run(void*){
     for (int j=0; i<loopCount; j++){
         //string sql = "SELECT * FROM item LIMIT " + limit;
         string sql = "SELECT * FROM " +  table + " LIMIT " + limit;
-        mysql_query(connect,sql.c_str());
+        if (mysql_query(connect,sql.c_str())) {
+            cout<<"Thread terminated - mysql_query() failed"<<endl;
+            return NULL;
+        }
+
         res_set = mysql_store_result(connect);
         if (!res_set) {
+            cout<<"Thread terminated - mysql_store_result() failed"<<endl;
+            return NULL;
         }
             
         numFields = mysql_num_fields(res_set);
@@ -79,6 +85,8 @@ void * run(void*){
     clock_t end = clock();
     clock_t total = end - start;
     cout<<"Execution time of this thread: "<<total<<endl;
+
+    return NULL;
 }
 
 int main(int argc, const char * argv[])
