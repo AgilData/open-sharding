@@ -504,7 +504,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection");
 
         // create a dedicated named pipe connection
-        OSPNamedPipeConnection namedPipeConnection = new OSPNamedPipeConnection(connInfo, false, pipeNo);
+        OSPNamedPipeConnection namedPipeConnection = new OSPNamedPipeConnection(info, false, pipeNo);
 
         if (xlog.isDebugEnabled()) xlog.debug("Created OSPNamedPipeConnection OK");
 
