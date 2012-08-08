@@ -96,20 +96,20 @@ int main(int argc, const char * argv[])
 
     pthread_t thread[numThreads];
 
+    // create threads
     for (int i=0; i<numThreads; ++i){
-        cout<<"Creating thread"<<i<<endl;
         if(pthread_create(&thread[i], NULL, &run, (void*)i)){
-            cout<<"Could not create the thread."<<endl;
+            cout<<"Failed to create thread"<<endl;
             return -1;
-        }else {
-            cout<<" Thread created"<<endl;
         }
     }
 
-    // sleep until CTRL-C
-    while (1) {
-        sleep(10);
+    // join threads (wait for threads to terminate)
+    cout << "Waiting for threads to terminate"<<endl;
+    for (int i=0; i<numThreads; ++i){
+        pthread_join(thread[i], NULL);
     }
+    cout << "All threads have terminated"<<endl;
 
     return 0;
 }
