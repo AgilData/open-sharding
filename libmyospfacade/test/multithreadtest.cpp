@@ -104,6 +104,11 @@ int main(int argc, const char * argv[])
         }
     }
 
+    // sleep until CTRL-C
+    while (1) {
+        sleep(10);
+    }
+
     return 0;
 }
 
