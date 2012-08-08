@@ -510,17 +510,14 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
 
         // create a dedicated named pipe connection
         OSPConnection* ospNetworkConnection;
-        switch (protocol) {
-            case PROTOCOL_TCP:
-                 ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
-                 break;
-            case PROTOCOL_PIPES:
-                 ospNetworkConnection = new OSPNamedPipeConnection(info, false, pipeNo);
-                 break;
-            case PROTOCOL_UNIX_SOCKET:
-                //TODO: implement
-            default:
-                throw Util::createException("UNSUPPORTED PROTOCOL");
+        if (info->getProtocol() == PROTOCOL_TCP) {
+             ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
+        }
+        else if (info->getProtocol() == PROTOCOL_TCP) {
+             ospNetworkConnection = new OSPNamedPipeConnection(info, false, pipeNo);
+        }
+        else {
+            throw Util::createException("UNSUPPORTED PROTOCOL");
         }
 
         if (xlog.isDebugEnabled()) xlog.debug("Created OSPNamedPipeConnection OK");
