@@ -62,7 +62,7 @@ namespace opensharding {
 
 // TODO: Should probably break queue out into it's own class
 
-typedef std::queue<OSPWireResponse*> fifo_id_msg_queue;
+//typedef std::queue<OSPWireResponse*> fifo_id_msg_queue;
 
 
 
@@ -82,12 +82,11 @@ private:
     string requestPipeFilename;
     string responsePipeFilename;
 
-    bool m_threadedResponseFifo;
-
-    boost::thread* m_thread;
-    boost::condition_variable m_cond;
-    boost::mutex m_mutex;
-    boost::mutex m_send_mutex;
+//    bool m_threadedResponseFifo;
+//    boost::thread* m_thread;
+//    boost::condition_variable m_cond;
+//    boost::mutex m_mutex;
+//    boost::mutex m_send_mutex;
  
     bool m_fifosCreated;
     bool m_fifosOpened;
@@ -97,7 +96,7 @@ private:
     char *buffer;
     unsigned int bufferSize;
 
-    map<int, fifo_id_msg_queue> m_responses;
+    //map<int, fifo_id_msg_queue> m_responses;
 
     static logger::Logger &log;
 
@@ -121,7 +120,7 @@ public:
     int makeFifos();
     int openFifos();
 
-    void startResponseThread();
+//    void startResponseThread();
  
     OSPMessage* sendMessage(OSPMessage*);
     OSPMessage* sendMessage(OSPMessage*,  bool expectACK);
@@ -131,7 +130,7 @@ public:
     OSPMessage* waitForResponse();
 
     // response background thread handler
-    void operator () ();
+    //void operator () ();
 
     void stop();
 };
