@@ -1099,11 +1099,9 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
         }
 
         // close the named pipe
-        //ospConn->stop();
-        //delete ospConn;
-        //ospConn = NULL;
-
-        // remove the connection from the map
+        ospConn->stop();
+        delete ospConn;
+        ospConn = NULL;
 
     }
     catch (...) {

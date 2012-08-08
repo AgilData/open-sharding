@@ -84,6 +84,9 @@ static boost::mutex resourceMapMutex;
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
 
+/* Temporary global variable for next named pipe number for this process */
+static int nextPipeNo = 1;
+
 /*
  * Map of MYSQL* to corresponding error state. This is required since we may
  * hit error conditions during connection attempts before we have created
@@ -489,29 +492,28 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              xlog.debug("Creating OSP connection");
         }
 
-        // we need a mutex here in case multiple threads are connecting to the database at the same time....
-        boost::mutex::scoped_lock lock(initMutex);
-
-        // synchronized section for creating OSPConnectionPool
-        OSPConnectionPool *ospConnectionPool = NULL;
+        int pipeNo = 0;
+        if (xlog.isDebugEnabled()) xlog.debug("Getting next named pipe ID");
         {
+            boost::mutex::scoped_lock lock(initMutex);
+            pipeNo = nextPipeNo++;
 
-            // get named pipe connection for this osp database
-            
-            ospConnectionPool = getResourceMap()->getOSPConn(info->target_schema_name);
-            if (!ospConnectionPool) {
-                ospConnectionPool = new OSPConnectionPool();
-                getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
-            }
         }
+        if (xlog.isDebugEnabled()) xlog.debug(string("Got next named pipe ID: ") + Util::toString(pipeNo));
 
-        // get an OSPConnection instance from the pool
-        OSPConnection *ospConn = ospConnectionPool->getConnection(mysql, info);
+        if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection");
+
+        // create a dedicated named pipe connection
+        OSPNamedPipeConnection namedPipeConnection = new OSPNamedPipeConnection(connInfo, false, pipeNo);
+
+        if (xlog.isDebugEnabled()) xlog.debug("Created OSPNamedPipeConnection OK");
 
         // create MySQL OSP connection object
         try {
             /*CHANGED*/
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
+            if (xlog.isDebugEnabled()) xlog.debug("Creating MySQLOSPConnection OK");
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), namedPipeConnection);
+            if (xlog.isDebugEnabled()) xlog.debug("Created MySQLOSPConnection OK");
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
