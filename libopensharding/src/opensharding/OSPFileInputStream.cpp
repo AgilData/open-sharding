@@ -202,5 +202,7 @@ unsigned int OSPFileInputStream::fill_buffer(char *buffer, unsigned int buffer_o
     return bytes_read;
 }
 
+}
+
 
 
