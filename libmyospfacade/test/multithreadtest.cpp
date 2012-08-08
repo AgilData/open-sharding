@@ -35,16 +35,17 @@ void * run(void*){
     cout<<"Thread started."<<endl;
     clock_t start = clock();
 
-    MYSQL* connect=mysql_init(NULL);
-    if(!connect){
+    MYSQL* mysql=mysql_init(NULL);
+    if(!mysql){
         cout<<"Thread terminated - mysql_init() failed"<<endl;
+        cout<<mysql_errno()<<" "<<mysql_error()<<endl;
         return NULL;
     }
 
-    connect = mysql_real_connect(connect,SERVER,USER,PASSWORD,DATABASE,0,NULL,0);
-        
-    if(!connect){
+    mysql = mysql_real_connect(mysql,SERVER,USER,PASSWORD,DATABASE,0,NULL,0);
+    if(!mysql){
         cout<<"mysql_real_connect() FAILED"<<endl;
+        cout<<mysql_errno()<<" "<<mysql_error()<<endl;
         return NULL;
     }
 
@@ -55,14 +56,16 @@ void * run(void*){
     for (int j=0; j<loopCount; j++){
         //string sql = "SELECT * FROM item LIMIT " + limit;
         string sql = "SELECT * FROM " +  table + " LIMIT " + limit;
-        if (mysql_query(connect,sql.c_str())) {
+        if (mysql_query(mysql,sql.c_str())) {
             cout<<"Thread terminated - mysql_query() failed"<<endl;
+            cout<<mysql_errno()<<" "<<mysql_error()<<endl;
             return NULL;
         }
 
-        res_set = mysql_store_result(connect);
+        res_set = mysql_store_result(mysql);
         if (!res_set) {
             cout<<"Thread terminated - mysql_store_result() failed"<<endl;
+            cout<<mysql_errno()<<" "<<mysql_error()<<endl;
             return NULL;
         }
             
@@ -78,7 +81,7 @@ void * run(void*){
         mysql_free_result(res_set);
     }
             
-    mysql_close(connect);   /* Close and shutdown connection*/
+    mysql_close(mysql);   /* Close and shutdown connection*/
 
     cout<<"Thread finished"<<endl;
 
