@@ -180,6 +180,11 @@ MySQLClient* getMySQLClient() {
     return mysqlclient;
 }
 
+int getNextNamedPipeID() {
+    boost::mutex::scoped_lock lock(initMutex);
+    return nextPipeNo++;
+}
+
 // this method called from mysql_server_init and shows banner
 void banner() {
     //boost::mutex::scoped_lock lock(initMutex);
@@ -492,13 +497,8 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              xlog.debug("Creating OSP connection");
         }
 
-        int pipeNo = 0;
         if (xlog.isDebugEnabled()) xlog.debug("Getting next named pipe ID");
-        {
-            boost::mutex::scoped_lock lock(initMutex);
-            pipeNo = nextPipeNo++;
-
-        }
+        int pipeNo = getNextNamedPipeID();
         if (xlog.isDebugEnabled()) xlog.debug(string("Got next named pipe ID: ") + Util::toString(pipeNo));
 
         if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection");
