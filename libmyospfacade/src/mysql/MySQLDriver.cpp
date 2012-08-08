@@ -492,11 +492,12 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              xlog.debug("Creating OSP connection");
         }
 
+        // we need a mutex here in case multiple threads are connecting to the database at the same time....
+        boost::mutex::scoped_lock lock(initMutex);
+
         // synchronized section for creating OSPConnectionPool
         OSPConnectionPool *ospConnectionPool = NULL;
         {
-            // we need a mutex here in case multiple threads are connecting to the database at the same time....
-            boost::mutex::scoped_lock lock(initMutex);
 
             // get named pipe connection for this osp database
             
@@ -506,7 +507,6 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
                 getResourceMap()->setOSPConn(info->target_schema_name, ospConnectionPool);
             }
         }
-
 
         // get an OSPConnection instance from the pool
         OSPConnection *ospConn = ospConnectionPool->getConnection(mysql);
