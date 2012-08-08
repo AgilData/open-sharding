@@ -44,7 +44,6 @@
 #include <mysql/MySQLOSPConnection.h>
 #include <mysql/MySQLNativeConnection.h>
 #include <opensharding/OSPConnection.h>
-#include <opensharding/OSPConnectionPool.h>
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
 #include <opensharding/OSPWireRequest.h>
@@ -67,6 +66,12 @@ using namespace logger;
 using namespace std;
 using namespace util;
 using namespace opensharding;
+
+/* CONSTANTS */
+
+static int PROTOCOL_TCP = 1;
+static int PROTOCOL_PIPES = 2;
+static int PROTOCOL_UNIX_SOCKET = 3;
 
 /* GLOBAL VARIABLES */
 
@@ -504,7 +509,19 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection");
 
         // create a dedicated named pipe connection
-        OSPNamedPipeConnection* namedPipeConnection = new OSPNamedPipeConnection(info, false, pipeNo);
+        OSPConnection* ospNetworkConnection;
+        switch (protocol) {
+            case PROTOCOL_TCP:
+                 ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
+                 break;
+            case PROTOCOL_PIPES:
+                 ospNetworkConnection = new OSPNamedPipeConnection(info, false, pipeNo);
+                 break;
+            case PROTOCOL_UNIX_SOCKET:
+                //TODO: implement
+            default:
+                throw Util::createException("UNSUPPORTED PROTOCOL");
+        }
 
         if (xlog.isDebugEnabled()) xlog.debug("Created OSPNamedPipeConnection OK");
 
@@ -512,7 +529,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         try {
             /*CHANGED*/
             if (xlog.isDebugEnabled()) xlog.debug("Creating MySQLOSPConnection OK");
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), namedPipeConnection);
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospNetworkConnection);
             if (xlog.isDebugEnabled()) xlog.debug("Created MySQLOSPConnection OK");
         }
         catch (...) {
@@ -609,10 +626,13 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             unsigned int protocol;
             if (conn_info[1] == "pipes") {
-                protocol = OSPConnectionPool::PROTOCOL_PIPES;
+                protocol = PROTOCOL_PIPES;
             }
             else if (conn_info[1] == "tcp") {
-                protocol = OSPConnectionPool::PROTOCOL_TCP;
+                protocol = PROTOCOL_TCP;
+            }
+            else if (conn_info[1] == "unix") {
+                protocol = PROTOCOL_UNIX_SOCKET;
             }
             else {
                 xlog.error("Invalid protocol");

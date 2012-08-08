@@ -34,7 +34,6 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/opensharding/OSPMessage.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPMessageConsumer.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPMessageDecoder.cpp
-	@g++ $(CPPFLAGS) src/opensharding/OSPConnectionPool.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPNamedPipeConnection.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPOutputStream.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPResultSetMetaResponse.cpp
