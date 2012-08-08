@@ -38,14 +38,13 @@ void * run(void*){
     MYSQL* mysql=mysql_init(NULL);
     if(!mysql){
         cout<<"Thread terminated - mysql_init() failed"<<endl;
-        cout<<mysql_errno()<<" "<<mysql_error()<<endl;
         return NULL;
     }
 
     mysql = mysql_real_connect(mysql,SERVER,USER,PASSWORD,DATABASE,0,NULL,0);
     if(!mysql){
         cout<<"mysql_real_connect() FAILED"<<endl;
-        cout<<mysql_errno()<<" "<<mysql_error()<<endl;
+        cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;
         return NULL;
     }
 
@@ -58,14 +57,14 @@ void * run(void*){
         string sql = "SELECT * FROM " +  table + " LIMIT " + limit;
         if (mysql_query(mysql,sql.c_str())) {
             cout<<"Thread terminated - mysql_query() failed"<<endl;
-            cout<<mysql_errno()<<" "<<mysql_error()<<endl;
+            cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;
             return NULL;
         }
 
         res_set = mysql_store_result(mysql);
         if (!res_set) {
             cout<<"Thread terminated - mysql_store_result() failed"<<endl;
-            cout<<mysql_errno()<<" "<<mysql_error()<<endl;
+            cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;
             return NULL;
         }
             
