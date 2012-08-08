@@ -84,9 +84,6 @@ static boost::mutex resourceMapMutex;
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
 
-/* Wrapper function to simplify shard logging for mysql_select_db */
-int mysql_select_db_actual(MYSQL *mysql, const char *db);
-
 /*
  * Map of MYSQL* to corresponding error state. This is required since we may
  * hit error conditions during connection attempts before we have created
