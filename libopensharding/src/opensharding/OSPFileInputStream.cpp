@@ -70,6 +70,99 @@ int OSPFileInputStream::readInt() {
     return byte0<<24 | byte1<<16 | byte2<<8 | byte3;
 }
 
+// simple version to rule out this class as the main issue
+void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
+
+    bool DEBUG = log.isDebugEnabled();
+
+    unsigned int bytes_to_read = length;
+    unsigned int bytes_read = 0;
+
+    buf_pos = 0;
+    buf_mark = 0;
+
+    if (bytes_to_read > buf_size) {
+        delete [] buffer;
+        buffer = new char[bytes_to_read];
+        buf_size = bytes_to_read;
+    }
+
+    // loop until we read something or the file is closed
+    while (bytes_read < bytes_to_read) {
+
+        if (DEBUG) {
+            log.debug(string("at top of select() loop:")
+                + string("; bytes_read=") + Util::toString(bytes_read)
+                + string("; bytes_to_read=") + Util::toString(bytes_to_read)
+                + string("; buf_pos=") + Util::toString(buf_pos)
+                + string("; buf_mark=") + Util::toString(buf_mark)
+                + string("; buf_size=") + Util::toString(buf_size)
+            );
+        }
+
+        // set up selector info
+        FD_ZERO (&readFileDescriptorSet);
+        FD_SET (fd, &readFileDescriptorSet);
+
+        // wait until some data is available to read
+        int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, NULL);
+
+        if (fdcount == -1) {
+            // error
+            log.error("select() error");
+            perror("select()");
+        }
+        else if (fdcount == 1) {
+
+            // paranoid checks
+            if (buf_mark < 0 || buf_mark >= buf_size) {
+                log.error(string("buffer underflow or overflow; buf_mark=") + Util::toString(buf_mark));
+                throw "buffer underflow or overflow";
+            }
+
+            if (FD_ISSET(fd, &readFileDescriptorSet)) {
+                int n = read(fd, buffer+buf_mark, buf_size-buf_mark);
+                if (n==0) {
+                    if (DEBUG) log.debug("read() returned 0 -- means connection closed");
+                    break;
+                }
+                else {
+                    if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
+                    bytes_read += n;
+                    buf_mark   += n;
+
+                    if (buf_mark > buf_size) {
+                        // should never happen
+                        log.error("buffer overflow");
+                        throw "buffer overflow";
+                    }
+                }
+            }
+        }
+        else {
+            // no data
+            if (DEBUG) log.debug("no data (timed out and will retry)");
+            continue;
+        }
+    }
+
+    if (DEBUG) {
+        log.debug(string("After non-blocking read(): bytesRead=") + Util::toString((int)bytes_read)
+            + string("; buf_pos=") + Util::toString((int)buf_pos)
+            + string("; buf_mark=") + Util::toString((int)buf_mark)
+            + string("; buf_size=") + Util::toString((int)buf_size)
+        );
+    }
+
+    // copy to the users buffer
+    memcpy(dest+offset, buffer+buf_pos, length);
+
+}
+
+/*
+
+THIS THE REAL VERSION WITH READ AHEAD BUFFER
+
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
 
     bool DEBUG = log.isDebugEnabled();
@@ -184,6 +277,13 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
                         if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
                         bytes_read += n;
                         buf_mark   += n;
+
+                        // paranoid
+                        if (buf_mark > buf_size) {
+                            // should never happen
+                            log.error("buffer overflow");
+                            throw "buffer overflow";
+                        }
                     }
                 }
             }
@@ -213,6 +313,7 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
     buf_pos += length;
 
 }
+*/
 
 }
 
