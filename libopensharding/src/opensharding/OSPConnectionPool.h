@@ -63,7 +63,7 @@ namespace opensharding {
         static const int PROTOCOL_TCP = 1;
         static const int PROTOCOL_PIPES = 2;
 			
-		OSPConnectionPool(OSPConnectionInfo *connInfo);
+		OSPConnectionPool();
 		~OSPConnectionPool();
 		
 		OSPConnection* getConnection(void* dbHandle, OSPConnectionInfo *connInfo);
