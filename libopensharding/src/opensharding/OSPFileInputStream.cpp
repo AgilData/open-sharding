@@ -70,33 +70,97 @@ int OSPFileInputStream::readInt() {
     return byte0<<24 | byte1<<16 | byte2<<8 | byte3;
 }
 
-// simple version to rule out this class as the main issue
 void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
 
     bool DEBUG = log.isDebugEnabled();
 
-    unsigned int bytes_to_read = length;
-    unsigned int bytes_read = 0;
+    if (DEBUG) {
+        log.debug(string("readBytes(")
+            + string("dest=") + Util::toString((void*)dest)
+            + string("; offset=") + Util::toString((int)offset)
+            + string("; length=") + Util::toString((int)length)
+            + string(")")
+        );
+    }
+    
+    bool USE_BUFFER = false;
+    
+    // temporary HACK so we just read directly into the user's buffer
+    if (!USE_BUFFER) {
+        fill_buffer(dest, offset, length, length);
+        return;
+    }
+    
+    // loop until we write enough data into the caller's buffer
+    while (length>0) {
+    
+        // how much data do we already have?
+        unsigned int available_bytes = buf_mark - buf_pos;
 
-    buf_pos = 0;
-    buf_mark = 0;
+        // if we have enough data to fulfil the request then copy it into the caller's buffer and return
+        if (available_bytes >= length) {
+            // yes we have all the data the user needs
+            memcpy(dest+offset, buffer+buf_pos, length);
+            buf_pos += length;
+            // return since we already wrote all the data requested
+            return;
+        }
+        
+        // do we have partial data available?
+        if (available_bytes>0) {
+            // we have partial data so copy that for now 
+            memcpy(dest+offset, buffer+buf_pos, available_bytes);
+            
+            // reduce length so we know how much more we need to read
+            offset += available_bytes;
+            length -= available_bytes;
+            
+            // buffer is now empty because we used all available bytes
+            buf_pos = 0;
+            buf_mark = 0;
+            available_bytes = 0;
+        }
+        
+        //NOTE: our buffer is definitely empty if we get this far!
+        
+        // is the caller asking for more data than we can buffer?
+        if (length > buf_size) {
+            // request is for more data than we can buffer, so read directly into the caller's buffer now
+            fill_buffer(dest, offset, length, length);
+            return;
+        }
+        
+        // read at least the remaining 'length' bytes into our buffer
+        buf_mark += fill_buffer(buffer, 0, buf_size, length);
+    }
+}
 
-    if (bytes_to_read > buf_size) {
-        delete [] buffer;
-        buffer = new char[bytes_to_read];
-        buf_size = bytes_to_read;
+/**
+ * Read directly from the file into a buffer. Read at least min_bytes_to_read but up to length.
+ */
+unsigned int OSPFileInputStream::fill_buffer(char *buffer, unsigned int buffer_offset, unsigned int buffer_length, unsigned int min_bytes_to_read) {
+
+    bool DEBUG = log.isDebugEnabled();
+
+    if (DEBUG) {
+        log.debug(
+            string("fill_buffer(buffer=")    + Util::toString(buffer)
+            + string("; buffer_offset=")     + Util::toString(buffer_offset)
+            + string("; buffer_length=")     + Util::toString(buffer_length)
+            + string("; min_bytes_to_read=") + Util::toString(min_bytes_to_read)
+            + string(")")
+        );
     }
 
-    // loop until we read something or the file is closed
-    while (bytes_read < bytes_to_read) {
+    unsigned int bytes_read = 0;
+
+    // loop until we read enough data
+    while (bytes_read < min_bytes_to_read) {
 
         if (DEBUG) {
             log.debug(string("at top of select() loop:")
                 + string("; bytes_read=") + Util::toString(bytes_read)
-                + string("; bytes_to_read=") + Util::toString(bytes_to_read)
-                + string("; buf_pos=") + Util::toString(buf_pos)
-                + string("; buf_mark=") + Util::toString(buf_mark)
-                + string("; buf_size=") + Util::toString(buf_size)
+                + string("; min_bytes_to_read=") + Util::toString(min_bytes_to_read)
             );
         }
 
@@ -111,31 +175,20 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             // error
             log.error("select() error");
             perror("select()");
+            break;
         }
         else if (fdcount == 1) {
-
-            // paranoid checks
-            if (buf_mark < 0 || buf_mark >= buf_size) {
-                log.error(string("buffer underflow or overflow; buf_mark=") + Util::toString(buf_mark));
-                throw "buffer underflow or overflow";
-            }
-
             if (FD_ISSET(fd, &readFileDescriptorSet)) {
-                int n = read(fd, buffer+buf_mark, buf_size-buf_mark);
+                // ask for enough data to fill the buffer - we may not get that much though
+                int n = read(fd, buffer+buffer_offset, buffer_length-buffer_offset);
+                if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
                 if (n==0) {
-                    if (DEBUG) log.debug("read() returned 0 -- means connection closed");
+                    // connection was closed, return error
                     break;
                 }
                 else {
-                    if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
+                    buffer_offset += n;
                     bytes_read += n;
-                    buf_mark   += n;
-
-                    if (buf_mark > buf_size) {
-                        // should never happen
-                        log.error("buffer overflow");
-                        throw "buffer overflow";
-                    }
                 }
             }
         }
@@ -145,175 +198,9 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             continue;
         }
     }
-
-    if (DEBUG) {
-        log.debug(string("After non-blocking read(): bytesRead=") + Util::toString((int)bytes_read)
-            + string("; buf_pos=") + Util::toString((int)buf_pos)
-            + string("; buf_mark=") + Util::toString((int)buf_mark)
-            + string("; buf_size=") + Util::toString((int)buf_size)
-        );
-    }
-
-    // copy to the users buffer
-    memcpy(dest+offset, buffer+buf_pos, length);
-
+    
+    return bytes_read;
 }
 
-/*
 
-THIS THE REAL VERSION WITH READ AHEAD BUFFER
-
-void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int length) {
-
-    bool DEBUG = log.isDebugEnabled();
-
-    if (DEBUG) {
-        log.debug(string("readBytes(length=") + Util::toString((int)length)
-            + string("); buf_pos=") + Util::toString((int)buf_pos)
-            + string("; buf_mark=") + Util::toString((int)buf_mark)
-            + string("; buf_size=") + Util::toString((int)buf_size)
-        );
-    }
-
-    // get more data, if needed
-    if (buf_pos+length>buf_mark) {
-
-        unsigned int bytes_to_read = buf_pos+length - buf_mark;
-        unsigned int bytes_read = 0;
-
-        if (DEBUG) {
-            log.debug(string("need more data - need to read ") + Util::toString(bytes_to_read) + " bytes");
-        }
-
-        // is there enough space at the end of the buffer
-        if (buf_pos+length>buf_size) {
-
-            // how many unread data bytes do we have?
-            unsigned int unreadDataBytes = buf_mark-buf_pos;
-
-            // do we need a larger buffer
-            if (unreadDataBytes+length>buf_size) {
-
-                if (DEBUG) {
-                    log.debug("growing buffer");
-                }
-
-                int new_buf_size = unreadDataBytes + length + 1024;
-                char *newBuffer = new char[new_buf_size];
-
-                // paranoid
-                memset(newBuffer, 0, new_buf_size);
-
-                // copy the unread data from the old buffer
-                memcpy(newBuffer, buffer+buf_pos, unreadDataBytes);
-                delete [] buffer;
-                buffer = newBuffer;
-                buf_size = new_buf_size;
-                buf_pos = 0;
-                buf_mark = unreadDataBytes;
-
-            }
-            else {
-
-                if (DEBUG) {
-                    log.debug(string("Moving ") + Util::toString(unreadDataBytes) + string(" unread bytes to the start of the buffer"));
-                }
-
-                // the buffer is large enough, we just need to shift data to the start to clear some space
-                //NOTE: memcpy not safe if ranges overlap so we manually copy the unread bytes
-                for (unsigned int i=0; i<unreadDataBytes; i++) {
-                    buffer[i] = buffer[buf_pos+i];
-                }
-
-                buf_pos = 0;
-                buf_mark = unreadDataBytes;
-
-                // paranoid
-                memset(buffer+buf_mark, 0, buf_size-buf_mark);
-            }
-
-        }
-
-        // loop until we read something or the file is closed
-        while (bytes_read < bytes_to_read) {
-
-            if (DEBUG) {
-                log.debug(string("at top of select() loop:")
-                    + string("; bytes_read=") + Util::toString(bytes_read)
-                    + string("; bytes_to_read=") + Util::toString(bytes_to_read)
-                    + string("; buf_pos=") + Util::toString(buf_pos)
-                    + string("; buf_mark=") + Util::toString(buf_mark)
-                    + string("; buf_size=") + Util::toString(buf_size)
-                );
-            }
-
-            // set up selector info
-            FD_ZERO (&readFileDescriptorSet);
-            FD_SET (fd, &readFileDescriptorSet);
-
-            // wait until some data is available to read
-            int fdcount = select(fd+1, &readFileDescriptorSet, NULL, NULL, NULL);
-
-            if (fdcount == -1) {
-                // error
-                log.error("select() error");
-                perror("select()");
-            }
-            else if (fdcount == 1) {
-
-                // paranoid checks
-                if (buf_mark < 0 || buf_mark >= buf_size) {
-                    log.error(string("buffer underflow or overflow; buf_mark=") + Util::toString(buf_mark));
-                    throw "buffer underflow or overflow";
-                }
-
-                if (FD_ISSET(fd, &readFileDescriptorSet)) {
-                    int n = read(fd, buffer+buf_mark, buf_size-buf_mark);
-                    if (n==0) {
-                        if (DEBUG) log.debug("read() returned 0 -- means connection closed");
-                        break;
-                    }
-                    else {
-                        if (DEBUG) log.debug(string("read() read ") + Util::toString(n) + string(" byte(s)"));
-                        bytes_read += n;
-                        buf_mark   += n;
-
-                        // paranoid
-                        if (buf_mark > buf_size) {
-                            // should never happen
-                            log.error("buffer overflow");
-                            throw "buffer overflow";
-                        }
-                    }
-                }
-            }
-            else {
-                // no data
-                if (DEBUG) log.debug("no data (timed out and will retry)");
-                continue;
-            }
-        }
-
-        if (DEBUG) {
-            log.debug(string("After non-blocking read(): bytesRead=") + Util::toString((int)bytes_read)
-                + string("; buf_pos=") + Util::toString((int)buf_pos)
-                + string("; buf_mark=") + Util::toString((int)buf_mark)
-                + string("; buf_size=") + Util::toString((int)buf_size)
-            );
-        }
-
-        if (bytes_read < bytes_to_read) {
-            log.error("not enough data to fulfil request");
-            throw "FAIL";
-        }
-    }
-
-    // copy data from read buffer to user buffer
-    memcpy(dest+offset, buffer+buf_pos, length);
-    buf_pos += length;
-
-}
-*/
-
-}
 

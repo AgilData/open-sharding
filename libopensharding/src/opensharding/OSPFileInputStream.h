@@ -57,6 +57,9 @@ private:
 
     static Logger &log;
 
+private:
+    unsigned int fill_buffer(char *buffer, unsigned int buffer_offset, unsigned int buffer_length, unsigned int min_bytes_to_read);
+
 public:
     OSPFileInputStream(int fd, int buf_size);
     ~OSPFileInputStream();
