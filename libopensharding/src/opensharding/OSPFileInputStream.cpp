@@ -75,15 +75,14 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
     bool DEBUG = log.isDebugEnabled();
 
     if (DEBUG) {
-        log.debug(string("readBytes(")
-            + string("dest=") + Util::toString((void*)dest)
+        log.debug(string("readBytes()")
+            + string(": dest=") + Util::toString((void*)dest)
             + string("; offset=") + Util::toString((int)offset)
             + string("; length=") + Util::toString((int)length)
-            + string(")")
         );
     }
     
-    bool USE_BUFFER = false;
+    bool USE_BUFFER = true;
     
     // temporary HACK so we just read directly into the user's buffer
     if (!USE_BUFFER) {
@@ -93,22 +92,47 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
     
     // loop until we write enough data into the caller's buffer
     while (length>0) {
+
+        if (DEBUG) {
+            log.debug(string("top of loop")
+                + string(": dest=") + Util::toString((void*)dest)
+                + string("; offset=") + Util::toString((int)offset)
+                + string("; length=") + Util::toString((int)length)
+                + string(")")
+            );
+
+            log.debug(string("top of loop")
+                + string(": buf_pos=") + Util::toString(buf_pos)
+                + string("; buf_mark=") + Util::toString(buf_mark)
+                + string("; buf_size=") + Util::toString(buf_size)
+                + string(")")
+            );
+        }
     
         // how much data do we already have?
         unsigned int available_bytes = buf_mark - buf_pos;
 
+        if (DEBUG) log.debug(string("available bytes") + Util::toString(available_bytes));
+
         // if we have enough data to fulfil the request then copy it into the caller's buffer and return
         if (available_bytes >= length) {
+
+            if (DEBUG) log.debug("we have enough data for request");
+
             // yes we have all the data the user needs
             memcpy(dest+offset, buffer+buf_pos, length);
             buf_pos += length;
+
             // return since we already wrote all the data requested
             return;
         }
         
         // do we have partial data available?
         if (available_bytes>0) {
-            // we have partial data so copy that for now 
+
+            if (DEBUG) log.debug("we have partial data for request");
+
+            // we have partial data so copy that for now
             memcpy(dest+offset, buffer+buf_pos, available_bytes);
             
             // reduce length so we know how much more we need to read
@@ -116,22 +140,24 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
             length -= available_bytes;
             
             // buffer is now empty because we used all available bytes
-            buf_pos = 0;
-            buf_mark = 0;
-            available_bytes = 0;
         }
         
         //NOTE: our buffer is definitely empty if we get this far!
-        
+        buf_pos = 0;
+        buf_mark = 0;
+        available_bytes = 0;
+
         // is the caller asking for more data than we can buffer?
         if (length > buf_size) {
             // request is for more data than we can buffer, so read directly into the caller's buffer now
+            if (DEBUG) log.debug("fill caller buffer directly");
             fill_buffer(dest, offset, length, length);
             return;
         }
         
-        // read at least the remaining 'length' bytes into our buffer
-        buf_mark += fill_buffer(buffer, 0, buf_size, length);
+        // read at least the remaining 'length' bytes into our empty buffer
+        if (DEBUG) log.debug("fill our buffer");
+        buf_mark = fill_buffer(buffer, 0, buf_size, length);
     }
 }
 
