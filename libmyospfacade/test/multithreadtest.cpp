@@ -93,10 +93,9 @@ int main(int argc, const char * argv[])
 {
 
     pthread_t thread[numThreads];
-    cout<<"Check 1"<<endl;
-  
-    for(i=0; i<numThreads; ++i){
-        cout<<"For loop iteration "<<i<<endl;
+
+    for (int i=0; i<numThreads; ++i){
+        cout<<"Creating thread"<<i<<endl;
         if(pthread_create(&thread[i], NULL, &run, (void*)i)){
             cout<<"Could not create the thread."<<endl;
             return -1;
