@@ -513,7 +513,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         if (info->getProtocol() == PROTOCOL_TCP) {
              ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
         }
-        else if (info->getProtocol() == PROTOCOL_TCP) {
+        else if (info->getProtocol() == PROTOCOL_PIPES) {
              ospNetworkConnection = new OSPNamedPipeConnection(info, false, pipeNo);
         }
         else {
