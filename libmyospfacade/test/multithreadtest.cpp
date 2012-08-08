@@ -38,7 +38,7 @@ void * run(void*){
     MYSQL* connect=mysql_init(NULL);
     if(!connect){
         cout<<"Thread terminated - mysql_init() failed"<<endl;
-        return;
+        return NULL;
     }
 
     connect = mysql_real_connect(connect,SERVER,USER,PASSWORD,DATABASE,0,NULL,0);
@@ -52,7 +52,7 @@ void * run(void*){
     MYSQL_ROW row;
     unsigned int    numFields;
             
-    for (int j=0; i<loopCount; j++){
+    for (int j=0; j<loopCount; j++){
         //string sql = "SELECT * FROM item LIMIT " + limit;
         string sql = "SELECT * FROM " +  table + " LIMIT " + limit;
         if (mysql_query(connect,sql.c_str())) {
@@ -67,7 +67,7 @@ void * run(void*){
         }
             
         numFields = mysql_num_fields(res_set);
-        cout<<"result set has " << numField << "columns" << endl;
+        cout<<"result set has " << numFields << "columns" << endl;
         while ((row = mysql_fetch_row(res_set)) != NULL){
             for(int columnIndex=0; columnIndex < numFields; columnIndex++){
                 cout<<"["<<row[columnIndex]<<"] ";
