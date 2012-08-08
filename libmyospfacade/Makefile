@@ -51,7 +51,7 @@ testsuite_sixteen: sixteen
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 $(TEST_FILE): $(TEST_OBJ)
 	@echo "Compiling tests..."
-	gcc -o $(TEST_FILE) test/src/*.o -lc -llogger -lutil -lopensharding -l$(BOOST_THREAD_LIB) -l$(TEST_LIB) -L/usr/local/lib -lcpptest -L. -L/usr/local/lib 
+	gcc -o $(TEST_FILE) test/src/*.o -lc -llogger -lutil -lopensharding -l$(BOOST_THREAD_LIB) -l$(TEST_LIB) -L/usr/local/lib -lcpptest -L. -L/usr/local/lib
 
 clean:
 	rm -f *.a lib*.so* testsuite
