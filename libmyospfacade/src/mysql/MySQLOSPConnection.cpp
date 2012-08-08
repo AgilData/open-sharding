@@ -215,7 +215,17 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
 
         // processMessage will set my_errno if anything goes wrong
         if (my_errno) {
+            currentRes = NULL;
             return -1;
+        }
+
+        if (currentRes) {
+            // finalize the result set
+            currentRes->handle = mysql;
+            currentRes->eof = true;
+
+            // store mapping for this result set
+            mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
         }
 
         // success
@@ -353,11 +363,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         // create native MySQL result set structure
         currentRes = new MYSQL_RES();
-        currentRes->handle = mysql;
         memset(currentRes, 0, sizeof(MYSQL_RES));
-
-        // store mapping for this result set
-        mysqlResourceMap->setResultSet(currentRes, new MySQLOSPResultSet(this));
 
         // initialize variables before results start streaming in
         currentRow = NULL;
@@ -526,10 +532,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         currentRes->data->fields = columnCount;
         currentRes->data->data = NULL; // populate this later
 
-        if (wireResponse->isFinalResponse()) {
-            // finalize result set structure
-            currentRes->eof = 1;
-        }
 
     }
     else if (responseType == 10 /* OSPResultSetRowResponse */) {
@@ -573,6 +575,10 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             // should never happen since OSPResultSetMetaResponse arrives first and this triggers
             // creation of currentRes
             throw Util::createException("OSPResultSetRowResponse received but currentRes is NULL");
+        }
+
+        if (currentRes->field_count != columnCount) {
+            throw Util::createException("OSPResultSetRowResponse received but columnCount is wrong");
         }
 
         /*
@@ -683,11 +689,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         currentRes->row_count++;
         currentRes->data->rows++;
-
-        if (wireResponse->isFinalResponse()) {
-            // finalize result set structure
-            currentRes->eof = 1;
-        }
 
     } else {
         log.error("received unexpected message type");
