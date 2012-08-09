@@ -85,14 +85,21 @@ end
 def create_tar
   platform = `cat /etc/issue`
 
+  # create temp dir
   run_command "rm -rf _temp"
   run_command "mkdir _temp"
+
+  # copy files into temp dir
   run_command "cp libs/lib* _temp"
   run_command "cp ../libopensharding/libopensharding.so.1.0.0 _temp"
   run_command "cp scripts/setup.rb _temp"
   run_command "cp src/myosp.conf _temp"
   run_command "cp src/README.txt _temp"
+
+  # create tar
   run_command "tar cvzf myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz -C _temp ."
+
+  # remove temp dir
   run_command "rm -rf _temp"
 
 end
