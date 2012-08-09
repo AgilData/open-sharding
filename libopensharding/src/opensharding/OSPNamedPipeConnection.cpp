@@ -66,22 +66,12 @@ int OSPNamedPipeConnection::init(OSPConnectionInfo *info, int pipeId)
 
 	// construct filename for request pipe
 	char lcpRequestPipeName[256];
-	if (threadedResponseFifo) {
-	    sprintf(lcpRequestPipeName,  "%s/mysqlosp_%d_request.fifo",  P_tmpdir, getpid());
-    }
-    else {
-	    sprintf(lcpRequestPipeName,  "%s/mysqlosp_%d_%d_request.fifo",  P_tmpdir, getpid(), pipeId);
-    }
+    sprintf(lcpRequestPipeName,  "%s/mysqlosp_%d_%d_request.fifo",  P_tmpdir, getpid(), pipeId);
 	this->requestPipeFilename  = lcpRequestPipeName;
 
 	// construct filename for response pipe
 	char lcpResponsePipeName[256];
-	if (threadedResponseFifo) {
-    	sprintf(lcpResponsePipeName, "%s/mysqlosp_%d_response.fifo", P_tmpdir, getpid());
-    }
-    else {
-    	sprintf(lcpResponsePipeName, "%s/mysqlosp_%d_%d_response.fifo", P_tmpdir, getpid(), pipeId);
-    }
+    sprintf(lcpResponsePipeName, "%s/mysqlosp_%d_%d_response.fifo", P_tmpdir, getpid(), pipeId);
     this->responsePipeFilename = lcpResponsePipeName;
 
     m_fifosCreated = false;
