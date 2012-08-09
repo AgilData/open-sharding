@@ -53,6 +53,8 @@ using namespace util;
 
 #define LOG_METHOD_CALLS false
 
+static char *emptyString = Util::createString("");
+
 Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
 MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
@@ -382,8 +384,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // allocate memory to store MYSQL_FIELD structures
         currentRes->fields = new MYSQL_FIELD[currentRes->field_count];
         memset(currentRes->fields, 0, currentRes->field_count * sizeof(MYSQL_FIELD));
-
-        char *emptyString = Util::createString("");
 
         for (unsigned int i = 0; i < currentRes->field_count; i++) {
 
