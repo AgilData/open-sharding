@@ -584,12 +584,17 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         }
 
         MySQLConnectionInfo *info = new MySQLConnectionInfo();
+
+        // these fields are populated from arguments to this function regardless of URL
         info->virtual_host=(_host==NULL ? string("") : string(_host));
-        
+        info->user = _user==NULL ? string("") : string(_user);
+        info->passwd = _passwd==NULL ? string("") : string(_passwd);
+        info->unix_socket = unix_socket;
+        info->clientflag = clientflag;
+
         bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
         
-        string databaseName;
-        databaseName = (db ? string(db) : string(""));
+        string databaseName = (db ? string(db) : string(""));
         
         if(ospMode) {
            
@@ -618,61 +623,59 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 return mysql;
             }
 
-            string osp_vendor = "";
-            osp_vendor = conn_info[0];
+            int urlIndex = 0;
+
+            info->osp_vendor = conn_info[urlIndex++];
+            string protocolName = conn_info[urlIndex++];
 
             unsigned int protocol;
-            if (conn_info[1] == "pipes") {
-                protocol = PROTOCOL_PIPES;
+            if (protocolName == "pipes") {
+                info->protocol = PROTOCOL_PIPES;
             }
-            else if (conn_info[1] == "tcp") {
-                protocol = PROTOCOL_TCP;
+            else if (protocolName == "tcp") {
+                info->protocol = PROTOCOL_TCP;
             }
-            else if (conn_info[1] == "unix") {
-                protocol = PROTOCOL_UNIX_SOCKET;
+            else if (protocolName == "unix") {
+                info->protocol = PROTOCOL_UNIX_SOCKET;
             }
             else {
                 xlog.error("Invalid protocol");
                 throw "Invalid protocol";
             }
 
-            const char* real_host=conn_info[2].c_str();
+            if (info->protocol == PROTOCOL_UNIX_SOCKET) {
 
-            unsigned int real_port;
-            if (conn_info[3] == "0") {
-                xlog.debug("Port was 0, defaulting to 4545");
-                real_port = 4545;
+                //TODO:
+                //info->socket = conn_info[urlIndex++];
+
             }
             else {
-                stringstream ss(conn_info[3]);
-                ss >> real_port;
+
+                info->host = conn_info[urlIndex++];
+                string portString = conn_info[urlIndex++];
+
+                unsigned int real_port;
+                if (portString == "0") {
+                    xlog.debug("Port was 0, defaulting to 4545");
+                    real_port = 4545;
+                }
+                else {
+                    stringstream ss(portString);
+                    ss >> real_port;
+                }
+
+                info->host = real_host;
             }
-            
-            string osp_domain = "";
-            osp_domain = conn_info[4];
 
-            string target_dbms = "";
-            target_dbms = conn_info[5];
+            info->osp_domain         = conn_info[urlIndex++];
+            info->target_dbms        = conn_info[urlIndex++];
+            info->target_schema_name = conn_info[urlIndex++];
 
-            //Replace a NULL db with the one supplied by host url
-            if (string(databaseName)=="") {
-                databaseName=conn_info[6];
+            if (databaseName != "") {
+                // if a database name was supplied as an argument to this function then this takes precedence
+                info->target_schema_name = databaseName;
             }
-            
-            info->host = real_host;
-            info->user = _user==NULL ? string("") : string(_user);
-            info->passwd = _passwd==NULL ? string("") : string(_passwd);
-            info->port = real_port;
-            info->unix_socket = unix_socket;
-            info->clientflag = clientflag;
-            info->osp_vendor = osp_vendor;
-            info->protocol = protocol;
-            info->osp_domain = osp_domain;
-            info->target_dbms = target_dbms;
-            info->target_schema_name = databaseName;
 
-           
-           
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect(")
                 + Util::toString(mysql) + string(", ")
