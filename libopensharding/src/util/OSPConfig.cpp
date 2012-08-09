@@ -110,19 +110,6 @@ OSPConfig::~OSPConfig() {
 	}
 
 /**
-*Added 
-*Returns the size of the pool
-*/
-/*static*/ int OSPConfig::getPoolsize() {
-	  int size;
-	 size = atoi(getConfigMap()[MODE].c_str());
-	 return size;
-	}
-	 
-	
-
-	
-/**
  * Returns true if the host string is defined as an osp host in the config file.
  */
 /*static*/ bool OSPConfig::isOspHost(string _host) {

@@ -56,7 +56,6 @@ public:
     static string getHostUrl(string host);
     static vector<string> parseVirtualHostUrl(string host_url);
     static int getMode();
-    static int getPoolsize();
 
     static string   getStringProperty(string name);
     static int      getIntProperty(string name, int defaultValue);
