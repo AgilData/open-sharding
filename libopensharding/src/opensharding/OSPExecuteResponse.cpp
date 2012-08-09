@@ -48,7 +48,7 @@ void OSPExecuteResponse::setField(int fieldNum, char *buffer, unsigned int offse
             errorMessage = string(buffer+offset, length);
             break;
         case 12:
-            errorMessage = string(buffer+offset, length);
+            sqlState = string(buffer+offset, length);
             break;
         default:
             throw "OSPExecuteResponse::setField() invalid fieldNum";
