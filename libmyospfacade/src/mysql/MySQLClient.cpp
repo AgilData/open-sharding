@@ -16,6 +16,7 @@
 
 #include <stdio.h>
 #include <map>
+#include <string.h>
 #include <string>
 #include <mysql.h>
 #include <dlfcn.h>
