@@ -625,7 +625,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             info->osp_vendor = conn_info[urlIndex++];
             string protocolName = conn_info[urlIndex++];
 
-            unsigned int protocol;
             if (protocolName == "pipes") {
                 info->protocol = PROTOCOL_PIPES;
             }
@@ -641,13 +640,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
 
             if (info->protocol == PROTOCOL_UNIX_SOCKET) {
-
-                //TODO:
-                //info->socket = conn_info[urlIndex++];
-
+                // read socket file name
+                info->socket_file = conn_info[urlIndex++];
             }
             else {
-
+                // read host and port
                 info->host = conn_info[urlIndex++];
                 string portString = conn_info[urlIndex++];
 
@@ -679,7 +676,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("port=") + Util::toString(info->port) + string(", ")
                 + string("user=") + info->user + string(", ")
                 + string("osp_vendor=") + info->osp_vendor + string(",")
-                + string("protocol=") + Util::toString(protocol) + string(",")
+                + string("protocol=") + Util::toString(info->protocol) + string(",")
                 + string("target_dbms=") + info->target_dbms + string(",")
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
