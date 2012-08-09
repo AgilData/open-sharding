@@ -25,6 +25,8 @@
 #ifndef __Mutex_h__
 #define __Mutex_h__
 
+#include <pthread.h>
+
 namespace util {
 
 class MutexLock {
