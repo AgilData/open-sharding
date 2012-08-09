@@ -65,7 +65,7 @@ def build(mysql-verison)
     run_command "cd libopensharding ; ruby build.rb"
 
     puts "Building libmyosp"
-    run_command "cd libmyospfacade ; ruby build.rb release #{mysql-version}"
+    run_command "cd libmyospfacade ; ruby build.rb release #{mysql_version}"
 
 end
 
@@ -169,9 +169,9 @@ begin
             puts "\t\t - 5.1 "
             exit
         end
-         mysql-verison = ARGV[1]
-        if mysql-verison.match("5.0") || mysql-verison.match("5.1")
-            build(mysql-version)
+         mysql_verison = ARGV[1]
+        if mysql_verison.match("5.0") || mysql-verison.match("5.1")
+            build(mysql_version)
         else
             puts "Error: Not supported MySQL type."
         end
