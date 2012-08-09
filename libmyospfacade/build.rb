@@ -83,7 +83,16 @@ def get_platform
 end
 
 def create_tar
+
   platform = `cat /etc/issue`
+
+  branch = `git branch | head -1`[2..99].chomp
+
+  if branch == "master"
+      tar_filename = "myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
+  else
+      tar_filename = "myosp-#{branch}-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
+  end
 
   # create temp dir
   run_command "rm -rf _temp"
@@ -97,7 +106,7 @@ def create_tar
   run_command "cp src/README.txt _temp"
 
   # create tar
-  run_command "tar cvzf myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz -C _temp ."
+  run_command "tar cvzf  -C _temp ."
 
   # remove temp dir
   run_command "rm -rf _temp"
