@@ -37,14 +37,16 @@ void OSPDisconnectResponse::write(OSPOutputStream *buffer) {
 void OSPDisconnectResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
     switch (fieldNum) {
         default:
-            throw "OSPDisconnectResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 
 void OSPDisconnectResponse::setField(int fieldNum, int value) {
     switch (fieldNum) {
         default:
-            throw "OSPDisconnectResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 

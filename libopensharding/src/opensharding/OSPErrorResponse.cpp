@@ -42,7 +42,8 @@ void OSPErrorResponse::setField(int fieldNum, char *buffer, unsigned int offset,
             errorMessage = string(buffer+offset, length);
             break;
         default:
-            throw "OSPErrorResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 
@@ -52,7 +53,8 @@ void OSPErrorResponse::setField(int fieldNum, int value) {
             errorCode = value;
             break;
         default:
-            throw "OSPErrorResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 

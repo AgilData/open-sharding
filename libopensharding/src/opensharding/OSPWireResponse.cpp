@@ -78,7 +78,8 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
             errorResponse = true;
             break;
         default:
-            throw "OSPWireResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 
     // decode the response message
@@ -102,7 +103,8 @@ void OSPWireResponse::setField(int fieldNum, int value) {
             finalResponse = value!=0;
             break;
         default:
-            throw "OSPWireResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 

@@ -51,7 +51,8 @@ void OSPExecuteResponse::setField(int fieldNum, char *buffer, unsigned int offse
             sqlState = string(buffer+offset, length);
             break;
         default:
-            throw "OSPExecuteResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 
@@ -73,7 +74,8 @@ void OSPExecuteResponse::setField(int fieldNum, int value) {
             errorCode = value;
             break;
         default:
-            throw "OSPExecuteResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 

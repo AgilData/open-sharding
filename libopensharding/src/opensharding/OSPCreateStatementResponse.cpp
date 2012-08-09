@@ -38,7 +38,9 @@ void OSPCreateStatementResponse::write(OSPOutputStream *buffer) {
 
 void OSPCreateStatementResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
     switch (fieldNum) {
-            throw "OSPCreateStatementResponse::setField() invalid fieldNum";
+        default:
+            // always ignore fields we don't recognize
+            break;
     }
 }
 
@@ -48,7 +50,8 @@ void OSPCreateStatementResponse::setField(int fieldNum, int value) {
             stmtID = value;
             break;
         default:
-            throw "OSPCreateStatementResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 

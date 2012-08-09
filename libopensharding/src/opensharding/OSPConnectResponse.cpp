@@ -50,14 +50,16 @@ void OSPConnectResponse::setField(int fieldNum, char *buffer, unsigned int offse
             responsePipeFilename = string(buffer+offset, length);
             break;
         default:
-            throw "OSPConnectResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 
 void OSPConnectResponse::setField(int fieldNum, int value) {
     switch (fieldNum) {
         default:
-            throw "OSPConnectResponse::setField() invalid fieldNum";
+            // always ignore fields we don't recognize
+            break;
     }
 }
 
