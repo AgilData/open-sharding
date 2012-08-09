@@ -24,9 +24,13 @@ def clean
   run_command "find . -name '*.so.*' -exec rm -f {} \\;"
 end
 
+def get_branch_name
+    return `git branch | head -1`[2..99].chomp
+end
+
 def write_version_header
     f = File.open("src/mysql/BuildInfo.h", "w")
-    f.puts "#define WRAPPER_VERSION \"#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}\""
+    f.puts "#define WRAPPER_VERSION \"#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_branch_name}\""
     f.puts "#define WRAPPER_BUILD_TSTAMP \"#{MYOSP_TIMESTAMP}\""
     f.close
 end
@@ -85,8 +89,6 @@ end
 def create_tar
 
   platform = `cat /etc/issue`
-
-  branch = `git branch | head -1`[2..99].chomp
 
   if branch == "master"
       tar_filename = "myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
