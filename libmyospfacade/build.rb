@@ -44,15 +44,21 @@ def do_compile (version)
     run_command "cp libmyosp* libs/"
 end
 
-def compile
+def compile(mysql-version)
     if !File.exists? "libs"
         run_command "mkdir libs"
     end
     run_command "rm -f libs/libmyosp*"
-    do_compile "fifteen"
-    do_compile "fifteen_r"
-    do_compile "sixteen"
-    do_compile "sixteen_r"
+    if mysql-version.match("5.0")
+        do_compile "fifteen"
+        do_compile "fifteen_r"
+    elsif  mysql-version.match("5.1")
+        do_compile "sixteen"
+        do_compile "sixteen_r"
+    else
+        puts "Invalid MySQL Version"
+        exit
+    end
 end
 
 def get_platform
@@ -98,10 +104,11 @@ def create_tar
 end
 
 begin
+    mysql-version = ARGV[0]
   start = Time.now
   clean
   write_version_header
-  compile
+  compile(mysql-version)
   create_tar
   finish = Time.now
 

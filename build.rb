@@ -52,20 +52,20 @@ def setup_environment
     end
     puts "Building and Installing Boost Libraries"
     Dir.chdir BOOST_DIR
-    run_command "./configure"
+    run_command "./configure --with-libraries=thread"
     run_command "sudo make install"
 end
 
 #################################################################################################
 ## Building libmyosp
 #################################################################################################
-def build
+def build(mysql-verison)
 
     puts "Building libopensharding"
     run_command "cd libopensharding ; ruby build.rb"
 
     puts "Building libmyosp"
-    run_command "cd libmyospfacade ; ruby build.rb release"
+    run_command "cd libmyospfacade ; ruby build.rb release #{mysql-version}"
 
 end
 
@@ -149,17 +149,32 @@ end
 #################################################################################################
 begin
     if ARGV.length==0
-        puts "Usage: ruby build.rb OPTION [ARGS]"
+        puts "Usage: ruby build.rb OPTION [ARGS] [MYSQL VERSION]"
         puts "\tAvailable options: "
         puts "\t\t - setup-env "
         puts "\t\t - build "
+        puts "\t MYSQL VERSION OPTIONS"
+        puts "\t\t - 5.0 "
+        puts "\t\t - 5.1 "
         exit
     end
 
     option = ARGV[0]
 
     if option == "build"
-      build
+        if ARGV.length==1
+            puts "Usage: ruby build.rb build [MYSQL VERSION]"
+            puts "\tAvailable options: "
+            puts "\t\t - 5.0 "
+            puts "\t\t - 5.1 "
+            exit
+        end
+         mysql-verison = ARGV[1]
+        if mysql-verison.match("5.0") || mysql-verison.match("5.1")
+            build(mysql-version)
+        else
+            puts "Error: Not supported MySQL type."
+        end
     elsif option == "setup-env"
       setup_environment
     else
