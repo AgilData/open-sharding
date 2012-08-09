@@ -26,7 +26,7 @@
 
 static pthread_mutex_t connmap_mutex = PTHREAD_MUTEX_INITIALIZER
 
-#define LOCK_MUTEX MuteLock(&connmap_mutex);
+#define LOCK_MUTEX MutexLock(&connmap_mutex);
 
 using namespace std;
 using namespace util;
