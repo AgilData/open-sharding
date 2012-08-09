@@ -22,8 +22,6 @@
 #include <string>
 #include <mysql.h>
 
-#include <boost/thread/mutex.hpp>
-
 #include <util/DynLib.h>
 #include <logger/Logger.h>
 
