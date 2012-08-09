@@ -153,6 +153,7 @@ OSPConfig::~OSPConfig() {
 	
     //virtual_host string format: 
     //[vendor]:[protocol]://[actual_host]:[port]/[domain]/[dbms]/[schema]?user=[username]&password=[password]
+    //[vendor]:[protocol]:/path/to/file:/[domain]/[dbms]/[schema]?user=[username]&password=[password]
 
     cerr << "OSPConfig::parseVirtualHostUrl(" << host_url << ")" << endl;
 	
@@ -174,43 +175,53 @@ OSPConfig::~OSPConfig() {
 	pos2=host_url.find(":", pos1);
 
 	string protocol = host_url.substr(pos1, pos2-pos1);
-	if (Util::toLower(protocol) == "pipes" || Util::toLower(protocol) == "tcp") {
-		// good
-	}
-	else {
-		throw Util::createException((string("The URL is invalid, the protocol contains a non-valid value. Valid values: pipes|tcp. value ") + protocol).c_str());
-	}
 
 	//push protocol to ret[1]
 	ret.push_back(protocol);
 
-	if (host_url.substr(pos2, 3) != "://") {
-		throw Util::createException((string("The URL is invalid, the host must start with '://'. url: ") + host_url).c_str());
+	if (Util::toLower(protocol) == "socket") {
+
+        pos1=pos2+1;
+        pos2=host_url.find(":", pos1);
+
+    	string socketFile = host_url.substr(pos1, pos2-pos1);
+    	ret.push_back(socketFile);
+
 	}
+	else if (Util::toLower(protocol) == "pipes" || Util::toLower(protocol) == "tcp" || Util::toLower(protocol) == "socket") {
 
-	//this time we skip 3 chars, '://'
-	pos1=pos2+3;
-	pos2=host_url.find("/", pos1);
-	pos3=host_url.find(":", pos1);
+        if (host_url.substr(pos2, 3) != "://") {
+            throw Util::createException((string("The URL is invalid, the host must start with '://'. url: ") + host_url).c_str());
+        }
 
-	//push actual_host and port to ret[2] and ret[3]
-	string host;
-	string port;
-	if(pos3 == string::npos || pos3 > pos2) {
-		host = host_url.substr(pos1, pos2-pos1);
-		//port not defined, value of 0 is translated to default by dbms-specific extension.
-		port = "0";
+        //this time we skip 3 chars, '://'
+        pos1=pos2+3;
+        pos2=host_url.find("/", pos1);
+        pos3=host_url.find(":", pos1);
+
+        //push actual_host and port to ret[2] and ret[3]
+        string host;
+        string port;
+        if(pos3 == string::npos || pos3 > pos2) {
+            host = host_url.substr(pos1, pos2-pos1);
+            //port not defined, value of 0 is translated to default by dbms-specific extension.
+            port = "0";
+        }
+        else {
+            host = host_url.substr(pos1, pos3-pos1);
+            port = host_url.substr(pos3+1, pos2-pos3-1);
+        }
+        ret.push_back(host);
+        ret.push_back(port);
+
+        //Check that url defined a host name
+        if (host == "") {
+            throw Util::createException((string("The URL is invalid, host is required. url: ") + host_url).c_str());
+        }
+
 	}
 	else {
-		host = host_url.substr(pos1, pos3-pos1);
-		port = host_url.substr(pos3+1, pos2-pos3-1);
-	}
-	ret.push_back(host);
-	ret.push_back(port);
-
-	//Check that url defined a host name
-	if (host == "") {
-		throw Util::createException((string("The URL is invalid, host is required. url: ") + host_url).c_str());
+		throw Util::createException((string("The URL is invalid, the protocol contains a non-valid value. Valid values: pipes|tcp|socket. value ") + protocol).c_str());
 	}
 
 	// parse domain
@@ -265,6 +276,28 @@ OSPConfig::~OSPConfig() {
 
 	return ret;
 }
+
+/*static*/ string OSPConfig::getStringProperty(string name) {
+    map<string,string> config = getConfigMap();
+    return config[name];
+}
+
+/*static*/ int OSPConfig::getIntProperty(string name, int defaultValue) {
+    string value = getStringProperty(name);
+    if (value=="") {
+        return defaultValue;
+    }
+    return Util::toInt(value);
+}
+
+/*static*/ bool OSPConfig::getBoolProperty(string name, bool defaultValue) {
+    string value = getStringProperty(name);
+    if (value=="") {
+        return defaultValue;
+    }
+    return value == "true" || value=="TRUE";
+}
+
 
 } //end namespace util
 

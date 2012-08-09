@@ -39,17 +39,11 @@ OSPFileInputStream::OSPFileInputStream(int fd, int _buf_size) {
     this->fd = fd;
     this->buf_size = _buf_size;
 
-    if (buf_size < 1) {
-        // minimum buffer size
-        buf_size = 1024;
-    }
-
     buf_pos = 0;
     buf_mark = 0;
     buffer = new char[buf_size];
 
     intBuffer = new char[4];
-
 }
 
 OSPFileInputStream::~OSPFileInputStream() {
@@ -82,13 +76,13 @@ void OSPFileInputStream::readBytes(char *dest, unsigned int offset, unsigned int
         );
     }
     
-    bool USE_BUFFER = true;
-    
-    // temporary HACK so we just read directly into the user's buffer
-    if (!USE_BUFFER) {
-        fill_buffer(dest, offset, length, length);
-        return;
-    }
+//    bool USE_BUFFER = true;
+//
+//    // temporary HACK so we just read directly into the user's buffer
+//    if (!USE_BUFFER) {
+//        fill_buffer(dest, offset, length, length);
+//        return;
+//    }
     
     // loop until we write enough data into the caller's buffer
     while (length>0) {

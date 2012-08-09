@@ -1813,6 +1813,9 @@ MYSQL_RES * mysql_list_processes(MYSQL *mysql) {
 
 // this is the signature for MySQL prior to 5.1.18
 int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
+    // mysql_options modifies the MYSQL struct so we can just delegate to the real driver for this
+    return getMySQLClient()->mysql_options(mysql, option, arg);
+    /*
     //trace("mysql_options", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
@@ -1820,17 +1823,22 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
         return 0;
     }
     return conn->mysql_options(mysql, option, arg);
+    */
 }
 
 // this is the signature for MySQL 5.1.18 and later
 int mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg) {
+    // mysql_options modifies the MYSQL struct so we can just delegate to the real driver for this
+    return getMySQLClient()->mysql_options(mysql, option, arg);
     //trace("mysql_options", mysql);
+    /*
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (!conn) {
         if (xlog.isDebugEnabled()) xlog.debug("Ignoring call to mysql_options and simulating success because there is no connection");
         return 0;
     }
     return conn->mysql_options(mysql, option, arg);
+    */
 }
 
 unsigned long mysql_escape_string(char *to, const char *from,

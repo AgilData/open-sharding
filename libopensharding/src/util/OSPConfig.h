@@ -57,6 +57,11 @@ public:
     static vector<string> parseVirtualHostUrl(string host_url);
     static int getMode();
     static int getPoolsize();
+
+    static string   getStringProperty(string name);
+    static int      getIntProperty(string name, int defaultValue);
+    static bool     getBoolProperty(string name, bool defaultValue);
+
 };
 
 } //end namespace util

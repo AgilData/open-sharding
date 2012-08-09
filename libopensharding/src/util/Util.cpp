@@ -483,5 +483,9 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
+/*static*/ int Util::toInt(string s) {
+    return atoi(s.c_str());
+}
+
 
 } // namespace util

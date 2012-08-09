@@ -104,4 +104,26 @@ MyOSPConfig::~MyOSPConfig() {
 	return shardAnalyze;
 }
 
+/*static*/ string MyOSPConfig::getStringProperty(string name) {
+    map<string,string> config = getConfigMap();
+    return config[name];
+}
+
+/*static*/ int MyOSPConfig::getIntProperty(string name, int defaultValue) {
+    string value = getStringProperty(name);
+    if (value=="") {
+        return defaultValue;
+    }
+    return Util::toInt(value);
+}
+
+/*static*/ bool MyOSPConfig::getBoolProperty(string name, bool defaultValue) {
+    string value = getStringProperty(name);
+    if (value=="") {
+        return defaultValue;
+    }
+    return value == "true" || value=="TRUE";
+}
+
+
 } //namespace util

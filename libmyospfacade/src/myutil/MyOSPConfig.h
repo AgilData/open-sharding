@@ -47,6 +47,10 @@ public:
 	static string getConfFile();
 	static FILE * getAnalyzeLogFile();
 	static int isShardAnalyze();
+
+    static string   getStringProperty(string name);
+    static int      getIntProperty(string name, int defaultValue);
+    static bool     getBoolProperty(string name, bool defaultValue);
 };
 
 } //end namespace util
