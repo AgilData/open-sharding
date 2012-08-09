@@ -55,14 +55,14 @@ OSPUnixSocketConnection::~OSPUnixSocketConnection() {
     stop();
 }
 
-int OSPUnixSocketConnection::init(OSPConnectionInfo *info)
+void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 {
-    socketFile = fopen(info->socket_file.c_str());
+    socketFile = fopen(info->socket_file.c_str(), "rwb");
     socketFD = fileno(socketFile);
     makeNonBlocking(socketFD);
 
     is = new OSPFileInputStream(socketFD, 4096);
-    os = new OSPFileOutputStream(socketFD, 0);
+    os = new OSPFileOutputStream(socketFile, 0);
 
     bufferSize = 8192;
     buffer = new char[bufferSize];

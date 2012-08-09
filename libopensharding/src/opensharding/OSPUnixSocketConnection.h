@@ -69,7 +69,7 @@ public:
     OSPUnixSocketConnection(OSPConnectionInfo *info);
     ~OSPUnixSocketConnection();
     
-    int init(OSPConnectionInfo *info);
+    void init(OSPConnectionInfo *info);
 
     OSPMessage* sendMessage(OSPMessage*);
     OSPMessage* sendMessage(OSPMessage*,  bool expectACK);
