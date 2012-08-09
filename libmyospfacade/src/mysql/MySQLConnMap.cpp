@@ -29,7 +29,8 @@ using namespace std;
 using namespace util;
 using namespace logger;
 
-static pthread_mutex_t connmap_mutex = PTHREAD_MUTEX_INITIALIZER
+// global mutex
+static pthread_mutex_t connmap_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 Logger &MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
 
