@@ -42,21 +42,16 @@ using namespace util;
 
 namespace mysql {
 
-static pthread_mutex_t mysqclient_mutex = PTHREAD_MUTEX_INITIALIZER
-
 Logger &MySQLClient::log = Logger::getLogger("MySQLClient");
 
 MySQLClient::MySQLClient() {
     initOK = false;
     dynLib = NULL;
-
     // init function pointers
     mysql_free_resultFn = NULL;
 }
 
 bool MySQLClient::init() {
-
-    MutexLock(&mysqclient_mutex);
 
     if (initOK) {
         return true;

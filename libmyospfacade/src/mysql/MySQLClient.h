@@ -316,8 +316,6 @@ private:
 
     bool initOK;
 
-    boost::mutex initMutex;
-
     DynLib *dynLib;
 
     // cached function pointers
