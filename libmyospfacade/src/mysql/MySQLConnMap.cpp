@@ -24,15 +24,9 @@
 #include <util/MutexLock.h>
 #include <mysql/MySQLConnectionInfo.h>
 
-static pthread_mutex_t connmap_mutex = PTHREAD_MUTEX_INITIALIZER
-
-#define LOCK_MUTEX MutexLock(&connmap_mutex);
-
 using namespace std;
 using namespace util;
 using namespace logger;
-
-
 
 Logger &MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
 
@@ -60,6 +54,7 @@ bool MySQLConnMap::operator==(const ConnectInfo& A, const ConnectInfo& B)
 */
 
 MySQLConnMap::MySQLConnMap() {
+    mutex = PTHREAD_MUTEX_INITIALIZER
     pid = getpid();
     if (_log.isTraceEnabled()) {
         _log.trace(string(string("[") + Util::toString((void*)this)) + string("] NEW INSTANCE IN PROCESS ID ") + Util::toString((long)pid));
@@ -82,7 +77,7 @@ void MySQLConnMap::setConnection(MYSQL *mysql, MySQLAbstractConnection *conn) {
         );
     }
 
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlToConnMap[mysql] = conn;
 }
 
@@ -90,7 +85,7 @@ void MySQLConnMap::setConnection(MYSQL *mysql, MySQLAbstractConnection *conn) {
  * Convert MYSQL* to MySQLAbstractConnection*
  */
 MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL *mysql) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
 
     MySQLAbstractConnection *ret = mysqlToConnMap[mysql];
 
@@ -109,12 +104,12 @@ MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL *mysql) {
 }
 
 void MySQLConnMap::setResultSet(MYSQL_RES* res, MySQLAbstractResultSet *rs) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlResMap[res] = rs;
 }
 
 MySQLAbstractResultSet* MySQLConnMap::getResultSet(MYSQL_RES* res) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     if (mysqlResMap.count(res)==0) {
         return NULL;
     }
@@ -123,13 +118,13 @@ MySQLAbstractResultSet* MySQLConnMap::getResultSet(MYSQL_RES* res) {
 
 // DEPRECATED:
 void MySQLConnMap::setConnection(MYSQL_RES* res, MySQLAbstractConnection *conn) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlResToConnMap[res] = conn;
 }
 
 // DEPRECATED:
 MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL_RES *res) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     if (mysqlResToConnMap.count(res)==0) {
         return NULL;
     }
@@ -149,7 +144,7 @@ void MySQLConnMap::erase(MYSQL *mysql) {
         );
     }
 
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
 
     mysqlToConnMap[mysql] = NULL;
     mysqlToErrorMap[mysql] = NULL;
@@ -168,7 +163,7 @@ void MySQLConnMap::erase(MYSQL_RES *res) {
         _log.trace(string("[") + Util::toString((void*)this)
             + string("] erase(MYSQL_RES=") + Util::toString((void *)res) + string(")"));
     }
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlResToConnMap.erase(res);
 }
 
@@ -191,12 +186,12 @@ void MySQLConnMap::eraseResults(MySQLAbstractConnection *conn) {
 }
 
 void MySQLConnMap::setConnectInfo(MYSQL *mysql, MySQLConnectionInfo *connectInfo) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlToConnInfoMap[mysql] = connectInfo;
 }
 
 MySQLConnectionInfo* MySQLConnMap::getConnectInfo(MYSQL *mysql) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     if (mysqlToConnInfoMap.count(mysql)==0) {
         return NULL;
     }
@@ -204,12 +199,12 @@ MySQLConnectionInfo* MySQLConnMap::getConnectInfo(MYSQL *mysql) {
 }
 
 void MySQLConnMap::setErrorState(MYSQL *mysql, MySQLErrorState *errorState) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlToErrorMap[mysql] = errorState;
 }
 
 MySQLErrorState *MySQLConnMap::getErrorState(MYSQL *mysql) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     if (mysqlToErrorMap.count(mysql)==0) {
         return NULL;
     }
@@ -217,7 +212,7 @@ MySQLErrorState *MySQLConnMap::getErrorState(MYSQL *mysql) {
 }
 
 void MySQLConnMap::clearErrorState(MYSQL *mysql) {
-    LOCK_MUTEX
+    MutexLock(&connmap_mutex);
     mysqlToErrorMap.erase(mysql);
 }
 
