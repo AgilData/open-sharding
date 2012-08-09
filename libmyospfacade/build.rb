@@ -55,6 +55,25 @@ def compile
     do_compile "sixteen_r"
 end
 
+def get_platform
+    if RUBY_PLATFORM.downcase =~ /darwin/
+        return "mac"
+    elsif RUBY_PLATFORM.downcase =~ /windows/
+        return "win"
+    else
+        issue = `cat /etc/issue`.downcase.split
+        if issue[0] == 'Ubuntu'
+            # Ubuntu 12.04 LTS \n \l
+            return issue[0] + "-" + issue[1]
+        else if issue[0] == 'centos'
+            # CentOS Linux release 6.0 (Final)
+            return issue[0] + "-" + issue[3]
+        else
+            return issue
+        end
+    end
+end
+
 def create_tar
   platform = `cat /etc/issue`
 
@@ -65,7 +84,7 @@ def create_tar
   run_command "cp scripts/setup.rb _temp"
   run_command "cp src/myosp.conf _temp"
   run_command "cp src/README.txt _temp"
-  run_command "tar cvzf myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz -C _temp ."
+  run_command "tar cvzf myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz -C _temp ."
   run_command "rm -rf _temp"
 
 end
