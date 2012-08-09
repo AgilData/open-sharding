@@ -23,8 +23,6 @@
 #include <logger/Logger.h>
 #include <util/Util.h>
 #include <mysql/MySQLConnectionInfo.h>
-#include <opensharding/OSPConnectionPool.h>
-
 
 #define LOCK_MUTEX boost::mutex::scoped_lock lock(mutex);
 
