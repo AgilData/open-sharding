@@ -33,7 +33,7 @@ end
 
 def do_compile (version)
     puts "Building version #{version}"
-    if run_commmand "make clean; make #{version}"
+    if run_command "make clean; make #{version}"
       run_command "cp libmyosp* libs/"
     else
       puts "BUILD FAILED!!!"
