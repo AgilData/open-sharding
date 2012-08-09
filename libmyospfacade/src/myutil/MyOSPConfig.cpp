@@ -15,6 +15,8 @@
 
 #include <fstream>
 #include <iostream>
+#include <cstring>
+#include <cstdlib>
 #include <map>
 
 #include <util/Util.h>
