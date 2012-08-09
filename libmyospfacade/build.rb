@@ -32,8 +32,12 @@ def write_version_header
 end
 
 def compile(version)
-    if run_commmand "make clean; make fifteen"
+    puts "Building version #{version}"
+    if run_commmand "make clean; make #{version}"
       run_command "cp libmyosp* libs/"
+    else
+      puts "BUILD FAILED!!!"
+      exit
     end
 end
 
