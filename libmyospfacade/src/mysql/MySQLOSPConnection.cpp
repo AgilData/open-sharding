@@ -733,9 +733,11 @@ void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
         // delete field meta-data
         for (unsigned short i = 0; i < res->field_count; i++) {
             if (res->fields[i].table && res->fields[i].table != emptyString) {
+                cerr << "deleting table name" << endl;
                 delete [] res->fields[i].table;
             }
             if (res->fields[i].name && res->fields[i].name != emptyString) {
+                cerr << "deleting column name" << endl;
                 delete [] res->fields[i].name;
             }
         }
