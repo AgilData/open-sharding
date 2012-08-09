@@ -31,7 +31,7 @@ def write_version_header
     f.close
 end
 
-def compile(version)
+def do_compile (version)
     puts "Building version #{version}"
     if run_commmand "make clean; make #{version}"
       run_command "cp libmyosp* libs/"
@@ -43,10 +43,10 @@ end
 
 def compile
     run_command "rm -f libs/libmyosp*"
-    compile "fifteen"
-    compile "fifteen_r"
-    compile "sixteen"
-    compile "sixteen_r"
+    do_compile "fifteen"
+    do_compile "fifteen_r"
+    do_compile "sixteen"
+    do_compile "sixteen_r"
 end
 
 begin
