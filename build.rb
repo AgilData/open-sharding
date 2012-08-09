@@ -16,19 +16,10 @@ require 'fileutils'
 ## Constants
 #################################################################################################
 
-BRANCH = "master"
-REPOSITORY = "git://git.assembla.com/open-sharding.git"
-BRANCH_LIST = ["HEAD", "logging_changes", "osp-virtual-hosts","master", "myospbinlog", "mysql_compatibility", "osp-client-host-list", "threaded_fifo", "windows"]
 BOOST_VER = "1.38.0"
 BOOST_DIR = "boost_1_38_0"
 BOOST_TAR = "boost_1_38_0.tar.gz"
 BOOST_DOWNLOAD = "http://downloads.sourceforge.net/project/boost/boost/#{BOOST_VER}/#{BOOST_TAR}"
-INIT_DIR = Dir.pwd
-OS_DIR = "#{INIT_DIR}/open-sharding"
-OPERSYS = "ubuntu1104" # update this to set the build operating system
-ARCH = "x64" # update this to set the build architecture
-LIBMYOSP_VER = "pre-release-1.1.113" # update this to set the libmyosp version
-LIBMYOSP_TAR = "libmyosp-#{OPERSYS}-#{ARCH}-#{LIBMYOSP_VER}.tar.gz"
 
 #################################################################################################
 ## Run an operating system command
@@ -42,26 +33,10 @@ def run_command(cmd)
 end
 
 #################################################################################################
-## Pull Opensharding Branch
+## Set up environment
 #################################################################################################
-def clone_rep(branch_name)
-  # This method depends on having the repo checked out already in the current folder.
-    puts "Cloning Opensharding Repositories"
-    if !File.exists? "open-sharding"
-        puts "WARN: open-sharding Not Found, aborting."
-        return
-    end
-    cmd = "git pull origin #{branch_name}"
-    run_command cmd
-end
-
-#################################################################################################
-## Building libmyosp
-#################################################################################################
-def build(branch_name)
+def setup_environment
     check_dep
-    puts "Building from branch #{branch_name}"
-    clone_rep branch_name
     puts "Downloading Boost Libraries"
     if RUBY_PLATFORM.downcase.include?("darwin")
         if !File.exists? "#{BOOST_DIR}"
@@ -79,21 +54,19 @@ def build(branch_name)
     Dir.chdir BOOST_DIR
     run_command "./configure"
     run_command "sudo make install"
-    Dir.chdir OS_DIR
-    puts "Building and installing libopensharding"
-    Dir.chdir "libopensharding"
-    run_command "make clean"
-    run_command "make"
-    run_command "sudo make install"
-    Dir.chdir OS_DIR
+end
+
+#################################################################################################
+## Building libmyosp
+#################################################################################################
+def build
+
+    puts "Building libopensharding"
+    run_command "cd libopensharding ; ruby build.rb"
+
     puts "Building libmyosp"
-    Dir.chdir "libmyospfacade"
-    run_command "ant"
-    puts "Creating libmyosp tarball"
-    run_command "./scripts/mktarball.sh #{LIBMYOSP_TAR} libs"
-    puts "Placing tarball in #{INIT_DIR}"
-    run_command "mv #{LIBMYOSP_TAR} #{INIT_DIR}"
-    Dir.chdir INIT_DIR
+    run_command "cd libmyospfacade ; ruby build.rb release"
+
 end
 
 #################################################################################################
@@ -178,36 +151,20 @@ begin
     if ARGV.length==0
         puts "Usage: ruby build.rb OPTION [ARGS]"
         puts "\tAvailable options: "
-        puts "\t\t - build [opensharding-branch]"
-        exit 
+        puts "\t\t - setup-env "
+        puts "\t\t - build "
+        exit
     end
-    
+
     option = ARGV[0]
-    
-    username = `whoami`.strip
-    if username != 'root'
-        puts "This script must be run as the root user (not as '#{username}')"
-        exit 1
-    end
-    
+
     if option == "build"
-        if ARGV.length < 2
-            puts "Warn: No branch specified to build, defaulting to #{BRANCH}"
-            build BRANCH
-        else
-            proposed_branch = ARGV[1]
-            if !BRANCH_LIST.include? proposed_branch
-                puts "Error: #{proposed_branch} is not a valid branch"
-                exit 1
-            else
-                build proposed_branch
-            end
-        end
-    elsif option == "check_dep"
-        check_dep
+      build
+    elsif option == "setup-env"
+      setup_environment
     else
         puts "Error: Invalid Argument"
         exit 1
     end
-    
+
 end
