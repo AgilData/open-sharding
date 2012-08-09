@@ -57,7 +57,7 @@ OSPUnixSocketConnection::~OSPUnixSocketConnection() {
 
 int OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 {
-    socketFile = fopen(info->socket_file);
+    socketFile = fopen(info->socket_file.c_str());
     socketFD = fileno(socketFile);
     makeNonBlocking(socketFD);
 
@@ -146,9 +146,8 @@ int OSPUnixSocketConnection::sendOnly(OSPMessage *message, bool flush) {
 
 int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
 
-
     // not likely to happen, but just to be safe
-    if (nextRequestID >= OSPNP_MAX_REQUEST_ID) {
+    if (nextRequestID >= 2000000) {
         nextRequestID = 1;
     }
 

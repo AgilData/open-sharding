@@ -47,7 +47,7 @@ namespace opensharding {
 class OSPUnixSocketConnection : public OSPConnection {
 private:
 
-    int socketFileFD;
+    int socketFD;
     FILE *socketFile;
 
     OSPFileInputStream *is;
