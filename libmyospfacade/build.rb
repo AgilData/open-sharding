@@ -36,12 +36,15 @@ def do_compile (version)
     if run_command "make clean; make #{version}"
       run_command "cp libmyosp* libs/"
     else
-      puts "BUILD FAILED!!!"
+      puts "BUILD FOR VERSION #{version} FAILED!!!"
       exit
     end
 end
 
 def compile
+    if !File.exists? "libs"
+        run_command "mkdir libs"
+    end
     run_command "rm -f libs/libmyosp*"
     do_compile "fifteen"
     do_compile "fifteen_r"
@@ -49,11 +52,27 @@ def compile
     do_compile "sixteen_r"
 end
 
+def create_tar
+  platform = `cat /etc/issue`
+
+  run_command "rm -rf _temp"
+  run_command "mkdir _temp"
+  run_command "cp libs/lib* _temp"
+  run_command "cp ../libopensharding/libopensharding.1.0.0 _temp"
+  run_command "cp scripts/setup.rb _temp"
+  run_command "cp src/myosp.conf _temp"
+  run_command "cp src/README.txt _temp"
+  run_command "tar cvzf myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}.tgz -C _temp *"
+  run_command "rm -rf _temp"
+
+end
+
 begin
   start = Time.now
   clean
   write_version_header
   compile
+  create_tar
   finish = Time.now
 
   elapsed = (finish-start).to_i
