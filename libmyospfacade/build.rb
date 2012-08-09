@@ -56,7 +56,7 @@ def compile(mysql_version)
         do_compile "sixteen"
         do_compile "sixteen_r"
     else
-        puts "Invalid MySQL Version"
+        puts "Invalid MySQL Version #{mysql_version}"
         exit
     end
 end
