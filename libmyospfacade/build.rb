@@ -65,7 +65,7 @@ def get_platform
         if issue[0] == 'Ubuntu'
             # Ubuntu 12.04 LTS \n \l
             return issue[0] + "-" + issue[1]
-        else if issue[0] == 'centos'
+        elsif issue[0] == 'centos'
             # CentOS Linux release 6.0 (Final)
             return issue[0] + "-" + issue[3]
         else
