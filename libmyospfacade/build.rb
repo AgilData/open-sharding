@@ -2,8 +2,9 @@
 
 require 'time'
 
-MYOSP_VERSION  = "1.3"
-MYOSP_BUILDNUM = "1"
+MYOSP_VERSION   = "1.3"
+MYOSP_BUILDNUM  = "1"
+MYOSP_TIMESTAMP = Time.new.strftime("%Y%m%d-%H%M%S")
 
 def run_command (cmd)
   puts "Executing: #{cmd}"
@@ -16,6 +17,9 @@ def run_command (cmd)
 end
 
 def clean
+  run_command "find . -name 'libmyosp*.so*' -exec rm -f {} \\;"
+  run_command "find . -name 'libmyosp*.tgz' -exec rm -f {} \\;"
+  run_command "find . -name 'myosp*.tgz' -exec rm -f {} \\;"
   run_command "find . -name '*.o' -exec rm -f {} \\;"
   run_command "find . -name '*.a' -exec rm -f {} \\;"
   run_command "find . -name '*.d' -exec rm -f {} \\;"
@@ -24,10 +28,9 @@ def clean
 end
 
 def write_version_header
-    tstamp = Time.new.strftime("%Y%m%d-%H%M%S")
     f = File.open("src/mysql/BuildInfo.h", "w")
     f.puts "#define WRAPPER_VERSION \"#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}\""
-    f.puts "#define WRAPPER_BUILD_TSTAMP \"#{tstamp}\""
+    f.puts "#define WRAPPER_BUILD_TSTAMP \"#{MYOSP_TIMESTAMP}\""
     f.close
 end
 
@@ -62,7 +65,7 @@ def create_tar
   run_command "cp scripts/setup.rb _temp"
   run_command "cp src/myosp.conf _temp"
   run_command "cp src/README.txt _temp"
-  run_command "tar cvzf myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}.tgz -C _temp ."
+  run_command "tar cvzf myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz -C _temp ."
   run_command "rm -rf _temp"
 
 end
