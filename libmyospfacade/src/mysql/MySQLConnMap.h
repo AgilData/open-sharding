@@ -19,7 +19,6 @@
 
 #include <unistd.h>
 #include <map>
-#include <pthread.h>
 #include <mysql.h>
 
 #include <mysql/MySQLAbstractConnection.h>
@@ -52,6 +51,8 @@ private:
 
     // logger
     static Logger &_log;
+
+    pthread_mutex_t connmap_mutex;
 
     /* process ID where this map was created. This is used to detect unsafe use of connections between
       processes as can happen with FastCGI/Django if the application opens connections during the import
