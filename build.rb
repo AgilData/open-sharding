@@ -59,7 +59,7 @@ end
 #################################################################################################
 ## Building libmyosp
 #################################################################################################
-def build(mysql-verison)
+def build(mysql_verison)
 
     puts "Building libopensharding"
     run_command "cd libopensharding ; ruby build.rb"
