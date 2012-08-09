@@ -49,7 +49,7 @@ def compile(mysql_version)
         run_command "mkdir libs"
     end
     run_command "rm -f libs/libmyosp*"
-    if mysql_version=="5.0"
+    if mysql_version.match("5.0")
         do_compile "fifteen"
         do_compile "fifteen_r"
     elsif  mysql_version.match("5.1")
