@@ -21,6 +21,7 @@
  */
 #include <stdio.h>
 #include <string>
+#include <cstring>
 
 #include <opensharding/OSPFileInputStream.h>
 
