@@ -43,7 +43,7 @@ void* lib_handle = NULL;
 static Logger &LOG = Logger::getLogger("DynLib");
 
 // global mutex
-pthread_mutex_t dynlib_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t dynlib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 namespace util {
 
