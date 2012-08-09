@@ -104,7 +104,7 @@ def create_tar
 end
 
 begin
-    mysql_version = ARGV[0]
+    mysql_version = ARGV[1]
   start = Time.now
   clean
   write_version_header
