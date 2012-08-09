@@ -9,7 +9,10 @@ def run_command (cmd)
   puts "Executing: #{cmd}"
   if ! system cmd
     puts "FAILED: #{cmd}"
+    return false
   end
+
+  return true
 end
 
 def clean
@@ -22,14 +25,24 @@ end
 
 def write_version_header
     tstamp = Time.new.strftime("%Y%m%d-%H%M%S")
-    f = File.open("src/mysql/BuildInfo.h")
+    f = File.open("src/mysql/BuildInfo.h", "w")
     f.puts "#define WRAPPER_VERSION \"#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}\""
     f.puts "#define WRAPPER_BUILD_TSTAMP \"#{tstamp}\""
     f.close
 end
 
-def compile
+def compile(version)
+    if run_commmand "make clean; make fifteen"
+      run_command "cp libmyosp* libs/"
+    end
+end
 
+def compile
+    run_command "rm -f libs/libmyosp*"
+    compile "fifteen"
+    compile "fifteen_r"
+    compile "sixteen"
+    compile "sixteen_r"
 end
 
 begin
