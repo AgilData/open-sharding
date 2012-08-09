@@ -37,23 +37,7 @@ end
 #################################################################################################
 def setup_environment
     check_dep
-    puts "Downloading Boost Libraries"
-    if RUBY_PLATFORM.downcase.include?("darwin")
-        if !File.exists? "#{BOOST_DIR}"
-            run_command "curl -L #{BOOST_DOWNLOAD} | tar xz"
-        end
-    else
-        if !File.exists? "#{BOOST_TAR}"
-            run_command "wget #{BOOST_DOWNLOAD}"
-        end
-        if !File.exists? "#{BOOST_DIR}"
-            run_command "tar xzf #{BOOST_TAR}"
-        end
-    end
-    puts "Building and Installing Boost Libraries"
-    Dir.chdir BOOST_DIR
-    run_command "./configure --with-libraries=thread"
-    run_command "sudo make install"
+    #TODO:Add the depends here. 
 end
 
 #################################################################################################
