@@ -89,6 +89,7 @@ end
 def create_tar
 
   platform = `cat /etc/issue`
+  branch = get_branch_name
 
   if branch == "master"
       tar_filename = "myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
