@@ -44,7 +44,10 @@ void OSPExecuteResponse::write(OSPOutputStream *buffer) {
 
 void OSPExecuteResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
     switch (fieldNum) {
-        case 5:
+        case 11:
+            errorMessage = string(buffer+offset, length);
+            break;
+        case 12:
             errorMessage = string(buffer+offset, length);
             break;
         default:
@@ -63,11 +66,11 @@ void OSPExecuteResponse::setField(int fieldNum, int value) {
         case 3:
             rowsAffected = value;
             break;
-        case 4:
-            errorCode = value;
-            break;
         case 5:
             generatedID = value;
+            break;
+        case 10:
+            errorCode = value;
             break;
         default:
             throw "OSPExecuteResponse::setField() invalid fieldNum";

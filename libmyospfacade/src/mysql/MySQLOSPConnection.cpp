@@ -237,6 +237,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         resultSetID = 0;
         affectedRows = 0;
         fieldCount = 0;
+        my_sqlstate = "99999";
         my_errno = CR_UNKNOWN_ERROR; // MySQL unknown error
         my_error = "Query failed due to OSP error";
         return -1;
@@ -246,6 +247,7 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         resultSetID = 0;
         affectedRows = 0;
         fieldCount = 0;
+        my_sqlstate = "99999";
         my_errno = CR_UNKNOWN_ERROR; // MySQL unknown error
         my_error = "Query failed due to OSP error";
         return -1;
@@ -318,6 +320,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             affectedRows = 0;
             fieldCount = 0;
 
+            my_sqlstate = "99999";
             my_errno = executeResponse->getErrorCode();
             //TODO: this is a memory leak ... do we care? what can we do about it?
             my_error = Util::createString(executeResponse->getErrorMessage().c_str());
