@@ -30,10 +30,6 @@
 #include <map>
 #include <syslog.h>
 
-#include <boost/scoped_ptr.hpp>
-#include <boost/thread.hpp>
-#include <boost/thread/mutex.hpp>
-
 #include <logger/Logger.h>
 
 using namespace std;

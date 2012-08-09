@@ -15,16 +15,18 @@
 
 #include <unistd.h>
 #include <map>
-#include <boost/thread/mutex.hpp>
 #include <mysql.h>
 #include <mysql/MySQLConnMap.h>
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLAbstractResultSet.h>
 #include <logger/Logger.h>
 #include <util/Util.h>
+#include <util/MutexLock.h>
 #include <mysql/MySQLConnectionInfo.h>
 
-#define LOCK_MUTEX boost::mutex::scoped_lock lock(mutex);
+static pthread_mutex_t connmap_mutex = PTHREAD_MUTEX_INITIALIZER
+
+#define LOCK_MUTEX MuteLock(&connmap_mutex);
 
 using namespace std;
 using namespace util;

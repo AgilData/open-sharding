@@ -43,7 +43,6 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
-//#include <boost/thread/mutex.hpp>
 
 
 #include <opensharding/OSPMessage.h>
@@ -62,8 +61,6 @@ using namespace util;
 
 namespace opensharding {
 
-//boost::mutex OSPTCPConnectionMutex;
-
 logger::Logger &OSPTCPConnection::log = Logger::getLogger("OSPTCPConnection");
 
 OSPTCPConnection::OSPTCPConnection(string host, int port) {
@@ -80,10 +77,6 @@ OSPTCPConnection::~OSPTCPConnection() {
 }
 
 void OSPTCPConnection::stop() {
-
-    // make this a synchronized method
-    //boost::mutex::scoped_lock lock(OSPTCPConnectionMutex);
-
     if (hSocket) {
         close(hSocket);
         hSocket = 0;

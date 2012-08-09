@@ -36,8 +36,6 @@
 #include <sys/types.h>
 #include <syslog.h>
 
-#include <boost/thread/mutex.hpp>
-
 #include <mysql/BuildInfo.h>
 #include <mysql/MySQLClient.h>
 #include <mysql/MySQLAbstractConnection.h>
@@ -56,6 +54,7 @@
 #include <myutil/MyOSPLogger.h>
 #include <myutil/MyOSPConfig.h>
 #include <util/Util.h>
+#include <util/MutexLock.h>
 
 #include <mysql/MySQLDriver.h>
 #include <mysql/MySQLAbstractConnection.h>
@@ -84,8 +83,8 @@ static bool bannerDisplayed = false;
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
 static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 
-/* Mutex for accessing _mysqlResourceMap */
-static boost::mutex resourceMapMutex;
+
+#define LOCK_MUTEX MutexLock(&connmap_mutex);
 
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
@@ -93,12 +92,8 @@ static MySQLConnMap *_mysqlResourceMap = NULL;
 /* Temporary global variable for next named pipe number for this process */
 static int nextPipeNo = 1;
 
-/*
- * Map of MYSQL* to corresponding error state. This is required since we may
- * hit error conditions during connection attempts before we have created
- * a connection object to delegate to.
- */
-static boost::mutex initMutex;
+static pthread_mutex_t MySQLDriver_init_mutex = PTHREAD_MUTEX_INITIALIZER
+static pthread_mutex_t MySQLDriver_resouce_mutex = PTHREAD_MUTEX_INITIALIZER
 
 /* Wrapper around libmysqlclient.so */
 static MySQLClient *mysqlclient = NULL;
@@ -170,7 +165,7 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
-    boost::mutex::scoped_lock lock(resourceMapMutex);
+    MutexLock(&MySQLDriver_resource_mutex);
     if (_mysqlResourceMap==NULL) {
         _mysqlResourceMap = new MySQLConnMap();
     }
@@ -178,7 +173,7 @@ MySQLConnMap* getResourceMap() {
 }
 
 MySQLClient* getMySQLClient() {
-    boost::mutex::scoped_lock lock(initMutex);
+    MutexLock(&MySQLDriver_init_mutex);
     if (!mysqlclient) {
         mysqlclient = new MySQLClient();
         if (!mysqlclient->init()) { xlog.error("Failed to init mysqlClient"); }
@@ -187,17 +182,14 @@ MySQLClient* getMySQLClient() {
 }
 
 int getNextNamedPipeID() {
-    boost::mutex::scoped_lock lock(initMutex);
+    MutexLock(&MySQLDriver_init_mutex);
     return nextPipeNo++;
 }
 
 // this method called from mysql_server_init and shows banner
 void banner() {
-    //boost::mutex::scoped_lock lock(initMutex);
     if (!bannerDisplayed) {
-
         Logger::configure("/etc/myosp-log.properties");
-
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("Open Sharding MySQL Driver") +
                        string(" (libmyosp) version ") +

@@ -20,10 +20,9 @@
 #include <mysql.h>
 #include <dlfcn.h>
 
-#include <boost/thread/mutex.hpp>
-
 #include <mysql/MySQLClient.h>
 #include <util/Util.h>
+#include <util/MutexLock.h>
 #include <logger/Logger.h>
 
 #ifdef MYSQL_5_0
@@ -43,6 +42,8 @@ using namespace util;
 
 namespace mysql {
 
+static pthread_mutex_t mysqclient_mutex = PTHREAD_MUTEX_INITIALIZER
+
 Logger &MySQLClient::log = Logger::getLogger("MySQLClient");
 
 MySQLClient::MySQLClient() {
@@ -55,8 +56,7 @@ MySQLClient::MySQLClient() {
 
 bool MySQLClient::init() {
 
-    // make this method synchronized
-    boost::mutex::scoped_lock lock(initMutex);
+    MutexLock(&mysqclient_mutex);
 
     if (initOK) {
         return true;

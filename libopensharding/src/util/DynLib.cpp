@@ -30,10 +30,8 @@
 #include <fstream>
 #include <dlfcn.h>
 
-//#include <boost/thread.hpp>
-//#include <boost/thread/mutex.hpp>
-
 #include <util/DynLib.h>
+#include <util/MutexLock.h>
 #include <logger/Logger.h>
 
 using namespace logger;
@@ -44,13 +42,14 @@ void* lib_handle = NULL;
 // logger for global methods
 static Logger &LOG = Logger::getLogger("DynLib");
 
-//boost::mutex dbsmutex;
+// global mutex
+pthread_mutex_t dynlib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 namespace util {
 
 DynLib::DynLib(const char *libraryName) {
 
-    //TODO:boost::mutex::scoped_lock lock(dbsmutex);
+    MutexLock lock(&dynlib_mutex);
 
     if (NULL == lib_handle) {
 
@@ -79,12 +78,13 @@ DynLib::DynLib(const char *libraryName) {
 }
 
 DynLib::~DynLib() {
-    //TODO: unload library
+    //TODO: unload library ?
 }
 
 void *DynLib::get_function(const char *functionName) {
 
-    //TODO: should probably have a mutex
+    //TODO:
+    //Mutex mutex;
 
     if (LOG.isDebugEnabled()) {
         LOG.debug(string("get_function(") + functionName + ")");

@@ -166,8 +166,6 @@ int OSPNamedPipeConnection::init(OSPConnectionInfo *info, int pipeId)
 
 int OSPNamedPipeConnection::makeFifos() {
 
-    //boost::unique_lock<boost::mutex> lock(m_mutex);
-
     if (DEBUG) log.debug(string("Creating named pipe ") + requestPipeFilename);
 
     // delete first just in case there was an issue before
@@ -201,10 +199,6 @@ int OSPNamedPipeConnection::makeFifos() {
 
 
 
-//void OSPNamedPipeConnection::startResponseThread() {
-//    m_thread=new boost::thread(boost::ref(*this));
-//}
-
 int OSPNamedPipeConnection::makeNonBlocking(int fd) {
     int flags = fcntl(fd, F_GETFL);
     if (-1 == fcntl(fd, F_SETFL, flags | O_NONBLOCK)) {
@@ -216,8 +210,6 @@ int OSPNamedPipeConnection::makeNonBlocking(int fd) {
 
 
 int OSPNamedPipeConnection::openFifos() {
-
-    //boost::unique_lock<boost::mutex> lock(m_mutex);
 
     if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
     requestPipe  = fopen(requestPipeFilename.c_str(), "wb");
@@ -237,40 +229,6 @@ int OSPNamedPipeConnection::openFifos() {
     }
     int responsePipeFD = fileno(responsePipe);
     makeNonBlocking(responsePipeFD);
-
-    /*  THIS CODE FAILED WITH
-
-    Failed to open request pipe '/tmp/mysqlosp_18173_1_request.fifo' for writing
-                              failed to open request pipe: No such device or address
-
-    if (DEBUG) log.debug(string("Opening request pipe ") + requestPipeFilename);
-    requestPipeFD = open(requestPipeFilename.c_str(), O_WRONLY | O_NONBLOCK);
-    if (requestPipeFD == -1) {
-        log.error(string("Failed to open request pipe '") + requestPipeFilename + string("' for writing"));
-        perror("failed to open request pipe");
-        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
-    }
-    requestPipe = fdopen(requestPipeFD, "wb");
-    if (!requestPipe) {
-        log.error(string("Failed to fdopen request pipe '") + requestPipeFilename + string("' for writing"));
-        return OSPNP_OPEN_REQUEST_PIPE_ERROR;
-    }
-
-    if (DEBUG) log.debug(string("Opening response pipe ") + responsePipeFilename);
-    responsePipeFD = open(responsePipeFilename.c_str(), O_RDONLY | O_NONBLOCK);
-    if (responsePipeFD == -1) {
-        log.error(string("Failed to open response pipe '") + responsePipeFilename + string("' for reading"));
-        perror("failed to open response pipe");
-        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
-    }
-    responsePipe = fdopen(responsePipeFD, "wb");
-    if (!responsePipe) {
-        log.error(string("Failed to fdopen response pipe '") + responsePipeFilename + string("' for reading"));
-        fclose(requestPipe);
-        return OSPNP_OPEN_RESPONSE_PIPE_ERROR;
-    }
-    */
-
 
     if (DEBUG) log.debug("Creating pipe I/O streams");
 
@@ -312,34 +270,10 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
         if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
-//        if (m_threadedResponseFifo) {
-//            boost::unique_lock<boost::mutex> lock(m_mutex);
-//
-//            // if there is nothing in the queue that matches this messages request id, relinquish control to other threads
-//            while (!((m_responses.count(requestID) > 0) && (m_responses[requestID].size() > 0))) {
-//              m_cond.wait(lock);
-//            }
-//
-//            // Grab the response (to return to the caller or send to the consumer), then remove queue entry
-//            response = m_responses[requestID].front();
-//            m_responses[requestID].pop();
-//
-//            if (m_responses[requestID].size() == 0) {
-//                // If queue empty, remove map entry for that request id.
-//                // TODO: Probably best to move this out of the loop for efficiency.
-//                m_responses.erase(m_responses.find(requestID));
-//            }
-//
-//            if (DEBUG) log.debug("sendMessage (threaded) got response, RequestID=" + Util::toString(requestID));
-//
-//            m_cond.notify_all();
-//        }
-//        else {
-            // no background thread, wait for message directly
-            response = dynamic_cast<OSPWireResponse*>(waitForResponse());
-            count++;
-            if (DEBUG) log.debug(string("sendMessage (non-threaded) got response number ") + Util::toString(count) + string("; RequestID=") + Util::toString(requestID));
-//        }
+        // no background thread, wait for message directly
+        response = dynamic_cast<OSPWireResponse*>(waitForResponse());
+        count++;
+        if (DEBUG) log.debug(string("sendMessage (non-threaded) got response number ") + Util::toString(count) + string("; RequestID=") + Util::toString(requestID));
 
         if (response == NULL) {
             break;
@@ -376,15 +310,7 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
 
 int OSPNamedPipeConnection::sendOnly(OSPMessage *message, bool flush) {
-//    if (m_threadedResponseFifo) {
-//        // make sure we only send one message at a time on a shared request pipe
-////        boost::unique_lock<boost::mutex> lock(m_send_mutex);
-//        return doSendOnly(message, flush);
-//    }
-//    else {
-        // no need for a mutex in this case
-        return doSendOnly(message, flush);
-//    }
+    return doSendOnly(message, flush);
 }
 
 int OSPNamedPipeConnection::doSendOnly(OSPMessage *message, bool flush) {
@@ -498,46 +424,8 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
 }
 
 
-//void OSPNamedPipeConnection::operator () () {
-//
-//    do
-//    {
-//        OSPWireResponse *response = NULL;
-//
-//        if (DEBUG) log.debug("Background thread, waiting for response");
-//
-//        response = dynamic_cast<OSPWireResponse*>(waitForResponse());
-//
-//        if (DEBUG) log.debug("Background thread, got response");
-//
-//        if (response != NULL) {
-//            boost::unique_lock<boost::mutex> lock(m_mutex);
-//
-//            int requestID = response->getRequestID();
-//
-//            if (DEBUG) log.debug("Background thread adding to map, RequestID=" + Util::toString(requestID));
-//
-//            m_responses[requestID].push(response);
-//
-//            // Let other threads get the response
-//            m_cond.notify_all();
-////            m_cond.wait(lock);
-//        }
-//        else {
-//            if (DEBUG) log.debug("Background thread, NULL response");
-//        }
-//    } while(true);
-//}
-
-
-
 void OSPNamedPipeConnection::stop() {
 
-//    if (m_threadedResponseFifo && (m_thread != NULL)) {
-//        m_thread->join();
-//        delete m_thread;
-//    }
-//
     if (DEBUG) log.debug("Closing pipes");
 
     // TODO: Add flag to indicate to indicate shutdown to background thread
