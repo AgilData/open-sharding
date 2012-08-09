@@ -58,8 +58,6 @@ private:
       processes as can happen with FastCGI/Django if the application opens connections during the import
       phase */
     pid_t pid;
-    
-   
 
     /* Map of MYSQL* to connection information */
     map<MYSQL*, MySQLConnectionInfo*> mysqlToConnInfoMap;
@@ -75,13 +73,7 @@ private:
 
     map<MYSQL*, MySQLErrorState*> mysqlToErrorMap;
 
-    /* map of dbName to named pipe connection */
-    //map<string, OSPConnection*> ospConnMap;
-    
-    map<string, OSPConnectionPool*> ospConnMap;
-
     // mutex for thread safety
-//    boost::interprocess::interprocess_mutex mutex;
     boost::mutex mutex;
 
 public:
@@ -109,9 +101,6 @@ public:
     void clearErrorState(MYSQL *mysql);
 
     void eraseResults(MySQLAbstractConnection *conn);
-
-    void setOSPConn(string dbName, OSPConnectionPool*);
-    OSPConnectionPool* getOSPConn(string dbName);
 
 };
 
