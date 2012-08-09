@@ -13,7 +13,7 @@ GCC_VERSION := $(shell sh -c 'gcc -v 2>&1|tail -n 1 | cut -f 3 -d " "  | cut -f 
 BOOST_THREAD_LIB=boost_thread-gcc$(GCC_VERSION)-mt
 BOOST_SYSTEM_LIB=boost_system-gcc$(GCC_VERSION)-mt
 
-CPPFLAGS=-I./src -I../libopensharding/include -I$(MYSQL_INCLUDE_PATH) -I$(BOOST_INCLUDE_PATH) $(CPP_OPTIONS) $(EXTRA_CFLAGS)
+CPPFLAGS=-I./src -I../libopensharding/src -I$(MYSQL_INCLUDE_PATH) -I$(BOOST_INCLUDE_PATH) $(CPP_OPTIONS) $(EXTRA_CFLAGS)
 
 RELEASE_CPPOPTIONS="-g -O2 -Wall -c -fmessage-length=0 -fPIC -MMD -MP"
 DEBUG_CPPOPTIONS="-O0 -g3 -Wall -c -fmessage-length=0 -fPIC -fno-inline -MMD -MP"
