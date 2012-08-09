@@ -166,7 +166,7 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
-    MutexLock lock(&MySQLDriver_resource_mutex);
+    MutexLock lock("MySQLDriver_resource_mutex", &MySQLDriver_resource_mutex);
     if (_mysqlResourceMap==NULL) {
         _mysqlResourceMap = new MySQLConnMap();
     }
@@ -174,7 +174,7 @@ MySQLConnMap* getResourceMap() {
 }
 
 MySQLClient* getMySQLClient() {
-    MutexLock lock(&MySQLDriver_init_mutex);
+    MutexLock lock("MySQLDriver_init_mutex", &MySQLDriver_init_mutex);
     if (!mysqlclient) {
         mysqlclient = new MySQLClient();
         if (!mysqlclient->init()) { xlog.error("Failed to init mysqlClient"); }
@@ -183,7 +183,7 @@ MySQLClient* getMySQLClient() {
 }
 
 int getNextNamedPipeID() {
-    MutexLock lock(&MySQLDriver_init_mutex);
+    MutexLock lock("MySQLDriver_init_mutex", &MySQLDriver_init_mutex);
     return nextPipeNo++;
 }
 

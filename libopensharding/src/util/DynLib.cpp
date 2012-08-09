@@ -49,7 +49,7 @@ namespace util {
 
 DynLib::DynLib(const char *libraryName) {
 
-    MutexLock lock(&dynlib_mutex);
+    MutexLock lock("DynLib", &dynlib_mutex);
 
     if (NULL == lib_handle) {
 

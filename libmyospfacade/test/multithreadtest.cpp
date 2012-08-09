@@ -21,6 +21,7 @@
 #define USER ""
 #define PASSWORD ""
 #define DATABASE "test"
+#define PORT 3306
 
 /*Global Variables for Thread Test*/
 std::string table="test1";
@@ -41,7 +42,7 @@ void * run(void*){
         return NULL;
     }
 
-    mysql = mysql_real_connect(mysql,SERVER,USER,PASSWORD,DATABASE,0,NULL,0);
+    mysql = mysql_real_connect(mysql,SERVER,USER,PASSWORD,DATABASE,PORT,NULL,0);
     if(!mysql){
         cout<<"mysql_real_connect() FAILED"<<endl;
         cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;

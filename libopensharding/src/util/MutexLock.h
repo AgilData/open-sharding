@@ -26,15 +26,26 @@
 #define __Mutex_h__
 
 #include <pthread.h>
+#include <iostream>
 
 namespace util {
 
 class MutexLock {
 private:
+    const char *name;
     pthread_mutex_t* mutex;
 public:
-    MutexLock(pthread_mutex_t* mutex) { this->mutex = mutex; pthread_mutex_lock( this->mutex ); }
-    ~MutexLock() { pthread_mutex_unlock( this->mutex ); }
+    MutexLock(const char *name, pthread_mutex_t* mutex) {
+        this->name = name;
+        this->mutex = mutex;
+        cerr << "Locking " << name << endl;
+        pthread_mutex_lock( this->mutex );
+    }
+
+    ~MutexLock() {
+        cerr << "Unlocking " << name << endl;
+        pthread_mutex_unlock( this->mutex );
+    }
 };
 
 } // namespace util
