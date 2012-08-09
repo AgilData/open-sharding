@@ -48,7 +48,9 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/util/DynLib.cpp
 	@g++ $(CPPFLAGS) src/util/OSPConfig.cpp
 	@echo "Linking libopensharding..."
+	@rm -f libopensharding.so*
 	@gcc -shared -Wl,-soname,libopensharding.so -o libopensharding.so.1.0.0 *.o -lc -lstdc++ -l$(BOOST_THREAD_LIB) -L/usr/lib64 -L$(BOOST_THREAD_LIB)
+	@ln -s libopensharding.so.1.0.0 libopensharding.so
 	@rm -f *.o
 	@rm -f *.d
 
@@ -60,17 +62,4 @@ clean:
 	@rm -f libopensharding*
 
 install:
-	@echo "Installing libopensharding to /usr/local/opensharding ..."
-	@rm -rf /usr/local/opensharding
-	@mkdir /usr/local/opensharding
-	@mkdir /usr/local/opensharding/lib
-	@mkdir /usr/local/opensharding/include
-	@mkdir /usr/local/opensharding/include/logger
-	@mkdir /usr/local/opensharding/include/opensharding
-	@mkdir /usr/local/opensharding/include/util
-	@cp src/logger/*.h /usr/local/opensharding/include/logger
-	@cp src/opensharding/*.h /usr/local/opensharding/include/opensharding
-	@cp src/util/*.h /usr/local/opensharding/include/util
-	@cp libopensharding.so.1.0.0 /usr/local/opensharding/lib
-	@cp libopensharding.so.1.0.0 /usr/local/opensharding/lib
-	@ln -s /usr/local/opensharding/lib/libopensharding.so.1.0.0 /usr/local/opensharding/lib/libopensharding.so
+	@echo "NO NEED TO INSTALL THIS NOW"
