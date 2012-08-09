@@ -28,7 +28,6 @@
 #include <mysql/MySQLErrorState.h>
 #include <mysql/MySQLConnectionInfo.h>
 #include <opensharding/OSPConnection.h>
-#include <opensharding/OSPConnectionPool.h>
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
 #include <logger/Logger.h>
