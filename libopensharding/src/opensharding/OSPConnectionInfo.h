@@ -34,6 +34,7 @@ namespace opensharding{
 		//const int PROTOCOL_PIPES = 2;
 		
 		string osp_vendor, virtual_host, host, osp_domain, target_dbms, target_schema_name, user, passwd;
+		string socket_file;
 		unsigned int port;
 		int protocol;
 		OSPConnectionInfo();
@@ -47,6 +48,7 @@ namespace opensharding{
         string getTargetSchemaName() {return target_schema_name;}
         string getUser() {return user;}
         string getPassword() {return passwd;}
+        string getSocketFile() { return socket_file; }
 		
 		};
 		
