@@ -61,8 +61,11 @@ def get_platform
     elsif RUBY_PLATFORM.downcase =~ /windows/
         return "win"
     else
+
+        # get linux distro name and version (might now work on all distros)
         issue = `cat /etc/issue`.downcase.split
-        if issue[0] == 'Ubuntu'
+
+        if issue[0] == 'ubuntu'
             # Ubuntu 12.04 LTS \n \l
             return issue[0] + "-" + issue[1]
         elsif issue[0] == 'centos'
@@ -91,9 +94,9 @@ end
 
 begin
   start = Time.now
-  clean
-  write_version_header
-  compile
+  #clean
+  #write_version_header
+  #compile
   create_tar
   finish = Time.now
 
