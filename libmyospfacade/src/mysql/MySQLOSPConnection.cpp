@@ -707,7 +707,7 @@ void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
         log.trace("mysql_free_result");
     }
 
-    if (res != NULL) {
+    if (res) {
 
         // iterate through result set rows
         res->data_cursor = res->data->data;
@@ -732,10 +732,10 @@ void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
 
         // delete field meta-data
         for (unsigned short i = 0; i < res->field_count; i++) {
-            if (res->fields[i].table) {
+            if (res->fields[i].table && res->fields[i].table != emptyString) {
                 delete [] res->fields[i].table;
             }
-            if (res->fields[i].name) {
+            if (res->fields[i].name && res->fields[i].name != emptyString) {
                 delete [] res->fields[i].name;
             }
         }
