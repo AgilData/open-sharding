@@ -91,6 +91,7 @@ def create_tar
   platform = `cat /etc/issue`
   branch = get_branch_name
 
+  tar_filename = ""
   if branch == "master"
       tar_filename = "myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
   else
@@ -109,7 +110,7 @@ def create_tar
   run_command "cp src/README.txt _temp"
 
   # create tar
-  run_command "tar cvzf  -C _temp ."
+  run_command "tar cvzf #{tar_filename} -C _temp ."
 
   # remove temp dir
   run_command "rm -rf _temp"
