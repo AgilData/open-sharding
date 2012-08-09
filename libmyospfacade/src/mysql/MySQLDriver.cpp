@@ -93,7 +93,7 @@ static int nextPipeNo = 1;
 
 static pthread_mutex_t MySQLDriver_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
-static pthread_mutex_t MySQLDriver_resouce_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t MySQLDriver_resource_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Wrapper around libmysqlclient.so */
 static MySQLClient *mysqlclient = NULL;
