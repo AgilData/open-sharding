@@ -667,8 +667,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                     stringstream ss(portString);
                     ss >> real_port;
                 }
-
-                info->host = real_host;
             }
 
             info->osp_domain         = conn_info[urlIndex++];
