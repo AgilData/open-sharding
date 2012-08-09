@@ -5,7 +5,7 @@ require 'time'
 def run_command (cmd)
   puts "Executing: #{cmd}"
   if ! system cmd
-    puts "FAILED: #{cmd}"
+    throw "FAILED: #{cmd}"
   end
 end
 
@@ -19,6 +19,11 @@ end
 
 def compile
   run_command "make clean ; make"
+
+  # do some minimal cleaning to get rid of temp files but don't delete libs
+  run_command "find . -name '*.o' -exec rm -f {} \\;"
+  run_command "find . -name '*.d' -exec rm -f {} \\;"
+
 end
 
 begin
