@@ -646,16 +646,10 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             else {
                 // read host and port
                 info->host = conn_info[urlIndex++];
-                string portString = conn_info[urlIndex++];
+                info->port = Util::toInt(conn_info[urlIndex++]);
 
-                unsigned int real_port;
-                if (portString == "0") {
-                    xlog.debug("Port was 0, defaulting to 4545");
-                    real_port = 4545;
-                }
-                else {
-                    stringstream ss(portString);
-                    ss >> real_port;
+                if (info->port == 0) {
+                    info->port = 4545;
                 }
             }
 
