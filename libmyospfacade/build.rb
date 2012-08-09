@@ -36,6 +36,13 @@ end
 
 def do_compile (version)
     puts "Building version #{version}"
+
+    # do some minimal cleaning to ensure this really is a clean build every time
+    run_command "rm -f libmyosp*"
+    run_command "find . -name '*.o' -exec rm -f {} \\;"
+    run_command "find . -name '*.d' -exec rm -f {} \\;"
+    run_command "find . -name '*.a' -exec rm -f {} \\;"
+
     if run_command "make clean; make #{version}"
       run_command "cp libmyosp* libs/"
     else
@@ -94,9 +101,9 @@ end
 
 begin
   start = Time.now
-  #clean
-  #write_version_header
-  #compile
+  clean
+  write_version_header
+  compile
   create_tar
   finish = Time.now
 
