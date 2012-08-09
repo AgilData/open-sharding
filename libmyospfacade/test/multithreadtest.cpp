@@ -23,6 +23,8 @@
 #define DATABASE "test"
 #define PORT 3306
 
+bool show_results = 0;
+
 /*Global Variables for Thread Test*/
 std::string table="test1";
 unsigned int numThreads=10;
@@ -31,20 +33,22 @@ std::string limit="1";
 
 using namespace std;
 
-void * run(void*){
+void * run(void* data){
 
-    cout<<"Thread started."<<endl;
+    int thread_no = *((int *)data);
+
+    cout<<"Thread " << thread_no << " started."<<endl;
     clock_t start = clock();
 
     MYSQL* mysql=mysql_init(NULL);
     if(!mysql){
-        cout<<"Thread terminated - mysql_init() failed"<<endl;
+        cout<<"Thread " << thread_no << " terminated - mysql_init() failed"<<endl;
         return NULL;
     }
 
     mysql = mysql_real_connect(mysql,SERVER,USER,PASSWORD,DATABASE,PORT,NULL,0);
     if(!mysql){
-        cout<<"mysql_real_connect() FAILED"<<endl;
+        cout<<"Thread " << thread_no << " mysql_real_connect() FAILED"<<endl;
         cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;
         return NULL;
     }
@@ -54,63 +58,80 @@ void * run(void*){
     unsigned int    numFields;
             
     for (int j=0; j<loopCount; j++){
+
+        cout<<"Thread " << thread_no <<" BEFORE query #" << j <<endl;
+
         //string sql = "SELECT * FROM item LIMIT " + limit;
         string sql = "SELECT * FROM " +  table + " LIMIT " + limit;
         if (mysql_query(mysql,sql.c_str())) {
-            cout<<"Thread terminated - mysql_query() failed"<<endl;
+            cout<<"Thread " << thread_no << " terminated - mysql_query() failed"<<endl;
             cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;
             return NULL;
         }
 
         res_set = mysql_store_result(mysql);
         if (!res_set) {
-            cout<<"Thread terminated - mysql_store_result() failed"<<endl;
+            cout<<"Thread " << thread_no << " terminated - mysql_store_result() failed"<<endl;
             cout<<mysql_errno(mysql)<<" "<<mysql_error(mysql)<<endl;
             return NULL;
         }
             
         numFields = mysql_num_fields(res_set);
-        cout<<"result set has " << numFields << "columns" << endl;
         while ((row = mysql_fetch_row(res_set)) != NULL){
-            for(int columnIndex=0; columnIndex < numFields; columnIndex++){
-                cout<<"["<<row[columnIndex]<<"] ";
+            if (show_results) {
+                for(int columnIndex=0; columnIndex < numFields; columnIndex++){
+                    cout<<"["<<row[columnIndex]<<"] ";
+                }
+                cout << endl;
             }
-            cout << endl;
         }
 
         mysql_free_result(res_set);
-    }
+
+        cout<<"Thread " << thread_no <<" AFTER query #" << j <<endl;
+   }
             
     mysql_close(mysql);   /* Close and shutdown connection*/
 
-    cout<<"Thread finished"<<endl;
+    cout<<"Thread " << thread_no <<" finished"<<endl;
 
     clock_t end = clock();
     clock_t total = end - start;
-    cout<<"Execution time of this thread: "<<total<<endl;
+    cout<<"Thread " << thread_no <<" execution time: "<<total<<endl;
 
     return NULL;
 }
 
 int main(int argc, const char * argv[])
 {
+    if (numThreads==1) {
 
-    pthread_t thread[numThreads];
+        int thread_no = 1;
+        run(&thread_no);
 
-    // create threads
-    for (int i=0; i<numThreads; ++i){
-        if(pthread_create(&thread[i], NULL, &run, (void*)i)){
-            cout<<"Failed to create thread"<<endl;
-            return -1;
+    }
+    else {
+
+        pthread_t thread[numThreads];
+
+        // create threads
+        for (int i=0; i<numThreads; ++i){
+            int *threadNo = new int[1];
+             *threadNo = i+1;
+            if(pthread_create(&thread[i], NULL, &run, (void*)threadNo)){
+                cout<<"Failed to create thread"<<endl;
+                return -1;
+            }
         }
-    }
 
-    // join threads (wait for threads to terminate)
-    cout << "Waiting for threads to terminate"<<endl;
-    for (int i=0; i<numThreads; ++i){
-        pthread_join(thread[i], NULL);
+        // join threads (wait for threads to terminate)
+        cout << "Waiting for threads to terminate"<<endl;
+        for (int i=0; i<numThreads; ++i){
+            cout << "Waiting to join thread " << (i+1) << endl;
+            pthread_join(thread[i], NULL);
+        }
+        cout << "All threads have terminated"<<endl;
     }
-    cout << "All threads have terminated"<<endl;
 
     return 0;
 }
