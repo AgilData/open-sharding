@@ -15,6 +15,7 @@
 
 #include <unistd.h>
 #include <map>
+#include <pthread.h>
 #include <mysql.h>
 #include <mysql/MySQLConnMap.h>
 #include <mysql/MySQLAbstractConnection.h>
@@ -54,7 +55,7 @@ bool MySQLConnMap::operator==(const ConnectInfo& A, const ConnectInfo& B)
 */
 
 MySQLConnMap::MySQLConnMap() {
-    //mutex = PTHREAD_MUTEX_INITIALIZER
+    connmap_mutex = PTHREAD_MUTEX_INITIALIZER
     pid = getpid();
     if (_log.isTraceEnabled()) {
         _log.trace(string(string("[") + Util::toString((void*)this)) + string("] NEW INSTANCE IN PROCESS ID ") + Util::toString((long)pid));
