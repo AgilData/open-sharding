@@ -62,7 +62,7 @@ def create_tar
   run_command "cp scripts/setup.rb _temp"
   run_command "cp src/myosp.conf _temp"
   run_command "cp src/README.txt _temp"
-  run_command "tar cvzf myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}.tgz -C _temp *"
+  run_command "tar cvzf myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}.tgz -C _temp ."
   run_command "rm -rf _temp"
 
 end
