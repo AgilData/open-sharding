@@ -41,6 +41,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <time.h>
 #include <sys/time.h>
 
