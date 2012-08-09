@@ -28,8 +28,6 @@
 #include <boost/thread/xtime.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
 
-//#include <string>
-//#include <iostream>
 #include <map>
 #include <queue>
 #include <stdio.h>
@@ -44,8 +42,6 @@
 #include <opensharding/OSPByteBuffer.h>
 #include <logger/Logger.h>
 
-
-
 #define OSPNP_SUCCESS                       0
 #define OSPNP_ERROR                         -1
 #define OSPNP_CREATE_REQUEST_PIPE_ERROR     -2
@@ -55,16 +51,7 @@
 
 #define OSPNP_MAX_REQUEST_ID                2000000000    // just to make sure we never overflow
 
-
-
 namespace opensharding {
-
-
-// TODO: Should probably break queue out into it's own class
-
-//typedef std::queue<OSPWireResponse*> fifo_id_msg_queue;
-
-
 
 class OSPNamedPipeConnection : public OSPConnection {
 private:
@@ -82,12 +69,6 @@ private:
     string requestPipeFilename;
     string responsePipeFilename;
 
-//    bool m_threadedResponseFifo;
-//    boost::thread* m_thread;
-//    boost::condition_variable m_cond;
-//    boost::mutex m_mutex;
-//    boost::mutex m_send_mutex;
- 
     bool m_fifosCreated;
     bool m_fifosOpened;
 
@@ -95,8 +76,6 @@ private:
 
     char *buffer;
     unsigned int bufferSize;
-
-    //map<int, fifo_id_msg_queue> m_responses;
 
     static logger::Logger &log;
 
@@ -106,10 +85,10 @@ private:
 
 
 public:
-    OSPNamedPipeConnection(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId);
+    OSPNamedPipeConnection(OSPConnectionInfo *info, int pipeId);
     ~OSPNamedPipeConnection();
     
-    int init(OSPConnectionInfo *info, bool threadedResponseFifo, int pipeId);
+    int init(OSPConnectionInfo *info, int pipeId);
 
     string getRequestPipeFilename() { return requestPipeFilename; }
     string getResponsePipeFilename() { return responsePipeFilename; }
@@ -120,17 +99,12 @@ public:
     int makeFifos();
     int openFifos();
 
-//    void startResponseThread();
- 
     OSPMessage* sendMessage(OSPMessage*);
     OSPMessage* sendMessage(OSPMessage*,  bool expectACK);
     OSPMessage* sendMessage(OSPMessage*,  bool expectACK, OSPMessageConsumer *);
 
     int sendOnly(OSPMessage *message, bool flush);
     OSPMessage* waitForResponse();
-
-    // response background thread handler
-    //void operator () ();
 
     void stop();
 };

@@ -514,7 +514,10 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
         }
         else if (info->getProtocol() == PROTOCOL_PIPES) {
-             ospNetworkConnection = new OSPNamedPipeConnection(info, false, pipeNo);
+             ospNetworkConnection = new OSPNamedPipeConnection(info, pipeNo);
+        }
+        else if (info->getProtocol() == PROTOCOL_UNIX_SOCKET) {
+             ospNetworkConnection = new OSPUnixSocketConnection(info);
         }
         else {
             throw Util::createException("UNSUPPORTED PROTOCOL");
