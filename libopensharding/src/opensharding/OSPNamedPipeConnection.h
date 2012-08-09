@@ -22,12 +22,6 @@
 #ifndef __OSPNamedPipeConnection_h__
 #define __OSPNamedPipeConnection_h__
 
-#include <boost/thread/mutex.hpp>
-#include <boost/thread/condition.hpp>
-#include <boost/thread/thread.hpp>
-#include <boost/thread/xtime.hpp>
-#include <boost/date_time/posix_time/posix_time.hpp>
-
 #include <map>
 #include <queue>
 #include <stdio.h>

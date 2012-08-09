@@ -83,9 +83,6 @@ private:
     int my_errno;
     char *my_error;
 
-    /* Mutex for thread-safe access to resultSets */
-    //boost::mutex resultSetMutex;
-
     // temporary variable used to populate MYSQL_RES structure
     MYSQL_RES  *currentRes;
     MYSQL_ROWS *currentRow;

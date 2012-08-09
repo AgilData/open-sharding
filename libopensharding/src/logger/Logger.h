@@ -28,10 +28,6 @@
 #include <string>
 #include <map>
 
-#include <boost/thread/mutex.hpp>
-//#include <boost/scoped_ptr.hpp>
-//#include <boost/thread.hpp>
-
 #define LOG_LEVEL_NONE  0
 #define LOG_LEVEL_TRACE 1
 #define LOG_LEVEL_DEBUG 2

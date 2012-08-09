@@ -19,8 +19,6 @@
 
 #include <unistd.h>
 #include <map>
-#include <boost/thread/mutex.hpp>
-//#include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <mysql.h>
 
 #include <mysql/MySQLAbstractConnection.h>
@@ -72,9 +70,6 @@ private:
     map<MYSQL_RES*, MySQLAbstractConnection*> mysqlResToConnMap; // THIS IS DEPRECATED
 
     map<MYSQL*, MySQLErrorState*> mysqlToErrorMap;
-
-    // mutex for thread safety
-    boost::mutex mutex;
 
 public:
     MySQLConnMap();
