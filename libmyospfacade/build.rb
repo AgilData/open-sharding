@@ -9,11 +9,8 @@ MYOSP_TIMESTAMP = Time.new.strftime("%Y%m%d-%H%M%S")
 def run_command (cmd)
   puts "Executing: #{cmd}"
   if ! system cmd
-    puts "FAILED: #{cmd}"
-    return false
+    raise "FAILED: #{cmd}"
   end
-
-  return true
 end
 
 def clean
@@ -43,12 +40,8 @@ def do_compile (version)
     run_command "find . -name '*.d' -exec rm -f {} \\;"
     run_command "find . -name '*.a' -exec rm -f {} \\;"
 
-    if run_command "make clean; make #{version}"
-      run_command "cp libmyosp* libs/"
-    else
-      puts "BUILD FOR VERSION #{version} FAILED!!!"
-      exit
-    end
+    run_command "make clean; make #{version}"
+    run_command "cp libmyosp* libs/"
 end
 
 def compile
@@ -90,7 +83,7 @@ def create_tar
   run_command "rm -rf _temp"
   run_command "mkdir _temp"
   run_command "cp libs/lib* _temp"
-  run_command "cp ../libopensharding/libopensharding.1.0.0 _temp"
+  run_command "cp ../libopensharding/libopensharding.so.1.0.0 _temp"
   run_command "cp scripts/setup.rb _temp"
   run_command "cp src/myosp.conf _temp"
   run_command "cp src/README.txt _temp"
