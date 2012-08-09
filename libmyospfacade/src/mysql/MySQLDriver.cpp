@@ -46,6 +46,7 @@
 #include <opensharding/OSPConnection.h>
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
+#include <opensharding/OSPUnixSocketConnection.h>
 #include <opensharding/OSPWireRequest.h>
 #include <opensharding/OSPConnectRequest.h>
 #include <opensharding/OSPWireResponse.h>
