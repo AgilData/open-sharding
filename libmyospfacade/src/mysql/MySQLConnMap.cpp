@@ -79,7 +79,7 @@ void MySQLConnMap::setConnection(MYSQL *mysql, MySQLAbstractConnection *conn) {
         );
     }
 
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlToConnMap[mysql] = conn;
 }
 
@@ -87,7 +87,7 @@ void MySQLConnMap::setConnection(MYSQL *mysql, MySQLAbstractConnection *conn) {
  * Convert MYSQL* to MySQLAbstractConnection*
  */
 MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL *mysql) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
 
     MySQLAbstractConnection *ret = mysqlToConnMap[mysql];
 
@@ -106,12 +106,12 @@ MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL *mysql) {
 }
 
 void MySQLConnMap::setResultSet(MYSQL_RES* res, MySQLAbstractResultSet *rs) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlResMap[res] = rs;
 }
 
 MySQLAbstractResultSet* MySQLConnMap::getResultSet(MYSQL_RES* res) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     if (mysqlResMap.count(res)==0) {
         return NULL;
     }
@@ -120,13 +120,13 @@ MySQLAbstractResultSet* MySQLConnMap::getResultSet(MYSQL_RES* res) {
 
 // DEPRECATED:
 void MySQLConnMap::setConnection(MYSQL_RES* res, MySQLAbstractConnection *conn) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlResToConnMap[res] = conn;
 }
 
 // DEPRECATED:
 MySQLAbstractConnection *MySQLConnMap::getConnection(MYSQL_RES *res) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     if (mysqlResToConnMap.count(res)==0) {
         return NULL;
     }
@@ -146,7 +146,7 @@ void MySQLConnMap::erase(MYSQL *mysql) {
         );
     }
 
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
 
     mysqlToConnMap[mysql] = NULL;
     mysqlToErrorMap[mysql] = NULL;
@@ -165,7 +165,7 @@ void MySQLConnMap::erase(MYSQL_RES *res) {
         _log.trace(string("[") + Util::toString((void*)this)
             + string("] erase(MYSQL_RES=") + Util::toString((void *)res) + string(")"));
     }
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlResToConnMap.erase(res);
 }
 
@@ -188,12 +188,12 @@ void MySQLConnMap::eraseResults(MySQLAbstractConnection *conn) {
 }
 
 void MySQLConnMap::setConnectInfo(MYSQL *mysql, MySQLConnectionInfo *connectInfo) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlToConnInfoMap[mysql] = connectInfo;
 }
 
 MySQLConnectionInfo* MySQLConnMap::getConnectInfo(MYSQL *mysql) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     if (mysqlToConnInfoMap.count(mysql)==0) {
         return NULL;
     }
@@ -201,12 +201,12 @@ MySQLConnectionInfo* MySQLConnMap::getConnectInfo(MYSQL *mysql) {
 }
 
 void MySQLConnMap::setErrorState(MYSQL *mysql, MySQLErrorState *errorState) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlToErrorMap[mysql] = errorState;
 }
 
 MySQLErrorState *MySQLConnMap::getErrorState(MYSQL *mysql) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     if (mysqlToErrorMap.count(mysql)==0) {
         return NULL;
     }
@@ -214,7 +214,7 @@ MySQLErrorState *MySQLConnMap::getErrorState(MYSQL *mysql) {
 }
 
 void MySQLConnMap::clearErrorState(MYSQL *mysql) {
-    MutexLock(&connmap_mutex);
+    MutexLock lock(&connmap_mutex);
     mysqlToErrorMap.erase(mysql);
 }
 
