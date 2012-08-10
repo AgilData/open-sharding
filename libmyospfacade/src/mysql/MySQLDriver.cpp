@@ -25,7 +25,6 @@
 //#include <my_global.h>
 #include <errmsg.h>
 #include <my_global.h>
-#include <mysql_com.h>
 #include <m_ctype.h>
 
 #include <mysql.h>
