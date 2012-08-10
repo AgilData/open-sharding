@@ -93,9 +93,9 @@ def create_tar
 
   tar_filename = ""
   if branch == "master"
-      tar_filename = "myosp-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
+      tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-#{MYOSP_TIMESTAMP}.tgz"
   else
-      tar_filename = "myosp-#{branch}-#{get_platform}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{MYOSP_TIMESTAMP}.tgz"
+      tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-#{MYOSP_TIMESTAMP}.tgz"
   end
 
   # create temp dir
