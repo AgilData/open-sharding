@@ -25,6 +25,8 @@
  namespace opensharding{
  
 	  OSPConnectionInfo::OSPConnectionInfo() {
+	  port = 0;
+	  protocol = 0;
 	 }
 	 
 	  OSPConnectionInfo::~OSPConnectionInfo(){
