@@ -105,9 +105,8 @@ def create_tar
   # copy files into temp dir
   run_command "cp libs/lib* _temp"
   run_command "cp ../libopensharding/libopensharding.so.1.0.0 _temp"
-  run_command "cp scripts/setup.rb _temp"
-  run_command "cp src/myosp.conf _temp"
-  run_command "cp src/README.txt _temp"
+  run_command "cp myosp.conf _temp"
+  run_command "cp README.txt _temp"
 
   # create tar
   run_command "tar cvzf #{tar_filename} -C _temp ."
