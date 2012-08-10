@@ -39,12 +39,17 @@ public:
         this->name = name;
         this->mutex = mutex;
         //cerr << "Locking " << name << endl;
-        pthread_mutex_lock( this->mutex );
+        if (o != pthread_mutex_lock( this->mutex )) {
+            cerr << "Failed to lock mutex " << name << endl;
+            this->mutex = NULL;
+        }
     }
 
     ~MutexLock() {
         //cerr << "Unlocking " << name << endl;
-        pthread_mutex_unlock( this->mutex );
+        if (this->mutex) {
+            pthread_mutex_unlock( this->mutex );
+        }
     }
 };
 

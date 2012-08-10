@@ -170,6 +170,7 @@ void MySQLConnMap::erase(MYSQL_RES *res) {
 }
 
 void MySQLConnMap::eraseResults(MySQLAbstractConnection *conn) {
+    MutexLock lock("MySQLConnMap", &connmap_mutex);
     map<MYSQL_RES*, MySQLAbstractConnection*>::iterator it;
     while (true) {
         bool found = false;
