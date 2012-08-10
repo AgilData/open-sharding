@@ -148,7 +148,7 @@ begin
     if ARGV.length==0
         puts "Usage: ruby build.rb OPTION [ARGS]"
         puts "\tAvailable options: "
-        puts "\t\t - setup-env "
+        puts "\t\t - check-dep "
         puts "\t\t - build "
         exit
     end
@@ -157,8 +157,8 @@ begin
 
     if option == "build"
       build
-    elsif option == "setup-env"
-      setup_environment
+    elsif option == "check-dep"
+      check_dep
     else
         puts "Error: Invalid Argument"
         exit 1
