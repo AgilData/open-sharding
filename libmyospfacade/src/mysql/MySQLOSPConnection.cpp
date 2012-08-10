@@ -447,72 +447,57 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             // set the data type
             currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
 
-            bool TRACE = true;		
             const char *odbcColumnName = columnName->getBuffer();
 
             switch (jdbcType) {
                 case JDBC_BLOB:
                     currentRes->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BLOB --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_BINARY:
                     currentRes->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_VARBINARY:
                     currentRes->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARBINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_LONGVARBINARY:
                     currentRes->fields[i].type = MYSQL_TYPE_BLOB;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_LONGVARBINARY --> MYSQL_TYPE_BLOB"));
                     break;
                 case JDBC_DATE:
                     currentRes->fields[i].type = MYSQL_TYPE_DATE;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TYPE_DATE --> MYSQL_TYPE_DATE"));
                     break;
                 case JDBC_TIME:
                     currentRes->fields[i].type = MYSQL_TYPE_DATETIME;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_TIME --> MYSQL_TYPE_DATETIME"));
                     break;
                 case JDBC_TIMESTAMP:
                     currentRes->fields[i].type = MYSQL_TYPE_DATETIME;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DATETIME --> MYSQL_TYPE_DATETIME"));
                     break;
                 case JDBC_DECIMAL:
                 case JDBC_NUMERIC:
                     currentRes->fields[i].type = MYSQL_TYPE_DECIMAL;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DECIMAL --> MYSQL_TYPE_DECIMAL"));
                     break;
                 case JDBC_BIT:
                 case JDBC_TINYINT:
                     currentRes->fields[i].type = MYSQL_TYPE_TINY;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_BIT --> MYSQL_TYPE_TINY"));
                     break;
                 case JDBC_SMALLINT:
                 case JDBC_BIGINT:
                 case JDBC_INTEGER:
                     currentRes->fields[i].type = MYSQL_TYPE_INT24;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_INTEGER --> MYSQL_TYPE_INT24"));
                     break;
                 case JDBC_REAL:
                 case JDBC_FLOAT:
                     currentRes->fields[i].type = MYSQL_TYPE_FLOAT;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_FLOAT --> MYSQL_TYPE_FLOAT"));
                     break;
                 case JDBC_DOUBLE:
                     currentRes->fields[i].type = MYSQL_TYPE_DOUBLE;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_DOUBLE --> MYSQL_TYPE_DOUBLE"));
                     break;
                 case JDBC_CHAR:
                 case JDBC_VARCHAR:
                 case JDBC_LONGVARCHAR:
                     currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_VARCHAR --> MYSQL_TYPE_VARCHAR"));
                     break;
                 case JDBC_CLOB:
                     currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
-                    if (TRACE) log.trace(string("Column ") + string((const char *)odbcColumnName) + string(" JDBC_CLOB --> MYSQL_TYPE_VARCHAR"));
                     break;
                 default:
                     currentRes->fields[i].type = MYSQL_TYPE_VARCHAR;
@@ -702,52 +687,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 }
 
 void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
-
-    if (log.isTraceEnabled()) {
-        log.trace("mysql_free_result");
-    }
-
-    if (res) {
-
-        // iterate through result set rows
-        res->data_cursor = res->data->data;
-        while (res->data_cursor) {
-
-            // get pointer to row
-            MYSQL_ROWS *currentRow = res->data_cursor;
-            MYSQL_ROW tmp = res->data_cursor->data;
-
-            // delete single buffer that contains all row data
-            delete [] tmp[0];
-
-            // delete array of pointers to offsets within the row data
-            delete [] tmp;
-
-            // go to next row
-            res->data_cursor = res->data_cursor->next;
-
-            // delete row
-            delete currentRow;
-        }
-
-        // delete field meta-data
-        for (unsigned short i = 0; i < res->field_count; i++) {
-            if (res->fields[i].table && res->fields[i].table != emptyString) {
-                cerr << "deleting table name" << endl;
-                delete [] res->fields[i].table;
-            }
-            if (res->fields[i].name && res->fields[i].name != emptyString) {
-                cerr << "deleting column name" << endl;
-                delete [] res->fields[i].name;
-            }
-        }
-        delete [] res->fields;
-        delete [] res->lengths;
-
-        delete res;
-        res = NULL;
-    }
-
+    // this method is never called! see MySQLOSPResultSet instead
 }
 
 MYSQL_RES * MySQLOSPConnection::mysql_use_result(MYSQL *mysql) {

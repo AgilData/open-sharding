@@ -1895,7 +1895,7 @@ int mysql_set_server_option(MYSQL *mysql, enum enum_mysql_set_option option) {
 
 void mysql_free_result(MYSQL_RES *res) {
     //trace("mysql_free_result", res);
-    if (res==NULL) {
+    if (!res) {
         return;
     }
     MySQLAbstractResultSet *rs = getResourceMap()->getResultSet(res);
