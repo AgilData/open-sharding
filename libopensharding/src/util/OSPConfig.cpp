@@ -169,7 +169,9 @@ OSPConfig::~OSPConfig() {
 
 	if (Util::toLower(protocol) == "socket") {
 
+        // skip the ':'
         pos1=pos2+1;
+        // find the next ':'
         pos2=host_url.find(":", pos1);
 
     	string socketFile = host_url.substr(pos1, pos2-pos1);

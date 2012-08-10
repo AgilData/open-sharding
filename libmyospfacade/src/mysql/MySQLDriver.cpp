@@ -623,6 +623,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             int urlIndex = 0;
 
             info->osp_vendor = conn_info[urlIndex++];
+
             string protocolName = conn_info[urlIndex++];
 
             if (protocolName == "pipes") {
@@ -631,7 +632,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             else if (protocolName == "tcp") {
                 info->protocol = PROTOCOL_TCP;
             }
-            else if (protocolName == "unix") {
+            else if (protocolName == "socket") {
                 info->protocol = PROTOCOL_UNIX_SOCKET;
             }
             else {
