@@ -177,6 +177,8 @@ OSPConfig::~OSPConfig() {
     	string socketFile = host_url.substr(pos1, pos2-pos1);
     	ret.push_back(socketFile);
 
+        // skip the ':/' after filename
+    	pos1=pos2+2;
 	}
 	else if (Util::toLower(protocol) == "pipes" || Util::toLower(protocol) == "tcp" || Util::toLower(protocol) == "socket") {
 
@@ -209,13 +211,14 @@ OSPConfig::~OSPConfig() {
             throw Util::createException((string("The URL is invalid, host is required. url: ") + host_url).c_str());
         }
 
+        // skip the '/' after port
+    	pos1=pos2+1;
 	}
 	else {
 		throw Util::createException((string("The URL is invalid, the protocol contains a non-valid value. Valid values: pipes|tcp|socket. value ") + protocol).c_str());
 	}
 
 	// parse domain
-	pos1=pos2+1;
 	pos2=host_url.find("/", pos1);
 	if (pos2 == string::npos) {
 		throw Util::createException((string("The URL is invalid, domain is required. url: ") + host_url).c_str());
