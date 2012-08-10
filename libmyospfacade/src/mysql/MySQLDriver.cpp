@@ -1840,9 +1840,6 @@ unsigned long mysql_escape_string(char *to, const char *from,
 unsigned long mysql_hex_string(char *to, const char *from,
         unsigned long from_length) {
     //trace("mysql_hex_string");
-    // delegate directly to MySQL driver
-//    //boost::mutex::scoped_lock lock(nonConnMutex);
-//    return getNonConn()->mysql_hex_string(to, from, from_length);
     return -1;
 }
 
