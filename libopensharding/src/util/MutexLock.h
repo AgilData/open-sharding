@@ -39,7 +39,7 @@ public:
         this->name = name;
         this->mutex = mutex;
         //cerr << "Locking " << name << endl;
-        if (o != pthread_mutex_lock( this->mutex )) {
+        if (0 != pthread_mutex_lock( this->mutex )) {
             cerr << "Failed to lock mutex " << name << endl;
             this->mutex = NULL;
         }
