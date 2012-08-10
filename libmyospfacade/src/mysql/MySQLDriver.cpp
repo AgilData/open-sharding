@@ -22,8 +22,8 @@
 #include <map>
 
 // if we want to support all mysql symbols we need to *at least* import these headers
-//#include <my_global.h>
-//#include <m_ctype.h>
+#include <my_global.h>
+#include <m_ctype.h>
 
 #include <mysql.h>
 #include <errmsg.h>
