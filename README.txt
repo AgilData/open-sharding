@@ -131,8 +131,8 @@ jdbc:osp:tcp:host[:port]
 jdbc:osp:tcp:myosphost:4001
 
 uds (Unix Domain Socket)
-jdbc:osp:uds:[path-to-socket-file]
-uds:osp:uds:/var/sock/myospprocess.sock
+jdbc:osp:socket:[path-to-socket-file]
+jdbc:osp:socket:/var/sock/myospprocess.sock
 
 named-pipes (Unix Named Pipes or Microsoft Windows Named Pipes)
 jdbc:osp:pipes:[pipe-name-prefix]

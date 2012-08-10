@@ -1,1 +1,17 @@
-To build, run "ant". You must build and install libopensharding first.
+libmyosp
+
+Build
+
+Run the build.rb script. This will create the following libraries in the ./libs directory and will also create
+a tarball of these files as well as the libopensharding.so from ../libopensharding
+
+libmyosp.so.15
+libmyosp_r.so.15
+libmyosp.so.16
+libmyosp_r.so.16
+
+These libraries mimic libmysqlclient.so and at runtime dynamically load a version of the original libmysqlclient with
+the so name and filename libmysqlclient_real.so.
+
+Note that it is not advisable to simply set up symlinks called libmysqlclient_real.so to link to the original
+libmysqlclient since this requires setting LD_LIBRARY_PATH and ldconfig will delete or change symlinks.
