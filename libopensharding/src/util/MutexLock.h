@@ -38,12 +38,12 @@ public:
     MutexLock(const char *name, pthread_mutex_t* mutex) {
         this->name = name;
         this->mutex = mutex;
-        cerr << "Locking " << name << endl;
+        //cerr << "Locking " << name << endl;
         pthread_mutex_lock( this->mutex );
     }
 
     ~MutexLock() {
-        cerr << "Unlocking " << name << endl;
+        //cerr << "Unlocking " << name << endl;
         pthread_mutex_unlock( this->mutex );
     }
 };
