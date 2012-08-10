@@ -16,11 +16,6 @@ require 'fileutils'
 ## Constants
 #################################################################################################
 
-BOOST_VER = "1.38.0"
-BOOST_DIR = "boost_1_38_0"
-BOOST_TAR = "boost_1_38_0.tar.gz"
-BOOST_DOWNLOAD = "http://downloads.sourceforge.net/project/boost/boost/#{BOOST_VER}/#{BOOST_TAR}"
-
 #################################################################################################
 ## Run an operating system command
 #################################################################################################
@@ -30,30 +25,6 @@ def run_command(cmd)
         puts "FAILED to execute #{cmd}"
         exit 1
     end
-end
-
-#################################################################################################
-## Set up environment
-#################################################################################################
-def setup_environment
-    check_dep
-    puts "Downloading Boost Libraries"
-    if RUBY_PLATFORM.downcase.include?("darwin")
-        if !File.exists? "#{BOOST_DIR}"
-            run_command "curl -L #{BOOST_DOWNLOAD} | tar xz"
-        end
-    else
-        if !File.exists? "#{BOOST_TAR}"
-            run_command "wget #{BOOST_DOWNLOAD}"
-        end
-        if !File.exists? "#{BOOST_DIR}"
-            run_command "tar xzf #{BOOST_TAR}"
-        end
-    end
-    puts "Building and Installing Boost Libraries"
-    Dir.chdir BOOST_DIR
-    run_command "./configure"
-    run_command "sudo make install"
 end
 
 #################################################################################################
