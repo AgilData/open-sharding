@@ -57,17 +57,35 @@ OSPUnixSocketConnection::~OSPUnixSocketConnection() {
 
 void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 {
-    socketFile = fopen(info->socket_file.c_str(), "rwb");
-    socketFD = fileno(socketFile);
-    makeNonBlocking(socketFD);
+/*
+    // open socket
+    int sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
+    if (sockfd < 0) {
+        throw Util::createException("ERROR opening unix domain socket");
+    }
+
+    // bind socket
+    struct sockaddr_un my_addr;
+    my_addr.sun_family = AF_UNIX;
+    memset(&my_addr, 0, sizeof(struct sockaddr_un));
+    strncpy(my_addr.sun_path, info->socket_file.c_str(), sizeof(my_addr.sun_path) - 1);
+
+    // connect
+    if (connect(sockfd, (struct sockaddr *) &my_addr, sizeof(my_addr)) < 0) {
+        throw Util::createException("ERROR connecting");
+    }
 
     is = new OSPFileInputStream(socketFD, 4096);
-    os = new OSPFileOutputStream(socketFile, 0);
+
+    //TODO: need output stream to use FD not FILE*
+
+    //os = new OSPFileOutputStream(socketFile, 0);
 
     bufferSize = 8192;
     buffer = new char[bufferSize];
 
     nextRequestID = 1;
+    */
 }
 
 

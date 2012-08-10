@@ -22,6 +22,7 @@
 #include <mysql/MySQLConnectionInfo.h>
 
 MySQLConnectionInfo::MySQLConnectionInfo() {
+    unix_socket = NULL;
 }
 
 MySQLConnectionInfo::~MySQLConnectionInfo() {
