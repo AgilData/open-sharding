@@ -53,9 +53,13 @@ using namespace util;
 
 #define LOG_METHOD_CALLS false
 
-static char *emptyString = Util::createString("");
-
 Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
+
+char *createEmptyString() {
+    char *ret = new char[0];
+    ret[0] = '\0';
+    return ret;
+}
 
 MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
 
@@ -415,12 +419,12 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         	OSPString *tableName = response->getTableNames()[i];
 
         	if (tableName == NULL) {
-        		currentRes->fields[i].table = emptyString;
+        		currentRes->fields[i].table = createEmptyString();
         	}
         	else {
 				int tableNameLength = tableName->getLength();
 				if (tableNameLength<1) {
-					currentRes->fields[i].table = emptyString;
+					currentRes->fields[i].table = createEmptyString();
 				}
 				else {
 					currentRes->fields[i].table = new char[tableNameLength + 1];
@@ -433,7 +437,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
             int jdbcType = response->getColumnTypes()[i];
             int columnNameLength = columnName->getLength();
             if (columnNameLength<1) {
-                currentRes->fields[i].name = emptyString;
+                currentRes->fields[i].name = createEmptyString();
             }
             else {
                 currentRes->fields[i].name = new char[columnNameLength + 1];
@@ -506,11 +510,11 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
                     break;
             }
 
-            currentRes->fields[i].org_name = emptyString;
-            currentRes->fields[i].org_table = emptyString;
-            currentRes->fields[i].db = emptyString;
-            currentRes->fields[i].catalog = emptyString;
-            currentRes->fields[i].def = emptyString;
+            currentRes->fields[i].org_name = createEmptyString();
+            currentRes->fields[i].org_table = createEmptyString();
+            currentRes->fields[i].db = createEmptyString();
+            currentRes->fields[i].catalog = createEmptyString();
+            currentRes->fields[i].def = createEmptyString();
             currentRes->fields[i].max_length = 0; // this must be set to the max length of any data item in the current result set
         }
 
@@ -693,82 +697,6 @@ void MySQLOSPConnection::mysql_free_result(MYSQL_RES *res) {
 MYSQL_RES * MySQLOSPConnection::mysql_use_result(MYSQL *mysql) {
     log.error("mysql_use_result not implemented with OSP yet!");
     return NULL;
-
-//
-//    if (log.isDebugEnabled()) log.debug(getLogPrefix(mysql) + "In mysql_use_result()");
-//
-//    // create native MySQL result set structure
-//    res = new MYSQL_RES();
-//    memset(res, 0, sizeof(MYSQL_RES));
-//
-//    // how many columns?
-//    SQLSMALLINT columns;
-//
-//    SQLNumResultCols(stmt, &columns);
-//    int columnCount = columns;
-//
-//    res->field_count = columns;
-//    res->row_count = 0;
-//    res->current_field = 0;
-//
-//    // fields
-//    res->fields = new MYSQL_FIELD[res->field_count];
-//    memset(res->fields, 0, res->field_count * sizeof(MYSQL_FIELD));
-//
-//    char *emptyString = Util::createString("");
-//
-//    SQLCHAR odbcColumnName[64];
-//    SQLSMALLINT odbcNameLength;
-//    SQLSMALLINT odbcDataType;
-//    SQLULEN odbcColumnSize;
-//    SQLSMALLINT odbcDecimalDigits;
-//    SQLSMALLINT odbcNullable;
-//
-//    for (unsigned int i = 0; i < res->field_count; i++) {
-//        SQLRETURN ret = SQLDescribeCol(stmt, i + 1, odbcColumnName,
-//                sizeof(odbcColumnName), &odbcNameLength, &odbcDataType,
-//                &odbcColumnSize, &odbcDecimalDigits, &odbcNullable);
-//
-//        if (ret != SQL_SUCCESS && ret != SQL_SUCCESS_WITH_INFO) {
-//            log.error("SQLDescribeCol FAILED");
-//            setODBCError(SQL_HANDLE_STMT);
-//            return NULL;
-//        }
-//
-//        res->fields[i].name = new char[odbcNameLength + 1];
-//        strcpy(res->fields[i].name, (const char *) odbcColumnName);
-//        res->fields[i].name_length = odbcNameLength;
-//        res->fields[i].length = odbcColumnSize;
-//        res->fields[i].type = MYSQL_TYPE_VARCHAR;
-//
-//        res->fields[i].org_name = emptyString;
-//        res->fields[i].table = emptyString;
-//        res->fields[i].org_table = emptyString;
-//        res->fields[i].db = emptyString;
-//        res->fields[i].catalog = emptyString;
-//        res->fields[i].def = emptyString;
-//        res->fields[i].max_length = 0;
-//
-//    } // end of for loop
-//
-//    // create data structure
-//    res->data = new MYSQL_DATA();
-//    res->data->rows = 0;
-//    res->data->fields = columns;
-//    res->data->data = NULL; // populate this later
-//
-//    // finalize result set structure
-//    res->handle = mysql;
-//    res->eof = 0;
-//    res->lengths = new unsigned long[columnCount];
-//    memset(res->lengths, 0, sizeof(unsigned long[columnCount]));
-//
-//    // store result
-//    mysqlResourceMap->setConnection(res, this);
-//
-//    // return result set
-//    return res;
-
 }//end of use_result
 
 my_bool MySQLOSPConnection::mysql_commit(MYSQL * mysql) {
@@ -860,92 +788,7 @@ MYSQL_ROW MySQLOSPConnection::mysql_fetch_row(MYSQL_RES *res) {
     if (isUseResult) {
         log.error("mysql_fetch_row not implemented in OSP yet!");
         return NULL;
-
-//
-//        if (TRACE) {
-//            log.trace("USE RESULT VERSION (NOT STORE RESULT VERSION");
-//        }
-//
-//        // mysql_use_result version
-//
-//        SQLLEN indicator;
-//
-//        long row;
-//        char buf[1024];
-//        SQLUSMALLINT col;
-//        MYSQL_ROWS *currentRow = NULL;
-//        SQLSMALLINT columns = res->field_count;
-//        //cout << "columns: " << columns << endl;
-//
-//        if (isSuccess(row = SQLFetch(stmt), "SQLFetch")) {
-//            currentRow = new MYSQL_ROWS();
-//            currentRow->length = 0;
-//            currentRow->data = new char*[columns];
-//            // on the first row, mark this as the result set data
-//            if (res->data_cursor == NULL) {
-//                //cout << "in if 2" << endl;
-//                res->data_cursor = currentRow;
-//                res->data->data = currentRow;
-//            }
-//
-//            // fetch each field's value as a string
-//            for (col = 1; col <= columns; col++) {
-//                SQLRETURN ret = SQLGetData(stmt, col, SQL_C_CHAR, buf,
-//                        sizeof(buf), &indicator);
-//                if (isSuccess(ret, "SQLGetData")) {
-//
-//                    //TODO: update this based on store_result ... this is out of date
-//
-//                    unsigned int l = 0;
-//                    if (indicator == SQL_NULL_DATA) {
-//                        // empty string TODO: seems like it could be more efficient
-//                        char *tmp = new char[1];
-//                        tmp[0] = '\0';
-//                        l = 0;
-//                        currentRow->data[col - 1] = tmp;
-//                    } else {
-//                        // copy the data from the buffer into the native structure
-//                        l = indicator; //strlen(buf);
-//                        currentRow->data[col - 1] = new char[l + 1];
-//                        memcpy(currentRow->data[col - 1], buf, l);
-//                        currentRow->data[col - 1][l] = '\0';
-//                    }
-//                    // update max length
-//                    if (l > res->fields[col - 1].max_length) {
-//                        res->fields[col - 1].max_length = l;
-//                    }
-//                }//end of isSuccess if condition
-//
-//                else {
-//                    log.error("SQLGetData FAILED");
-//                    setODBCError(SQL_HANDLE_STMT);
-//                    return NULL;
-//                }//end of else
-//
-//            }//end of for
-//            res->row_count++;
-//            res->data->rows++;
-//
-//            MYSQL_ROW tmp = res->data_cursor->data;
-//            res->data_cursor = res->data_cursor->next;
-//
-//            res->current_row = tmp;
-//
-//            // calculate fields length for current row
-//            for (unsigned short i=0; i<res->data->fields; i++) {
-//                res->lengths[i] = res->current_row[i]==NULL ? 0 : strlen(res->current_row[i]);
-//            }
-//
-//            return res->current_row;
-//
-//        } // end of SQLFetch
-//
-//        else {
-//            return res->current_row = (MYSQL_ROW) NULL;
-//        }
-//
     }//end of useResult
-
     else {
         // mysql_store_result version
         if (!res->data_cursor) {
