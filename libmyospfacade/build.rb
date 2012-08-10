@@ -25,7 +25,7 @@ def clean
 end
 
 def get_branch_name
-    return `git branch | head -1`[2..99].chomp
+    return `git branch | grep \"*\" | head -1`[2..99].chomp
 end
 
 def write_version_header

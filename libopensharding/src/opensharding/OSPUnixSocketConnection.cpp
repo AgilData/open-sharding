@@ -63,6 +63,7 @@ void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
     // open socket
     int sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
     if (sockfd < 0) {
+        log.error(string("ERROR opening unix domain socket"));
         throw Util::createException("ERROR opening unix domain socket");
     }
 
@@ -74,7 +75,8 @@ void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 
     // connect
     if (connect(sockfd, (struct sockaddr *) &my_addr, sizeof(my_addr)) < 0) {
-        throw Util::createException("ERROR connecting");
+        log.error(string("ERROR connecting to unix socket: ") + info->socket_file);
+        throw Util::createException("ERROR connecting to unix socket");
     }
 
     is = new OSPFileInputStream(socketFD, 4096);

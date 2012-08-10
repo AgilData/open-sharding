@@ -496,19 +496,19 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              xlog.debug("Creating OSP connection");
         }
 
-        if (xlog.isDebugEnabled()) xlog.debug("Getting next named pipe ID");
-        int pipeNo = getNextNamedPipeID();
-        if (xlog.isDebugEnabled()) xlog.debug(string("Got next named pipe ID: ") + Util::toString(pipeNo));
 
         // create a dedicated named pipe connection
         OSPConnection* ospNetworkConnection;
         if (info->getProtocol() == PROTOCOL_TCP) {
             if (xlog.isDebugEnabled()) xlog.debug("Creating OSPTCPConnection OK");
-             ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
+            ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
         }
         else if (info->getProtocol() == PROTOCOL_PIPES) {
+            if (xlog.isDebugEnabled()) xlog.debug("Getting next named pipe ID");
+            int pipeNo = getNextNamedPipeID();
+            if (xlog.isDebugEnabled()) xlog.debug(string("Got next named pipe ID: ") + Util::toString(pipeNo));
             if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection OK");
-             ospNetworkConnection = new OSPNamedPipeConnection(info, pipeNo);
+            ospNetworkConnection = new OSPNamedPipeConnection(info, pipeNo);
         }
         else if (info->getProtocol() == PROTOCOL_UNIX_SOCKET) {
             if (xlog.isDebugEnabled()) xlog.debug("Creating OSPUnixSocketConnection OK");
