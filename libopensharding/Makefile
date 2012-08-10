@@ -1,13 +1,11 @@
-BOOST_INCLUDE_PATH=/usr/local/include/boost-1_38
 LIBXML_INCLUDE_PATH=/usr/include/libxml2
 GCC_VERSION := $(shell sh -c 'gcc -v 2>&1|tail -n 1 | cut -f 3 -d " "  | cut -f -2 -d \. |tr -d \. || echo UNKNOWN')
-BOOST_THREAD_LIB=boost_thread-gcc$(GCC_VERSION)-mt
 
 # release settings
-#CPPFLAGS=-Isrc -I$(BOOST_INCLUDE_PATH) -I$(LIBXML_INCLUDE_PATH) -O2 -Wall -c -fmessage-length=0 -fPIC -MMD -MP
+#CPPFLAGS=-Isrc -I$(LIBXML_INCLUDE_PATH) -O2 -Wall -c -fmessage-length=0 -fPIC -MMD -MP
 
 # debug settings
-CPPFLAGS=-Isrc -I$(BOOST_INCLUDE_PATH) -I$(LIBXML_INCLUDE_PATH) -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -fno-inline -MMD -MP
+CPPFLAGS=-Isrc  -I$(LIBXML_INCLUDE_PATH) -O0 -g3 -Wall -c -fmessage-length=0 -fPIC -fno-inline -MMD -MP
 
 all: libopensharding.so.1.0.0
 
@@ -49,7 +47,7 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/util/OSPConfig.cpp
 	@echo "Linking libopensharding..."
 	@rm -f libopensharding.so*
-	@gcc -shared -Wl,-soname,libopensharding.so -o libopensharding.so.1.0.0 *.o -lc -lstdc++ -l$(BOOST_THREAD_LIB) -L/usr/lib64 -L$(BOOST_THREAD_LIB)
+	@gcc -shared -Wl,-soname,libopensharding.so -o libopensharding.so.1.0.0 *.o -lc -lstdc++ -L/usr/lib64 
 	@ln -s libopensharding.so.1.0.0 libopensharding.so
 	@rm -f *.o
 	@rm -f *.d
