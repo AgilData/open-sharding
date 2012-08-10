@@ -23,7 +23,7 @@
 
 // if we want to support all mysql symbols we need to *at least* import these headers
 //#include <my_global.h>
-//#include <m_ctype.h>
+#include <m_ctype.h>
 
 #include <mysql.h>
 #include <errmsg.h>
@@ -66,40 +66,6 @@ using namespace logger;
 using namespace std;
 using namespace util;
 using namespace opensharding;
-
-
-/*Externs Pulled from m_ctype.h*/
-extern CHARSET_INFO my_charset_bin;
-extern CHARSET_INFO my_charset_big5_chinese_ci;
-extern CHARSET_INFO my_charset_big5_bin;
-extern CHARSET_INFO my_charset_cp932_japanese_ci;
-extern CHARSET_INFO my_charset_cp932_bin;
-extern CHARSET_INFO my_charset_eucjpms_japanese_ci;
-extern CHARSET_INFO my_charset_eucjpms_bin;
-extern CHARSET_INFO my_charset_euckr_korean_ci;
-extern CHARSET_INFO my_charset_euckr_bin;
-extern CHARSET_INFO my_charset_gb2312_chinese_ci;
-extern CHARSET_INFO my_charset_gb2312_bin;
-extern CHARSET_INFO my_charset_gbk_chinese_ci;
-extern CHARSET_INFO my_charset_gbk_bin;
-extern CHARSET_INFO my_charset_latin1;
-extern CHARSET_INFO my_charset_latin1_german2_ci;
-extern CHARSET_INFO my_charset_latin1_bin;
-extern CHARSET_INFO my_charset_latin2_czech_ci;
-extern CHARSET_INFO my_charset_sjis_japanese_ci;
-extern CHARSET_INFO my_charset_sjis_bin;
-extern CHARSET_INFO my_charset_tis620_thai_ci;
-extern CHARSET_INFO my_charset_tis620_bin;
-extern CHARSET_INFO my_charset_ucs2_general_ci;
-extern CHARSET_INFO my_charset_ucs2_bin;
-extern CHARSET_INFO my_charset_ucs2_unicode_ci;
-extern CHARSET_INFO my_charset_ujis_japanese_ci;
-extern CHARSET_INFO my_charset_ujis_bin;
-extern CHARSET_INFO my_charset_utf8_general_ci;
-extern CHARSET_INFO my_charset_utf8_unicode_ci;
-extern CHARSET_INFO my_charset_utf8_bin;
-extern CHARSET_INFO my_charset_cp1250_czech_ci;
-
 
 
 /* CONSTANTS */
