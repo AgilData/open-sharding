@@ -254,15 +254,16 @@ OSPConfig::~OSPConfig() {
 	pos2=host_url.find("?", pos1);
 
 	//push schema to ret[6]
+	string schema = "";
 	if (pos2 == string::npos) {
-		string schema = host_url.substr(pos1);
+		schema = host_url.substr(pos1);
 		ret.push_back(schema);
 	}
 	else {
-		string schema = host_url.substr(pos1, pos2-pos1);
+		schema = host_url.substr(pos1, pos2-pos1);
 		ret.push_back(schema);
 	}
-	if (ret[6] == "") {
+	if (schema == "") {
 		throw Util::createException((string("The URL is invalid, schema is required. url: ") + host_url).c_str());
 	}
 	//ignoring user= and password= for now.
