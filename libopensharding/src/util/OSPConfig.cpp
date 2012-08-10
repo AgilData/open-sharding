@@ -224,7 +224,7 @@ OSPConfig::~OSPConfig() {
 		throw Util::createException((string("The URL is invalid, domain is required. url: ") + host_url).c_str());
 	}
 
-	//push domain to ret[4]
+	//push domain to ret
 	string domain = host_url.substr(pos1, pos2-pos1);
 	if (domain == "") {
 		throw Util::createException((string("The URL is invalid, domain is required. url: ") + host_url).c_str());
@@ -242,7 +242,7 @@ OSPConfig::~OSPConfig() {
 		return ret;
 	}
 
-	//push dbms to ret[5]
+	//push dbms to ret
 	string dbms = host_url.substr(pos1, pos2-pos1);
 	if (dbms == "") {
 		throw Util::createException((string("The URL is invalid, dbms is required. url: ") + host_url).c_str());
@@ -253,7 +253,7 @@ OSPConfig::~OSPConfig() {
 	pos1=pos2+1;
 	pos2=host_url.find("?", pos1);
 
-	//push schema to ret[6]
+	//push schema to ret
 	string schema = "";
 	if (pos2 == string::npos) {
 		schema = host_url.substr(pos1);
