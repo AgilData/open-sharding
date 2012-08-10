@@ -10,8 +10,16 @@ libmyosp_r.so.15
 libmyosp.so.16
 libmyosp_r.so.16
 
-These libraries mimic libmysqlclient.so and at runtime dynamically load a version of the original libmysqlclient with
-the so name and filename libmysqlclient_real.so.
+Install
 
-Note that it is not advisable to simply set up symlinks called libmysqlclient_real.so to link to the original
-libmysqlclient since this requires setting LD_LIBRARY_PATH and ldconfig will delete or change symlinks.
+Here is how MyOSP configuration with ldconfig works:
+- The libmyosp libraries are installed in /usr/lib64/myosp (for Ubuntu and Debian /usr/lib/myosp)
+- The package includes libmysqlclient_real_r.so.16.0.0
+-- This is a build of the actual MySQL client library, with the library name modified to include _real
+- Add a file for ldconfig to recognize myosp as a priority library
+-- /etc/ld.so.conf.d/myosp.conf
+-- The contents of the file are:
+--- /usr/lib64/myosp (or /usr/lib/myosp)
+- Run ldconfig
+- All links are automatically created in /usr/lib64/myosp
+
