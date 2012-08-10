@@ -68,7 +68,7 @@ def build
     # look for libopensharding
     puts "Searching for deployed versions of libopensharding..."
     deployed_opensharding_libs = `find /usr -name \"libopensharding*\"`
-    puts "FOUND: #{deployed_opensharding_libs}"
+    #puts "FOUND: #{deployed_opensharding_libs}"
     if deployed_opensharding_libs != ""
       puts "Cannot build until you delete these already deployed versions: #{deployed_opensharding_libs}"
       exit
@@ -78,7 +78,7 @@ def build
     # look for libmyosp
     puts "Searching for deployed versions of libmyosp..."
     deployed_myosp_libs = `find /usr -name \"libmyosp*\"`
-    puts "FOUND: #{deployed_myosp_libs}"
+    #puts "FOUND: #{deployed_myosp_libs}"
     if deployed_myosp_libs != ""
       puts "Cannot build until you delete these already deployed versions: #{deployed_myosp_libs}"
       exit
