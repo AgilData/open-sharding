@@ -56,7 +56,7 @@ using namespace util;
 Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
 char *createEmptyString() {
-    char *ret = new char[0];
+    char *ret = new char[1];
     ret[0] = '\0';
     return ret;
 }
