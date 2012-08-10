@@ -143,7 +143,7 @@ OSPConfig::~OSPConfig() {
     //[vendor]:[protocol]://[actual_host]:[port]/[domain]/[dbms]/[schema]?user=[username]&password=[password]
     //[vendor]:[protocol]:/path/to/file:/[domain]/[dbms]/[schema]?user=[username]&password=[password]
 
-    cerr << "OSPConfig::parseVirtualHostUrl(" << host_url << ")" << endl;
+    //cerr << "OSPConfig::parseVirtualHostUrl(" << host_url << ")" << endl;
 	
 	vector<string> ret;
 	size_t pos1=0;
