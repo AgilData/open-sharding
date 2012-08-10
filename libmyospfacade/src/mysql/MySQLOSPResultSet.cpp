@@ -70,7 +70,23 @@ void MySQLOSPResultSet::mysql_free_result(MYSQL_RES *res) {
             if (res->fields[i].name) {
                 delete [] res->fields[i].name;
             }
+            if (res->fields[i].org_name) {
+                delete [] res->fields[i].org_name;
+            }
+            if (res->fields[i].org_table) {
+                delete [] res->fields[i].org_table;
+            }
+            if (res->fields[i].db) {
+                delete [] res->fields[i].db;
+            }
+            if (res->fields[i].catalog) {
+                delete [] res->fields[i].catalog;
+            }
+            if (res->fields[i].def) {
+                delete [] res->fields[i].def;
+            }
         }
+
         if (res->fields) delete [] res->fields;
         if (res->lengths) delete [] res->lengths;
 	if (res->data) delete res->data;
