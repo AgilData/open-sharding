@@ -236,7 +236,7 @@ int OSPNamedPipeConnection::openFifos() {
     this->is = new OSPFileInputStream(responsePipeFD, 4096);
 
     // TODO: we should be using a buffer here - not sure why we're not
-    this->os = new OSPFileOutputStream(requestPipe, 0);
+    this->os = new OSPFileOutputStream(requestPipeFD, 0);
 
     this->m_fifosOpened = true;
 

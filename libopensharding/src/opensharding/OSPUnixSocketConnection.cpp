@@ -24,6 +24,9 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <sys/un.h>
+#include <netinet/in.h>
+
 #include <opensharding/OSPMessage.h>
 #include <opensharding/OSPMessageConsumer.h>
 #include <opensharding/OSPFileOutputStream.h>
@@ -57,7 +60,6 @@ OSPUnixSocketConnection::~OSPUnixSocketConnection() {
 
 void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 {
-/*
     // open socket
     int sockfd = socket(PF_UNIX, SOCK_STREAM, 0);
     if (sockfd < 0) {
@@ -76,16 +78,12 @@ void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
     }
 
     is = new OSPFileInputStream(socketFD, 4096);
-
-    //TODO: need output stream to use FD not FILE*
-
-    //os = new OSPFileOutputStream(socketFile, 0);
+    os = new OSPFileOutputStream(socketFD, 0);
 
     bufferSize = 8192;
     buffer = new char[bufferSize];
 
     nextRequestID = 1;
-    */
 }
 
 

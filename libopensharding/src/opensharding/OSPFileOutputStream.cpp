@@ -34,8 +34,8 @@ namespace opensharding {
 
 logger::Logger &OSPFileOutputStream::log = Logger::getLogger("OSPFileOutputStream");
 
-OSPFileOutputStream::OSPFileOutputStream(FILE *file, unsigned int writeBufferSize) {
-    this->file = file;
+OSPFileOutputStream::OSPFileOutputStream(int fd, unsigned int writeBufferSize) {
+    this->fd = fd;
     this->writeBufferSize = writeBufferSize;
 
     intBuffer = new char[4];
@@ -132,7 +132,7 @@ void OSPFileOutputStream::writeBytes(const char *buffer, unsigned int offset, un
 
 void OSPFileOutputStream::writeBytesToFile(const char *buffer, unsigned int offset, unsigned int length) {
     //log.trace("writeBytes()");
-    size_t n = fwrite(buffer+offset, sizeof(char), length, file);
+    size_t n = write(fd, buffer+offset, length);
     if (n!=length) {
         log.error("writeBytes() FAILED");
         throw "FAIL";
@@ -158,8 +158,7 @@ void OSPFileOutputStream::flush() {
         writeBuffer->reset();
     }
 
-    //log.trace("flush()");
-    fflush(file);
+    fsync(fd);
 }
 
 }
