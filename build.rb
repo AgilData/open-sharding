@@ -88,9 +88,9 @@ def mysql_install(mysql_version)
     #   exit
     #end
     puts `pwd`
-    run_command("./configure --prefix=/usr/local/mysql")
-    run_command("make")
-    run_command("make install")
+    #run_command("./configure --prefix=/usr/local/mysql")
+    #run_command("make")
+    #run_command("make install")
     Dir.chdir("/usr/local/mysql")
     puts `pwd`
     run_command("chown -R mysql .")
