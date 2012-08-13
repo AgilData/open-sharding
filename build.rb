@@ -70,14 +70,14 @@ end
 ## Building MySQl
 #################################################################################################
 def mysql_install(mysql_version)
-    mysql-dir = "/root/mysql-install/"
+    mysql_dir = "/root/mysql-install/"
     puts "Installing mysql libraries based on the version: #{mysql_version}"
     run_command("groupadd mysql")
     run_command("useradd -g mysql mysql")
-    Dir.mkdir(mysql-dir)
+    Dir.mkdir(mysql_dir)
     if mysql_version.match("5.0")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
-        run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql-dir}")
+        run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
     elsif mysql_version.match("5.1")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
         run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_version}")
@@ -85,7 +85,7 @@ def mysql_install(mysql_version)
         puts "Invalid version for installation of mysql."
         exit
     end
-    Dir.chdir(mysql-dir)
+    Dir.chdir(mysql_dir)
     run_command("./configure --prefix=/usr/local/mysql")
     run_command("make")
     run_command("make install")
@@ -95,9 +95,9 @@ def mysql_install(mysql_version)
     run_command("bin/mysql-install-db --user=mysql")
     run_command("chown -R root .")
     run_command("chown -R mysql var")
-    run_command("cp #{mysql-dir}support-files/my-medium.cnf /etc/my.cnf")
+    run_command("cp #{mysql_dir}support-files/my-medium.cnf /etc/my.cnf")
     run_command("bin/mysqld_safe --user=mysql &")
-    run_command("cp #{mysql-dir}support-files/mysql.server /etc/init.d/mysql.server")
+    run_command("cp #{mysql_dir}support-files/mysql.server /etc/init.d/mysql.server")
     run_command("ln bin/mysql /usr/bin/mysql")
 end
     
