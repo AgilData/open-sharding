@@ -26,9 +26,11 @@
 #include <opensharding/OSPByteBuffer.h>
 
 #include <logger/Logger.h>
+#include <util/Util.h>
 
 using namespace std;
 using namespace logger;
+using namespace util;
 
 namespace opensharding {
 
