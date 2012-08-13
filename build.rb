@@ -72,8 +72,8 @@ end
 def mysql_install(mysql_version)
     mysql_dir = "/root/mysql-install/"
     puts "Installing mysql libraries based on the version: #{mysql_version}"
-    run_command("groupadd mysql")
-    run_command("useradd -g mysql mysql")
+    puts `groupadd mysql`
+    puts `useradd -g mysql mysql`
     Dir.mkdir(mysql_dir)
     if mysql_version.match("5.0")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
