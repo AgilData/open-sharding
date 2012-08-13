@@ -211,6 +211,7 @@ begin
             puts "Error: Not supported MySQL type."
         end
     elsif option == "build-real"
+        mysql_version = ARGV[1]
         mysql_install(mysql_version)
         build(mysql_version)
     elsif option == "check-dep"
