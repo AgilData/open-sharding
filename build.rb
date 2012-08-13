@@ -187,7 +187,7 @@ begin
         puts "\tAvailable options: "
         puts "\t\t - setup-env "
         puts "\t\t - build "
-        puts "\t\t - build-all"
+        puts "\t\t - build-real"
         puts "\t MYSQL VERSION OPTIONS"
         puts "\t\t - 5.0 "
         puts "\t\t - 5.1 "
@@ -210,7 +210,7 @@ begin
             else
             puts "Error: Not supported MySQL type."
         end
-    elsif option == "build-all"
+    elsif option == "build-real"
         mysql_install(mysql_version)
         build(mysql_version)
     elsif option == "check-dep"
