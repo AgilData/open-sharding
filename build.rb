@@ -30,7 +30,7 @@ end
 #################################################################################################
 ## Building libmyosp
 #################################################################################################
-def build
+def build(mysql_version)
     
     # check for any old libs already deployed that might be on LD_LIBRARY_PATH
     # this is REALLY important or we will end up with corrupt binaries or a mix
@@ -62,7 +62,7 @@ def build
     
     # build libmyosp
     puts "Building libmyosp"
-    run_command "cd libmyospfacade ; ruby build.rb release"
+    run_command "cd libmyospfacade ; ruby build.rb release #{mysql_version}"
     
 end
 
@@ -74,24 +74,25 @@ def mysql_install(mysql_version)
     puts "Installing mysql libraries based on the version: #{mysql_version}"
     puts `groupadd mysql`
     puts `useradd -g mysql mysql`
-    #Dir.mkdir(mysql_dir)
-    #if mysql_version.match("5.0")
-    #    run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
-    #   run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
+    Dir.mkdir(mysql_dir)
+    if mysql_version.match("5.0")
+        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
+       run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
         mysql_dir = "/root/mysql-install/mysql-5.0.96/"
         Dir.chdir("#{mysql_dir}")
-    # elsif mysql_version.match("5.1")
-    #   run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
-    #   run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_version}")
-    #   Dir.chdir("#{mysql_dir}")
-    #else
-    #   puts "Invalid version for installation of mysql."
-    #   exit
-    #end
+     elsif mysql_version.match("5.1")
+       run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
+       run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_version}")
+        mysql_dir = "/root/mysql-install/"
+       Dir.chdir("#{mysql_dir}")
+    else
+       puts "Invalid version for installation of mysql."
+       exit
+    end
     puts `pwd`
-    #run_command("./configure --prefix=/usr/local/mysql")
-    #run_command("make")
-    #run_command("make install")
+    run_command("./configure --prefix=/usr/local/mysql")
+    run_command("make")
+    run_command("make install")
     Dir.chdir("/usr/local/mysql")
     puts `pwd`
     run_command("chown -R mysql .")
@@ -216,7 +217,7 @@ begin
         end
     elsif option == "build-real"
         mysql_version = ARGV[1]
-        mysql_install(mysql_version)
+        #mysql_install(mysql_version)
         build(mysql_version)
     elsif option == "check-dep"
         check_dep
