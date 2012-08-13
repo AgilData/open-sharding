@@ -95,7 +95,7 @@ def mysql_install(mysql_version)
     puts `pwd`
     run_command("chown -R mysql .")
     run_command("chgrp -R mysql .")
-    run_command("bin/mysql-install-db --user=mysql")
+    run_command("bin/mysql_install_db --user=mysql")
     run_command("chown -R root .")
     run_command("chown -R mysql var")
     run_command("cp #{mysql_dir}support-files/my-medium.cnf /etc/my.cnf")
