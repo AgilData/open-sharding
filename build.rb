@@ -78,9 +78,11 @@ def mysql_install(mysql_version)
     if mysql_version.match("5.0")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
         run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
+        Dir.chdir("#{mysql_dir}/mysql-5.0.96")
     elsif mysql_version.match("5.1")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
         run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_version}")
+        Dir.chdir("#{mysql_dir}")
     else
         puts "Invalid version for installation of mysql."
         exit
