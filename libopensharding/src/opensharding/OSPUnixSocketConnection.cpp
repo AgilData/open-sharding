@@ -70,8 +70,8 @@ void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 
     // bind socket
     struct sockaddr_un my_addr;
+    memset(&my_addr, 0, sizeof(my_addr));
     my_addr.sun_family = AF_UNIX;
-    memset(&my_addr, 0, sizeof(struct sockaddr_un));
     strncpy(my_addr.sun_path, info->socket_file.c_str(), sizeof(my_addr.sun_path) - 1);
 
     // connect
