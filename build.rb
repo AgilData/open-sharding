@@ -72,13 +72,12 @@ end
 def mysql_install(mysql_version)
     mysql_dir = "/root/mysql-install/"
     puts "Installing mysql libraries based on the version: #{mysql_version}"
-=begin
     puts `groupadd mysql`
     puts `useradd -g mysql mysql`
     Dir.mkdir(mysql_dir)
-    if mysql_version.match("5.0")
-        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
-        run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
+    #if mysql_version.match("5.0")
+    #    run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
+    #   run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
         Dir.chdir("#{mysql_dir}/mysql-5.0.96")
     elsif mysql_version.match("5.1")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
@@ -92,7 +91,6 @@ def mysql_install(mysql_version)
     run_command("./configure --prefix=/usr/local/mysql")
     run_command("make")
     run_command("make install")
- =end
     Dir.chdir("/usr/local/mysql")
     puts `pwd`
     run_command("chown -R mysql .")
