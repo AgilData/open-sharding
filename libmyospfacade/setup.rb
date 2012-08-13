@@ -20,15 +20,41 @@ def run_command(cmd)
 end
 
 #################################################################################################
+## Get Platform 
+#################################################################################################
+def get_platform
+    if RUBY_PLATFORM.downcase =~ /darwin/
+        return "mac"
+        elsif RUBY_PLATFORM.downcase =~ /windows/
+        return "win"
+        else
+        
+        # get linux distro name and version (might now work on all distros)
+        issue = `cat /etc/issue`.downcase.split
+        arch = `uname -i`
+        platform = issue +" "+arch
+        return platform
+    end
+end
+#################################################################################################
 ## Myosp Placement
 #################################################################################################
 def myosp_conf_placement
+    platfrom = get_platform
+    if platfrom.match("ubuntu") || platfrom.match("i386")
+        library = "lib"
+    elsif platfrom.match("centos") && platfrom.match("x86_64")
+        library = "lib64"
+    else
+        puts "Non existing platform."
+        exit
+    end
     if File.exist?("/etc/osp/myosp.conf")
         puts "The myosp.conf file is already in place."
         else
         puts "Moving the myosp.conf in the directory /etc/osp/, please edit this config for proper use of MyOSP."
         Dir.mkdir("/etc/osp/")
-        run_command("cp /usr/lib64/myosp/myosp.conf /etc/osp/")
+        run_command("cp /usr/#{library}/myosp/myosp.conf /etc/osp/")
         if File.exist?("/etc/osp/myosp.conf")
             puts "Succesfully copied myosp.conf to the appropriate location."
             else
@@ -42,6 +68,15 @@ end
 ## Set Up LDCONFIG
 #################################################################################################
 def myosp_ldconfig
+    platfrom = get_platform
+    if platfrom.match("ubuntu") || platfrom.match("i386")
+        library = "lib"
+        elsif platfrom.match("centos") && platfrom.match("x86_64")
+        library = "lib64"
+        else
+        puts "Non existing platform."
+        exit
+    end
     if File.exist?("/etc/ld.so.conf.d/1.so.myosp.conf")
         puts "File /etc/ld.so.conf.d/1.so.myosp.conf already exsists, now running ldconfig."
     else
@@ -51,10 +86,12 @@ def myosp_ldconfig
             puts "Failed to open the file /etc/ld.so.conf.d/1.so.myosp.conf"
             exit
         else
-            ld_config.puts "/usr/lib64/myosp"
+            ld_config.puts "/usr/#{library}/myosp"
             ld_config.close
         end
     end
+    ldd_value = `ldd /usr/bin/mysql`
+    run_command("rm #{ldd_value}")
     run_command("ldconfig")
 end
 
