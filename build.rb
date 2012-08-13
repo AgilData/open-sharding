@@ -85,7 +85,7 @@ def mysql_install(mysql_version)
         puts "Invalid version for installation of mysql."
         exit
     end
-    Dir.chdir(mysql_dir)
+   run_command("cd #{mysql_dir}")
     run_command("./configure --prefix=/usr/local/mysql")
     run_command("make")
     run_command("make install")
