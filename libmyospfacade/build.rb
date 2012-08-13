@@ -112,6 +112,9 @@ def create_tar
     run_command "cp libs/lib* _temp"
     run_command "cp ../libopensharding/libopensharding.so.1.0.0 _temp"
     run_command "cp setup.rb _temp"
+    if File.exists?("/usr/local/mysql/lib/mysql/libmysqlclient_real.so.15.0.0")
+        run_command "cp /usr/local/mysql/lib/mysql/libmysqlclient_real.so.15.0.0 _temp"
+    end
     run_command "cp myosp.conf _temp"
     run_command "cp README _temp"
     
