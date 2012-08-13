@@ -72,6 +72,7 @@ end
 def mysql_install(mysql_version)
     mysql_dir = "/root/mysql-install/"
     puts "Installing mysql libraries based on the version: #{mysql_version}"
+=begin
     puts `groupadd mysql`
     puts `useradd -g mysql mysql`
     Dir.mkdir(mysql_dir)
@@ -91,7 +92,9 @@ def mysql_install(mysql_version)
     run_command("./configure --prefix=/usr/local/mysql")
     run_command("make")
     run_command("make install")
+ =end
     Dir.chdir("/usr/local/mysql")
+    puts `pwd`
     run_command("chown -R mysql .")
     run_command("chgrp -R mysql .")
     run_command("bin/mysql-install-db --user=mysql")
@@ -188,8 +191,8 @@ begin
         puts "Usage: ruby build.rb OPTION [ARGS] [MYSQL VERSION]"
         puts "\tAvailable options: "
         puts "\t\t - setup-env "
-        puts "\t\t - build "
-        puts "\t\t - build-real"
+        puts "\t\t - build (Installation of myosp only)"
+        puts "\t\t - build-real (Installation of mysql and myosp)"
         puts "\t MYSQL VERSION OPTIONS"
         puts "\t\t - 5.0 "
         puts "\t\t - 5.1 "
