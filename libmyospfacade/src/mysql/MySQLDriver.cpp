@@ -510,6 +510,11 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         }
 
         // get a connection from the pool
+        OSPConnection* ospNetworkConnection = pool->borrowConnection();
+
+        //TODO: get the validation logging working otherwise we have to restart the client process after a DbsClient restart
+        /*
+        // get a connection from the pool
         OSPConnection* ospNetworkConnection = NULL;
         OSPPingRequest pingRequest;
         while (!ospNetworkConnection) {
@@ -534,6 +539,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
                 ospNetworkConnection = NULL;
             }
         }
+        */
 
         // if there is no available connection then create one
         if (!ospNetworkConnection) {
