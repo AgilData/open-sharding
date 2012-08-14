@@ -26,9 +26,11 @@
 #include <opensharding/OSPByteBuffer.h>
 
 #include <logger/Logger.h>
+#include <util/Util.h>
 
 using namespace std;
 using namespace logger;
+using namespace util;
 
 namespace opensharding {
 
@@ -133,8 +135,13 @@ void OSPFileOutputStream::writeBytes(const char *buffer, unsigned int offset, un
 void OSPFileOutputStream::writeBytesToFile(const char *buffer, unsigned int offset, unsigned int length) {
     //log.trace("writeBytes()");
     size_t n = write(fd, buffer+offset, length);
+    if (n == -1) {
+        perror("write to file descriptor failed");
+        throw "FAIL";
+    }
+
     if (n!=length) {
-        log.error("writeBytes() FAILED");
+        log.error(("writeBytes(") + Util::toString(length) + ") only wrote " + Util::toString(n) + " byte(s)");
         throw "FAIL";
     }
 }
