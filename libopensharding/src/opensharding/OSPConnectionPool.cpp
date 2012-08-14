@@ -25,7 +25,7 @@
 namespace opensharding {
 
 //TODO: convert this global mutex into a class member
-static pthread_mutex_t OSPConnectPool_mutex = PTHREAD_MUTEX_INITIALIZER;
+static pthread_mutex_t OSPConnectionPool_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 OSPConnectionPool::OSPConnectionPool() {
 }
@@ -41,7 +41,7 @@ OSPConnectionPool::~OSPConnectionPool() {
 }
 
 OSPConnection *OSPConnectionPool::borrowConnection() {
-    MutexLock lock("OSPConnectPool_mutex", &connmap_mutex);
+    MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
     if (pool.size() == 0) {
         return NULL;
     }
@@ -51,7 +51,7 @@ OSPConnection *OSPConnectionPool::borrowConnection() {
 }
 
 void OSPConnectionPool::returnConnection(OSPConnection *conn) {
-    MutexLock lock("OSPConnectPool_mutex", &connmap_mutex);
+    MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
     pool.push(conn);
 }
 

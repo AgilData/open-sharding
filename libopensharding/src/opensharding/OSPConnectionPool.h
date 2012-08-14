@@ -28,6 +28,8 @@
 #include <string.h>
 #include <stack>
 
+#include <opensharding/OSPConnection.h>
+
 #include <logger/Logger.h>
 
 namespace opensharding {
