@@ -116,7 +116,7 @@ def mysql_install(mysql_version)
         Dir.chdir("#{mysql_dir}")
      elsif mysql_version.match("5.1")
        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
-       run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_version}")
+       run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_dir}")
         mysql_dir = "/root/mysql-install/"
        Dir.chdir("#{mysql_dir}")
     else
