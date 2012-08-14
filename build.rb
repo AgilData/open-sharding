@@ -26,7 +26,37 @@ def run_command(cmd)
         exit 1
     end
 end
-
+#################################################################################################
+## Get Platform 
+#################################################################################################
+def get_platform
+    if RUBY_PLATFORM.downcase =~ /darwin/
+        return "mac"
+        elsif RUBY_PLATFORM.downcase =~ /windows/
+        return "win"
+        else
+        
+        # get linux distro name and version (might now work on all distros)
+        issue = `cat /etc/issue`.downcase.split
+        arch = `uname -i`
+        platform = "#{issue} #{arch}"
+        return platform
+    end
+end
+#################################################################################################
+## Install Dependencies
+#################################################################################################
+def install_dependencies
+    platform = get_platform
+    if platform.match("centos")
+        run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel uuid-devel java-1.6.0-openjdk-devel kernel-devel")
+    elsif platform.match("ubuntu") || platform.match("debian")
+        run_command("sudo apt-get install -y build-essential uuid-dev libncurses5-dev libltdl3-dev")
+    else
+        puts "Platform not found: #{platform}"
+        exit
+    end
+end
 #################################################################################################
 ## Building libmyosp
 #################################################################################################
@@ -34,9 +64,8 @@ def build(mysql_version)
     
     # check for any old libs already deployed that might be on LD_LIBRARY_PATH
     # this is REALLY important or we will end up with corrupt binaries or a mix
-    # of old and new functionality because myosp libs will link against the wrong
-    # version of libopensharding!!
-
+    # of old and new functionality
+    
     # look for libopensharding
     puts "Searching for deployed versions of libopensharding..."
     deployed_opensharding_libs = `find /usr -name \"libopensharding*\"`
@@ -218,7 +247,8 @@ begin
         end
     elsif option == "build-real"
         mysql_version = ARGV[1]
-        #mysql_install(mysql_version)
+        install_dependencies
+        mysql_install(mysql_version)
         build(mysql_version)
     elsif option == "check-dep"
         check_dep
