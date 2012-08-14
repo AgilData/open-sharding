@@ -20,12 +20,11 @@
  * USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include <opensharding/OSPConnectionPool.h>
-#include <opensharding/OSPConnection.h>
-
-namespace opensharding {
 
 //TODO: convert this global mutex into a class member
 static pthread_mutex_t OSPConnectionPool_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+namespace opensharding {
 
 OSPConnectionPool::OSPConnectionPool() {
 }
