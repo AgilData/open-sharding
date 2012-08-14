@@ -32,9 +32,10 @@ end
 #################################################################################################
 def build
 
-    # check for any old libs already deployed that might be on LD_LIBRARY_PATH
+    # check for any libopensharding.so already deployed that might be on LD_LIBRARY_PATH
     # this is REALLY important or we will end up with corrupt binaries or a mix
-    # of old and new functionality
+    # of old and new functionality because myosp libs will link against the wrong
+    # version of libopensharding!!
 
     # look for libopensharding
     puts "Searching for deployed versions of libopensharding..."
@@ -45,16 +46,6 @@ def build
       exit
     end
     puts "No deployed versions of libopensharding found"
-
-    # look for libmyosp
-    puts "Searching for deployed versions of libmyosp..."
-    deployed_myosp_libs = `find /usr -name \"libmyosp*\"`
-    #puts "FOUND: #{deployed_myosp_libs}"
-    if deployed_myosp_libs != ""
-      puts "Cannot build until you delete these already deployed versions: #{deployed_myosp_libs}"
-      exit
-    end
-    puts "No deployed versions of libmyosp found"
 
     # build libopensharding
     puts "Building libopensharding"
