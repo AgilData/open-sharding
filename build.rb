@@ -189,15 +189,6 @@ def check_dep
     end
     puts "Found"
     
-    print "Ant ... "
-    x = `which ant`.strip
-    if x == ""
-        puts ""
-        puts "Error: Ant is missing"
-        exit 1
-    end
-    puts "Found"
-    
     print "UUID ... "
     x = `find /usr/local/include -name 'uuid.h'`.strip
     if x == ""
@@ -232,6 +223,7 @@ begin
     option = ARGV[0]
     
     if option == "build"
+        puts "Building with the option: #{option}"
         if ARGV.length==1
             puts "Usage: ruby build.rb build [MYSQL VERSION]"
             puts "\tAvailable options: "
@@ -246,6 +238,7 @@ begin
             puts "Error: Not supported MySQL type."
         end
     elsif option == "build-real"
+        puts "Building with the option: #{option}"
         mysql_version = ARGV[1]
         if mysql_version.match("5.0") || mysql_version.match("5.1")
             build(mysql_version)
