@@ -32,7 +32,7 @@ def get_platform
         # get linux distro name and version (might now work on all distros)
         issue = `cat /etc/issue`.downcase.split
         arch = `uname -i`
-        platform = issue +" "+arch
+        platform = "#{issue} #{arch}"
         return platform
     end
 end
@@ -90,9 +90,9 @@ def myosp_ldconfig
             ld_config.close
         end
     end
+    run_command("ldconfig")
     ldd_value = `ldd /usr/bin/mysql`
     run_command("rm #{ldd_value}")
-    run_command("ldconfig")
 end
 
 #################################################################################################
