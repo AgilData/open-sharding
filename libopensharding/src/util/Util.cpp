@@ -83,26 +83,6 @@ namespace util {
 
 }
 
-/*static*/ string Util::generateUUID() {
-
-    char tmp[37]; // 36 chars plus \0
-    uuid_t uuid;
-    uuid_generate(uuid);
-    uuid_unparse(uuid, tmp);
-    string ret(tmp);
-    return ret;
-
-    // call Apache Portable Runtime UUID function
-    /*
-    apr_uuid_t uuid;
-    apr_uuid_get(&uuid);
-    char *ret = new char[APR_UUID_FORMATTED_LENGTH+1];
-    memset(ret, 0, APR_UUID_FORMATTED_LENGTH+1);
-    apr_uuid_format(ret, &uuid);
-    return ret;
-    */
-}
-
 /*static*/ string Util::createRandomWord(unsigned int length) {
     const char *chars = "01234567890 abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
     const int l = strlen(chars);

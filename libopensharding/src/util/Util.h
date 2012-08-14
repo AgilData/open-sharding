@@ -45,7 +45,6 @@ private:
 public:
 
     static void init();
-    static string generateUUID();
     static void generateUniqueID(char *);
     static void dump(const char *buf, unsigned int len, int lineLength);
     static string createRandomWord(unsigned int length);
