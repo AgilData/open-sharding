@@ -47,6 +47,7 @@ Here is how MyOSP configuration with ldconfig works:
 - The libmyosp libraries are installed in /usr/lib64/myosp (for Ubuntu and Debian /usr/lib/myosp)
 - The package includes libmysqlclient_real_r.so.16.0.0
 -- This is a build of the actual MySQL client library, with the library name modified to include _real
+---This section can also be executed by running setup.rb in the package---------
 - Add a file for ldconfig to recognize myosp as a priority library
 -- /etc/ld.so.conf.d/myosp.conf
 -- The contents of the file are:
