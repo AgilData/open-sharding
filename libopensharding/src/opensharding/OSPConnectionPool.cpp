@@ -30,31 +30,55 @@ using namespace util;
 namespace opensharding {
 
 OSPConnectionPool::OSPConnectionPool() {
+    poolSize = 200;
+    pool = new OSPConnection[poolSize];
+    for (int i=0; i<poolSize; i++) {
+        pool[i] = NULL;
+    }
 }
 
 OSPConnectionPool::~OSPConnectionPool() {
     MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
     // delete all the connections
-    while (pool.size()>0) {
-        OSPConnection *ret = pool.top();
-        pool.pop();
-        delete ret;
+    for (int i=0; i<poolSize; i++) {
+        if (pool[i]) {
+            delete pool[i];
+            pool[i] = NULL;
+        }
     }
 }
 
 OSPConnection *OSPConnectionPool::borrowConnection() {
     MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
-    if (pool.size() == 0) {
-        return NULL;
+    OSPConnection *ret = NULL;
+    for (int i=0; i<poolSize; i++) {
+        if (pool[i]) {
+            ret = pool[i];
+            pool[i] = NULL;
+            break;
+        }
     }
-    OSPConnection *ret = pool.top();
-    pool.pop();
     return ret;
 }
 
 void OSPConnectionPool::returnConnection(OSPConnection *conn) {
     MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
     pool.push(conn);
+    // look for the first empty slot
+    bool returned = false;
+    for (int i=0; i<poolSize; i++) {
+        if (!pool[i]) {
+            // return to pool
+            pool[i] = conn;
+            returned = true;
+            break;
+        }
+    }
+
+    if (!returned) {
+        // no room in pool
+        delete conn;
+    }
 }
 
 

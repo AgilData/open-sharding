@@ -37,7 +37,8 @@ namespace opensharding {
 class OSPConnectionPool {
 private:
 
-    stack<OSPConnection *> pool;
+    int poolSize;
+    OSPConnection* pool;
 
 public:
 
