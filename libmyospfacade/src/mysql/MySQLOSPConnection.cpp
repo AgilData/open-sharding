@@ -61,7 +61,7 @@ char *createEmptyString() {
     return ret;
 }
 
-MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
+MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnectionPool *ospConnPool, OSPConnection *ospConn) {
 
     if (!ospConn) {
         log.error("NULL ospConn");
@@ -70,6 +70,7 @@ MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, stri
 
     this->mysql = mysql;
     this->mysqlResourceMap = mysqlResourceMap;
+    this->ospConnPool = ospConnPool;
     this->ospConn = ospConn;
 
     // request a database connection
@@ -889,10 +890,8 @@ void MySQLOSPConnection::mysql_close(MYSQL *mysql) {
             // is this possible?
         }
 
-        // close the named pipe
-        ospConn->stop();
-        delete ospConn;
-        ospConn = NULL;
+        // return the OSPConnection to the pool
+        ospConnPool->returnConnection(ospConn);
 
     }
     catch (...) {

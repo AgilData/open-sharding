@@ -26,6 +26,7 @@
 #include <mysql/MySQLOSPResultSet.h>
 
 #include <opensharding/OSPConnection.h>
+#include <opensharding/OSPConnectionPool.h>
 #include <opensharding/OSPNamedPipeConnection.h>
 #include <opensharding/OSPMessage.h>
 #include <opensharding/OSPMessageConsumer.h>
@@ -54,6 +55,7 @@ private:
 
     pid_t pid;
 
+    OSPConnectionPool *ospConnPool;
     OSPConnection *ospConn;
     MYSQL *mysql;
 
@@ -90,7 +92,7 @@ private:
 
 
 public:
-    MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection*);
+    MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnectionPool *ospConnPool, OSPConnection* ospConn);
     virtual ~MySQLOSPConnection();
     bool connect(const char *, const char *, const char *, const char *, unsigned int port, const char *unix_socket, unsigned long clientflag) ;
     void setError(const char *sqlstate, int x_errno, const char *x_error);

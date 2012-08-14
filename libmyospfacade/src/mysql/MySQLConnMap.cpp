@@ -219,3 +219,16 @@ void MySQLConnMap::clearErrorState(MYSQL *mysql) {
     mysqlToErrorMap.erase(mysql);
 }
 
+
+void MySQLConnMap::setOSPConnectionPool(string virtualHost, OSPConnectionPool *ospConn) {
+    MutexLock lock("MySQLConnMap", &connmap_mutex);
+    ospConnMap[virtualHost] = ospConn;
+}
+
+OSPConnectionPool* MySQLConnMap::getOSPConnectionPool(string virtualHost) {
+    MutexLock lock("MySQLConnMap", &connmap_mutex);
+    if (ospConnMap.count(virtualHost)==0) {
+        return NULL;
+    }
+    return ospConnMap[virtualHost];
+}

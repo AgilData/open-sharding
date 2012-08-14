@@ -48,6 +48,8 @@
 #include <opensharding/OSPWireRequest.h>
 #include <opensharding/OSPConnectRequest.h>
 #include <opensharding/OSPWireResponse.h>
+#include <opensharding/OSPPingRequest.h>
+#include <opensharding/OSPPingResponse.h>
 #include <opensharding/OSPConnectResponse.h>
 #include <opensharding/OSPErrorResponse.h>
 #include <logger/Logger.h>
@@ -84,8 +86,6 @@ static bool bannerDisplayed = false;
 static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 
 
-#define LOCK_MUTEX MutexLock(&connmap_mutex);
-
 /* Mapping of MYSQL structues to wrapper structures */
 static MySQLConnMap *_mysqlResourceMap = NULL;
 
@@ -95,6 +95,8 @@ static int nextPipeNo = 1;
 static pthread_mutex_t MySQLDriver_init_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 static pthread_mutex_t MySQLDriver_resource_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+static pthread_mutex_t MySQLDriver_connpool_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 /* Wrapper around libmysqlclient.so */
 static MySQLClient *mysqlclient = NULL;
@@ -496,34 +498,77 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
              xlog.debug("Creating OSP connection");
         }
 
-
-        // create a dedicated named pipe connection
-        OSPConnection* ospNetworkConnection;
-        if (info->getProtocol() == PROTOCOL_TCP) {
-            if (xlog.isDebugEnabled()) xlog.debug("Creating OSPTCPConnection OK");
-            ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
-        }
-        else if (info->getProtocol() == PROTOCOL_PIPES) {
-            if (xlog.isDebugEnabled()) xlog.debug("Getting next named pipe ID");
-            int pipeNo = getNextNamedPipeID();
-            if (xlog.isDebugEnabled()) xlog.debug(string("Got next named pipe ID: ") + Util::toString(pipeNo));
-            if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection OK");
-            ospNetworkConnection = new OSPNamedPipeConnection(info, pipeNo);
-        }
-        else if (info->getProtocol() == PROTOCOL_UNIX_SOCKET) {
-            if (xlog.isDebugEnabled()) xlog.debug("Creating OSPUnixSocketConnection OK");
-             ospNetworkConnection = new OSPUnixSocketConnection(info);
-        }
-        else {
-            throw Util::createException("UNSUPPORTED PROTOCOL");
+        // get connection pool
+        OSPConnectionPool *pool = NULL;
+        {
+            MutexLock lock("MySQLDriver_connpool_mutex", &MySQLDriver_connpool_mutex);
+            pool = getResourceMap()->getOSPConnectionPool(info->target_schema_name);
+            if (!pool) {
+                pool = new OSPConnectionPool();
+                getResourceMap()->setOSPConnectionPool(info->target_schema_name, pool);
+            }
         }
 
+        // get a connection from the pool
+        OSPConnection* ospNetworkConnection = pool->borrowConnection();
+
+        //TODO: get the validation logging working otherwise we have to restart the client process after a DbsClient restart
+        /*
+        // get a connection from the pool
+        OSPConnection* ospNetworkConnection = NULL;
+        OSPPingRequest pingRequest;
+        while (!ospNetworkConnection) {
+            ospNetworkConnection = pool->borrowConnection();
+            if (!ospNetworkConnection) {
+                // no connection available in pool
+                break;
+            }
+
+            // validate the connection with a ping to the osp process
+            try {
+                if (xlog.isDebugEnabled()) xlog.debug("Got OSP connection from pool, validating with ping");
+                OSPPingResponse *pingResponse = dynamic_cast<OSPPingResponse*>(ospNetworkConnection->sendMessage(&pingRequest));
+                if (xlog.isDebugEnabled()) xlog.debug("Ping OK");
+                delete pingResponse;
+                break;
+            }
+            catch (...) {
+                // bad connection, don't return to pool, try again
+                if (xlog.isDebugEnabled()) xlog.debug("Ping failed, removing connection from pool");
+                delete ospNetworkConnection;
+                ospNetworkConnection = NULL;
+            }
+        }
+        */
+
+        // if there is no available connection then create one
+        if (!ospNetworkConnection) {
+            // create a dedicated named pipe connection
+            if (info->getProtocol() == PROTOCOL_TCP) {
+                if (xlog.isDebugEnabled()) xlog.debug("Creating OSPTCPConnection OK");
+                ospNetworkConnection = new OSPTCPConnection(info->getHost(), info->getPort());
+            }
+            else if (info->getProtocol() == PROTOCOL_PIPES) {
+                if (xlog.isDebugEnabled()) xlog.debug("Getting next named pipe ID");
+                int pipeNo = getNextNamedPipeID();
+                if (xlog.isDebugEnabled()) xlog.debug(string("Got next named pipe ID: ") + Util::toString(pipeNo));
+                if (xlog.isDebugEnabled()) xlog.debug("Creating OSPNamedPipeConnection OK");
+                ospNetworkConnection = new OSPNamedPipeConnection(info, pipeNo);
+            }
+            else if (info->getProtocol() == PROTOCOL_UNIX_SOCKET) {
+                if (xlog.isDebugEnabled()) xlog.debug("Creating OSPUnixSocketConnection OK");
+                 ospNetworkConnection = new OSPUnixSocketConnection(info);
+            }
+            else {
+                throw Util::createException("UNSUPPORTED PROTOCOL");
+            }
+        }
 
         // create MySQL OSP connection object
         try {
             /*CHANGED*/
             if (xlog.isDebugEnabled()) xlog.debug("Creating MySQLOSPConnection OK");
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospNetworkConnection);
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), pool, ospNetworkConnection);
             if (xlog.isDebugEnabled()) xlog.debug("Created MySQLOSPConnection OK");
         }
         catch (...) {
