@@ -31,7 +31,7 @@ namespace opensharding {
 
 OSPConnectionPool::OSPConnectionPool() {
     poolSize = 200;
-    pool = new OSPConnection[poolSize];
+    pool = new OSPConnection*[poolSize];
     for (int i=0; i<poolSize; i++) {
         pool[i] = NULL;
     }
