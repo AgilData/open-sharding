@@ -26,6 +26,7 @@
 #include <mysql/MySQLErrorState.h>
 #include <mysql/MySQLConnectionInfo.h>
 #include <opensharding/OSPConnection.h>
+#include <opensharding/OSPConnectionPool.h>
 #include <opensharding/OSPTCPConnection.h>
 #include <opensharding/OSPNamedPipeConnection.h>
 #include <logger/Logger.h>
@@ -71,6 +72,9 @@ private:
 
     map<MYSQL*, MySQLErrorState*> mysqlToErrorMap;
 
+    map<string, OSPConnectionPool*> ospConnMap;
+
+
 public:
     MySQLConnMap();
     ~MySQLConnMap();
@@ -96,6 +100,9 @@ public:
     void clearErrorState(MYSQL *mysql);
 
     void eraseResults(MySQLAbstractConnection *conn);
+
+    void setOSPConnectionPool(string dbName, OSPConnectionPool*);
+    OSPConnectionPool* getOSPConnectionPool(string dbName);
 
 };
 
