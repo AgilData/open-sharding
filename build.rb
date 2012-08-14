@@ -50,9 +50,9 @@ def install_dependencies
     puts "Installing Dependencies *****************************************"
     platform = get_platform
     if platform.match("centos")
-        run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel uuid-devel java-1.6.0-openjdk-devel kernel-devel")
+        run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel java-1.6.0-openjdk-devel kernel-devel")
     elsif platform.match("ubuntu") || platform.match("debian")
-        run_command("sudo apt-get install -y build-essential uuid-dev libncurses5-dev libltdl3-dev")
+        run_command("sudo apt-get install -y build-essential libncurses5-dev libltdl3-dev")
     else
         puts "Platform not found: #{platform}"
         exit
@@ -193,17 +193,6 @@ def check_dep
     end
     puts "Found"
     
-    print "UUID ... "
-    x = `find /usr/local/include -name 'uuid.h'`.strip
-    if x == ""
-        x = `find /usr/include -name 'uuid.h'`.strip
-        if x == ""
-            puts ""
-            puts "Error: uuid/uuid.h is missing"
-            exit 1
-        end
-    end
-    puts "Found"
     
     puts "All Dependencies are found"
 end
