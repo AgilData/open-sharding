@@ -520,7 +520,6 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
                 OSPPingResponse *pingResponse = dynamic_cast<OSPPingResponse*>(ospNetworkConnection->sendMessage(&pingRequest));
                 if (xlog.isDebugEnabled()) xlog.debug("Ping OK");
                 delete pingResponse;
-                break;
             }
             catch (...) {
                 // bad connection, don't return to pool, try again
