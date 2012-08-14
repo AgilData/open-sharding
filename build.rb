@@ -244,7 +244,7 @@ begin
     elsif option == "build-real"
         puts "Building with the option: #{option}"
         mysql_version = ARGV[1]
-        if ! mysql_version.match("5.0") ||  ! mysql_version.match("5.1")
+        if ! mysql_version.match("5.0") &&  ! mysql_version.match("5.1")
             puts "Error: Not supported MySQL type."
             exit
         end
