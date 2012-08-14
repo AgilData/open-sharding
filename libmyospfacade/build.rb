@@ -138,7 +138,7 @@ begin
     clean
     write_version_header
     compile(mysql_version)
-    create_tar
+    create_tar(mysql_version)
     finish = Time.now
     
     elapsed = (finish-start).to_i
