@@ -30,7 +30,7 @@ using namespace util;
 namespace opensharding {
 
 OSPConnectionPool::OSPConnectionPool() {
-    poolSize = 200;
+    poolSize = 200; //TODO: make configurable
     pool = new OSPConnection*[poolSize];
     for (int i=0; i<poolSize; i++) {
         pool[i] = NULL;
@@ -46,6 +46,9 @@ OSPConnectionPool::~OSPConnectionPool() {
             pool[i] = NULL;
         }
     }
+
+    delete [] pool;
+    pool = NULL;
 }
 
 OSPConnection *OSPConnectionPool::borrowConnection() {

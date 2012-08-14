@@ -502,7 +502,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         OSPConnectionPool *pool = NULL;
         {
             MutexLock lock("MySQLDriver_connpool_mutex", &MySQLDriver_connpool_mutex);
-            OSPConnectionPool *pool = getResourceMap()->getOSPConnectionPool(info->target_schema_name);
+            pool = getResourceMap()->getOSPConnectionPool(info->target_schema_name);
             if (!pool) {
                 pool = new OSPConnectionPool();
                 getResourceMap()->setOSPConnectionPool(info->target_schema_name, pool);
