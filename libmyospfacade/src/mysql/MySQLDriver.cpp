@@ -514,6 +514,10 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         OSPPingRequest pingRequest;
         while (!ospNetworkConnection) {
             ospNetworkConnection = pool->borrowConnection();
+            if (!ospNetworkConnection) {
+                // no connection available in pool
+                break;
+            }
 
             // validate the connection with a ping to the osp process
             try {
@@ -526,6 +530,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
             catch (...) {
                 // bad connection, don't return to pool, try again
                 if (xlog.isDebugEnabled()) xlog.debug("Ping failed, removing connection from pool");
+                delete ospNetworkConnection;
                 ospNetworkConnection = NULL;
             }
         }
