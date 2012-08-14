@@ -47,6 +47,7 @@ end
 ## Install Dependencies
 #################################################################################################
 def install_dependencies
+    puts "Installing Dependencies *****************************************"
     platform = get_platform
     if platform.match("centos")
         run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel uuid-devel java-1.6.0-openjdk-devel kernel-devel")
@@ -61,6 +62,9 @@ end
 ## Building libmyosp
 #################################################################################################
 def build(mysql_version)
+    
+    puts "Building MyOSP *****************************************"
+
     
     # check for any old libs already deployed that might be on LD_LIBRARY_PATH
     # this is REALLY important or we will end up with corrupt binaries or a mix
