@@ -48,6 +48,8 @@
 #include <opensharding/OSPWireRequest.h>
 #include <opensharding/OSPConnectRequest.h>
 #include <opensharding/OSPWireResponse.h>
+#include <opensharding/OSPPingRequest.h>
+#include <opensharding/OSPPingResponse.h>
 #include <opensharding/OSPConnectResponse.h>
 #include <opensharding/OSPErrorResponse.h>
 #include <logger/Logger.h>
@@ -508,7 +510,25 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         }
 
         // get a connection from the pool
-        OSPConnection* ospNetworkConnection = pool->borrowConnection();
+        OSPConnection* ospNetworkConnection = NULL;
+        OSPPingRequest pingRequest;
+        while (!ospNetworkConnection) {
+            ospNetworkConnection = pool->borrowConnection();
+
+            // validate the connection with a ping to the osp process
+            try {
+                if (xlog.isDebugEnabled()) xlog.debug("Got OSP connection from pool, validating with ping");
+                OSPPingResponse *pingResponse = ospNetworkConnection->sendMessage(&pingRequest);
+                if (xlog.isDebugEnabled()) xlog.debug("Ping OK");
+                delete pingResponse;
+                break;
+            }
+            catch (...) {
+                // bad connection, don't return to pool, try again
+                if (xlog.isDebugEnabled()) xlog.debug("Ping failed, removing connection from pool");
+                ospNetworkConnection = NULL;
+            }
+        }
 
         // if there is no available connection then create one
         if (!ospNetworkConnection) {

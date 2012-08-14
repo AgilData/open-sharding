@@ -14,6 +14,7 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@rm -f *.d
 	@g++ $(CPPFLAGS) src/opensharding/OSPByteBuffer.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPConnection.cpp
+	@g++ $(CPPFLAGS) src/opensharding/OSPConnectionPool.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPConnectionInfo.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPConnectRequest.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPConnectResponse.cpp
@@ -22,6 +23,8 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/opensharding/OSPDisconnectRequest.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPDisconnectResponse.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPException.cpp
+	@g++ $(CPPFLAGS) src/opensharding/OSPPingRequest.cpp
+	@g++ $(CPPFLAGS) src/opensharding/OSPPingResponse.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPExecuteRequest.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPExecuteResponse.cpp
 	@g++ $(CPPFLAGS) src/opensharding/OSPErrorResponse.cpp
