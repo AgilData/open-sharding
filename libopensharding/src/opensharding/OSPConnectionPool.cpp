@@ -33,7 +33,7 @@ OSPConnectionPool::OSPConnectionPool() {
 }
 
 OSPConnectionPool::~OSPConnectionPool() {
-    MutexLock lock("OSPConnectPool_mutex", &connmap_mutex);
+    MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
     // delete all the connections
     while (pool.size()>0) {
         OSPConnection *ret = pool.top();
