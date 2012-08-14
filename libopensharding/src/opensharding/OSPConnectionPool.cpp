@@ -63,7 +63,6 @@ OSPConnection *OSPConnectionPool::borrowConnection() {
 
 void OSPConnectionPool::returnConnection(OSPConnection *conn) {
     MutexLock lock("OSPConnectionPool_mutex", &OSPConnectionPool_mutex);
-    pool.push(conn);
     // look for the first empty slot
     bool returned = false;
     for (int i=0; i<poolSize; i++) {
