@@ -518,7 +518,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
             // validate the connection with a ping to the osp process
             try {
                 if (xlog.isDebugEnabled()) xlog.debug("Got OSP connection from pool, validating with ping");
-                OSPPingResponse *pingResponse = ospNetworkConnection->sendMessage(&pingRequest);
+                OSPPingResponse *pingResponse = dynamic_cast<OSPPingResponse*>(ospNetworkConnection->sendMessage(&pingRequest));
                 if (xlog.isDebugEnabled()) xlog.debug("Ping OK");
                 delete pingResponse;
                 break;
