@@ -497,6 +497,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         }
 
         // get connection pool
+        OSPConnectionPool *pool = NULL;
         {
             MutexLock lock("MySQLDriver_connpool_mutex", &MySQLDriver_connpool_mutex);
             OSPConnectionPool *pool = getResourceMap()->getOSPConnectionPool(info->target_schema_name);
@@ -536,7 +537,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         try {
             /*CHANGED*/
             if (xlog.isDebugEnabled()) xlog.debug("Creating MySQLOSPConnection OK");
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospNetworkConnection);
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), pool, ospNetworkConnection);
             if (xlog.isDebugEnabled()) xlog.debug("Created MySQLOSPConnection OK");
         }
         catch (...) {
