@@ -92,7 +92,7 @@ def get_platform
     end
 end
 
-def create_tar
+def create_tar(mysql_version)
     
     platform = `cat /etc/issue`
     branch = get_branch_name
@@ -112,9 +112,15 @@ def create_tar
     run_command "cp libs/lib* _temp"
     run_command "cp ../libopensharding/libopensharding.so.1.0.0 _temp"
     run_command "cp setup.rb _temp"
-    if File.exists?("/usr/local/mysql/lib/mysql/libmysqlclient_real.so.15.0.0")
+    
+    if mysql_version.match("5.0")
         run_command "cp /usr/local/mysql/lib/mysql/libmysqlclient_real.so.15.0.0 _temp"
+    elsif mysql_version.match("5.1")
+        run_command "cp /usr/local/mysql/lib/mysql/libmysqlclient_real.so.16.0.0 _temp"
+    else
+        puts "Failed to copy libmysqlclient_real.so for tar packaging."
     end
+    
     run_command "cp myosp.conf _temp"
     run_command "cp README _temp"
     

@@ -34,8 +34,9 @@ def build(mysql_version)
     
     # check for any old libs already deployed that might be on LD_LIBRARY_PATH
     # this is REALLY important or we will end up with corrupt binaries or a mix
-    # of old and new functionality
-    
+    # of old and new functionality because myosp libs will link against the wrong
+    # version of libopensharding!!
+
     # look for libopensharding
     puts "Searching for deployed versions of libopensharding..."
     deployed_opensharding_libs = `find /usr -name \"libopensharding*\"`
