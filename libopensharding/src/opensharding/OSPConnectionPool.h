@@ -38,7 +38,7 @@ class OSPConnectionPool {
 private:
 
     int poolSize;
-    OSPConnection* pool;
+    OSPConnection** pool;
 
 public:
 
