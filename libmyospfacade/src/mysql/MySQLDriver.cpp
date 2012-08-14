@@ -512,21 +512,11 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         // get a connection from the pool
         OSPConnection* ospNetworkConnection = pool->borrowConnection();
 
-        //TODO: get the validation logging working otherwise we have to restart the client process after a DbsClient restart
-        /*
-        // get a connection from the pool
-        OSPConnection* ospNetworkConnection = NULL;
-        OSPPingRequest pingRequest;
-        while (!ospNetworkConnection) {
-            ospNetworkConnection = pool->borrowConnection();
-            if (!ospNetworkConnection) {
-                // no connection available in pool
-                break;
-            }
-
+        if (ospNetworkConnection) {
             // validate the connection with a ping to the osp process
             try {
                 if (xlog.isDebugEnabled()) xlog.debug("Got OSP connection from pool, validating with ping");
+                OSPPingRequest pingRequest;
                 OSPPingResponse *pingResponse = dynamic_cast<OSPPingResponse*>(ospNetworkConnection->sendMessage(&pingRequest));
                 if (xlog.isDebugEnabled()) xlog.debug("Ping OK");
                 delete pingResponse;
@@ -539,9 +529,8 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
                 ospNetworkConnection = NULL;
             }
         }
-        */
 
-        // if there is no available connection then create one
+        // if there is no available connection or the pooled connection was bad then create a new one
         if (!ospNetworkConnection) {
             // create a dedicated named pipe connection
             if (info->getProtocol() == PROTOCOL_TCP) {
