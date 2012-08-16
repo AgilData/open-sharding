@@ -921,7 +921,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         xlog.debug("Not in shard Analyze.");
                     }
 
-                if (db && string(db) != "") {
+             //   if (db && string(db) != "") {
                 
                 	if (xlog.isDebugEnabled()) {
                         xlog.debug("db and string(db) does not equal empty quotes.");
@@ -1013,12 +1013,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         return NULL;
                     }
         
-                }
-                else {
+             //   }
+              /*  else {
                 	if (xlog.isDebugEnabled()) {
                         xlog.debug("NOTHING IS BEING DONE!.");
                     }
-                }
+                }*/
             }
         }
 
