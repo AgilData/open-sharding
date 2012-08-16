@@ -1,7 +1,5 @@
 MYSQL_INCLUDE_PATH=/usr/local/include/mysql
 
-TEST_LIB=uuid
-
 CPPFLAGS=-I./src -I../libopensharding/src -I$(MYSQL_INCLUDE_PATH) $(CPP_OPTIONS) $(EXTRA_CFLAGS)
 
 RELEASE_CPPOPTIONS="-g -O2 -Wall -c -fmessage-length=0 -fPIC -MMD -MP"
@@ -31,8 +29,8 @@ sixteen_debug:
 
 $(SO_FILE): $(OBJ)
 	@echo "Creating Shared Library"
-	#gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lc -lstdc++ -lpthread -luuid -lopensharding -lmysys -lmystrings -L../libopensharding -L/usr/lib64/mysql
-	gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lc -lstdc++ -lpthread -luuid -lopensharding -L../libopensharding -L/usr/lib64/mysql
+	#gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lc -lstdc++ -lpthread -lopensharding -lmysys -lmystrings -L../libopensharding -L/usr/lib64/mysql
+	gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lc -lstdc++ -lpthread -lopensharding -L../libopensharding -L/usr/lib64/mysql
 
 testsuite_fifteen: fifteen
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
@@ -40,7 +38,7 @@ testsuite_sixteen: sixteen
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 $(TEST_FILE): $(TEST_OBJ)
 	@echo "Compiling tests..."
-	gcc -o $(TEST_FILE) test/src/*.o -lc -llogger -lutil -lopensharding -l$(TEST_LIB) -lcpptest -L../libopensharding -L. -L/usr/local/lib
+	gcc -o $(TEST_FILE) test/src/*.o -lc -llogger -lutil -lopensharding -lcpptest -L../libopensharding -L. -L/usr/local/lib
 
 clean:
 	rm -f *.a lib*.so* testsuite
