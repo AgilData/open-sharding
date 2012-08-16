@@ -26,6 +26,6 @@
   "\n" \
   "Oracle is a registered trademark of Oracle Corporation and/or its\n" \
   "affiliates. Other names may be trademarks of their respective\n" \
-  "owners.\n"
+  "owners HAHAHAHAHA.\n"
 
 #endif /* _welcome_copyright_notice_h_ */

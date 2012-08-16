@@ -9,7 +9,7 @@
 #include <custom_conf.h>
 #else
 #define PROTOCOL_VERSION                10
-#define MYSQL_SERVER_VERSION            "5.0.96 DBSHARDS EDITION"
+#define MYSQL_SERVER_VERSION            "5.0.96"
 #define MYSQL_BASE_VERSION              "mysqld-5.0"
 #define MYSQL_SERVER_SUFFIX_DEF         ""
 #define FRM_VER                         6
