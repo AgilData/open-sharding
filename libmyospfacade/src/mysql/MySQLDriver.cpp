@@ -775,6 +775,10 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
         }
         else { //This is also known as delegate mode...
+        
+        	if (xlog.isDebugEnabled()) {
+                        xlog.debug("Debug section of Delegate Mode.");
+                    }
 
             info->host = _host==NULL ? string("") : string(_host);
             info->user = _user==NULL ? string("") : string(_user);
@@ -900,7 +904,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 if (db && string(db) != "") {
 
                     if (xlog.isDebugEnabled()) {
-                        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+                        xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
                     }
 
                     MySQLAbstractConnection *conn = NULL;
@@ -958,7 +962,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         getResourceMap()->clearErrorState(mysql);
 
                         if (xlog.isDebugEnabled()) {
-                            xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+                            xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
                         }
 
 
