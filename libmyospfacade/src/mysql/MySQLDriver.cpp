@@ -778,7 +778,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         
         	if (xlog.isDebugEnabled()) {
                         xlog.debug("Debug section of Delegate Mode.");
-                    }
+                    } //Checkpoint 1
 
             info->host = _host==NULL ? string("") : string(_host);
             info->user = _user==NULL ? string("") : string(_user);
@@ -797,7 +797,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
                 ); 
-            }
+            } //Checkpoint 2
 
             MySQLConnectionInfo *old_info = getResourceMap()->getConnectInfo(mysql);
             
@@ -812,12 +812,19 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         xlog.debug(string("Storing mysql handle: ") 
                         					+ Util::toString(mysql) 
                         					+ string(" and Info to Resource Map."));
-                    }
+                    } //Checkpoint 3
 
             // store connection info so it can be retrieved in mysql_select_db in separate call
             getResourceMap()->setConnectInfo(mysql, info);
-
+			
+			if (xlog.isDebugEnabled()) {
+                        xlog.debug("Checking to see if shard analyze...which it shouldn't be here.");
+                    }
             if(MyOSPConfig::isShardAnalyze()) {
+            
+				if (xlog.isDebugEnabled()) {
+							xlog.debug("Entering Shard Analyze.");
+						}
                 struct timeval tstart; gettimeofday(&tstart, NULL);
                 
                 if (db != NULL) {
@@ -909,8 +916,16 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 delete [] params;
             }
             else {
+            
+            	if (xlog.isDebugEnabled()) {
+                        xlog.debug("Not in shard Analyze.");
+                    }
 
                 if (db && string(db) != "") {
+                
+                	if (xlog.isDebugEnabled()) {
+                        xlog.debug("db and string(db) does not equal empty quotes.");
+                    }
 
                     if (xlog.isDebugEnabled()) {
                         xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
