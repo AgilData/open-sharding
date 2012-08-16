@@ -950,6 +950,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 						 if (xlog.isDebugEnabled()) {
                         	xlog.debug("Storing to the map after defining a connection.");
                     	}
+                    	
                         // store mapping from the MYSQL structure to the native connection
                         getResourceMap()->setConnection(mysql, conn);
 
@@ -1034,7 +1035,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     if (!conn)
     {
       xlog.error("No connection from getConnection");
-      setErrorState(mysql, CR_UNKNOWN_ERROR, "No Connection", "OSP01");
+      setErrorState(mysql, CR_UNKNOWN_ERROR, "No Connection From MySQL Select DB", "OSP01");
       return -1;
     }
 
