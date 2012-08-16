@@ -1014,6 +1014,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                     }
         
                 }
+                else {
+                	if (xlog.isDebugEnabled()) {
+                        xlog.debug("NOTHING IS BEING DONE!.");
+                    }
+                }
             }
         }
 
