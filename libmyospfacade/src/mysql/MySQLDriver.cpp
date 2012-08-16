@@ -802,8 +802,17 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             MySQLConnectionInfo *old_info = getResourceMap()->getConnectInfo(mysql);
             
             if (old_info) {
+            		if (xlog.isDebugEnabled()) {
+                        xlog.debug("Deleting old info.");
+                    }
                 delete old_info;
             }
+            
+            	if (xlog.isDebugEnabled()) {
+                        xlog.debug(string("Storing mysql handle: ") 
+                        					+ Util::toString(mysql) 
+                        					+ string(" and Info to Resource Map."));
+                    }
 
             // store connection info so it can be retrieved in mysql_select_db in separate call
             getResourceMap()->setConnectInfo(mysql, info);
@@ -906,7 +915,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                     if (xlog.isDebugEnabled()) {
                         xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
                     }
-
+					
+					if (xlog.isDebugEnabled()) {
+                        xlog.debug("Creating a new connection variable.");
+                    }
+                    
                     MySQLAbstractConnection *conn = NULL;
 
                     try {
