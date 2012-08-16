@@ -938,10 +938,18 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         if (xlog.isDebugEnabled()) {
                             xlog.debug("Creating native connection");
                         }
+                        
+                        if (xlog.isDebugEnabled()) {
+                        	xlog.debug(string("mysql_real_connect---what's being passed into the new conn.(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+                    	}
+
 
                         // create native connection
                         conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
-
+						
+						 if (xlog.isDebugEnabled()) {
+                        	xlog.debug("Storing to the map after defining a connection.");
+                    	}
                         // store mapping from the MYSQL structure to the native connection
                         getResourceMap()->setConnection(mysql, conn);
 
