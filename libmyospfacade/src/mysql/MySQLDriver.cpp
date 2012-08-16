@@ -1126,6 +1126,10 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         }
     }
     else { //This is also delegate mode
+    	  if (xlog.isDebugEnabled()) {
+                  xlog.debug("Delegate Mode for Mysql_select_db.");
+              }
+    
         if(MyOSPConfig::isShardAnalyze()) {
             struct timeval tstart; gettimeofday(&tstart, NULL);
             //ADD NEW CODE
