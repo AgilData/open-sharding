@@ -775,6 +775,10 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             }
         }
         else { //This is also known as delegate mode...
+        
+        	if (xlog.isDebugEnabled()) {
+                        xlog.debug("Debug section of Delegate Mode.");
+                    } //Checkpoint 1
 
             info->host = _host==NULL ? string("") : string(_host);
             info->user = _user==NULL ? string("") : string(_user);
@@ -793,18 +797,34 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string("db=") + (databaseName=="" ? "NULL" : databaseName.c_str()) 
                 + string(")")
                 ); 
-            }
+            } //Checkpoint 2
 
             MySQLConnectionInfo *old_info = getResourceMap()->getConnectInfo(mysql);
             
             if (old_info) {
+            		if (xlog.isDebugEnabled()) {
+                        xlog.debug("Deleting old info.");
+                    }
                 delete old_info;
             }
+            
+            	if (xlog.isDebugEnabled()) {
+                        xlog.debug(string("Storing mysql handle: ") 
+                        					+ Util::toString(mysql) 
+                        					+ string(" and Info to Resource Map."));
+                    } //Checkpoint 3
 
             // store connection info so it can be retrieved in mysql_select_db in separate call
             getResourceMap()->setConnectInfo(mysql, info);
-
+			
+			if (xlog.isDebugEnabled()) {
+                        xlog.debug("Checking to see if shard analyze...which it shouldn't be here.");
+                    }
             if(MyOSPConfig::isShardAnalyze()) {
+            
+				if (xlog.isDebugEnabled()) {
+							xlog.debug("Entering Shard Analyze.");
+						}
                 struct timeval tstart; gettimeofday(&tstart, NULL);
                 
                 if (db != NULL) {
@@ -896,13 +916,25 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 delete [] params;
             }
             else {
-
-                if (db && string(db) != "") {
-
-                    if (xlog.isDebugEnabled()) {
-                        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+            
+            	if (xlog.isDebugEnabled()) {
+                        xlog.debug("Not in shard Analyze.");
                     }
 
+             //   if (db && string(db) != "") {
+                
+                	if (xlog.isDebugEnabled()) {
+                        xlog.debug("db and string(db) does not equal empty quotes.");
+                    }
+
+                    if (xlog.isDebugEnabled()) {
+                        xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+                    }
+					
+					if (xlog.isDebugEnabled()) {
+                        xlog.debug("Creating a new connection variable.");
+                    }
+                    
                     MySQLAbstractConnection *conn = NULL;
 
                     try {
@@ -934,10 +966,19 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         if (xlog.isDebugEnabled()) {
                             xlog.debug("Creating native connection");
                         }
+                        
+                        if (xlog.isDebugEnabled()) {
+                        	xlog.debug(string("mysql_real_connect---what's being passed into the new conn.(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+                    	}
+
 
                         // create native connection
                         conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
-
+						
+						 if (xlog.isDebugEnabled()) {
+                        	xlog.debug("Storing to the map after defining a connection.");
+                    	}
+                    	
                         // store mapping from the MYSQL structure to the native connection
                         getResourceMap()->setConnection(mysql, conn);
 
@@ -958,7 +999,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         getResourceMap()->clearErrorState(mysql);
 
                         if (xlog.isDebugEnabled()) {
-                            xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+                            xlog.debug(string("mysql_real_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
                         }
 
 
@@ -972,7 +1013,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         return NULL;
                     }
         
-                }
+             //   }
+              /*  else {
+                	if (xlog.isDebugEnabled()) {
+                        xlog.debug("NOTHING IS BEING DONE!.");
+                    }
+                }*/
             }
         }
 
@@ -1022,7 +1068,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
     if (!conn)
     {
       xlog.error("No connection from getConnection");
-      setErrorState(mysql, CR_UNKNOWN_ERROR, "No Connection", "OSP01");
+      setErrorState(mysql, CR_UNKNOWN_ERROR, "No Connection From MySQL Select DB", "OSP01");
       return -1;
     }
 
@@ -1113,6 +1159,10 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         }
     }
     else { //This is also delegate mode
+    	  if (xlog.isDebugEnabled()) {
+                  xlog.debug("Delegate Mode for Mysql_select_db.");
+              }
+    
         if(MyOSPConfig::isShardAnalyze()) {
             struct timeval tstart; gettimeofday(&tstart, NULL);
             //ADD NEW CODE
