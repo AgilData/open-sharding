@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D1931E3915DD884B00E20828 /* OSPUnixSocketConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1931E3715DD884B00E20828 /* OSPUnixSocketConnection.cpp */; };
+		D1931E3A15DD884B00E20828 /* OSPUnixSocketConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = D1931E3815DD884B00E20828 /* OSPUnixSocketConnection.h */; };
+		D1931E3D15DFC48F00E20828 /* MutexLock.h in Headers */ = {isa = PBXBuildFile; fileRef = D1931E3C15DFC48F00E20828 /* MutexLock.h */; };
 		D1C20F1415CF1DDB00C99279 /* Makefile in Sources */ = {isa = PBXBuildFile; fileRef = D1C20ECD15CF1DDA00C99279 /* Makefile */; };
 		D1C20F1515CF1DDB00C99279 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D1C20ED115CF1DDB00C99279 /* Logger.cpp */; };
 		D1C20F1615CF1DDB00C99279 /* Logger.h in Headers */ = {isa = PBXBuildFile; fileRef = D1C20ED215CF1DDB00C99279 /* Logger.h */; };
@@ -76,6 +79,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		D1931E3715DD884B00E20828 /* OSPUnixSocketConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = OSPUnixSocketConnection.cpp; sourceTree = "<group>"; };
+		D1931E3815DD884B00E20828 /* OSPUnixSocketConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = OSPUnixSocketConnection.h; sourceTree = "<group>"; };
+		D1931E3C15DFC48F00E20828 /* MutexLock.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MutexLock.h; sourceTree = "<group>"; };
 		D1C20EC015CF1DBD00C99279 /* libOpenShardingProtocolLibrary.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libOpenShardingProtocolLibrary.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1C20ECD15CF1DDA00C99279 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = "<group>"; };
 		D1C20ECE15CF1DDA00C99279 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = README; path = ../README; sourceTree = "<group>"; };
@@ -198,6 +204,8 @@
 		D1C20ED315CF1DDB00C99279 /* opensharding */ = {
 			isa = PBXGroup;
 			children = (
+				D1931E3715DD884B00E20828 /* OSPUnixSocketConnection.cpp */,
+				D1931E3815DD884B00E20828 /* OSPUnixSocketConnection.h */,
 				D1C20ED415CF1DDB00C99279 /* jdbc_types.h */,
 				D1C20ED515CF1DDB00C99279 /* OSPByteBuffer.cpp */,
 				D1C20ED615CF1DDB00C99279 /* OSPByteBuffer.h */,
@@ -262,6 +270,7 @@
 		D1C20F0D15CF1DDB00C99279 /* util */ = {
 			isa = PBXGroup;
 			children = (
+				D1931E3C15DFC48F00E20828 /* MutexLock.h */,
 				D1C20F0E15CF1DDB00C99279 /* DynLib.cpp */,
 				D1C20F0F15CF1DDB00C99279 /* DynLib.h */,
 				D1C20F1015CF1DDB00C99279 /* OSPConfig.cpp */,
@@ -312,6 +321,8 @@
 				D1C20F5115CF1DDB00C99279 /* DynLib.h in Headers */,
 				D1C20F5315CF1DDB00C99279 /* OSPConfig.h in Headers */,
 				D1C20F5515CF1DDB00C99279 /* Util.h in Headers */,
+				D1931E3A15DD884B00E20828 /* OSPUnixSocketConnection.h in Headers */,
+				D1931E3D15DFC48F00E20828 /* MutexLock.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -399,6 +410,7 @@
 				D1C20F5015CF1DDB00C99279 /* DynLib.cpp in Sources */,
 				D1C20F5215CF1DDB00C99279 /* OSPConfig.cpp in Sources */,
 				D1C20F5415CF1DDB00C99279 /* Util.cpp in Sources */,
+				D1931E3915DD884B00E20828 /* OSPUnixSocketConnection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -489,6 +501,7 @@
 				D1C20EC615CF1DBD00C99279 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
