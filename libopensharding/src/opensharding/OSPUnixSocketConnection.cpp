@@ -181,18 +181,17 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     if (DEBUG) log.debug("Sending message to resquest pipe, RequestID=" + Util::toString(requestID));
 
-    OSPWireRequest request(requestID, message->getMessageType(), message);
-
     // encode the message into the temporary memory buffer
     requestBuffer->reset();
     requestBuffer->writeInt(0); // temporary placeholder for message length integer
-    request.write(requestBuffer);
+    message.write(requestBuffer);
     int messageLength = requestBuffer->getOffset() - 4;
     // write message length into first four bytes of the buffer
     requestBuffer->reset();
     requestBuffer->writeInt(messageLength);
 
     // now use a second buffer to encode the OSPWireRequest
+    int messageType = message->getMessageType();
     requestBuffer2->writeInt(1, requestID);
     requestBuffer2->writeInt(2, messageType);
     requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, messageLength+4); // this is the encoded request from the first buffer
