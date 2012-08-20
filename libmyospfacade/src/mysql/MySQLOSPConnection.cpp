@@ -73,8 +73,8 @@ MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, stri
     this->ospConnPool = ospConnPool;
     this->ospConn = ospConn;
 
-    // request a database connection
-    OSPConnectRequest request(database, user, password);
+    // request a database connection and statement in a single call
+    OSPConnectRequest request(database, user, password, true);
 
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
     if (wireResponse->isErrorResponse()) {
