@@ -50,6 +50,7 @@ logger::Logger &OSPUnixSocketConnection::log = Logger::getLogger("OSPUnixSocketC
 
 OSPUnixSocketConnection::OSPUnixSocketConnection(OSPConnectionInfo *info) {
     requestBuffer = NULL;
+    requestBuffer2 = NULL;
     buffer = NULL;
 	init(info);
 }
@@ -85,6 +86,8 @@ void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
     os = new OSPFileOutputStream(sockfd, 0);
 
     requestBuffer = new OSPByteBuffer(8192);
+
+    requestBuffer2 = new OSPByteBuffer(8192);
 
     bufferSize = 8192;
     buffer = new char[bufferSize];
@@ -189,9 +192,14 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer->reset();
     requestBuffer->writeInt(messageLength);
 
+    // now use a second buffer to encode the OSPWireRequest
+    requestBuffer2->writeInt(1, requestID);
+    requestBuffer2->writeInt(2, messageType);
+    requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, messageLength+4); // this is the encoded request from the first buffer
+
     // write to output stream
     if (DEBUG) log.debug("Writing request to request pipe");
-    os->writeBytes((char *) requestBuffer->getBuffer(), 0, messageLength+4);
+    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, requestBuffer2->getOffset());
 
     // flush the pipe if we are waiting for a response
     if (flush) {
@@ -265,6 +273,11 @@ void OSPUnixSocketConnection::stop() {
     if (requestBuffer) {
         delete requestBuffer;
         requestBuffer = NULL;
+    }
+
+    if (requestBuffer2) {
+        delete requestBuffer2;
+        requestBuffer2 = NULL;
     }
 
     if (buffer) {

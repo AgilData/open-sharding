@@ -38,6 +38,9 @@ OSPWireRequest::~OSPWireRequest() {
 }
 
 void OSPWireRequest::write(OSPOutputStream *buffer) {
+
+    //TODO: this is functional but very inefficient - see OSPUnixSocketConnection for better example of doing this
+
     buffer->writeInt(1, requestID);
     buffer->writeInt(2, messageType);
 
