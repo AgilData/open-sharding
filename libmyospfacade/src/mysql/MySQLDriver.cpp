@@ -671,8 +671,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 info->protocol = PROTOCOL_UNIX_SOCKET;
             }
             else {
-                xlog.error("Invalid protocol. protocolName: " + protocolName.c_str());
-                throw "Invalid protocol. protocolName: " + protocolName.c_str();
+                xlog.error("Invalid protocol. protocolName: " + protocolName);
+                throw "Invalid protocol. protocolName";
             }
 
             if (info->protocol == PROTOCOL_UNIX_SOCKET) {
@@ -707,7 +707,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 + string(" osp_vendor: ") + info->osp_vendor
                 + string(" protocol: ") + Util::toString(info->protocol)
                 + string(" target_dbms: ") + info->target_dbms
-                + string(" db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
+                + string(" db: ") + (databaseName=="" ? "NULL" : databaseName)
                 );
             }
 
