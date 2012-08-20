@@ -103,7 +103,7 @@ end
 ## Building MySQl
 #################################################################################################
 def mysql_install(mysql_version)
-    mysql_dir = "./mysql-install/#{mysql_version}"
+    mysql_dir = "./mysql-install-#{mysql_version}"
     puts "Installing mysql libraries based on the version: #{mysql_version}"
     puts `groupadd mysql`
     puts `useradd -g mysql mysql`
