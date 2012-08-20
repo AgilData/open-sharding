@@ -181,13 +181,13 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     OSPWireRequest request(requestID, message->getMessageType(), message);
 
     // encode the message into the temporary memory buffer
-    request.reset();
-    request.writeInt(0); // temporary placeholder for message length integer
+    requestBuffer->reset();
+    requestBuffer->writeInt(0); // temporary placeholder for message length integer
     request.write(requestBuffer);
-
     int messageLength = tempBuffer.getOffset() - 4;
-    request.reset();
-    request.writeInt(messageLength);
+    // write message length into first four bytes of the buffer
+    requestBuffer->reset();
+    requestBuffer->writeInt(messageLength);
 
     // write to output stream
     if (DEBUG) log.debug("Writing request to request pipe");
