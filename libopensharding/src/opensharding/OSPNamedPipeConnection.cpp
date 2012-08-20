@@ -99,7 +99,7 @@ int OSPNamedPipeConnection::init(OSPConnectionInfo *info, int pipeId)
 
     // now use a TCP connection to tell DbsClient about this new named pipe and set up the server thread to process it
     OSPTCPConnection *ospTcpConn = new OSPTCPConnection(info->host, info->port==0 ? 4545 : info->port);
-    OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT"); // magic values
+    OSPConnectRequest request("OSP_CONNECT", "OSP_CONNECT", "OSP_CONNECT", false); // magic values
     request.setRequestPipe(this->getRequestPipeFilename());
     request.setResponsePipe(this->getResponsePipeFilename());       
     OSPWireResponse* wireResponse = NULL;
