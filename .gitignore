@@ -8,5 +8,10 @@ cf*.properties
 .idea
 *.d
 *.o
-/OpenSharding/OpenSharding.xcodeproj/project.xcworkspace/xcuserdata
-/libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata
+OpenSharding/OpenSharding.xcodeproj/project.xcworkspace/xcuserdata
+libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata/*
+xcuserdata/
+xcschemes/
+mysql-install*
+*.tgz
+*.gz
