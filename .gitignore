@@ -9,4 +9,6 @@ cf*.properties
 *.d
 *.o
 OpenSharding/OpenSharding.xcodeproj/project.xcworkspace/xcuserdata
-libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata
+libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata/*
+xcuserdata/
+xcschemes/
