@@ -26,10 +26,11 @@
 
 namespace opensharding {
 
-OSPConnectRequest::OSPConnectRequest(string database, string user, string password) {
+OSPConnectRequest::OSPConnectRequest(string database, string user, string password, bool createStatement) {
     this->database = database;
     this->user = user;
     this->password = password;
+    this->createStatement = createStatement;
 }
 
 OSPConnectRequest::~OSPConnectRequest() {
@@ -43,6 +44,7 @@ void OSPConnectRequest::write(OSPOutputStream *buffer) {
     buffer->writeInt(5, 1); // use named pipes
     buffer->writeString(6, requestPipe);
     buffer->writeString(7, responsePipe);
+    buffer->writeInt(8, createStatement ? 1 : 0);
 }
 
 unsigned int OSPConnectRequest::getEstimatedEncodingLength() {

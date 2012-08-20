@@ -37,8 +37,10 @@ private:
     string requestPipe;
     string responsePipe;
 
+    bool createStatement;
+
 public:
-    OSPConnectRequest(string database, string user, string password);
+    OSPConnectRequest(string database, string user, string password, bool createStatement);
     virtual ~OSPConnectRequest();
 
     unsigned char getMessageType() { return 0x01; }
