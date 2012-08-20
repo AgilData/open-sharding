@@ -62,11 +62,20 @@ end
 ## Building libmyosp
 #################################################################################################
 def build(mysql_version)
-    
+
     puts "Building MyOSP *****************************************"
 
-    
-    # check for any old libs already deployed that might be on LD_LIBRARY_PATH
+    # we need to make sure we already have the mysql headers for the _real libs since we need
+    # to compile against the same exact version or we will end up with hard to diagnose segmentation
+    # faults at runtime
+
+    mysql_real_dir = "mysql-install-#{mysql_version}"
+    if !File.exists?(mysql_real_dir)
+      puts "Could not locate mysql directory '#{mysql_real_dir}' - you should run build-real first (this is a one-time requirement)"
+      exit -1
+    end
+
+    # check for any libopensharding.so already deployed that might be on LD_LIBRARY_PATH
     # this is REALLY important or we will end up with corrupt binaries or a mix
     # of old and new functionality
     
@@ -79,16 +88,6 @@ def build(mysql_version)
         exit
     end
     puts "No deployed versions of libopensharding found"
-    
-    # look for libmyosp
-    puts "Searching for deployed versions of libmyosp..."
-    deployed_myosp_libs = `find /usr -name \"libmyosp*\"`
-    #puts "FOUND: #{deployed_myosp_libs}"
-    if deployed_myosp_libs != ""
-        puts "Cannot build until you delete these already deployed versions: #{deployed_myosp_libs}"
-        exit
-    end
-    puts "No deployed versions of libmyosp found"
     
     # build libopensharding
     puts "Building libopensharding"
@@ -104,7 +103,7 @@ end
 ## Building MySQl
 #################################################################################################
 def mysql_install(mysql_version)
-    mysql_dir = "/root/mysql-install/"
+    mysql_dir = "./mysql-install/#{mysql_version}"
     puts "Installing mysql libraries based on the version: #{mysql_version}"
     puts `groupadd mysql`
     puts `useradd -g mysql mysql`
@@ -112,12 +111,11 @@ def mysql_install(mysql_version)
     if mysql_version.match("5.0")
         run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
        run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
-        mysql_dir = "/root/mysql-install/mysql-5.0.96/"
+        mysql_dir = "./mysql-install/#{mysql_version}/mysql-5.0.96"
         Dir.chdir("#{mysql_dir}")
      elsif mysql_version.match("5.1")
        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql5.1.62/mysql5.1real.tar.gz")
        run_command("tar xvfz mysql5.1real.tar.gz -C #{mysql_dir}")
-        mysql_dir = "/root/mysql-install/"
        Dir.chdir("#{mysql_dir}")
     else
        puts "Invalid version for installation of mysql."
@@ -232,6 +230,13 @@ begin
         end
     elsif option == "build-real"
         puts "Building with the option: #{option}"
+        if ARGV.length==1
+            puts "Usage: ruby build.rb build-real [MYSQL VERSION]"
+            puts "\tAvailable options: "
+            puts "\t\t - 5.0 "
+            puts "\t\t - 5.1 "
+            exit
+        end
         mysql_version = ARGV[1]
         if ! mysql_version.match("5.0") &&  ! mysql_version.match("5.1")
             puts "Error: Not supported MySQL type."

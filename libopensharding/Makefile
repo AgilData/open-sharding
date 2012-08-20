@@ -49,7 +49,7 @@ libopensharding.so.1.0.0: src/opensharding/*.cpp src/opensharding/*.h
 	@g++ $(CPPFLAGS) src/util/OSPConfig.cpp
 	@echo "Linking libopensharding..."
 	@rm -f libopensharding.so*
-	@gcc -shared -Wl,-soname,libopensharding.so -o libopensharding.so.1.0.0 *.o -lc -lstdc++ -lpthread -L/usr/lib64
+	@gcc -shared -Wl,-soname,libopensharding.so -o libopensharding.so.1.0.0 *.o -lc -lstdc++ -lpthread
 	@ln -s libopensharding.so.1.0.0 libopensharding.so
 	@rm -f *.o
 	@rm -f *.d
