@@ -42,8 +42,6 @@
 
 #define DEBUG log.isDebugEnabled()
 
-#define AVOID_COPY 0
-
 using namespace util;
 
 namespace opensharding {
@@ -51,6 +49,8 @@ namespace opensharding {
 logger::Logger &OSPUnixSocketConnection::log = Logger::getLogger("OSPUnixSocketConnection");
 
 OSPUnixSocketConnection::OSPUnixSocketConnection(OSPConnectionInfo *info) {
+    requestBuffer = NULL;
+    buffer = NULL;
 	init(info);
 }
 
@@ -83,6 +83,8 @@ void OSPUnixSocketConnection::init(OSPConnectionInfo *info)
 
     is = new OSPFileInputStream(sockfd, 4096);
     os = new OSPFileOutputStream(sockfd, 0);
+
+    requestBuffer = new OSPByteBuffer(8192);
 
     bufferSize = 8192;
     buffer = new char[bufferSize];
@@ -178,39 +180,21 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     OSPWireRequest request(requestID, message->getMessageType(), message);
 
-    // encode the message into a temporary memory buffer
-    OSPByteBuffer tempBuffer(message->getEstimatedEncodingLength());
-    request.write(&tempBuffer);
+    // encode the message into the temporary memory buffer
+    request.reset();
+    request.writeInt(0); // temporary placeholder for message length integer
+    request.write(requestBuffer);
 
-    int messageLength = tempBuffer.getOffset();
+    int messageLength = tempBuffer.getOffset() - 4;
+    request.reset();
+    request.writeInt(messageLength);
 
-#ifdef AVOID_COPY
-
-    //TODO: OSPFileOutputStream is not implemented correctly yet
-
-    os->writeInt(messageLength);
-    os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
-
-#else
-
-    // wrap the message in the messaging protocol
-    OSPByteBuffer zbuffer(tempBuffer.getOffset() + 4);
-
-    // message length
-    zbuffer.writeInt(messageLength);
-
-    // message bytes
-    zbuffer.writeBytes(tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
-
-    // write to pipe
+    // write to output stream
     if (DEBUG) log.debug("Writing request to request pipe");
-    os->writeBytes((char *) zbuffer.getBuffer(), 0, zbuffer.getOffset());
-
-#endif
+    os->writeBytes((char *) requestBuffer->getBuffer(), 0, messageLength+4);
 
     // flush the pipe if we are waiting for a response
     if (flush) {
-        log.debug("Flushing request pipe");
         os->flush();
     }
 
@@ -277,6 +261,11 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
 void OSPUnixSocketConnection::stop() {
 
     if (DEBUG) log.debug("Closing pipes");
+
+    if (requestBuffer) {
+        delete requestBuffer;
+        requestBuffer = NULL;
+    }
 
     if (buffer) {
         delete [] buffer;

@@ -47,6 +47,10 @@ private:
 
     int nextRequestID;
 
+    // buffer for reading requests
+    OSPByteBuffer *requestBuffer;
+
+    // buffer for reading responses
     char *buffer;
     unsigned int bufferSize;
 
