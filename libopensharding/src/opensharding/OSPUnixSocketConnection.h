@@ -47,8 +47,9 @@ private:
 
     int nextRequestID;
 
-    // buffer for reading requests
-    OSPByteBuffer *requestBuffer;
+    // buffers for encoding requests
+    OSPByteBuffer *requestBuffer; // encode request
+    OSPByteBuffer *requestBuffer2; // encode OSPWireRequest wrapper
 
     // buffer for reading responses
     char *buffer;
