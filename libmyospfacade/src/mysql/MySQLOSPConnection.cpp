@@ -93,6 +93,25 @@ MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, stri
     // delete the response now we have all the info from it
     delete wireResponse;
 
+    // legacy support
+    if (stmtID==0) {
+
+        // older versions of OSP spec did not support creating a statement at the same time as connection, so send
+        // a separate request
+        OSPCreateStatementRequest createStatementRequest(connID);
+        wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&createStatementRequest, true));
+        if (wireResponse->isErrorResponse()) {
+            OSPErrorResponse* response = dynamic_cast<OSPErrorResponse*>(wireResponse->getResponse());
+            log.error(string("OSP Error: ") + Util::toString(response->getErrorCode()) + string(": ") + response->getErrorMessage());
+            delete wireResponse;
+            throw "OSP_ERROR";
+        }
+
+        OSPCreateStatementResponse* createStatementResponse = dynamic_cast<OSPCreateStatementResponse*>(wireResponse->getResponse());
+        stmtID = createStatementResponse->getStmtID();
+        delete wireResponse;
+    }
+
     my_sqlstate = "00000";
     my_errno = 0;
     my_error = NULL;
