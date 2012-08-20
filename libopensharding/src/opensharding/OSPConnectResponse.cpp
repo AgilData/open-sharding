@@ -29,6 +29,7 @@ OSPConnectResponse::OSPConnectResponse() {
     connID = "";
     requestPipeFilename = "";
     responsePipeFilename = "";
+    stmtID = 0;
 }
 
 OSPConnectResponse::~OSPConnectResponse() {
@@ -57,6 +58,9 @@ void OSPConnectResponse::setField(int fieldNum, char *buffer, unsigned int offse
 
 void OSPConnectResponse::setField(int fieldNum, int value) {
     switch (fieldNum) {
+        case 4:
+            stmtID = value;
+            break;
         default:
             // always ignore fields we don't recognize
             break;

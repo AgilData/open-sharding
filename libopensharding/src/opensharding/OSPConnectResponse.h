@@ -32,6 +32,7 @@ private:
     string connID;
     string requestPipeFilename;
     string responsePipeFilename;
+    int stmtID;
 
 public:
     OSPConnectResponse();
@@ -46,6 +47,7 @@ public:
     string getConnID() { return connID; }
     string getRequestPipeFilename() { return requestPipeFilename; }
     string getResponsePipeFilename() { return responsePipeFilename; }
+    int getStmtID() { return stmtID; }
 };
 
 }
