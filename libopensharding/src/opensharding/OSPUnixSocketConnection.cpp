@@ -184,7 +184,7 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer->reset();
     requestBuffer->writeInt(0); // temporary placeholder for message length integer
     request.write(requestBuffer);
-    int messageLength = tempBuffer.getOffset() - 4;
+    int messageLength = requestBuffer->getOffset() - 4;
     // write message length into first four bytes of the buffer
     requestBuffer->reset();
     requestBuffer->writeInt(messageLength);
