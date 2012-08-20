@@ -198,7 +198,7 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     // write to output stream
     if (DEBUG) log.debug("Writing request to request pipe");
-    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength);
+    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength+4);
 
     // flush the pipe if we are waiting for a response
     if (flush) {
