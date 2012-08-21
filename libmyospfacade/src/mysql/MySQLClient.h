@@ -31,8 +31,10 @@ using namespace util;
 
 // #ifdef for the real mysql library that this wrapper will load.
 
+// NOTE: we *ALWAYS* have to use the _r version or the driver hangs (non-recursive mutexes?)
+
 #ifdef MYSQL_5_0
-#define MYSQL_LIBRARY "libmysqlclient_real.so.15.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.15.0.0"
 #endif
 
 #ifdef MYSQL_5_0_R
@@ -40,7 +42,7 @@ using namespace util;
 #endif
 
 #ifdef MYSQL_5_1
-#define MYSQL_LIBRARY "libmysqlclient_real.so.16.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.16.0.0"
 #endif
 
 #ifdef MYSQL_5_1_R
@@ -48,7 +50,7 @@ using namespace util;
 #endif
 
 #ifdef MYSQL_5_5
-#define MYSQL_LIBRARY "libmysqlclient_real.so.18.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.18.0.0"
 #endif
 
 #ifdef MYSQL_5_5_R
