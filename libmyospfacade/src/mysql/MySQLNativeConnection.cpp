@@ -120,7 +120,7 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
 
 
         if (log.isDebugEnabled()) {
-            log.debug(string("mysql_real_connect() function: ") + Util::toString(tempFunction));
+            log.debug(string("mysql_real_connect() function: ") + Util::toString((void*) tempFunction));
         }
 
         if (!tempFunction(mysql, server, user, password, database,
