@@ -107,9 +107,8 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         if (log.isDebugEnabled()) {
             stringstream ss;
             string us; if (unix_socket) us = unix_socket;
-            string db; if (database)    db = database;
             ss << "connect(server: "      << server
-               <<        " database: "    << db
+               <<        " database: "    << (database ? string(database) : string("NULL"))
                <<        " port: "        << port
                <<        " unix_socket: " << us     << ")";
                log.debug(ss.str());
@@ -118,6 +117,11 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         //TODO: we should be caching this function pointer instead of looking it up each time
         mysql_real_connectFnType* tempFunction =
             (mysql_real_connectFnType*)get_mysql_function("mysql_real_connect");
+
+
+        if (log.isDebugEnabled()) {
+            log.debug(string("mysql_real_connect() function: ") + Util::toString(tempFunction));
+        }
 
         if (!tempFunction(mysql, server, user, password, database,
                           port, unix_socket, clientflag)) {
