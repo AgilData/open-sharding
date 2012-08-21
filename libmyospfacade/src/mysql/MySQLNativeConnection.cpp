@@ -110,9 +110,9 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
 
             stringstream ss;
             string us; if (unix_socket) us = unix_socket;
-            ss << "connect(mysql: "      << server
+            ss << "connect(mysql: "      << Util::toString(mysql)
                <<        " server: "      << server
-               <<        " database: "    << (database ? string(database) : string("NULL"))
+               <<        " database: "    << Util::toString(database)
                <<        " port: "        << port
                <<        " unix_socket: " << us     << ")";
                log.debug(ss.str());
@@ -138,7 +138,7 @@ bool MySQLNativeConnection::connect(const char *server, const char *user,
         if (log.isDebugEnabled()) {
             log.debug(string("Connected OK; server=") +
                       string(server) + string("; user=") + string(user) +
-                      string("; database=") + string(database));
+                      string("; database=") + Util::toString(database));
         }
 
         if (mysql->server_version == NULL) {
