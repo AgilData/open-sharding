@@ -23,6 +23,7 @@
 
 MySQLConnectionInfo::MySQLConnectionInfo() {
     unix_socket = NULL;
+    clientflag = 0;
 }
 
 MySQLConnectionInfo::~MySQLConnectionInfo() {
