@@ -30,22 +30,28 @@ using namespace logger;
 using namespace util;
 
 // #ifdef for the real mysql library that this wrapper will load.
-// NOTE: we *always* link to the thread-safe version (with _r suffix)
-
-//TODO: need to decide if we want to use _real_ or not .. seems safer to use this even if it is a symlink
 
 #ifdef MYSQL_5_0
-//#define MYSQL_LIBRARY "libmysqlclient_r.so.15.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real.so.15.0.0"
+#endif
+
+#ifdef MYSQL_5_0_R
 #define MYSQL_LIBRARY "libmysqlclient_real_r.so.15.0.0"
 #endif
 
 #ifdef MYSQL_5_1
-//#define MYSQL_LIBRARY "libmysqlclient_r.so.16.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real.so.16.0.0"
+#endif
+
+#ifdef MYSQL_5_1_R
 #define MYSQL_LIBRARY "libmysqlclient_real_r.so.16.0.0"
 #endif
 
 #ifdef MYSQL_5_5
-//#define MYSQL_LIBRARY "libmysqlclient_r.so.18.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real.so.18.0.0"
+#endif
+
+#ifdef MYSQL_5_5_R
 #define MYSQL_LIBRARY "libmysqlclient_real_r.so.18.0.0"
 #endif
 
