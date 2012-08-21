@@ -59,6 +59,7 @@ public:
 
     static int toInt(string s);
 
+    static string toString(const char *cstring);
     static string toString(const long int i);
     static string toString(const int i);
     static string toString(const unsigned long int i);

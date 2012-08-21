@@ -250,6 +250,10 @@ bool Util::equalsIgnoreCase(const char *str1, const char *str2) {
     return string(temp);
 }
 
+/*static*/ string Util::toString(const char *cstring) {
+    return cstring ? string(cstring) : string("NULL");
+}
+
 /*static*/ string Util::toString(const int i) {
     char temp[256];
     sprintf(temp, "%d", i);

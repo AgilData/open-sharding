@@ -467,7 +467,7 @@ const char * mysql_sqlstate(MYSQL *mysql) {
 int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQLAbstractConnection *conn)
 {
     if (xlog.isDebugEnabled()) {
-        xlog.debug(string("do_osp_connect: mysql: ") + Util::toString(mysql) + string(" db: ") + string(db));
+        xlog.debug(string("do_osp_connect: mysql: ") + Util::toString(mysql) + string(" db: ") + Util::toString(db));
     }
 
     try {
@@ -562,7 +562,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         getResourceMap()->clearErrorState(mysql);
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+            xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
         }
 
 
@@ -616,7 +616,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
         
         // In MySQL, a database name is the same as a schema in other DBMS engines.
-        string databaseName = (db ? string(db) : string(""));
+        string databaseName = (db ? Util::toString(db) : string(""));
         
         if(ospMode) {
             
@@ -831,7 +831,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                     if (xlog.isDebugEnabled()) {
                         xlog.debug(string("mysql_real_connect: mysql: ")
                             + Util::toString(mysql)
-                            + string(" db: ") + string(db));
+                            + string(" db: ") + Util::toString(db));
                     }
 
                     MySQLAbstractConnection *conn = NULL;
@@ -874,7 +874,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
                         if (xlog.isDebugEnabled()) {
                             xlog.debug(string("mysql_real_connect: Delegate Mode: SUCCESS: mysql: ") + Util::toString(mysql)
-                                       + string(" db: ") + string(db));
+                                       + string(" db: ") + Util::toString(db));
                         }
 
 
@@ -931,7 +931,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                     
                     if (xlog.isDebugEnabled()) {
                         xlog.debug(string("mysql_real_connect: Delegate mode: mysql: ") + Util::toString(mysql)
-                                   + string(" db: ") + string(db));
+                                   + string(" db: ") + databaseName);
                     }
 
                     // create native connection
@@ -961,7 +961,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                     getResourceMap()->clearErrorState(mysql);
 
                     if (xlog.isDebugEnabled()) {
-                        xlog.debug(string("mysql_real_connect: Delegate mode: SUCCESS: mysql: ") + Util::toString(mysql) + string(" db: ") + string(db));
+                        xlog.debug(string("mysql_real_connect: Delegate mode: SUCCESS: mysql: ") + Util::toString(mysql) + string(" db: ") + Util::toString(db));
                     }
 
 
@@ -1009,7 +1009,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
         return -1;
     }
     if (xlog.isDebugEnabled()) {
-        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\")"));
     }
 
     // get the connection info that should have been stored in the previous call to mysql_real_connect()
@@ -1054,7 +1054,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                     string("mysql_select_db() switching from ")
                     + (mysql->db ? string(mysql->db) : string("NULL"))
                     + string(" to ")
-                    + (db ? string(db) : string("NULL"))
+                    + (db ? Util::toString(db) : string("NULL"))
                 );
 
                 // a different db is being selected so we need to close the old connection now
@@ -1091,7 +1091,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                       string("mysql_select_db() switching from ")
                       + (mysql->db ? string(mysql->db) : string("NULL"))
                       + string(" to ")
-                      + (db ? string(db) : string("NULL"))
+                      + (db ? Util::toString(db) : string("NULL"))
                   );
 
                   // a different db is being selected so we need to close the old connection now
@@ -1151,7 +1151,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
               getResourceMap()->clearErrorState(mysql);
 
               if (xlog.isDebugEnabled()) {
-                  xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+                  xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
               }
 
               result = 0;
@@ -1205,7 +1205,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
               getResourceMap()->clearErrorState(mysql);
 
               if (xlog.isDebugEnabled()) {
-                  xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+                  xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
               }
 
               return 0;
