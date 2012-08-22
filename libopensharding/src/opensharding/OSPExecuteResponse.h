@@ -33,6 +33,7 @@ private:
     int resultSetColumnCount;
     int rowsAffected;
     int generatedID;
+    bool autocommit;
     string sqlState;
     int errorCode;
     string errorMessage;
@@ -52,6 +53,7 @@ public:
     int getResultSetColumnCount() { return resultSetColumnCount; }
     int getUpdateCount() { return rowsAffected; }
     int getGeneratedID() { return generatedID; }
+    int isAutoCommit() { return autocommit; }
 
     string getSQLState() { return sqlState; }
     int getErrorCode() { return errorCode; }

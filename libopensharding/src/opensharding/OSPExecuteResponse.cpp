@@ -30,6 +30,7 @@ OSPExecuteResponse::OSPExecuteResponse() {
     resultSetColumnCount = 0;
     rowsAffected = 0;
     generatedID = 0;
+    autocommit = false;
     sqlState = "00000";
     errorCode = 0;
     errorMessage = "";
@@ -66,6 +67,9 @@ void OSPExecuteResponse::setField(int fieldNum, int value) {
             break;
         case 3:
             rowsAffected = value;
+            break;
+        case 4:
+            autocommit = value!=0;
             break;
         case 5:
             generatedID = value;

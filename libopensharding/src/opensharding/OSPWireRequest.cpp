@@ -32,6 +32,7 @@ OSPWireRequest::OSPWireRequest(int requestID, int messageType, OSPMessage *reque
     this->requestID = requestID;
     this->messageType = messageType;
     this->request = request;
+    this->ospProtocolVersion = 1; //current protocol version implemented in this driver
 }
 
 OSPWireRequest::~OSPWireRequest() {
@@ -43,6 +44,7 @@ void OSPWireRequest::write(OSPOutputStream *buffer) {
 
     buffer->writeInt(1, requestID);
     buffer->writeInt(2, messageType);
+    buffer->writeInt(3, ospProtocolVersion);
 
     // encode request to temp buffer
     OSPByteBuffer temp(request->getEstimatedEncodingLength());

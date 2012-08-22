@@ -73,8 +73,10 @@ MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, stri
     this->ospConnPool = ospConnPool;
     this->ospConn = ospConn;
 
+    autocommit = true; // default
+
     // request a database connection and statement in a single call
-    OSPConnectRequest request(database, user, password, true);
+    OSPConnectRequest request(database, user, password, autocommit, true /*createStatement*/);
 
     OSPWireResponse* wireResponse = dynamic_cast<OSPWireResponse*>(ospConn->sendMessage(&request, true));
     if (wireResponse->isErrorResponse()) {
@@ -321,6 +323,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         fieldCount = executeResponse->getResultSetColumnCount();
         affectedRows = executeResponse->getUpdateCount();
         insertID = executeResponse->getGeneratedID();
+        autocommit = executeResponse->isAutoCommit();
 
         if (executeResponse->getErrorCode()) {
 

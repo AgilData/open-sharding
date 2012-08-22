@@ -29,6 +29,7 @@ namespace opensharding {
 
 class OSPWireResponse : public OSPMessage {
 private:
+    int ospProtocolVersion;
     int requestID;
     int messageType;
     bool finalResponse;
@@ -49,6 +50,7 @@ public:
 
     bool isErrorResponse() { return errorResponse; }
     bool isFinalResponse() { return finalResponse; }
+    int getProtocolVersion() { return ospProtocolVersion; }
 
     int getRequestID() { return requestID; }
 

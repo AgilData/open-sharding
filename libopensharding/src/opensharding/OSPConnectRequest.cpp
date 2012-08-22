@@ -26,11 +26,12 @@
 
 namespace opensharding {
 
-OSPConnectRequest::OSPConnectRequest(string database, string user, string password, bool createStatement) {
+OSPConnectRequest::OSPConnectRequest(string database, string user, string password, bool autocommit, bool createStatement) {
     this->database = database;
     this->user = user;
     this->password = password;
     this->createStatement = createStatement;
+    this->autocommit = autocommit;
 }
 
 OSPConnectRequest::~OSPConnectRequest() {
@@ -40,8 +41,8 @@ void OSPConnectRequest::write(OSPOutputStream *buffer) {
     buffer->writeString(1, database);
     buffer->writeString(2, user);
     buffer->writeString(3, password);
-    buffer->writeInt(4, 1); // autocommit
-    buffer->writeInt(5, 1); // use named pipes
+    buffer->writeInt(4, autocommit);
+    buffer->writeInt(5, 1); // use named pipes - not used now
     buffer->writeString(6, requestPipe);
     buffer->writeString(7, responsePipe);
     buffer->writeInt(8, createStatement ? 1 : 0);

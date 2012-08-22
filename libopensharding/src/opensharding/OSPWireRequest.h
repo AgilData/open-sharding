@@ -29,6 +29,7 @@ namespace opensharding {
 
 class OSPWireRequest : public OSPMessage {
 private:
+    int ospProtocolVersion;
     int requestID;
     int messageType;
     OSPMessage *request;
@@ -47,6 +48,7 @@ public:
 
     void setField(int fieldNum, int value) {}
 
+    int getProtocolVersion() { return ospProtocolVersion; }
 
 };
 

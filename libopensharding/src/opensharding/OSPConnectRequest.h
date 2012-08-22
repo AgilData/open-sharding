@@ -37,13 +37,15 @@ private:
     string requestPipe;
     string responsePipe;
 
+    bool autocommit;
     bool createStatement;
 
 public:
-    OSPConnectRequest(string database, string user, string password, bool createStatement);
+    OSPConnectRequest(string database, string user, string password, bool autocommit, bool createStatement);
     virtual ~OSPConnectRequest();
 
     unsigned char getMessageType() { return 0x01; }
+    bool isAutoCommit() { return autocommit; }
 
     unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);

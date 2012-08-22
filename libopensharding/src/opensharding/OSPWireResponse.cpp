@@ -41,6 +41,7 @@ OSPWireResponse::OSPWireResponse() {
     response = NULL;
     errorResponse = false;
     finalResponse = true;
+    ospProtocolVersion = 1;
 }
 
 OSPWireResponse::~OSPWireResponse() {
@@ -84,6 +85,7 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
 
     // decode the response message
     if (response) {
+        //TODO: not efficient - doing large malloc/free each time
         OSPByteBuffer temp(buffer+offset, length);
         OSPMessageDecoder decoder;
         decoder.decode(response, &temp);
@@ -101,6 +103,9 @@ void OSPWireResponse::setField(int fieldNum, int value) {
             break;
         case 3:
             finalResponse = value!=0;
+            break;
+        case 4:
+            ospProtocolVersion = value;
             break;
         default:
             // always ignore fields we don't recognize

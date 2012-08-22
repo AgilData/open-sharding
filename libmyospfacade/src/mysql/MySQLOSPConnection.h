@@ -73,6 +73,7 @@ private:
     int affectedRows;
     int insertID;
     int fieldCount;
+    bool autocommit;
 
     MySQLConnMap *mysqlResourceMap;
 
@@ -99,6 +100,7 @@ public:
     string getLogPrefix(MYSQL *mysql);
     char *ensureCapacity(char *buffer, unsigned int *length, unsigned int capacity);
     void processMessage(OSPMessage*);
+    bool isAutoCommit() { return autocommit; }
 
     // highest priority methods to add support for
     int mysql_server_init(int argc, char **argv, char **groups);
