@@ -117,9 +117,9 @@ MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, stri
     my_error = NULL;
 
     nextResultSetID = 1;
-    insertID = -1;
     resultSetID = -1;
 
+    insertID = 0;
     affectedRows = 0;
     fieldCount = 0;
 
