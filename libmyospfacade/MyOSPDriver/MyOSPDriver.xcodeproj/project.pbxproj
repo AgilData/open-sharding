@@ -115,11 +115,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		D1C20D1215CF1B1100C99279 /* libMyOSPDriver.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libMyOSPDriver.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
-		D1C20DC015CF1BE600C99279 /* build.xml */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = build.xml; path = ../build.xml; sourceTree = "<group>"; };
+		D1C20D1215CF1B1100C99279 /* libMyOSPDriver.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; name = libMyOSPDriver.dylib; path = liblibmyosp.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		D1C20DC115CF1BE600C99279 /* log.properties */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = log.properties; path = ../log.properties; sourceTree = "<group>"; };
 		D1C20DC215CF1BE600C99279 /* Makefile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.make; name = Makefile; path = ../Makefile; sourceTree = "<group>"; };
-		D1C20DC315CF1BE600C99279 /* Makefile_ubuntu */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = Makefile_ubuntu; path = ../Makefile_ubuntu; sourceTree = "<group>"; };
 		D1C20DC615CF1BE600C99279 /* chardefs.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = chardefs.h; sourceTree = "<group>"; };
 		D1C20DC715CF1BE600C99279 /* decimal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = decimal.h; sourceTree = "<group>"; };
 		D1C20DC815CF1BE600C99279 /* errmsg.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = errmsg.h; sourceTree = "<group>"; };
@@ -203,7 +201,6 @@
 		D1C20E1815CF1BE600C99279 /* mkbuildprops.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = mkbuildprops.sh; sourceTree = "<group>"; };
 		D1C20E1915CF1BE600C99279 /* mktarball.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = mktarball.sh; sourceTree = "<group>"; };
 		D1C20E1A15CF1BE600C99279 /* setup.rb */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.ruby; path = setup.rb; sourceTree = "<group>"; };
-		D1C20E1C15CF1BE600C99279 /* myosp.conf */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = myosp.conf; sourceTree = "<group>"; };
 		D1C20E1E15CF1BE600C99279 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		D1C20E1F15CF1BE600C99279 /* MySQLAbstractConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MySQLAbstractConnection.cpp; sourceTree = "<group>"; };
 		D1C20E2015CF1BE600C99279 /* MySQLAbstractConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MySQLAbstractConnection.h; sourceTree = "<group>"; };
@@ -233,7 +230,6 @@
 		D1C20E3A15CF1BE600C99279 /* MyOSPConfig.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOSPConfig.h; sourceTree = "<group>"; };
 		D1C20E3B15CF1BE600C99279 /* MyOSPLogger.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MyOSPLogger.cpp; sourceTree = "<group>"; };
 		D1C20E3C15CF1BE600C99279 /* MyOSPLogger.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = MyOSPLogger.h; sourceTree = "<group>"; };
-		D1C20E3D15CF1BE600C99279 /* README.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README.txt; sourceTree = "<group>"; };
 		D1C20E3F15CF1BE600C99279 /* .gitignore */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		D1C20E4015CF1BE600C99279 /* build.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = build.sh; sourceTree = "<group>"; };
 		D1C20E4115CF1BE600C99279 /* test.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = test.c; sourceTree = "<group>"; };
@@ -253,10 +249,8 @@
 		D1C20D0715CF1B1100C99279 = {
 			isa = PBXGroup;
 			children = (
-				D1C20DC015CF1BE600C99279 /* build.xml */,
 				D1C20DC115CF1BE600C99279 /* log.properties */,
 				D1C20DC215CF1BE600C99279 /* Makefile */,
-				D1C20DC315CF1BE600C99279 /* Makefile_ubuntu */,
 				D1C20DC415CF1BE600C99279 /* mysql-headers */,
 				D1C20E1415CF1BE600C99279 /* README */,
 				D1C20E1515CF1BE600C99279 /* scripts */,
@@ -391,10 +385,8 @@
 		D1C20E1B15CF1BE600C99279 /* src */ = {
 			isa = PBXGroup;
 			children = (
-				D1C20E1C15CF1BE600C99279 /* myosp.conf */,
 				D1C20E1D15CF1BE600C99279 /* mysql */,
 				D1C20E3815CF1BE600C99279 /* myutil */,
-				D1C20E3D15CF1BE600C99279 /* README.txt */,
 			);
 			name = src;
 			path = ../src;
@@ -718,6 +710,7 @@
 				D1C20D1815CF1B1100C99279 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

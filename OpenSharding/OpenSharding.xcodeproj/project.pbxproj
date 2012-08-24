@@ -14,13 +14,6 @@
 			remoteGlobalIDString = D1C20D1215CF1B1100C99279;
 			remoteInfo = MyOSPDriver;
 		};
-		D1C20D3515CF1B7B00C99279 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = D1C20D3115CF1B7A00C99279 /* OpenShardingProtocolLibrary.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = D1C20D2A15CF1B7A00C99279;
-			remoteInfo = OpenShardingProtocolLibrary;
-		};
 		D1C20ECB15CF1DBD00C99279 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = D1C20EC715CF1DBD00C99279 /* OpenShardingProtocolLibrary.xcodeproj */;
@@ -32,7 +25,6 @@
 
 /* Begin PBXFileReference section */
 		D1C20D1915CF1B1100C99279 /* MyOSPDriver.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = MyOSPDriver.xcodeproj; path = ../libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj; sourceTree = "<group>"; };
-		D1C20D3115CF1B7A00C99279 /* OpenShardingProtocolLibrary.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OpenShardingProtocolLibrary.xcodeproj; path = OpenShardingProtocolLibrary/OpenShardingProtocolLibrary.xcodeproj; sourceTree = "<group>"; };
 		D1C20EAE15CF1C7B00C99279 /* build.rb */ = {isa = PBXFileReference; lastKnownFileType = text.script.ruby; name = build.rb; path = ../build.rb; sourceTree = "<group>"; };
 		D1C20EB015CF1C7B00C99279 /* opensharding.proto */ = {isa = PBXFileReference; lastKnownFileType = text; path = opensharding.proto; sourceTree = "<group>"; };
 		D1C20EB115CF1C7B00C99279 /* README.txt */ = {isa = PBXFileReference; lastKnownFileType = text; name = README.txt; path = ../README.txt; sourceTree = "<group>"; };
@@ -46,7 +38,6 @@
 				D1C20EAE15CF1C7B00C99279 /* build.rb */,
 				D1C20EAF15CF1C7B00C99279 /* protobuf */,
 				D1C20EB115CF1C7B00C99279 /* README.txt */,
-				D1C20D3115CF1B7A00C99279 /* OpenShardingProtocolLibrary.xcodeproj */,
 				D1C20EC715CF1DBD00C99279 /* OpenShardingProtocolLibrary.xcodeproj */,
 				D1C20D1915CF1B1100C99279 /* MyOSPDriver.xcodeproj */,
 				D1C20CBB15CF179100C99279 /* Products */,
@@ -64,14 +55,6 @@
 			isa = PBXGroup;
 			children = (
 				D1C20D1E15CF1B1200C99279 /* libMyOSPDriver.dylib */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		D1C20D3215CF1B7A00C99279 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				D1C20D3615CF1B7B00C99279 /* libOpenShardingProtocolLibrary.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -118,10 +101,6 @@
 					ProjectRef = D1C20D1915CF1B1100C99279 /* MyOSPDriver.xcodeproj */;
 				},
 				{
-					ProductGroup = D1C20D3215CF1B7A00C99279 /* Products */;
-					ProjectRef = D1C20D3115CF1B7A00C99279 /* OpenShardingProtocolLibrary.xcodeproj */;
-				},
-				{
 					ProductGroup = D1C20EC815CF1DBD00C99279 /* Products */;
 					ProjectRef = D1C20EC715CF1DBD00C99279 /* OpenShardingProtocolLibrary.xcodeproj */;
 				},
@@ -139,13 +118,6 @@
 			name = libMyOSPDriver.dylib;
 			path = liblibmyosp.dylib;
 			remoteRef = D1C20D1D15CF1B1200C99279 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		D1C20D3615CF1B7B00C99279 /* libOpenShardingProtocolLibrary.dylib */ = {
-			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.dylib";
-			path = libOpenShardingProtocolLibrary.dylib;
-			remoteRef = D1C20D3515CF1B7B00C99279 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		D1C20ECC15CF1DBD00C99279 /* libOpenShardingProtocolLibrary.dylib */ = {
