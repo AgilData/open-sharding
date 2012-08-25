@@ -130,6 +130,7 @@ def mysql_install(mysql_version)
        exit
     end
     puts `pwd`
+     current_directory=`pwd`.chomp
     run_command("./configure --prefix=/usr/local/mysql")
     run_command("make")
     run_command("make install")
@@ -139,16 +140,15 @@ def mysql_install(mysql_version)
     run_command("chgrp -R mysql .")
     run_command("bin/mysql_install_db --user=mysql")
     run_command("chown -R root .")
-    #run_command("chown -R mysql var")
-    current_directory=`pwd`
-    FileUtils.cp "#{current_directory}/#{mysql_dir}/support-files/my-medium.cnf", "/etc/my.cnf"
+    run_command("chown -R mysql var")
+    FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
     #run_command("cp #{mysql_dir}/support-files/my-medium.cnf /etc/my.cnf")
     run_command("bin/mysqld_safe --user=mysql &")
-    FileUtils.cp "#{current_directory}/#{mysql_dir}/support-files/mysql.server","/etc/init.d/mysql.server"
+    FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
     #run_command("cp #{mysql_dir}/support-files/mysql.server /etc/init.d/mysql.server")
     run_command("ln bin/mysql /usr/bin/mysql")
     Dir.mkdir("/usr/local/include/mysql")
-    FileUtils.cp "#{current_directory}/#{mysql_dir}/include/*","/usr/local/include/mysql/"
+    FileUtils.cp "#{current_directory}/include/","/usr/local/include/mysql/"
     #run_command("cp -r #{mysql_dir}/include/* /usr/local/include/mysql/")
 end
     
