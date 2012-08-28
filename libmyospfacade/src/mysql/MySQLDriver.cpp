@@ -648,12 +648,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_real_connect: ")
-            + string("mysql handle: ") + Util::toString(mysql)
-            + string("virtual-host: ") + info->virtual_host
-            + string("real-host: ") + info->host
-            + string("port: ") + Util::toString(info->port)
-            + string("user: ") + info->user
-            + string("db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
+            + string(", mysql handle: ") + Util::toString(mysql)
+            + string(", virtual-host: ") + info->virtual_host
+            + string(", real-host: ") + info->host
+            + string(", port: ") + Util::toString(info->port)
+            + string(", user: ") + info->user
+            + string(", db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
             );
         }
 
@@ -742,14 +742,14 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect: ")
-                + string(" virtual-host: ") + info->virtual_host
-                + string(" real-host: ") + info->host
-                + string(" port: ") + Util::toString(info->port)
-                + string(" user: ") + info->user
-                + string(" osp_vendor: ") + info->osp_vendor
-                + string(" protocol: ") + Util::toString(info->protocol)
-                + string(" target_dbms: ") + info->target_dbms
-                + string(" db: ") + (databaseName=="" ? "NULL" : databaseName)
+                + string(", virtual-host: ") + info->virtual_host
+                + string(", real-host: ") + info->host
+                + string(", port: ") + Util::toString(info->port)
+                + string(", user: ") + info->user
+                + string(", osp_vendor: ") + info->osp_vendor
+                + string(", protocol: ") + Util::toString(info->protocol)
+                + string(", target_dbms: ") + info->target_dbms
+                + string(", db: ") + (databaseName=="" ? "NULL" : databaseName)
                 );
             }
 
