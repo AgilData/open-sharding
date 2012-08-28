@@ -1,6 +1,4 @@
-MYSQL_INCLUDE_PATH=/usr/local/include/mysql
-
-CPPFLAGS=-I./src -I../libopensharding/src -I$(MYSQL_INCLUDE_PATH) $(CPP_OPTIONS) $(EXTRA_CFLAGS)
+CPPFLAGS=-I./src -I../libopensharding/src $(CPP_OPTIONS) $(EXTRA_CFLAGS)
 
 RELEASE_CPPOPTIONS="-g -O2 -Wall -c -fmessage-length=0 -fPIC -MMD -MP"
 DEBUG_CPPOPTIONS="-O0 -g3 -Wall -c -fmessage-length=0 -fPIC -fno-inline -MMD -MP"
@@ -21,11 +19,11 @@ fifteen_r_debug:
 	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0_R" SO_FILE="libmyosp_r.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver"
 
 sixteen:
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
 sixteen_r:
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/include -DMYSQL_5_1_R" SO_FILE="libmyosp_r.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1_R" SO_FILE="libmyosp_r.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
 sixteen_debug:
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
 
 $(SO_FILE): $(OBJ)
 	@echo "Creating Shared Library"
@@ -35,7 +33,7 @@ $(SO_FILE): $(OBJ)
 testsuite_fifteen: fifteen
 	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 testsuite_sixteen: sixteen
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/include -DMYSQL_5_1" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 $(TEST_FILE): $(TEST_OBJ)
 	@echo "Compiling tests..."
 	gcc -o $(TEST_FILE) test/src/*.o -lc -llogger -lutil -lopensharding  -lcpptest -L../libopensharding -L.

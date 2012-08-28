@@ -71,7 +71,7 @@ def build(mysql_version)
     if mysql_version.match("5.0")
         mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.0.96"
     elsif mysql_version.match("5.1")
-        mysql_real_dir = "mysql-install-#{mysql_version}" #NOTE: version number not needed here since 5.1 has different directory structure than 5.0
+        mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.1.65"
     else
         puts "Support for mysql #{mysql_version} is not avaliable."
         exit -1
@@ -136,23 +136,37 @@ def mysql_install(mysql_version)
      current_directory=`pwd`.chomp
     run_command("./configure --prefix=/usr/local/mysql")
     run_command("make")
-    run_command("make install")
-    Dir.chdir("/usr/local/mysql")
-    puts `pwd`
-    run_command("chown -R mysql .")
-    run_command("chgrp -R mysql .")
-    run_command("bin/mysql_install_db --user=mysql")
-    run_command("chown -R root .")
-    run_command("chown -R mysql var")
-    FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
-    #run_command("cp #{mysql_dir}/support-files/my-medium.cnf /etc/my.cnf")
-    run_command("bin/mysqld_safe --user=mysql &")
-    FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
-    #run_command("cp #{mysql_dir}/support-files/mysql.server /etc/init.d/mysql.server")
-    run_command("ln bin/mysql /usr/bin/mysql")
-    Dir.mkdir("/usr/local/include/mysql")
-    FileUtils.cp "#{current_directory}/include/","/usr/local/include/mysql/"
-    #run_command("cp -r #{mysql_dir}/include/* /usr/local/include/mysql/")
+
+    #TODO: need to discuss this with Jerry - when I build I don't want to install the
+    # mysql libs to /usr/local/mysql (I don't have permissions to do that either when
+    # I run this script since I'm not running as root). I just want to build the libs
+    # for inclusion in the tarball that we deliver to the customer. Maybe we need to
+    # have a separate build target/option for also performing a local install of the
+    # mysql libs?
+    install_local = false
+
+    if install_local
+
+      run_command("make install")
+      Dir.chdir("/usr/local/mysql")
+      puts `pwd`
+      run_command("chown -R mysql .")
+      run_command("chgrp -R mysql .")
+      run_command("bin/mysql_install_db --user=mysql")
+      run_command("chown -R root .")
+      run_command("chown -R mysql var")
+      FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
+      #run_command("cp #{mysql_dir}/support-files/my-medium.cnf /etc/my.cnf")
+      run_command("bin/mysqld_safe --user=mysql &")
+      FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
+      #run_command("cp #{mysql_dir}/support-files/mysql.server /etc/init.d/mysql.server")
+      run_command("ln bin/mysql /usr/bin/mysql")
+      Dir.mkdir("/usr/local/include/mysql")
+      FileUtils.cp "#{current_directory}/include/","/usr/local/include/mysql/"
+      #run_command("cp -r #{mysql_dir}/include/* /usr/local/include/mysql/")
+
+    end
+
 end
     
     
@@ -261,7 +275,6 @@ begin
         end
         install_dependencies
         mysql_install(mysql_version)
-        build(mysql_version)
     elsif option == "check-dep"
         check_dep
     else
