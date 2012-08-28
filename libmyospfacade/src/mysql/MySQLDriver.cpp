@@ -828,7 +828,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             string * params = new string[8];
             params[0] = Util::toString(mysql);
             params[1] = Util::toString(_host);
-            params[2] = Util::toString(user);
+            params[2] = Util::toString(_user);
             params[3] = "hidden"; //Don't log the password value
             params[4] = Util::toString(db);
             params[5] = Util::toString(port);
