@@ -584,6 +584,13 @@ int do_osp_connect(MYSQL *mysql, MySQLConnectionInfo *info)
 MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
     const char *_passwd, const char *db, unsigned int port,
     const char *unix_socket, unsigned long clientflag) {
+
+    struct timeval tstart, tend;
+
+    if (MyOSPConfig::isShardAnalyze()) {
+         gettimeofday(&tstart, NULL);
+    }
+
     //trace("mysql_real_connect", mysql);
     try {
 
@@ -746,34 +753,11 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 );
             }
 
-            struct timeval tstart, tend;
-
-            if (MyOSPConfig::isShardAnalyze()) {
-                 gettimeofday(&tstart, NULL);
-            }
-
             if (-1 == do_osp_connect(mysql, info)) {
                 setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
                 return NULL;
             }
 
-            if (MyOSPConfig::isShardAnalyze()) {
-                gettimeofday(&tend, NULL);
-                string * params = new string[8];
-                params[0] = Util::toString(mysql);
-                params[1] = (_host ? _host : "NULL");
-                params[2] = (_user ? _user : "NULL");
-                params[3] = "hidden"; //Don't log the password value
-                params[4] = (db ? db : "NULL");
-                params[5] = Util::toString(port);
-                params[6] = (unix_socket ? unix_socket : "NULL");
-                params[7] = Util::toString(clientflag);
-                log_entry_for_analyser("", (void *) mysql, 0,
-                        "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
-                        "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8,"", &tstart, &tend);
-                delete [] params;
-            }
         }
         
         // Delegate Mode.
@@ -782,16 +766,6 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
             if (xlog.isDebugEnabled()) {
                 xlog.debug("Delegate mode.");
              } //Checkpoint 1
-
-            struct timeval tstart, tend;
-
-            // Shard analyze logging.
-            if(MyOSPConfig::isShardAnalyze()) {
-                if (xlog.isDebugEnabled()) {
-                    xlog.debug("Entering Shard Analyze mode.");
-                }
-                gettimeofday(&tstart, NULL);
-            }
 
             MySQLAbstractConnection *conn = NULL;
 
@@ -843,29 +817,28 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
                 return NULL;
             }
-
-            if(MyOSPConfig::isShardAnalyze()) {
-                gettimeofday(&tend, NULL);
-                string * params = new string[8];
-                params[0] = Util::toString(mysql);
-                params[1] = (_host ? _host : "NULL");
-                params[2] = (_user ? _user : "NULL");
-                params[3] = "hidden"; //Don't log the password value
-                params[4] = (db ? db : "NULL");
-                params[5] = Util::toString(port);
-                params[6] = (unix_socket ? unix_socket : "NULL");
-                params[7] = Util::toString(clientflag);
-                log_entry_for_analyser("", (void *) mysql, 0,
-                        "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
-                        "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8, "", &tstart, &tend);
-                delete [] params;
-	    }
-
         }
 
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_real_connect() SUCCESS Returning ") + Util::toString((void*)mysql));
+        }
+
+        if (MyOSPConfig::isShardAnalyze()) {
+            gettimeofday(&tend, NULL);
+            string * params = new string[8];
+            params[0] = Util::toString(mysql);
+            params[1] = Util::toString(_host);
+            params[2] = Util::toString(user);
+            params[3] = "hidden"; //Don't log the password value
+            params[4] = Util::toString(db);
+            params[5] = Util::toString(port);
+            params[6] = Util::toString(unix_socket);
+            params[7] = Util::toString(clientflag);
+            log_entry_for_analyser("", (void *) mysql, 0,
+                    "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
+                    "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
+                    "unsigned long clientflag)", params, 8,"", &tstart, &tend);
+            delete [] params;
         }
 
         return mysql;
@@ -885,6 +858,12 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 /*****New Method for Mysql_Select_DB***/
 /**************************************/
 int mysql_select_db(MYSQL *mysql, const char *_db) {
+
+    struct timeval tstart, tend;
+    if(MyOSPConfig::isShardAnalyze()) {
+        gettimeofday(&tstart, NULL);
+    }
+
     int result;
 
     if (xlog.isDebugEnabled()) {
@@ -936,12 +915,6 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
 
     if (MyOSPConfig::isOspHost(info->virtual_host)) {
 
-        struct timeval tstart, tend;
-
-        if(MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tstart, NULL);
-        }
-
         // a different db is being selected so we need to close the old connection now
         conn->mysql_close(mysql);
 
@@ -956,37 +929,16 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
 
         result = do_osp_connect(mysql, info);
 
-        if(MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tend, NULL);
-            string * params = new string[2];
-            params[0] = Util::toString(mysql);
-            params[1] = Util::toString(_db);
-            log_entry_for_analyser("", (void *) mysql, 0,
-                    "mysql_select_db(MYSQL *mysql, const char *db)",
-                    params, 2, "", &tstart, &tend);
-            delete [] params;
     }
+    else {
 
-        return result;
-
-    }
-    else { //This is also delegate mode
+        // delegate mode
         if (xlog.isDebugEnabled()) {
             xlog.debug("Delegate Mode for Mysql_select_db.");
         }
 
-        struct timeval tstart, tend;
-
-        if (MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tstart, NULL);
-        }
-
         try
         {
-          if (xlog.isDebugEnabled()) {
-              xlog.debug("Creating native connection");
-          }
-
           // just delegate to the driver
           conn->mysql_select_db(mysql,info->target_schema_name.c_str());
 
@@ -1009,6 +961,8 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
           result = -1;
         }
 
+    }
+
     if(MyOSPConfig::isShardAnalyze()) {
         gettimeofday(&tend, NULL);
         string * params = new string[2];
@@ -1022,8 +976,6 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
 
     return result;
 }
-}
-
 
 my_bool mysql_autocommit(MYSQL *mysql, my_bool auto_mode) {
     //trace("mysql_autocommit", mysql);
