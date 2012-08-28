@@ -934,53 +934,28 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
         );
     }
 
+    struct timeval tstart, tend;
+
+    if(MyOSPConfig::isShardAnalyze()) {
+        gettimeofday(&tstart, NULL);
+    }
+
+    // a different db is being selected so we need to close the old connection now
+    conn->mysql_close(mysql);
+
+    // erase all resources for this mysql handle
+    getResourceMap()->erase(mysql);
+
+    // delete the connection
+    delete conn;
+
+    // reset reference
+    conn = NULL;
+
     if (MyOSPConfig::isOspHost(info->virtual_host)) {
-
-        struct timeval tstart, tend;
-
-        if(MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tstart, NULL);
-        }
-
-        // a different db is being selected so we need to close the old connection now
-        conn->mysql_close(mysql);
-
-        // erase all resources for this mysql handle
-        getResourceMap()->erase(mysql);
-
-        // delete the connection
-        delete conn;
-
-        // reset reference
-        conn = NULL;
-
         result = do_osp_connect(mysql, info, conn);
-
-        if(MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tend, NULL);
-            string * params = new string[2];
-            params[0] = Util::toString(mysql);
-            params[1] = Util::toString(_db);
-            log_entry_for_analyser("", (void *) mysql, 0,
-                    "mysql_select_db(MYSQL *mysql, const char *db)",
-                    params, 2, "", &tstart, &tend);
-            delete [] params;
-        }
-
-        return result;
-
     }
     else { //This is also delegate mode
-        if (xlog.isDebugEnabled()) {
-            xlog.debug("Delegate Mode for Mysql_select_db.");
-        }
-
-        struct timeval tstart, tend;
-
-        if (MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tstart, NULL);
-        }
-
         try
         {
           if (xlog.isDebugEnabled()) {
@@ -1023,19 +998,20 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
           result = -1;
         }
 
-        if (MyOSPConfig::isShardAnalyze()) {
-            gettimeofday(&tend, NULL);
-            string * params = new string[2];
-            params[0] = Util::toString(mysql);
-            params[1] = Util::toString(_db);
-            log_entry_for_analyser("", (void *) mysql, 0,
-                    "mysql_select_db(MYSQL *mysql, const char *db)",
-                    params, 2, "", &tstart, &tend);
-            delete [] params;
-        }
-
-        return result;
     }
+
+    if(MyOSPConfig::isShardAnalyze()) {
+        gettimeofday(&tend, NULL);
+        string * params = new string[2];
+        params[0] = Util::toString(mysql);
+        params[1] = Util::toString(_db);
+        log_entry_for_analyser("", (void *) mysql, 0,
+                "mysql_select_db(MYSQL *mysql, const char *db)",
+                params, 2, "", &tstart, &tend);
+        delete [] params;
+    }
+
+    return result;
 }
 
 
