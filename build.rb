@@ -71,7 +71,7 @@ def build(mysql_version)
     if mysql_version.match("5.0")
         mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.0.96"
     elsif mysql_version.match("5.1")
-        mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.1.65"
+        mysql_real_dir = "mysql-install-#{mysql_version}" #NOTE: version number not needed here since 5.1 has different directory structure than 5.0
     else
         puts "Support for mysql #{mysql_version} is not avaliable."
         exit -1
@@ -111,6 +111,9 @@ end
 #################################################################################################
 def mysql_install(mysql_version)
     mysql_dir = "mysql-install-#{mysql_version}"
+    if File.exists? mysql_dir
+      return
+    end
     puts "Installing mysql libraries based on the version: #{mysql_version}"
     puts `groupadd mysql`
     puts `useradd -g mysql mysql`

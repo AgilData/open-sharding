@@ -467,7 +467,7 @@ const char * mysql_sqlstate(MYSQL *mysql) {
 int do_osp_connect(MYSQL *mysql, MySQLConnectionInfo *info, MySQLAbstractConnection *conn)
 {
     if (xlog.isDebugEnabled()) {
-        xlog.debug(string("do_osp_connect: mysql: ") + Util::toString(mysql) + string(" db: ") + Util::toString(db));
+        xlog.debug(string("do_osp_connect: mysql: ") + Util::toString(mysql) + string(" db: ") + info->target_schema_name);
     }
 
     try {
@@ -555,7 +555,7 @@ int do_osp_connect(MYSQL *mysql, MySQLConnectionInfo *info, MySQLAbstractConnect
             getResourceMap()->clearErrorState(mysql);
 
             if (xlog.isDebugEnabled()) {
-                xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
+                xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + info->target_schema_name + string("\") SUCCESS"));
             }
         }
         catch (...) {
@@ -569,7 +569,7 @@ int do_osp_connect(MYSQL *mysql, MySQLConnectionInfo *info, MySQLAbstractConnect
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
         return -1;
     } catch (...) {
-        xlog.error(string("do_osp_connect: failed due to unknown exception: db: ") + string(db==NULL?"NULL":db));
+        xlog.error(string("do_osp_connect: failed due to unknown exception: db: ") + info->target_schema_name);
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
         return -1;
     }
@@ -860,18 +860,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                         "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
                         "unsigned long clientflag)", params, 8, "", &tstart, &tend);
                 delete [] params;
-
-            } catch (const char *exception) {
-                xlog.error(string("mysql_real_connect: failed due to exception: ") + exception);
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-                return NULL;
-            } catch (...) {
-                xlog.error(string("mysql_real_connect: failed due to unknown exception: ")
-                           + string(" host: ") + string(_host==NULL?"NULL":_host)
-                           + string(" db: ") + string(db==NULL?"NULL":db));
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
-                return NULL;
-            }
+	    }
 
         }
 
@@ -939,9 +928,9 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
     if (xlog.isDebugEnabled()) {
         xlog.debug(
             string("mysql_select_db() switching from ")
-            + Util::toString(original_schema_name)
+            + original_schema_name
             + string(" to ")
-            + Util::toString(info->target_schema_name)
+            + info->target_schema_name
         );
     }
 
@@ -1019,7 +1008,7 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
           getResourceMap()->clearErrorState(mysql);
 
           if (xlog.isDebugEnabled()) {
-              xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
+              xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(_db) + string("\") SUCCESS"));
           }
 
           result = 0;
@@ -1029,7 +1018,7 @@ int mysql_select_db(MYSQL *mysql, const char *_db) {
           setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
           result = -1;
         } catch (...) {
-          xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+          xlog.error(string("mysql_select_db(") + Util::toString(_db) + string(") failed due to exception"));
           setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
           result = -1;
         }
