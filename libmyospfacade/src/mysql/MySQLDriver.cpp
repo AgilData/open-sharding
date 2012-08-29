@@ -647,8 +647,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         string databaseName = (db ? Util::toString(db) : string(""));
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("mysql_real_connect: ")
-            + string(", mysql handle: ") + Util::toString(mysql)
+            xlog.debug(string("mysql_real_connect")
+            + string(": mysql handle: ") + Util::toString(mysql)
             + string(", virtual-host: ") + info->virtual_host
             + string(", real-host: ") + info->host
             + string(", port: ") + Util::toString(info->port)
