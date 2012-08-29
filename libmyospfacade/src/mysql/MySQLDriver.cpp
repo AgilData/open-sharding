@@ -782,13 +782,13 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 getResourceMap()->setConnection(mysql, conn);
 
                 if (conn->connect(
-                        info->host.c_str(),
-                        info->user.c_str(),
-                        info->passwd.c_str(),
+                        _host,
+                        _user,
+                        _passwd,
                         db,
-                        info->port==0 ? 3306 : info->port,
-                        info->unix_socket,
-                        info->clientflag
+                        port,
+                        unix_socket,
+                        clientflag
                     )) {
 
                     // success
