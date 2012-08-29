@@ -647,13 +647,13 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         string databaseName = (db ? Util::toString(db) : string(""));
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("mysql_real_connect: ")
-            + string("mysql handle: ") + Util::toString(mysql)
-            + string("virtual-host: ") + info->virtual_host
-            + string("real-host: ") + info->host
-            + string("port: ") + Util::toString(info->port)
-            + string("user: ") + info->user
-            + string("db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
+            xlog.debug(string("mysql_real_connect")
+            + string(": mysql handle: ") + Util::toString(mysql)
+            + string(", virtual-host: ") + info->virtual_host
+            + string(", real-host: ") + info->host
+            + string(", port: ") + Util::toString(info->port)
+            + string(", user: ") + info->user
+            + string(", db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
             );
         }
 
@@ -742,14 +742,14 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect: ")
-                + string(" virtual-host: ") + info->virtual_host
-                + string(" real-host: ") + info->host
-                + string(" port: ") + Util::toString(info->port)
-                + string(" user: ") + info->user
-                + string(" osp_vendor: ") + info->osp_vendor
-                + string(" protocol: ") + Util::toString(info->protocol)
-                + string(" target_dbms: ") + info->target_dbms
-                + string(" db: ") + (databaseName=="" ? "NULL" : databaseName)
+                + string(", virtual-host: ") + info->virtual_host
+                + string(", real-host: ") + info->host
+                + string(", port: ") + Util::toString(info->port)
+                + string(", user: ") + info->user
+                + string(", osp_vendor: ") + info->osp_vendor
+                + string(", protocol: ") + Util::toString(info->protocol)
+                + string(", target_dbms: ") + info->target_dbms
+                + string(", db: ") + (databaseName=="" ? "NULL" : databaseName)
                 );
             }
 
@@ -782,13 +782,13 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 getResourceMap()->setConnection(mysql, conn);
 
                 if (conn->connect(
-                        info->host.c_str(),
-                        info->user.c_str(),
-                        info->passwd.c_str(),
+                        _host,
+                        _user,
+                        _passwd,
                         db,
-                        info->port==0 ? 3306 : info->port,
-                        info->unix_socket,
-                        info->clientflag
+                        port,
+                        unix_socket,
+                        clientflag
                     )) {
 
                     // success
