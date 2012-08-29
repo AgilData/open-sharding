@@ -99,9 +99,9 @@ def create_tar(mysql_version)
     
     tar_filename = ""
     if branch == "master"
-        tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-#{MYOSP_TIMESTAMP}.tgz"
+        tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
         else
-        tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-#{MYOSP_TIMESTAMP}.tgz"
+        tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
     end
     
     # create temp dir
