@@ -84,7 +84,7 @@ static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
 static boost::mutex resourceMapMutex;
 
 /* Mapping of MYSQL structues to wrapper structures */
-static MySQLConnMap *c = NULL;
+static MySQLConnMap *_mysqlResourceMap = NULL;
 
 /* Wrapper function to simplify shard logging for mysql_select_db */
 int mysql_select_db_actual(MYSQL *mysql, const char *db);
