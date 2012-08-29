@@ -230,6 +230,10 @@ my_bool MySQLNativeConnection::mysql_commit(MYSQL * mysql){
 
 void MySQLNativeConnection::mysql_close(MYSQL *mysql){
 
+    if (log.isDebugEnabled()) {
+        log.debug(string("mysql_close()"));
+    }
+
     //TODO: we should be caching this function pointer instead of looking it up each time
     mysql_closeFnType* tempFunction =
                           (mysql_closeFnType*)get_mysql_function("mysql_close");

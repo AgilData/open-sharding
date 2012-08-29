@@ -464,27 +464,24 @@ const char * mysql_sqlstate(MYSQL *mysql) {
 /*************Added function do_osp_connect****************/
 /******************************************************************/
 
-int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQLAbstractConnection *conn)
+int do_osp_connect(MYSQL *mysql, MySQLConnectionInfo *info)
 {
     if (xlog.isDebugEnabled()) {
-        xlog.debug(string("do_osp_connect: mysql: ") + Util::toString(mysql) + string(" db: ") + Util::toString(db));
+        xlog.debug(string("do_osp_connect: mysql: ") + Util::toString(mysql) + string(" db: ") + info->target_schema_name);
     }
 
     try {
 
-        if (db!=NULL) {
-            if (strlen(db) == 0) {
-                setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
-                return -1;
-            }
-        }
-
-        if (info == NULL) {
-            xlog.error("No ConnInfo in map");
-            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
+        if (!info) {
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: ConnectionInfo is NULL", "OSP01");
             return -1;
         }
-    
+
+        if (info->target_schema_name=="") {
+            setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
+            return -1;
+        }
+
         if (xlog.isDebugEnabled()) {
              xlog.debug("Creating OSP connection");
         }
@@ -545,24 +542,25 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
 
         // create MySQL OSP connection object
         try {
-            /*CHANGED*/
-            if (xlog.isDebugEnabled()) xlog.debug("Creating MySQLOSPConnection OK");
-            conn = new MySQLOSPConnection(mysql, info->host, info->port, db, info->user, info->passwd, getResourceMap(), pool, ospNetworkConnection);
-            if (xlog.isDebugEnabled()) xlog.debug("Created MySQLOSPConnection OK");
+            MySQLOSPConnection *conn = new MySQLOSPConnection(
+                                mysql, info->host, info->port, info->target_schema_name,
+                                info->user, info->passwd, getResourceMap(), pool,
+                                ospNetworkConnection);
+
+
+            // store mapping from the MYSQL structure to the OSP connection
+            getResourceMap()->setConnection(mysql, conn);
+
+            // success
+            getResourceMap()->clearErrorState(mysql);
+
+            if (xlog.isDebugEnabled()) {
+                xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + info->target_schema_name + string("\") SUCCESS"));
+            }
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
             return -1;
-        }
-
-        // store mapping from the MYSQL structure to the OSP connection
-        getResourceMap()->setConnection(mysql, conn);
-
-        // success
-        getResourceMap()->clearErrorState(mysql);
-
-        if (xlog.isDebugEnabled()) {
-            xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
         }
 
 
@@ -571,7 +569,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
         return -1;
     } catch (...) {
-        xlog.error(string("do_osp_connect: failed due to unknown exception: db: ") + string(db==NULL?"NULL":db));
+        xlog.error(string("do_osp_connect: failed due to unknown exception: db: ") + info->target_schema_name);
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
         return -1;
     }
@@ -586,6 +584,13 @@ int do_osp_connect(MYSQL *mysql, const char *db, MySQLConnectionInfo *info, MySQ
 MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
     const char *_passwd, const char *db, unsigned int port,
     const char *unix_socket, unsigned long clientflag) {
+
+    struct timeval tstart, tend;
+
+    if (MyOSPConfig::isShardAnalyze()) {
+         gettimeofday(&tstart, NULL);
+    }
+
     //trace("mysql_real_connect", mysql);
     try {
 
@@ -604,21 +609,58 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
           return NULL;
         }
 
+        // delete any existing connection info or connection for this mysql handle regardless of what mode we are in
+        // NOTE: later on we could be smarter and see if the user is trying to connect to the same server again in
+        // which case we could avoid the cost of disconnecting and reconnecting
+        MySQLConnectionInfo *old_info = getResourceMap()->getConnectInfo(mysql);
+        if (old_info) {
+            delete old_info;
+        }
+
+        MySQLAbstractConnection *conn = getConnection(mysql, false);
+        if (conn) {
+            if (xlog.isDebugEnabled()) {
+                xlog.debug("In mysql_real_connect() closing down existing connection before creating new connection");
+            }
+            // In real connect we always close.
+            conn->mysql_close(mysql);
+            // erase all resources for this mysql handle
+            getResourceMap()->erase(mysql);
+            // delete the connection
+            delete conn;
+            // reset reference
+            conn = NULL;
+        }
+
+        // build up the connection info based on the function arguments
         MySQLConnectionInfo *info = new MySQLConnectionInfo();
 
         // these fields are populated from arguments to this function regardless of URL
         info->virtual_host=(_host==NULL ? string("") : string(_host));
         info->user = _user==NULL ? string("") : string(_user);
         info->passwd = _passwd==NULL ? string("") : string(_passwd);
+        info->port = port;
         info->unix_socket = unix_socket;
         info->clientflag = clientflag;
 
-        bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
-        
         // In MySQL, a database name is the same as a schema in other DBMS engines.
         string databaseName = (db ? Util::toString(db) : string(""));
-        
-        if(ospMode) {
+
+        if (xlog.isDebugEnabled()) {
+            xlog.debug(string("mysql_real_connect: ")
+            + string(", mysql handle: ") + Util::toString(mysql)
+            + string(", virtual-host: ") + info->virtual_host
+            + string(", real-host: ") + info->host
+            + string(", port: ") + Util::toString(info->port)
+            + string(", user: ") + info->user
+            + string(", db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
+            );
+        }
+
+        // store the connection info in the map
+        getResourceMap()->setConnectInfo(mysql, info);
+
+        if (MyOSPConfig::isOspHost(info->virtual_host)) {
             
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect: connect in OSP mode"));
@@ -700,79 +742,22 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("mysql_real_connect: ")
-                + string(" virtual-host: ") + info->virtual_host
-                + string(" real-host: ") + info->host
-                + string(" port: ") + Util::toString(info->port)
-                + string(" user: ") + info->user
-                + string(" osp_vendor: ") + info->osp_vendor
-                + string(" protocol: ") + Util::toString(info->protocol)
-                + string(" target_dbms: ") + info->target_dbms
-                + string(" db: ") + (databaseName=="" ? "NULL" : databaseName)
+                + string(", virtual-host: ") + info->virtual_host
+                + string(", real-host: ") + info->host
+                + string(", port: ") + Util::toString(info->port)
+                + string(", user: ") + info->user
+                + string(", osp_vendor: ") + info->osp_vendor
+                + string(", protocol: ") + Util::toString(info->protocol)
+                + string(", target_dbms: ") + info->target_dbms
+                + string(", db: ") + (databaseName=="" ? "NULL" : databaseName)
                 );
             }
 
-            MySQLConnectionInfo *old_info = getResourceMap()->getConnectInfo(mysql);
-           
-            if (old_info) {
-                delete old_info;
+            if (-1 == do_osp_connect(mysql, info)) {
+                setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
+                return NULL;
             }
 
-            MySQLAbstractConnection *conn = getConnection(mysql, false);
-
-            if (conn) {
-
-                // In real connect we always close.
-                conn->mysql_close(mysql);
-
-                // erase all resources for this mysql handle
-                getResourceMap()->erase(mysql);
-
-                // delete the connection
-                delete conn;
-
-                // reset reference
-                conn = NULL;
-
-            }
-
-            // store the connection info in the map again
-            getResourceMap()->setConnectInfo(mysql, info);
-           
-
-            if(MyOSPConfig::isShardAnalyze()) {
-                struct timeval tstart; gettimeofday(&tstart, NULL);
-                    if (-1 == do_osp_connect(mysql, info->target_schema_name.c_str(), info, conn)) {
-                        setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
-                        return NULL;
-
-                }
-                struct timeval tend;   gettimeofday(&tend, NULL);
-                string * params = new string[8];
-                params[0] = Util::toString(mysql);
-                params[1] = (_host ? _host : "NULL");
-                params[2] = (_user ? _user : "NULL");
-                params[3] = "hidden"; //Don't log the password value
-                params[4] = (db ? db : "NULL");
-                params[5] = Util::toString(port);
-                params[6] = (unix_socket ? unix_socket : "NULL");
-                params[7] = Util::toString(clientflag);
-                log_entry_for_analyser("", (void *) mysql, 0,
-                        "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
-                        "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8,"", &tstart, &tend);
-                delete [] params;
-
-            }   
-            else {
-                  if (-1 == do_osp_connect(mysql, info->target_schema_name.c_str(), info, conn)) {
-                      setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
-                      xlog.error("Call to do_osp_connect FAILED");
-                      return NULL;
-                  }
-                  else {
-                      xlog.debug("Call to do_osp_connect SUCCESS");
-                  }
-            }
         }
         
         // Delegate Mode.
@@ -782,206 +767,78 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 xlog.debug("Delegate mode.");
              } //Checkpoint 1
 
-            info->host = _host==NULL ? string("") : string(_host);
-            info->user = _user==NULL ? string("") : string(_user);
-            info->passwd = _passwd==NULL ? string("") : string(_passwd);
-            info->port = port;
-            info->unix_socket = unix_socket;
-            info->clientflag = clientflag;
+            MySQLAbstractConnection *conn = NULL;
 
-            if (xlog.isDebugEnabled()) {
-                xlog.debug(string("mysql_real_connect: ")
-                + string("mysql handle: ") + Util::toString(mysql)
-                + string("virtual-host: ") + info->virtual_host
-                + string("real-host: ") + info->host
-                + string("port: ") + Util::toString(info->port)
-                + string("user: ") + info->user
-                + string("db: ") + (databaseName=="" ? "NULL" : databaseName.c_str())
-                );
-            } //Checkpoint 2
+            try {
 
-            MySQLConnectionInfo *old_info = getResourceMap()->getConnectInfo(mysql);
-            
-            if (old_info) {
-            		if (xlog.isDebugEnabled()) {
-                        xlog.debug("Deleting old_info.");
-                    }
-                delete old_info;
-            }
-            
-            if (xlog.isDebugEnabled()) {
-            xlog.debug(string("Storing mysql handle: ")
-                + Util::toString(mysql)
-                + string(" and info to Resource Map."));
-            } //Checkpoint 3
-
-            // store connection info so it can be retrieved in mysql_select_db in separate call
-            getResourceMap()->setConnectInfo(mysql, info);
-			
-            // Shard analyze logging.
-            if(MyOSPConfig::isShardAnalyze()) {
-            
                 if (xlog.isDebugEnabled()) {
-                    xlog.debug("Entering Shard Analyze mode.");
+                    xlog.debug("Creating native connection");
                 }
-                struct timeval tstart; gettimeofday(&tstart, NULL);
-                
-                if (db != NULL) {
 
-                    if (xlog.isDebugEnabled()) {
-                        xlog.debug(string("mysql_real_connect: mysql: ")
-                            + Util::toString(mysql)
-                            + string(" db: ") + Util::toString(db));
-                    }
+                // create native connection
+                conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
 
-                    MySQLAbstractConnection *conn = NULL;
+                // store mapping from the MYSQL structure to the native connection
+                getResourceMap()->setConnection(mysql, conn);
 
-                    try {
+                if (conn->connect(
+                        info->host.c_str(),
+                        info->user.c_str(),
+                        info->passwd.c_str(),
+                        db,
+                        info->port==0 ? 3306 : info->port,
+                        info->unix_socket,
+                        info->clientflag
+                    )) {
 
-                        // get the connection info that should have been stored in the previous call to mysql_real_connect()
-                        info = getResourceMap()->getConnectInfo(mysql);
-
-                        if (info == NULL) {
-                            xlog.error("No ConnInfo in map");
-                            setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
-                            return NULL;
-                        }
-
-                        if (xlog.isDebugEnabled()) {
-                            xlog.debug("Creating native connection");
-                        }
-
-                        // create native connection
-                        conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
-
-                        // store mapping from the MYSQL structure to the native connection
-                        getResourceMap()->setConnection(mysql, conn);
-
-                        if (!conn->connect(
-                                info->host.c_str(),
-                                info->user.c_str(),
-                                info->passwd.c_str(),
-                                db,
-                                info->port==0 ? 3306 : info->port,
-                                info->unix_socket,
-                                info->clientflag
-                            )) {
-                            setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [1]", "OSP01");
-                            return NULL;
-                        }
-                           // success
-                        getResourceMap()->clearErrorState(mysql);
-
-                        if (xlog.isDebugEnabled()) {
-                            xlog.debug(string("mysql_real_connect: Delegate Mode: SUCCESS: mysql: ") + Util::toString(mysql)
-                                       + string(" db: ") + Util::toString(db));
-                        }
-
-
-                    } catch (const char *exception) {
-                        xlog.error(string("mysql_real_connect failed due to exception: ") + exception);
-                        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-                        return NULL;
-                    } catch (...) {
-                        xlog.error(string("mysql_real_connect: failed due to unknown exception: ")
-                                   + string(" host: ") + string(_host==NULL?"NULL":_host)
-                                   + string(" db: ") + string(db==NULL?"NULL":db));
-                        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
-                        return NULL;
-                    }
-                }
-                struct timeval tend;   gettimeofday(&tend, NULL);
-                string * params = new string[8];
-                params[0] = Util::toString(mysql);
-                params[1] = (_host ? _host : "NULL");
-                params[2] = (_user ? _user : "NULL");
-                params[3] = "hidden"; //Don't log the password value
-                params[4] = (db ? db : "NULL");
-                params[5] = Util::toString(port);
-                params[6] = (unix_socket ? unix_socket : "NULL");
-                params[7] = Util::toString(clientflag);
-                log_entry_for_analyser("", (void *) mysql, 0,
-                        "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
-                        "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
-                        "unsigned long clientflag)", params, 8, "", &tstart, &tend);
-                delete [] params;
-            }
-            else {
-            
-                if (xlog.isDebugEnabled()) {
-                    xlog.debug("Not in shard analyze mode.");
-                }
-                    
-                MySQLAbstractConnection *conn = NULL;
-
-                try {
-
-                    // get the connection info that should have been stored in the previous call to mysql_real_connect()
-                    MySQLConnectionInfo *info = getResourceMap()->getConnectInfo(mysql);
-
-                    if (info == NULL) {
-                        xlog.error("No ConnInfo in map");
-                        setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
-                        return NULL;
-                    }
-
-                    if (xlog.isDebugEnabled()) {
-                        xlog.debug("Creating native connection");
-                    }
-                    
-                    if (xlog.isDebugEnabled()) {
-                        xlog.debug(string("mysql_real_connect: Delegate mode: mysql: ") + Util::toString(mysql)
-                                   + string(" db: ") + databaseName);
-                    }
-
-                    // create native connection
-                    conn = new MySQLNativeConnection(mysql, getMySQLClient(), getResourceMap());
-                    
-                     if (xlog.isDebugEnabled()) {
-                        xlog.debug("Storing to the map after defining a connection.");
-                    }
-                    
-                    // store mapping from the MYSQL structure to the native connection
-                    getResourceMap()->setConnection(mysql, conn);
-
-                    if (!conn->connect(
-                            info->host.c_str(),
-                            info->user.c_str(),
-                            info->passwd.c_str(),
-                            db,
-                            info->port==0 ? 3306 : info->port,
-                            info->unix_socket,
-                            info->clientflag
-                        )) {
-                        setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [1]", "OSP01");
-                        return NULL;
-                    }
-            
                     // success
                     getResourceMap()->clearErrorState(mysql);
 
-                    if (xlog.isDebugEnabled()) {
-                        xlog.debug(string("mysql_real_connect: Delegate mode: SUCCESS: mysql: ") + Util::toString(mysql) + string(" db: ") + Util::toString(db));
-                    }
-
-
-                } catch (const char *exception) {
-                    xlog.error(string("mysql_real_connect: failed due to exception: ") + exception);
-                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-                    return NULL;
-                } catch (...) {
-                    xlog.error(string("mysql_real_connect: failed due to unknown exception: ")
-                               + string(" host: ") + string(_host==NULL?"NULL":_host)
-                               + string(" db: ") + string(db==NULL?"NULL":db));
-                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
+                }
+                else {
+                    setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [1]", "OSP01");
                     return NULL;
                 }
-        
+
+                if (xlog.isDebugEnabled()) {
+                    xlog.debug(string("mysql_real_connect: Delegate Mode: SUCCESS: mysql: ") + Util::toString(mysql)
+                               + string(" db: ") + Util::toString(db));
+                }
+
+
+            } catch (const char *exception) {
+                xlog.error(string("mysql_real_connect failed due to exception: ") + exception);
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
+                return NULL;
+            } catch (...) {
+                xlog.error(string("mysql_real_connect: failed due to unknown exception: ")
+                           + string(" host: ") + string(_host==NULL?"NULL":_host)
+                           + string(" db: ") + string(db==NULL?"NULL":db));
+                setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
+                return NULL;
             }
         }
 
         if (xlog.isDebugEnabled()) {
             xlog.debug(string("mysql_real_connect() SUCCESS Returning ") + Util::toString((void*)mysql));
+        }
+
+        if (MyOSPConfig::isShardAnalyze()) {
+            gettimeofday(&tend, NULL);
+            string * params = new string[8];
+            params[0] = Util::toString(mysql);
+            params[1] = Util::toString(_host);
+            params[2] = Util::toString(_user);
+            params[3] = "hidden"; //Don't log the password value
+            params[4] = Util::toString(db);
+            params[5] = Util::toString(port);
+            params[6] = Util::toString(unix_socket);
+            params[7] = Util::toString(clientflag);
+            log_entry_for_analyser("", (void *) mysql, 0,
+                    "mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user, "
+                    "const char *_passwd, const char *db, unsigned int port, const char *unix_socket, "
+                    "unsigned long clientflag)", params, 8,"", &tstart, &tend);
+            delete [] params;
         }
 
         return mysql;
@@ -1000,229 +857,125 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 /**************************************/
 /*****New Method for Mysql_Select_DB***/
 /**************************************/
-int mysql_select_db(MYSQL *mysql, const char *db) {
+int mysql_select_db(MYSQL *mysql, const char *_db) {
+
+    struct timeval tstart, tend;
+    if(MyOSPConfig::isShardAnalyze()) {
+        gettimeofday(&tstart, NULL);
+    }
+
     int result;
 
-    if (db==NULL) {
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(_db) + string("\")"));
+    }
+
+    if (!_db) {
         setErrorState(mysql, CR_UNKNOWN_ERROR, "Passed NULL database name", "OSP01");
         xlog.error("failed to init mysqlClient");
         return -1;
-    }
-    if (xlog.isDebugEnabled()) {
-        xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\")"));
     }
 
     // get the connection info that should have been stored in the previous call to mysql_real_connect()
     MySQLConnectionInfo *info = getResourceMap()->getConnectInfo(mysql);
 
-    if (info == NULL) {
-        xlog.error("No ConnInfo in map");
-        setErrorState(mysql, CR_UNKNOWN_ERROR, "No ConnInfo in map", "OSP01");
+    if (!info) {
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Passed NULL connectionInfo", "OSP01");
         return -1;
     }
     
     MySQLAbstractConnection *conn = getConnection(mysql, false);
 
-    if (!conn)
-    {
-      xlog.error("No connection from getConnection");
+    if (!conn) {
       setErrorState(mysql, CR_UNKNOWN_ERROR, "No Connection From MySQL Select DB", "OSP01");
       return -1;
     }
 
-    bool ospMode = MyOSPConfig::isOspHost(info->virtual_host);
-
-    if (ospMode){
-
-        //Done for strcmp
-        const char * schema_name = info->target_schema_name.c_str();
-
-        if (strcmp(schema_name, db)==0) {
-            if (xlog.isDebugEnabled()) {
-                    xlog.debug("mysql_select_db() re-using existing connection");
-                }
-            // success
-            return 0;
+    // see if db matches the current target_schema_name
+    if (strcmp(info->target_schema_name.c_str(), _db)==0) {
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("mysql_select_db() re-using existing connection");
         }
-        else
+        // success
+        return 0;
+    }
+
+    // update the info object to reflect the change in database name
+    string original_schema_name = info->target_schema_name;
+    info->target_schema_name = _db;
+
+    if (xlog.isDebugEnabled()) {
+        xlog.debug(
+            string("mysql_select_db() switching from ")
+            + original_schema_name
+            + string(" to ")
+            + info->target_schema_name
+        );
+    }
+
+    if (MyOSPConfig::isOspHost(info->virtual_host)) {
+
+        // a different db is being selected so we need to close the old connection now
+        conn->mysql_close(mysql);
+
+        // erase all resources for this mysql handle
+        getResourceMap()->erase(mysql);
+
+        // delete the connection
+        delete conn;
+
+        // reset reference
+        conn = NULL;
+
+        result = do_osp_connect(mysql, info);
+
+    }
+    else {
+
+        // delegate mode
+        if (xlog.isDebugEnabled()) {
+            xlog.debug("Delegate Mode for Mysql_select_db.");
+        }
+
+        try
         {
-            
-            if(MyOSPConfig::isShardAnalyze()) {
-                struct timeval tstart; gettimeofday(&tstart, NULL);
-            
-                xlog.info(
-                    string("mysql_select_db() switching from ")
-                    + (mysql->db ? string(mysql->db) : string("NULL"))
-                    + string(" to ")
-                    + (db ? Util::toString(db) : string("NULL"))
-                );
+          // just delegate to the driver
+          conn->mysql_select_db(mysql,info->target_schema_name.c_str());
 
-                // a different db is being selected so we need to close the old connection now
-                conn->mysql_close(mysql);
+          // success
+          getResourceMap()->clearErrorState(mysql);
 
-                // erase all resources for this mysql handle
-                getResourceMap()->erase(mysql);
+          if (xlog.isDebugEnabled()) {
+              xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(_db) + string("\") SUCCESS"));
+          }
 
-                // delete the connection
-                delete conn;
+          result = 0;
 
-                // reset reference
-                conn = NULL;
-
-                // store the connection info in the map again
-                getResourceMap()->setConnectInfo(mysql, info);
-            
-
-                result = do_osp_connect(mysql,db, info, conn);
-
-                struct timeval tend; gettimeofday(&tend, NULL);
-                string * params = new string[2];
-                params[0] = Util::toString(mysql);
-                params[1] = (db ? db : "NULL");
-                log_entry_for_analyser("", (void *) mysql, 0,
-                        "mysql_select_db(MYSQL *mysql, const char *db)",
-                        params, 2, "", &tstart, &tend);
-                delete [] params;
-                return result;
-            }
-            else {
-
-                  xlog.info(
-                      string("mysql_select_db() switching from ")
-                      + (mysql->db ? string(mysql->db) : string("NULL"))
-                      + string(" to ")
-                      + (db ? Util::toString(db) : string("NULL"))
-                  );
-
-                  // a different db is being selected so we need to close the old connection now
-                  conn->mysql_close(mysql);
-
-                  // erase all resources for this mysql handle
-                  getResourceMap()->erase(mysql);
-
-                  // delete the connection
-                  delete conn;
-
-                  // reset reference
-                  conn = NULL;
-
-                  // store the connection info in the map again
-                  getResourceMap()->setConnectInfo(mysql, info);
-                  
-
-                result = do_osp_connect(mysql,db, info, conn);
-
-                return result;
-            }
+        } catch (const char *exception) {
+          xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
+          setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
+          result = -1;
+        } catch (...) {
+          xlog.error(string("mysql_select_db(") + Util::toString(_db) + string(") failed due to exception"));
+          setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
+          result = -1;
         }
+
     }
-    else { //This is also delegate mode
-    	  if (xlog.isDebugEnabled()) {
-                  xlog.debug("Delegate Mode for Mysql_select_db.");
-              }
-    
-        if(MyOSPConfig::isShardAnalyze()) {
-            struct timeval tstart; gettimeofday(&tstart, NULL);
-            //ADD NEW CODE
-            try
-            {
-              if (xlog.isDebugEnabled()) {
-                  xlog.debug("Creating native connection");
-              }
 
-              conn->mysql_select_db(mysql,db);
-
-              // store mapping from the MYSQL structure to the native connection
-              getResourceMap()->setConnection(mysql, conn);
-
-              if (!conn->connect(
-                      info->host.c_str(),
-                      info->user.c_str(),
-                      info->passwd.c_str(),
-                      db,
-                      info->port==0 ? 3306 : info->port,
-                      info->unix_socket,
-                      info->clientflag
-              )) {
-                  setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [1]", "OSP01");
-                  result = -1;
-              }
-               // success
-              getResourceMap()->clearErrorState(mysql);
-
-              if (xlog.isDebugEnabled()) {
-                  xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
-              }
-
-              result = 0;
-
-            } catch (const char *exception) {
-              xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
-              setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-              result = -1;
-            } catch (...) {
-              xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
-              setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
-              result = -1;
-            }
-
-            //END NEW CODE
-            struct timeval tend; gettimeofday(&tend, NULL);
-            string * params = new string[2];
-            params[0] = Util::toString(mysql);
-            params[1] = (db ? db : "NULL");
-            log_entry_for_analyser("", (void *) mysql, 0,
-                    "mysql_select_db(MYSQL *mysql, const char *db)",
-                    params, 2, "", &tstart, &tend);
-            delete [] params;
-            return result;
-        }
-        else {
-            try {
-              if (xlog.isDebugEnabled()) {
-                  xlog.debug("Creating native connection");
-              }
-
-              conn->mysql_select_db(mysql,db);
-
-              // store mapping from the MYSQL structure to the native connection
-              getResourceMap()->setConnection(mysql, conn);
-
-              if (!conn->connect(
-                      info->host.c_str(),
-                      info->user.c_str(),
-                      info->passwd.c_str(),
-                      db,
-                      info->port==0 ? 3306 : info->port,
-                      info->unix_socket,
-                      info->clientflag
-              )) {
-                  setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [1]", "OSP01");
-                  return -1;
-              }
-
-              // success
-              getResourceMap()->clearErrorState(mysql);
-
-              if (xlog.isDebugEnabled()) {
-                  xlog.debug(string("mysql_select_db(\"") + Util::toString(mysql) + string(",") + Util::toString(db) + string("\") SUCCESS"));
-              }
-
-              return 0;
-
-            } catch (const char *exception) {
-              xlog.error(string("mysql_select_db() failed due to exception: ") + exception);
-              setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
-              return -1;
-            } catch (...) {
-              xlog.error(string("mysql_select_db(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
-              setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
-              return-1;
-            }
-        }
+    if(MyOSPConfig::isShardAnalyze()) {
+        gettimeofday(&tend, NULL);
+        string * params = new string[2];
+        params[0] = Util::toString(mysql);
+        params[1] = Util::toString(_db);
+        log_entry_for_analyser("", (void *) mysql, 0,
+                "mysql_select_db(MYSQL *mysql, const char *db)",
+                params, 2, "", &tstart, &tend);
+        delete [] params;
     }
+
+    return result;
 }
-
 
 my_bool mysql_autocommit(MYSQL *mysql, my_bool auto_mode) {
     //trace("mysql_autocommit", mysql);
