@@ -130,7 +130,7 @@ def create_tar(mysql_version)
     # remove temp dir
     run_command "rm -rf _temp"
 
-    svn_import_command = "svn import #{tar_filename} https://subversion.assembla.com/svn/open-sharding/trunk/myosp/#{get_platform}/#{tar_filename} -m \"New release #{tarfile}\""
+    svn_import_command = "svn import #{tar_filename} https://subversion.assembla.com/svn/open-sharding/trunk/myosp/#{get_platform}/#{tar_filename} -m \"New release #{tar_filename}\""
 
     puts "***********************************************************************************************************"
     puts "***********************************************************************************************************"
