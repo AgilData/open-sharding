@@ -91,7 +91,8 @@ def build(mysql_version)
     deployed_opensharding_libs = `find /usr -name \"libopensharding*\"`
     #puts "FOUND: #{deployed_opensharding_libs}"
     if deployed_opensharding_libs != ""
-        puts "Cannot build until you delete these already deployed versions: #{deployed_opensharding_libs}"
+        puts "Cannot build until you delete these already deployed versions: "
+        puts "#{deployed_opensharding_libs}"
         exit
     end
     puts "No deployed versions of libopensharding found"
