@@ -288,6 +288,7 @@ begin
     elsif option == "check-dep"
         check_dep
     elsif option == "install-mysql"
+        mysql_version = ARGV[1]
         install_mysql(mysql_version)
     else
         puts "Error: Invalid Argument"
