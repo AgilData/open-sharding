@@ -18,7 +18,7 @@ def clean
 end
 
 def compile
-    run_command "make clean ; make"
+    run_command "make clean ; make; make install"
     
     # do some minimal cleaning to get rid of temp files but don't delete libs
     run_command "find . -name '*.o' -exec rm -f {} \\;"
