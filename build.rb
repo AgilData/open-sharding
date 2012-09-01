@@ -170,9 +170,7 @@ def install_mysql(mysql_version)
         run_command("#{installation_directory}/bin/mysqld_safe --user=mysql &")
         FileUtils.cp "#{installation_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
         run_command("ln bin/mysql /usr/bin/mysql")
-        # Dir.mkdir("/usr/local/include/mysql")
-        #FileUtils.cp "#{current_directory}/#{mysql_dir}/include/","/usr/local/include/mysql/"
-
+        puts "Installation of mysql has completed, please use /usr/local/mysql/bin/mysqld_safe & to start mysql."
     else
         puts "Source compile has not been executed, please run the build script again with the option build-real."
     end

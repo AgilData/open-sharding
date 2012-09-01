@@ -71,7 +71,7 @@ def myosp_ldconfig
     platfrom = get_platform
     if platfrom.match("ubuntu") || platfrom.match("i386")
         library = "lib"
-        elsif platfrom.match("centos") && platfrom.match("x86_64")
+        elsif (platfrom.match("centos") || platfrom.match("redhat")) && platfrom.match("x86_64")
         library = "lib64"
         else
         puts "Non existing platform."
@@ -91,8 +91,10 @@ def myosp_ldconfig
         end
     end
     run_command("ldconfig")
-    ldd_value = `ldd /usr/bin/mysql`
-    run_command("rm #{ldd_value}")
+    ldd_value = `ldd /usr/bin/mysql | grep mysql`
+    ldd_array = ldd_value.split(" => ")
+    puts "Removing:: #{ldd_array[1]}"
+    #run_command("rm #{ldd_value}")
 end
 
 #################################################################################################
