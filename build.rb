@@ -159,7 +159,7 @@ def install_mysql(mysql_version)
             puts "Failed to change directories."
         end
         run_command("make install")
-        current_directory=`pwd`
+        current_directory=`pwd`.chomp
         Dir.chdir("/usr/local/mysql")
         run_command("chown -R mysql .")
         run_command("chgrp -R mysql .")
@@ -169,9 +169,9 @@ def install_mysql(mysql_version)
         FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
         run_command("#{current_directory}/bin/mysqld_safe --user=mysql &")
         FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
-        run_command("ln #{current_directory}/#{mysql_dir}/bin/mysql /usr/bin/mysql")
-        Dir.mkdir("/usr/local/include/mysql")
-        FileUtils.cp "#{current_directory}/#{mysql_dir}/include/","/usr/local/include/mysql/"
+        run_command("ln #{current_directory}/bin/mysql /usr/bin/mysql")
+        # Dir.mkdir("/usr/local/include/mysql")
+        #FileUtils.cp "#{current_directory}/#{mysql_dir}/include/","/usr/local/include/mysql/"
 
     else
         puts "Source compile has not been executed, please run the build script again with the option build-real."
