@@ -109,7 +109,7 @@ end
 #################################################################################################
 ## Building MySQl
 #################################################################################################
-def boost-build
+def boost_build
     puts "Down loading the boost libraries."
     cmd = 'wget http://downloads.sourceforge.net/project/boost/boost/1.38.0/boost_1_38_0.tar.gz'
     run_command cmd
