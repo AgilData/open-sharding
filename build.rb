@@ -145,7 +145,8 @@ end
 #################################################################################################
 def install_mysql(mysql_version)
     mysql_dir = "mysql-install-#{mysql_version}"
-    
+    puts `pwd`
+    puts mysql_dir
     if File.exists? mysql_dir
         Dir.chdir mysql_dir
         if mysql_version.match("5.0")
@@ -286,7 +287,7 @@ begin
         build_mysql(mysql_version)
     elsif option == "check-dep"
         check_dep
-    elsif option == "install_mysql"
+    elsif option == "install-mysql"
         install_mysql(mysql_version)
     else
         puts "Error: Invalid Argument"
