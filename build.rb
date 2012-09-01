@@ -231,7 +231,7 @@ begin
             exit
         end
         install_dependencies
-        boost-build
+        boost_build
         elsif option == "check-dep"
         check_dep
         else
