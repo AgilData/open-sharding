@@ -166,9 +166,9 @@ def install_mysql(mysql_version)
         run_command("bin/mysql_install_db --user=mysql")
         run_command("chown -R root .")
         run_command("chown -R mysql var")
-        FileUtils.cp "#{current_directory}/#{mysql_dir}/support-files/my-medium.cnf", "/etc/my.cnf"
-        run_command("#{current_directory}/#{mysql_dir}/bin/mysqld_safe --user=mysql &")
-        FileUtils.cp "#{current_directory}/#{mysql_dir}/support-files/mysql.server","/etc/init.d/mysql.server"
+        FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
+        run_command("#{current_directory}/bin/mysqld_safe --user=mysql &")
+        FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
         run_command("ln #{current_directory}/#{mysql_dir}/bin/mysql /usr/bin/mysql")
         Dir.mkdir("/usr/local/include/mysql")
         FileUtils.cp "#{current_directory}/#{mysql_dir}/include/","/usr/local/include/mysql/"
