@@ -159,17 +159,17 @@ def install_mysql(mysql_version)
             puts "Failed to change directories."
         end
         run_command("make install")
-        current_directory=`pwd`.chomp
+        installation_directory=`pwd`.chomp
         Dir.chdir("/usr/local/mysql")
         run_command("chown -R mysql .")
         run_command("chgrp -R mysql .")
         run_command("bin/mysql_install_db --user=mysql")
         run_command("chown -R root .")
         run_command("chown -R mysql var")
-        FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
-        run_command("#{current_directory}/bin/mysqld_safe --user=mysql &")
-        FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
-        run_command("ln #{current_directory}/bin/mysql /usr/bin/mysql")
+        FileUtils.cp "#{installation_directory}/support-files/my-huge.cnf", "/etc/my.cnf"
+        run_command("#{installation_directory}/bin/mysqld_safe --user=mysql &")
+        FileUtils.cp "#{installation_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
+        run_command("ln bin/mysql /usr/bin/mysql")
         # Dir.mkdir("/usr/local/include/mysql")
         #FileUtils.cp "#{current_directory}/#{mysql_dir}/include/","/usr/local/include/mysql/"
 
