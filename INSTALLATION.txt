@@ -1,0 +1,67 @@
+=====================================
+Open Sharding Protocol Driver Installation
+=====================================
+
+The installation of the Open Sharding Protocol for MySQl can be executed with the ruby script build.rb. This Script will compile and package the neccesary libraries for use with dbshards.
+
+
+----Executing Build.rb---------
+
+Executing build.rb format. 
+
+ruby build.rb [options arguments] [mysql version(5.0 or 5.1)]
+
+Executing build.rb be can be carried out with the following steps. 
+
+$ ruby build.rb build 5.0
+* This command will build the myosp libraries for the mysql version 5.0.
+
+$ ruby build.rb build 5.1 
+* This command will build the myosp libraries for the mysql version 5.1.
+
+$ ruby build.rb build-boost [5.0 or 5.1]
+* This command will install all the depencies for the actual build of myosp, if this has not 
+* been executed before, the build option will fail. This only has to be executed once. 
+
+
+-------Installing the MyOSP Driver--------
+
+In order for proper installation. The myosp package should be placed in the /usr/lib64/myosp or /usr/lib/myosp depending on what system. 
+
+$ mkdir /usr/lib64/myosp 
+* This is for any x86_64 architecture system excluding ubuntu.
+
+$ mkdir /usr/lib/myosp
+* This is for any i386 architectures and all Ubuntu systems.
+
+The myosp.conf needs to be place in the /etc/osp directory for use by dbshards. 
+
+$ mkdir /etc/osp
+* This will create the necessary directory for myosp.conf to be placed in. 
+
+$ cp /usr/lib64/myosp/myosp.conf /etc/osp/
+* This will copy the myosp.conf to etc/osp directory for use. NOTE: Depending on the directory that the myosp directory is in will determine if you would use lib64 or lib. 
+
+The myosp.conf will have to be edited for the inclusion of the virtual host id and the connection type.
+In order to finish up the installation you will need to run the setup.rb in the /usr/lib64/myosp directory or /usr/lib/myosp directory. This will create the links necessary for dbshards. 
+
+$ ruby setup.rb 5.0 
+* This will create the links if the Mysql version is 5.0
+
+$ ruby setup.rb 5.1
+* This will create the links if the Mysql version is 5.1 
+
+**IMPORTANT**
+
+Export the libraries to be used. 
+
+$ export LD_LIBRARY_PATH=/usr/lib64/myosp
+* This exports the library path for myosp if found in the lib64 directory.
+
+$ export LD_LIBRARY_PATH=/usr/lib/myosp
+* This exports the library path for myosp if found in the lib64 directory.
+
+------------------------------------------------
+
+THIS FINISHES THE INSTALLATION PROCEDURE.
+
