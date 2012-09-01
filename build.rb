@@ -135,7 +135,7 @@ def build_mysql(mysql_version)
     end
     puts `pwd`
      current_directory=`pwd`.chomp
-    run_command("./configure --prefix=/usr/local/mysql")
+    run_command("./configure --prefix=/usr/local/mysql -enable-thread-safe-client")
     run_command("make")
     puts "Completed compiling mysql."
 end
