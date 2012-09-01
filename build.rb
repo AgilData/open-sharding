@@ -163,7 +163,7 @@ def install_mysql(mysql_version)
         Dir.chdir("/usr/local/mysql")
         run_command("chown -R mysql .")
         run_command("chgrp -R mysql .")
-        run_command("#{current_directory}/#{mysql_dir}/bin/mysql_install_db --user=mysql")
+        run_command("bin/mysql_install_db --user=mysql")
         run_command("chown -R root .")
         run_command("chown -R mysql var")
         FileUtils.cp "#{current_directory}/#{mysql_dir}/support-files/my-medium.cnf", "/etc/my.cnf"
