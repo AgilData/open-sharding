@@ -61,6 +61,21 @@ $ export LD_LIBRARY_PATH=/usr/lib64/myosp
 $ export LD_LIBRARY_PATH=/usr/lib/myosp
 * This exports the library path for myosp if found in the lib64 directory.
 
+-------Apache Setup with MyOSP 1.2--------------
+
+In order for Apache to work with MyOSP 1.2, it needs to include the necessary command
+	export LD_LIBRARY_PATH=/usr/lib64/myosp
+in the following files:
+
+APACHE::
+	/etc/init.d/httpd
+	/usr/sbin/apachectl
+
+APACHE2::
+	/etc/apache2/envvars
+
+NOTE: Apache must be restarted after this. 
+
 ------------------------------------------------
 
 THIS FINISHES THE INSTALLATION PROCEDURE.
