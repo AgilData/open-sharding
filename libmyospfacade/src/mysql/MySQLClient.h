@@ -22,8 +22,6 @@
 #include <string>
 #include <mysql.h>
 
-#include <boost/thread/mutex.hpp>
-
 #include <util/DynLib.h>
 #include <logger/Logger.h>
 
@@ -37,17 +35,22 @@ using namespace util;
 //TODO: need to decide if we want to use _real_ or not .. seems safer to use this even if it is a symlink
 
 #ifdef MYSQL_5_0
-//#define MYSQL_LIBRARY "libmysqlclient_r.so.15.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.15.0.0"
+#endif
+
+#ifdef MYSQL_5_0_R
 #define MYSQL_LIBRARY "libmysqlclient_real_r.so.15.0.0"
 #endif
 
 #ifdef MYSQL_5_1
-//#define MYSQL_LIBRARY "libmysqlclient_r.so.16.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.16.0.0"
+#endif
+
+#ifdef MYSQL_5_1_R
 #define MYSQL_LIBRARY "libmysqlclient_real_r.so.16.0.0"
 #endif
 
 #ifdef MYSQL_5_5
-//#define MYSQL_LIBRARY "libmysqlclient_r.so.18.0.0"
 #define MYSQL_LIBRARY "libmysqlclient_real_r.so.18.0.0"
 #endif
 
@@ -317,8 +320,6 @@ private:
     static Logger &log;
 
     bool initOK;
-
-    boost::mutex initMutex;
 
     DynLib *dynLib;
 

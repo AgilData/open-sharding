@@ -17,10 +17,9 @@
 #include <stdio.h>
 #include <map>
 #include <string>
+#include <cstring>
 #include <mysql.h>
 #include <dlfcn.h>
-
-#include <boost/thread/mutex.hpp>
 
 #include <mysql/MySQLClient.h>
 #include <util/Util.h>
@@ -54,9 +53,6 @@ MySQLClient::MySQLClient() {
 }
 
 bool MySQLClient::init() {
-
-    // make this method synchronized
-    boost::mutex::scoped_lock lock(initMutex);
 
     if (initOK) {
         return true;

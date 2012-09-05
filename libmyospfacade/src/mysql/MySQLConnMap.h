@@ -19,8 +19,6 @@
 
 #include <unistd.h>
 #include <map>
-#include <boost/thread/mutex.hpp>
-//#include <boost/interprocess/sync/interprocess_mutex.hpp>
 #include <mysql.h>
 
 #include <mysql/MySQLAbstractConnection.h>
@@ -70,10 +68,6 @@ private:
 
     /* map of dbName to named pipe connection */
     map<string, OSPConnection*> ospConnMap;
-
-    // mutex for thread safety
-//    boost::interprocess::interprocess_mutex mutex;
-    boost::mutex mutex;
 
 public:
     MySQLConnMap();

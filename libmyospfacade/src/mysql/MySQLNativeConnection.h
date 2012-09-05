@@ -22,8 +22,6 @@
 #include <string>
 #include <mysql.h>
 
-//#include <boost/scoped_ptr.hpp>
-
 #include <mysql/MySQLClient.h>
 #include <mysql/MySQLAbstractConnection.h>
 #include <mysql/MySQLConnMap.h>

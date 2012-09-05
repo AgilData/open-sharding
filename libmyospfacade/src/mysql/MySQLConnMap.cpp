@@ -15,7 +15,6 @@
 
 #include <unistd.h>
 #include <map>
-#include <boost/thread/mutex.hpp>
 #include <mysql.h>
 #include <mysql/MySQLConnMap.h>
 #include <mysql/MySQLAbstractConnection.h>
@@ -23,11 +22,11 @@
 #include <logger/Logger.h>
 #include <util/Util.h>
 
-#define LOCK_MUTEX boost::mutex::scoped_lock lock(mutex);
-
 using namespace std;
 using namespace util;
 using namespace logger;
+
+#define LOCK_MUTEX ;
 
 Logger &MySQLConnMap::_log = Logger::getLogger("MySQLConnMap");
 

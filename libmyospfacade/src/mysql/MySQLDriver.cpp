@@ -30,11 +30,10 @@
 #include <string>
 #include <iostream>
 #include <fstream>
+#include <sstream>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <syslog.h>
-
-#include <boost/thread/mutex.hpp>
 
 #include <mysql/BuildInfo.h>
 #include <mysql/MySQLClient.h>
@@ -83,8 +82,6 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db);
  * hit error conditions during connection attempts before we have created
  * a connection object to delegate to.
  */
-static boost::mutex initMutex;
-
 /* Wrapper around libmysqlclient.so */
 static MySQLClient *mysqlclient = NULL;
 
@@ -162,7 +159,6 @@ MySQLConnMap* getResourceMap() {
 }
 
 MySQLClient* getMySQLClient() {
-    boost::mutex::scoped_lock lock(initMutex);
     if (!mysqlclient) {
         mysqlclient = new MySQLClient();
         if (!mysqlclient->init()) { xlog.error("Failed to init mysqlClient"); }
@@ -172,7 +168,6 @@ MySQLClient* getMySQLClient() {
 
 // this method called from mysql_server_init and shows banner
 void banner() {
-    //boost::mutex::scoped_lock lock(initMutex);
     if (!bannerDisplayed) {
 
         Logger::configure("/etc/myosp-log.properties");
@@ -635,9 +630,6 @@ int mysql_select_db_actual(MYSQL *mysql, const char *db) {
 
             // osp:databasename
             string databaseName = string(mysql->db).substr(4);
-
-            // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
-            boost::mutex::scoped_lock lock(initMutex);
 
             // get named pipe connection for this osp database
             OSPConnection *ospConn = getResourceMap()->getOSPConn(databaseName);
@@ -1457,7 +1449,6 @@ unsigned long mysql_hex_string(char *to, const char *from,
         unsigned long from_length) {
     //trace("mysql_hex_string");
     // delegate directly to MySQL driver
-//    //boost::mutex::scoped_lock lock(nonConnMutex);
 //    return getNonConn()->mysql_hex_string(to, from, from_length);
     return -1;
 }
