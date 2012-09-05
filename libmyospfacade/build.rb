@@ -2,8 +2,8 @@
 
 require 'time'
 
-MYOSP_VERSION   = "1.3"
-MYOSP_BUILDNUM  = "5"
+MYOSP_VERSION   = "1.1"
+MYOSP_BUILDNUM  = "300"
 MYOSP_TIMESTAMP = Time.new.strftime("%Y%m%d-%H%M%S")
 
 def run_command (cmd)
@@ -121,7 +121,7 @@ def create_tar(mysql_version)
         puts "Failed to copy libmysqlclient_real.so for tar packaging."
     end
     
-    run_command "cp myosp.conf _temp"
+    run_command "cp src/myosp.conf _temp"
     run_command "cp README _temp"
     
     # create tar
