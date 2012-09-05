@@ -43,8 +43,6 @@
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <unistd.h>
-//#include <boost/thread/mutex.hpp>
-
 
 #include <opensharding/OSPMessage.h>
 #include <opensharding/OSPByteBuffer.h>
@@ -61,8 +59,6 @@
 using namespace util;
 
 namespace opensharding {
-
-//boost::mutex OSPTCPConnectionMutex;
 
 logger::Logger &OSPTCPConnection::log = Logger::getLogger("OSPTCPConnection");
 

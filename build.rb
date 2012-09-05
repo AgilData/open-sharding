@@ -16,105 +16,167 @@ require 'fileutils'
 ## Constants
 #################################################################################################
 
-BRANCH = "master"
-REPOSITORY = "git://git.assembla.com/open-sharding.git"
-BRANCH_LIST = ["HEAD", "logging_changes", "master", "myospbinlog", "mysql_compatibility", "osp-client-host-list", "threaded_fifo", "windows"]
-BOOST_VER = "1.38.0"
-BOOST_DIR = "boost_1_38_0"
-BOOST_TAR = "boost_1_38_0.tar.gz"
-BOOST_DOWNLOAD = "http://downloads.sourceforge.net/project/boost/boost/#{BOOST_VER}/#{BOOST_TAR}"
-INIT_DIR = Dir.pwd
-OS_DIR = "#{INIT_DIR}/open-sharding"
-OPERSYS = "ubuntu1104" # update this to set the build operating system
-ARCH = "x64" # update this to set the build architecture
-LIBMYOSP_VER = "pre-release-1.1.113" # update this to set the libmyosp version
-LIBMYOSP_TAR = "libmyosp-#{OPERSYS}-#{ARCH}-#{LIBMYOSP_VER}.tar.gz"
-
 #################################################################################################
 ## Run an operating system command
 #################################################################################################
-def run_command(cmd, failonerror=true)
+def run_command(cmd)
     puts "Executing: #{cmd}"
     if ! system cmd
-        if failonerror
-            raise "FAILED to execute #{cmd}"
+        puts "FAILED to execute #{cmd}"
+        exit 1
+    end
+end
+#################################################################################################
+## Get Platform 
+#################################################################################################
+def get_platform
+    if RUBY_PLATFORM.downcase =~ /darwin/
+        return "mac"
+        elsif RUBY_PLATFORM.downcase =~ /windows/
+        return "win"
         else
-            puts "FAILED to execute #{cmd}"
-        end
+        
+        # get linux distro name and version (might now work on all distros)
+        issue = `cat /etc/issue`.downcase.split
+        arch = `uname -i`
+        platform = "#{issue} #{arch}"
+        return platform
     end
 end
-
 #################################################################################################
-## Generate opensharding.jar from opensharding.proto file
+## Install Dependencies
 #################################################################################################
-def generate_opensharding_jar
-  run_command "rm -rf _protobuf"
-  run_command "mkdir _protobuf", false
-  run_command "protoc -I=protobuf --java_out=_protobuf protobuf/opensharding.proto"
-  run_command "mkdir dist", false
-  run_command "rm -f dist/opensharding.jar"
-  run_command "javac _protobuf/org/opensharding/protocol/Opensharding.java -d _protobuf/ -classpath 3rdparty/protobuf/protobuf-java-2.4.1.jar"
-  run_command "jar cf dist/opensharding.jar -C _protobuf org"
-  run_command "rm -rf _protobuf"
-end
-
-#################################################################################################
-## Retrieve Opensharding Rep
-#################################################################################################
-def clone_rep(branch_name)
-    puts "Cloning Opensharding Repositories"
-    if File.exists? "open-sharding"
-        puts "WARN: open-sharding Found"
-        puts "WARN: moving open-sharding to open-sharding.bak"
-        if File.exists? "open-sharding.bak"
-            run_command "rm -rf open-sharding.bak"
-        end
-        run_command "mv open-sharding open-sharding.bak"
+def install_dependencies
+    puts "Installing Dependencies *****************************************"
+    platform = get_platform
+    if platform.match("centos")
+        run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel java-1.6.0-openjdk-devel kernel-devel")
+    elsif platform.match("ubuntu") || platform.match("debian")
+        run_command("sudo apt-get install -y build-essential libncurses5-dev libltdl3-dev")
+    else
+        puts "Platform not found: #{platform}"
+        exit
     end
-    cmd = "git clone -b #{branch_name} \"#{REPOSITORY}\""
-    run_command cmd
 end
-
 #################################################################################################
 ## Building libmyosp
 #################################################################################################
-def build(branch_name)
-    check_dep
-    puts "Building from branch #{branch_name}"
-    clone_rep branch_name
-    puts "Downloading Boost Libraries"
-    if RUBY_PLATFORM.downcase.include?("darwin")
-        if !File.exists? "#{BOOST_DIR}"
-            run_command "curl -L #{BOOST_DOWNLOAD} | tar xz"
-        end
+def build(mysql_version)
+
+    puts "Building MyOSP *****************************************"
+
+    # we need to make sure we already have the mysql headers for the _real libs since we need
+    # to compile against the same exact version or we will end up with hard to diagnose segmentation
+    # faults at runtime
+    if mysql_version.match("5.0")
+        mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.0.96"
+    elsif mysql_version.match("5.1")
+        mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.1.65"
     else
-        if !File.exists? "#{BOOST_TAR}"
-            run_command "wget #{BOOST_DOWNLOAD}"
-        end
-        if !File.exists? "#{BOOST_DIR}"
-            run_command "tar xzf #{BOOST_TAR}"
-        end
+        puts "Support for mysql #{mysql_version} is not avaliable."
+        exit -1
     end
-    puts "Building and Installing Boost Libraries"
-    Dir.chdir BOOST_DIR
-    run_command "./configure"
-    run_command "sudo make install"
-    Dir.chdir OS_DIR
-    puts "Building and installing libopensharding"
-    Dir.chdir "libopensharding"
-    run_command "make clean"
-    run_command "make"
-    run_command "sudo make install"
-    Dir.chdir OS_DIR
+    
+    if !File.exists?(mysql_real_dir)
+      puts "Could not locate mysql directory '#{mysql_real_dir}' - you should run build-real first (this is a one-time requirement)"
+      exit -1
+    end
+
+    # check for any libopensharding.so already deployed that might be on LD_LIBRARY_PATH
+    # this is REALLY important or we will end up with corrupt binaries or a mix
+    # of old and new functionality
+    
+    # look for libopensharding
+    puts "Searching for deployed versions of libopensharding..."
+    deployed_opensharding_libs = `find /usr -name \"libopensharding*\"`
+    #puts "FOUND: #{deployed_opensharding_libs}"
+    if deployed_opensharding_libs != ""
+        puts "Cannot build until you delete these already deployed versions: "
+        puts "#{deployed_opensharding_libs}"
+        exit
+    end
+    puts "No deployed versions of libopensharding found"
+    
+    # build libopensharding
+    puts "Building libopensharding"
+    run_command "cd libopensharding ; ruby build.rb"
+    
+    # build libmyosp
     puts "Building libmyosp"
-    Dir.chdir "libmyospfacade"
-    run_command "ant"
-    puts "Creating libmyosp tarball"
-    run_command "./scripts/mktarball.sh #{LIBMYOSP_TAR} libs"
-    puts "Placing tarball in #{INIT_DIR}"
-    run_command "mv #{LIBMYOSP_TAR} #{INIT_DIR}"
-    Dir.chdir INIT_DIR
+    run_command "cd libmyospfacade ; ruby build.rb release #{mysql_version}"
+    
 end
+
+#################################################################################################
+## Building MySQl
+#################################################################################################
+def build_mysql(mysql_version)
+    mysql_dir = "mysql-install-#{mysql_version}"
+    if File.exists? mysql_dir
+      return
+    end
+    puts "Installing mysql libraries based on the version: #{mysql_version}"
+    puts `groupadd mysql`
+    puts `useradd -g mysql mysql`
+    Dir.mkdir(mysql_dir)
+    if mysql_version.match("5.0")
+        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
+       run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
+        mysql_dir = "#{mysql_dir}/mysql-5.0.96"
+        Dir.chdir("#{mysql_dir}")
+     elsif mysql_version.match("5.1")
+       run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.1.65-myosp.tar.gz/")
+       run_command("tar xvfz mysql-5.1.65-myosp.tar.gz -C #{mysql_dir}")
+         mysql_dir = "#{mysql_dir}/mysql-5.1.65"
+       Dir.chdir("#{mysql_dir}")
+    else
+       puts "Invalid version for installation of mysql."
+       exit
+    end
+    puts `pwd`
+     current_directory=`pwd`.chomp
+    run_command("./configure --prefix=/usr/local/mysql -enable-thread-safe-client")
+    run_command("make")
+    puts "Completed compiling mysql."
+end
+
+#################################################################################################
+## Install Mysql
+#################################################################################################
+def install_mysql(mysql_version)
+    mysql_dir = "mysql-install-#{mysql_version}"
+    puts `pwd`
+    puts mysql_dir
+    if File.exists? mysql_dir
+        Dir.chdir mysql_dir
+        if mysql_version.match("5.0")
+            Dir.chdir "mysql-5.0.96"
+            mysql_dir="#{mysql_dir}/mysql-5.0.96"
+        elsif mysql_version.match("5.1")
+            Dir.chdir "mysql-5.1.65"
+            mysql_dir="#{mysql_dir}/mysql-5.1.65"
+        else
+            puts "Failed to change directories."
+        end
+        run_command("make install")
+        installation_directory=`pwd`.chomp
+        Dir.chdir("/usr/local/mysql")
+        run_command("chown -R mysql .")
+        run_command("chgrp -R mysql .")
+        run_command("bin/mysql_install_db --user=mysql")
+        run_command("chown -R root .")
+        run_command("chown -R mysql var")
+        FileUtils.cp "#{installation_directory}/support-files/my-huge.cnf", "/etc/my.cnf"
+        run_command("#{installation_directory}/bin/mysqld_safe --user=mysql &")
+        FileUtils.cp "#{installation_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
+        run_command("ln bin/mysql /usr/bin/mysql")
+        puts "Installation of mysql has completed, please use /usr/local/mysql/bin/mysqld_safe & to start mysql."
+    else
+        puts "Source compile has not been executed, please run the build script again with the option build-real."
+    end
+    
+end
+    
 
 #################################################################################################
 ## Check Dependencies
@@ -167,26 +229,6 @@ def check_dep
     end
     puts "Found"
     
-    print "Ant ... "
-    x = `which ant`.strip
-    if x == ""
-        puts ""
-        puts "Error: Ant is missing"
-        exit 1
-    end
-    puts "Found"
-    
-    print "UUID ... "
-    x = `find /usr/local/include -name 'uuid.h'`.strip
-    if x == ""
-        x = `find /usr/include -name 'uuid.h'`.strip
-        if x == ""
-            puts ""
-            puts "Error: uuid/uuid.h is missing"
-            exit 1
-        end
-    end
-    puts "Found"
     
     puts "All Dependencies are found"
 end
@@ -196,40 +238,56 @@ end
 #################################################################################################
 begin
     if ARGV.length==0
-        puts "Usage: ruby build.rb OPTION [ARGS]"
+        puts "Usage: ruby build.rb OPTION [ARGS] [MYSQL VERSION]"
         puts "\tAvailable options: "
-        puts "\t\t - build [opensharding-branch]"
-        exit 
+        puts "\t\t - setup-env "
+        puts "\t\t - build (Installation of myosp only)"
+        puts "\t\t - build-real (Source compile of mysql)"
+        puts "\t\t - install-mysql"
+        puts "\t MYSQL VERSION OPTIONS"
+        puts "\t\t - 5.0 "
+        puts "\t\t - 5.1 "
+        exit
     end
     
     option = ARGV[0]
-
-    if option == "generate_opensharding_jar"
-        generate_opensharding_jar
-        exit
-    end
-
-    username = `whoami`.strip
-    if username != 'root'
-        puts "This script must be run as the root user (not as '#{username}')"
-        exit 1
-    end
     
     if option == "build"
-        if ARGV.length < 2
-            puts "Warn: No branch specified to build, defaulting to #{BRANCH}"
-            build BRANCH
-        else
-            proposed_branch = ARGV[1]
-            if !BRANCH_LIST.include? proposed_branch
-                puts "Error: #{proposed_branch} is not a valid branch"
-                exit 1
-            else
-                build proposed_branch
-            end
+        puts "Building with the option: #{option}"
+        if ARGV.length==1
+            puts "Usage: ruby build.rb build [MYSQL VERSION]"
+            puts "\tAvailable options: "
+            puts "\t\t - 5.0 "
+            puts "\t\t - 5.1 "
+            exit
         end
-    elsif option == "check_dep"
+        mysql_version = ARGV[1]
+        if mysql_version.match("5.0") || mysql_version.match("5.1")
+            build(mysql_version)
+            else
+            puts "Error: Not supported MySQL type."
+        end
+    elsif option == "build-real"
+        puts "Building with the option: #{option}"
+        if ARGV.length==1
+            puts "Usage: ruby build.rb build-real [MYSQL VERSION]"
+            puts "\tAvailable options: "
+            puts "\t\t - 5.0 "
+            puts "\t\t - 5.1 "
+            exit
+        end
+        mysql_version = ARGV[1]
+        if ! mysql_version.match("5.0") &&  ! mysql_version.match("5.1")
+            puts "Error: Not supported MySQL type."
+            exit
+        end
+        install_dependencies
+        build_mysql(mysql_version)
+    elsif option == "check-dep"
         check_dep
+    elsif option == "install-mysql"
+        mysql_version = ARGV[1]
+        install_mysql(mysql_version)
     else
         puts "Error: Invalid Argument"
         exit 1

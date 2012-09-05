@@ -8,3 +8,5 @@ cf*.properties
 .idea
 *.d
 *.o
+mysql-install*
+mysql-*.gz

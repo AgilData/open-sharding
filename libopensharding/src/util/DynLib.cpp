@@ -30,9 +30,6 @@
 #include <fstream>
 #include <dlfcn.h>
 
-//#include <boost/thread.hpp>
-//#include <boost/thread/mutex.hpp>
-
 #include <util/DynLib.h>
 #include <logger/Logger.h>
 
@@ -44,13 +41,9 @@ void* lib_handle = NULL;
 // logger for global methods
 static Logger &LOG = Logger::getLogger("DynLib");
 
-//boost::mutex dbsmutex;
-
 namespace util {
 
 DynLib::DynLib(const char *libraryName) {
-
-    //TODO:boost::mutex::scoped_lock lock(dbsmutex);
 
     if (NULL == lib_handle) {
 
