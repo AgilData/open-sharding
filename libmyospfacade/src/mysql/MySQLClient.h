@@ -35,23 +35,23 @@ using namespace util;
 //TODO: need to decide if we want to use _real_ or not .. seems safer to use this even if it is a symlink
 
 #ifdef MYSQL_5_0
-#define MYSQL_LIBRARY "libmysqlclient_real_r.so.15.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.15"
 #endif
 
 #ifdef MYSQL_5_0_R
-#define MYSQL_LIBRARY "libmysqlclient_real_r.so.15.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.15"
 #endif
 
 #ifdef MYSQL_5_1
-#define MYSQL_LIBRARY "libmysqlclient_real_r.so.16.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.16"
 #endif
 
 #ifdef MYSQL_5_1_R
-#define MYSQL_LIBRARY "libmysqlclient_real_r.so.16.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.16"
 #endif
 
 #ifdef MYSQL_5_5
-#define MYSQL_LIBRARY "libmysqlclient_real_r.so.18.0.0"
+#define MYSQL_LIBRARY "libmysqlclient_real_r.so.18"
 #endif
 
 // TYPEDEFs for all MySQL functions that we can dynamically invoke in libmysqlclient
