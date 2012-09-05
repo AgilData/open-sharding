@@ -3,5 +3,6 @@ libmyosp*
 libopensharding*
 libs
 temp
+_temp
 *.gz
 
