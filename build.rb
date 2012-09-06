@@ -49,7 +49,7 @@ end
 def install_dependencies
     puts "Installing Dependencies *****************************************"
     platform = get_platform
-    if platform.match("centos")
+    if platform.match("centos") || platform.match("amazon")
         run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel java-1.6.0-openjdk-devel kernel-devel")
     elsif platform.match("ubuntu") || platform.match("debian")
         run_command("sudo apt-get install -y build-essential libncurses5-dev libltdl3-dev")
