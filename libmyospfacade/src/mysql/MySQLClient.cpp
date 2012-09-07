@@ -468,7 +468,7 @@ my_bool MySQLClient::mysql_reads_from_master_enabled(MYSQL *mysql){
 }
 
 enum mysql_rpl_type MySQLClient::mysql_rpl_query_type(const char* q, int len){
-    mysql_rpl_query__typeFnType* tempFunction = (mysql_rpl_query__typeFnType*)get_mysql_function("mysql_rpl_query_type");
+    mysql_rpl_query_typeFnType* tempFunction = (mysql_rpl_query_typeFnType*)get_mysql_function("mysql_rpl_query_type");
     enum mysql_rpl_type tempValue = tempFunction(q, len);
     return tempValue;
 }
