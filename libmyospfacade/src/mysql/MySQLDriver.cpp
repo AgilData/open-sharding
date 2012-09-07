@@ -165,14 +165,14 @@ const char *client_errors[]=
 /* GLOBAL METHODS */
 
 MySQLConnMap* getResourceMap() {
-	log.debug("getResourceMap() BEFORE lock mutex");
+	xlog.debug("getResourceMap() BEFORE lock mutex");
     boost::mutex::scoped_lock lock(resourceMapMutex);
-	log.debug("getResourceMap() AFTER lock mutex");
+	xlog.debug("getResourceMap() AFTER lock mutex");
     if (_mysqlResourceMap==NULL) {
-		log.debug("getResourceMap() create map");
+		xlog.debug("getResourceMap() create map");
         _mysqlResourceMap = new MySQLConnMap();
     }
-	log.debug("getResourceMap() return map");
+	xlog.debug("getResourceMap() return map");
     return _mysqlResourceMap;
 }
 
