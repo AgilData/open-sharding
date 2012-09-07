@@ -1054,6 +1054,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         xlog.error(string("mysql_real_query() returning -1 because no connection found for mysql handle ") + Util::toString((void*)mysql));
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "no connection found for mysql handle", "OSP01");
         return -1;
     }
 
@@ -1105,7 +1106,7 @@ int mysql_send_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //trace("mysql_send_query", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        xlog.error("mysql_send_query() returning -1 because no connection found");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_send_query but there is no current connection", "OSP01");
         return -1;
     }
     return conn->mysql_send_query(mysql, sql, length);
@@ -1350,6 +1351,7 @@ int mysql_server_init(int argc, char **argv, char **groups) {
 
     if (!getMySQLClient()->init()) {
         xlog.error("mysql_server_init() failed to init mysqlclient");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_server_init() failed to init mysqlclient", "OSP01");
         return -1;
     }
 
@@ -1491,6 +1493,7 @@ int mysql_ping(MYSQL *mysql) {
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_ping but there is no current connection");
         // return non-zero to indicate the connection is bad
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_ping but there is no current connection", "OSP01");
         return -1;
     }
     return conn->mysql_ping(mysql);
@@ -1651,6 +1654,7 @@ int mysql_next_result(MYSQL *mysql) {
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_next_result but there is no current connection");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_next_result but there is no current connection", "OSP01");
         return -1;
     }
     return conn->mysql_next_result(mysql);
@@ -1934,12 +1938,14 @@ MYSQL * mysql_connect(MYSQL *mysql, const char *host, const char *user,
 int mysql_create_db(MYSQL *mysql, const char *DB) {
     //trace("mysql_create_db", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_create_db");
+    setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_create_db is not supported in myosp", "OSP01");
     return -1;
 }
 
 int mysql_drop_db(MYSQL *mysql, const char *DB) {
     //trace("mysql_drop_db", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_drop_db");
+    setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_drop_db is not supported in myosp", "OSP01");
     return -1;
 }
 
