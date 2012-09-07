@@ -16,14 +16,7 @@ else
   exit 2
 end
 
-os_arch = `/usr/`
-
-if ARGV[1] != nil
-  libdir = ARGV[1]
-end
-
-puts 'Checking in the directory for mysql lib: ' + os_arch
-
+libdir = "/usr/"
 if ARGV[1] != nil
   libdir = ARGV[1]
 end
