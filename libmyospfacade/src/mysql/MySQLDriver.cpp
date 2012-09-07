@@ -1629,7 +1629,7 @@ int mysql_server_init(int argc, char **argv, char **groups) {
 
     if (!getMySQLClient()->init()) {
         xlog.error("mysql_server_init() failed to init mysqlclient");
-        setErrorState(getMySQLClient(), CR_UNKNOWN_ERROR, "mysql_server_init() failed to init mysqlclient", "OSP01");
+        //setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_server_init() failed to init mysqlclient", "OSP01");
         return -1;
     }
 
