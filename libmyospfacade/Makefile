@@ -40,13 +40,6 @@ sixteen_r:
 sixteen_debug:
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" SO_FILE="libmyosp.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver"
 
-eighteen:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.5.25 -DMYSQL_5_5" SO_FILE="libmyosp.so.18" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so.18" VERSION_SCRIPT="src/mysql/version/mysqlclient_18.ver"
-eighteen_r:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.5.25 -DMYSQL_5_5" SO_FILE="libmyosp_r.so.18" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.18" VERSION_SCRIPT="src/mysql/version/mysqlclient_18.ver"
-eighteen_debug:
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.5.25 -DMYSQL_5_5" SO_FILE="libmyosp.so.18.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so.18" VERSION_SCRIPT="src/mysql/version/mysqlclient_18.ver"
-
 $(SO_FILE): $(OBJ)
 	@echo "Creating Shared Library"
 	#gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lc -lstdc++ -luuid -lopensharding -lmysys -lmystrings -l$(BOOST_THREAD_LIB) -L$(BOOST_LIB_PATH) -L/usr/local/opensharding/lib -L/usr/lib64/mysql
@@ -56,8 +49,6 @@ testsuite_fifteen: fifteen
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.0.45 -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 testsuite_sixteen: sixteen
 	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.1.36 -DMYSQL_5_1" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
-testsuite_eighteen: eighteen
-	make EXTRA_CFLAGS="-Imysql-headers/mysql-5.5.25 -DMYSQL_5_5" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 $(TEST_FILE): $(TEST_OBJ)
 	@echo "Compiling tests..."
 	gcc -o $(TEST_FILE) test/src/*.o -lc -llogger -lutil -lopensharding -l$(BOOST_THREAD_LIB) -l$(TEST_LIB) -L/usr/local/lib -lcpptest -L. -L/usr/local/lib 
