@@ -118,6 +118,7 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/my_symlink.o \
 	$(MYSYS50_PATH)/my_thr_init.o \
 	$(MYSYS50_PATH)/my_write.o \
+    $(MYSYS50_PATH)/net.o \
     $(MYSYS50_PATH)/password.o \
 	$(MYSYS50_PATH)/safemalloc.o \
 	$(MYSYS50_PATH)/sha1.o \
@@ -251,6 +252,7 @@ MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/my_sync.o \
 	$(MYSYS51_PATH)/my_thr_init.o \
 	$(MYSYS51_PATH)/my_write.o \
+    $(MYSYS51_PATH)/net.o \
     $(MYSYS51_PATH)/password.o \
 	$(MYSYS51_PATH)/safemalloc.o \
 	$(MYSYS51_PATH)/sha1.o \
