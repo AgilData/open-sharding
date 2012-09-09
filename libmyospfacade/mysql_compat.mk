@@ -132,7 +132,7 @@ MYCMN50_OBJ=$(MYCMN50_PATH)/net.o $(MYCMN50_PATH)/get_password.o $(MYCMN50_PATH)
 
 # more dependencies found in testing
 MYDEP50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
-MYDEP50_OBJ=$(MYDEP50_PATH)/vio.o $(MYDEP50_PATH)/viosocket.o  $(MYDEP50_PATH)/viosslfactories.o
+MYDEP50_OBJ=$(MYDEP50_PATH)/vio.o $(MYDEP50_PATH)/viosocket.o  $(MYDEP50_PATH)/viosslfactories.o $(MYDEP51_PATH)/viossl.o
 
 MYSQL50_OBJ=$(MYSTRINGS50_OBJ) $(MYSYS50_OBJ) $(MYCMN50_OBJ) $(MYDEP50_OBJ)
 
