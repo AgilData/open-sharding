@@ -2241,5 +2241,4 @@ MYSQL_FIELD_OFFSET mysql_field_tell(MYSQL_RES *res) {
 
 void my_net_local_init(NET *net)
 {
-    return 0;
 }
