@@ -604,7 +604,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         // create buffer to store data for entire row in a contiguous block
         unsigned int rowDataSize = 0;
-        int col;
+        unsigned int col;
         //log.info("CALC row length");
         for (col = 1; col <= columnCount; col++) {
             if (currentRowData[col-1]) {
