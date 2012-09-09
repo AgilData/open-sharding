@@ -19,7 +19,7 @@
 #include <string.h>
 #include <string>
 #include <mysql.h>
-#include <my_sys.h>
+//#include <my_sys.h>
 #include <dlfcn.h>
 
 #include <mysql/MySQLClient.h>
