@@ -27,27 +27,33 @@
 #include <logger/Logger.h>
 
 #ifdef MYSQL_5_0
-const char *my_progname = "libmysqlclient_15";
+//const char *my_progname = "libmysqlclient_15";
+my_progname = "libmysqlclient_15";
 #endif
 
 #ifdef MYSQL_5_0_R
-const char *my_progname = "libmysqlclient_r_15";
+//const char *my_progname = "libmysqlclient_r_15";
+my_progname = "libmysqlclient_r_15";
 #endif
 
 #ifdef MYSQL_5_1
-const char *my_progname = "libmysqlclient_16";
+//const char *my_progname = "libmysqlclient_16";
+my_progname = "libmysqlclient_16";
 #endif
 
 #ifdef MYSQL_5_1_R
-const char *my_progname = "libmysqlclient_r_16";
+//const char *my_progname = "libmysqlclient_r_16";
+my_progname = "libmysqlclient_r_16";
 #endif
 
 #ifdef MYSQL_5_5
-const char *my_progname = "libmysqlclient_18";
+//const char *my_progname = "libmysqlclient_18";
+my_progname = "libmysqlclient_18";
 #endif
 
 #ifdef MYSQL_5_5_R
-const char *my_progname = "libmysqlclient_r_18";
+//const char *my_progname = "libmysqlclient_r_18";
+my_progname = "libmysqlclient_r_18";
 #endif
 
 using namespace logger;
