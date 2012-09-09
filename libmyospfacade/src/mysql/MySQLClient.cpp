@@ -27,6 +27,8 @@
 #include <util/MutexLock.h>
 #include <logger/Logger.h>
 
+
+/*Not needed with the compatibility merge.
 #ifdef MYSQL_5_0
 //extern const char *my_progname = "libmysqlclient_15";
 #endif
@@ -52,6 +54,7 @@ extern const char *my_progname = "libmysqlclient_18";
 #ifdef MYSQL_5_5_R
 extern const char *my_progname = "libmysqlclient_r_18";
 #endif
+*/
 
 using namespace logger;
 using namespace util;
