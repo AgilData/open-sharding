@@ -19,6 +19,7 @@
 #include <string.h>
 #include <string>
 #include <mysql.h>
+#include <my_sys.h>
 #include <dlfcn.h>
 
 #include <mysql/MySQLClient.h>
@@ -27,7 +28,7 @@
 #include <logger/Logger.h>
 
 #ifdef MYSQL_5_0
-extern const char *my_progname = "libmysqlclient_15";
+//extern const char *my_progname = "libmysqlclient_15";
 #endif
 
 #ifdef MYSQL_5_0_R
@@ -35,11 +36,13 @@ extern const char *my_progname = "libmysqlclient_r_15";
 #endif
 
 #ifdef MYSQL_5_1
-extern const char *my_progname = "libmysqlclient_16";
+//extern const char *my_progname = "libmysqlclient_16";
+*my_progname = "libmysqlclient_16";
 #endif
 
 #ifdef MYSQL_5_1_R
-extern const char *my_progname = "libmysqlclient_r_16";
+//extern const char *my_progname = "libmysqlclient_r_16";
+*my_progname = "libmysqlclient_r_16"
 #endif
 
 #ifdef MYSQL_5_5
