@@ -842,7 +842,7 @@ int MySQLClient::mysql_drop_db(MYSQL *mysql, const char *DB){
     return tempValue;
 }
 
-my_bool MySQLClient::void my_net_local_init(NET *net)
+void MySQLClient::my_net_local_init(NET *net)
     {
         net->max_packet=   (uint) net_buffer_length;
         my_net_set_read_timeout(net, CLIENT_NET_READ_TIMEOUT);
