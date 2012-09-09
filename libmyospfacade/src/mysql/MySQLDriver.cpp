@@ -2239,3 +2239,7 @@ MYSQL_FIELD_OFFSET mysql_field_tell(MYSQL_RES *res) {
     return conn->mysql_field_tell(res);
 }
 
+void my_net_local_init(NET *net)
+{
+    return 0;
+}
