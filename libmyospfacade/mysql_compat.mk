@@ -268,7 +268,7 @@ MYCMN51_OBJ=$(MYCMN51_PATH)/net.o $(MYCMN51_PATH)/get_password.o $(MYCMN51_PATH)
 
 # more dependencies found in testing
 MYDEP51_PATH=$(MYSQL51_SRC_PATH)/libmysql/.libs
-MYDEP51_OBJ=$(MYDEP51_PATH)/vio.o $(MYDEP51_PATH)/viosocket.o $(MYDEP51_PATH)/viosslfactories.o
+MYDEP51_OBJ=$(MYDEP51_PATH)/vio.o $(MYDEP51_PATH)/viosocket.o $(MYDEP51_PATH)/viosslfactories.o $(MYDEP51_PATH)/viossl.o
 
 MYSQL51_OBJ=$(MYSTRINGS51_OBJ) $(MYSYS51_OBJ) $(MYCMN51_OBJ) $(MYDEP51_OBJ)
 
