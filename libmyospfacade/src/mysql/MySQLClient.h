@@ -314,7 +314,6 @@ typedef int mysql_create_dbFnType(MYSQL *mysql, const char *DB);
 //int        STDCALL mysql_drop_db(MYSQL *mysql, const char *DB);
 typedef int mysql_drop_dbFnType(MYSQL *mysql, const char *DB);
 
-typedef void my_net_local_init(NET *net);
 
 
 namespace mysql {
@@ -414,7 +413,6 @@ public:
     int             mysql_create_db(MYSQL *mysql, const char *DB);
     int             mysql_drop_db(MYSQL *mysql, const char *DB);
     my_bool         mysql_read_query_result(MYSQL *mysql);
-    void my_net_local_init(NET *net);
 
     // result set operations
     void mysql_data_seek(MYSQL_RES *result, my_ulonglong offset);

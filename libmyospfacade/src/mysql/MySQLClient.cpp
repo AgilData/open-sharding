@@ -842,11 +842,7 @@ int MySQLClient::mysql_drop_db(MYSQL *mysql, const char *DB){
     return tempValue;
 }
 
-void MySQLClient::my_net_local_init(NET *net)
-    {
-        my_net_local_initFnType* tempFunction = (my_net_local_initFnType*)get_mysql_function("my_net_local_init");
-        tempFunction(stmt, offset);
-    }
+
 
 
 } // namespace
