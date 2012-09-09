@@ -4,8 +4,8 @@
 # This is temporary, we need to settle how we are going to do the final build across all platforms
 # Currently, you must have the mysql 5.0 and 5.1 source installed and compiled to build myosp
 
-MYSQL50_SRC_PATH=/usr/local/mysql
-MYSQL51_SRC_PATH=/usr/local/mysql
+MYSQL50_SRC_PATH=/root/mysql-install-5.0/mysql5.0.96/
+MYSQL51_SRC_PATH=/root/mysql-install-5.1/mysql5.1.65/
 
 ###############
 #  MYSQL 5.0  #
@@ -119,6 +119,7 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/my_symlink.o \
 	$(MYSYS50_PATH)/my_thr_init.o \
 	$(MYSYS50_PATH)/my_write.o \
+    $(MYSYS50_PATH)/password.o \
 	$(MYSYS50_PATH)/safemalloc.o \
 	$(MYSYS50_PATH)/sha1.o \
 	$(MYSYS50_PATH)/string.o \
@@ -128,7 +129,7 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 
 # common
 MYCMN50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
-MYCMN50_OBJ=$(MYCMN50_PATH)/net.o $(MYCMN50_PATH)/get_password.o $(MYCMN50_PATH)/pack.o $(MYCMN50_PATH)/my_time.o
+MYCMN50_OBJ=$(MYCMN50_PATH)/net.o $(MYCMN50_PATH)/get_password.o $(MYCMN50_PATH)/pack.o $(MYCMN50_PATH)/my_time.o $
 
 # more dependencies found in testing
 MYDEP50_PATH=$(MYSQL50_SRC_PATH)/libmysql/.libs
@@ -251,6 +252,7 @@ MYSYS51_OBJ=$(MYSYS51_PATH)/array.o \
 	$(MYSYS51_PATH)/my_sync.o \
 	$(MYSYS51_PATH)/my_thr_init.o \
 	$(MYSYS51_PATH)/my_write.o \
+    $(MYSYS51_PATH)/password.o \
 	$(MYSYS51_PATH)/safemalloc.o \
 	$(MYSYS51_PATH)/sha1.o \
 	$(MYSYS51_PATH)/string.o \
