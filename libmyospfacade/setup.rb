@@ -92,15 +92,15 @@ def myosp_ldconfig
     end
     run_command("ldconfig")
     #TODO: This section is only a rough manner in which to remove the desired libmysqlcient path, however for the time being this will solve this issue.
-    
-    ldd_value = `ldd /usr/bin/mysql | grep mysql`
-    ldd_array = ldd_value.split(" => ")
-    lib_path = ldd_array[1].split(" (")
-    puts "Removing:: #{lib_path[0]}"
-    run_command("rm #{lib_path[0]}")
-    puts `ldd /usr/bin/mysql`
-    puts "If the ldd shows that it is using the mysql lib found in myosp, then installation has completed."
-    puts `export MYSQL_PS1="MyOSP(Mysql)>  "`
+
+    #    ldd_value = `ldd /usr/bin/mysql | grep mysql`
+    #ldd_array = ldd_value.split(" => ")
+    #lib_path = ldd_array[1].split(" (")
+    #puts "Removing:: #{lib_path[0]}"
+    #run_command("rm #{lib_path[0]}")
+    #puts `ldd /usr/bin/mysql`
+    #puts "If the ldd shows that it is using the mysql lib found in myosp, then installation has completed."
+    #puts `export MYSQL_PS1="MyOSP(Mysql)>  "`
 end
 
 #################################################################################################
