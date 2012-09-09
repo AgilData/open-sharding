@@ -314,6 +314,8 @@ typedef int mysql_create_dbFnType(MYSQL *mysql, const char *DB);
 //int        STDCALL mysql_drop_db(MYSQL *mysql, const char *DB);
 typedef int mysql_drop_dbFnType(MYSQL *mysql, const char *DB);
 
+extern void my_net_local_init(NET *net;
+
 
 namespace mysql {
 

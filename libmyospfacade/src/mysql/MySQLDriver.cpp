@@ -82,7 +82,6 @@ static unsigned int Pid = 0;
 
 static bool bannerDisplayed = false;
 
-extern void my_net_local_init(NET *net);
 
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
 static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();

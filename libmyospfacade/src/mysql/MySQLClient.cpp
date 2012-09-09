@@ -56,6 +56,8 @@ extern const char *my_progname = "libmysqlclient_r_18";
 using namespace logger;
 using namespace util;
 
+
+
 namespace mysql {
 
 Logger &MySQLClient::log = Logger::getLogger("MySQLClient");
