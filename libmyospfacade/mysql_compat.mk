@@ -107,7 +107,6 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/my_net.o \
 	$(MYSYS50_PATH)/my_once.o \
 	$(MYSYS50_PATH)/my_open.o \
-	$(MYSYS50_PATH)/my_port.o \
 	$(MYSYS50_PATH)/my_pread.o \
 	$(MYSYS50_PATH)/my_pthread.o \
 	$(MYSYS50_PATH)/my_read.o \
