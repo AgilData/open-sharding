@@ -37,13 +37,13 @@ my_progname = "libmysqlclient_r_15";
 #endif
 
 #ifdef MYSQL_5_1
-//const char *my_progname = "libmysqlclient_16";
-*my_progname = "libmysqlclient_16";
+const char *my_progname = "libmysqlclient_16";
+//*my_progname = "libmysqlclient_16";
 #endif
 
 #ifdef MYSQL_5_1_R
-//const char *my_progname = "libmysqlclient_r_16";
-*my_progname = "libmysqlclient_r_16";
+const char *my_progname = "libmysqlclient_r_16";
+//*my_progname = "libmysqlclient_r_16";
 #endif
 
 #ifdef MYSQL_5_5
