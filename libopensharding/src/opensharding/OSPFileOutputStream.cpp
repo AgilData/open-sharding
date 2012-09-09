@@ -134,7 +134,7 @@ void OSPFileOutputStream::writeBytes(const char *buffer, unsigned int offset, un
 
 void OSPFileOutputStream::writeBytesToFile(const char *buffer, unsigned int offset, unsigned int length) {
     //log.trace("writeBytes()");
-    size_t n = write(fd, buffer+offset, length);
+    int n = write(fd, buffer+offset, length);
     if (n == -1) {
         perror("write to file descriptor failed");
         throw "FAIL";
