@@ -6,3 +6,5 @@ cf*.properties
 .idea
 *.d
 *.o
+
+libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata/coryisaacson.xcuserdatad/
