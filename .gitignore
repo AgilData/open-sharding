@@ -7,4 +7,4 @@ cf*.properties
 *.d
 *.o
 
-libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata/coryisaacson.xcuserdatad/
+libmyospfacade/MyOSPDriver/MyOSPDriver.xcodeproj/xcuserdata/coryisaacson.xcuserdatad/*
