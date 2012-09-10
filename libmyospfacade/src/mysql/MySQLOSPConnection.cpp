@@ -379,8 +379,27 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         }
 
         // create native MySQL result set structure
+		/*
+         typedef struct st_mysql_res {
+         my_ulonglong row_count;
+         MYSQL_FIELD   *fields;
+         MYSQL_DATA    *data;
+         MYSQL_ROWS    *data_cursor;
+         unsigned long *lengths;               // column lengths of current row
+         MYSQL         *handle;                // for unbuffered reads
+         MEM_ROOT      field_alloc;
+         unsigned int  field_count, current_field;
+         MYSQL_ROW     row;                    // If unbuffered read
+         MYSQL_ROW     current_row;            // buffer to current row
+         my_bool       eof;                    // Used by mysql_fetch_row
+         my_bool       unbuffered_fetch_cancelled;
+         const struct st_mysql_methods *methods;
+         } MYSQL_RES;
+         */
+
         currentRes = new MYSQL_RES();
         memset(currentRes, 0, sizeof(MYSQL_RES));
+        currentRes->handle = mysql;
 
         // initialize variables before results start streaming in
         currentRow = NULL;
@@ -527,7 +546,21 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         }
 
         // create data structure
+        
+        /*
+		typedef struct st_mysql_data {
+		  MYSQL_ROWS *data;
+		  struct embedded_query_result *embedded_info;
+		  MEM_ROOT alloc;
+		  my_ulonglong rows;
+		  unsigned int fields;
+		  void *extension;
+		} MYSQL_DATA;
+		*/        
         currentRes->data = new MYSQL_DATA();
+        memset(currentRes->data, 0, sizeof(MYSQL_DATA));
+
+		// init the fields we care about        
         currentRes->data->rows = 0;
         currentRes->data->fields = columnCount;
         currentRes->data->data = NULL; // populate this later
@@ -547,24 +580,6 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         if (log.isDebugEnabled()) {
             log.debug(string("OSPResultSetRowResponse getColumnCount() returned ") + Util::toString(columnCount));
         }
-
-        /*
-         typedef struct st_mysql_res {
-         my_ulonglong row_count;
-         MYSQL_FIELD   *fields;
-         MYSQL_DATA    *data;
-         MYSQL_ROWS    *data_cursor;
-         unsigned long *lengths;               // column lengths of current row
-         MYSQL         *handle;                // for unbuffered reads
-         MEM_ROOT      field_alloc;
-         unsigned int  field_count, current_field;
-         MYSQL_ROW     row;                    // If unbuffered read
-         MYSQL_ROW     current_row;            // buffer to current row
-         my_bool       eof;                    // Used by mysql_fetch_row
-         my_bool       unbuffered_fetch_cancelled;
-         const struct st_mysql_methods *methods;
-         } MYSQL_RES;
-         */
 
         OSPString **currentRowData = response->getResultRow();
         if (!currentRowData) {
@@ -593,6 +608,7 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
 
         // create new native row structure
         currentRow = new MYSQL_ROWS();
+        memset(currentRow, 0, sizeof(MYSQL_ROWS));
         currentRow->length = 0;
         currentRow->data = new char*[columnCount];
 
