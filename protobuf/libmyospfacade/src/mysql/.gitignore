@@ -1,0 +1,4 @@
+BuildInfo.h
+*.d
+*.o
+

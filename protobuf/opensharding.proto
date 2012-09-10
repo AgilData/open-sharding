@@ -1,0 +1,159 @@
+// Open Sharding Protocol (OSP) version 1.0.0
+//
+// Copyright (C) 2011 CodeFutures Corporation. All rights reserved.
+
+
+package org.opensharding.protocol;
+
+message OSPConnectRequest {
+    required string database      = 1;
+    required string user          = 2;
+    required string password      = 3;
+    optional bool   autocommit    = 4;
+    optional bool   useNamedPipes = 5;
+    optional string requestPipe   = 6;
+    optional string responsePipe  = 7;
+}
+
+message OSPConnectResponse {
+    required string connID               = 1;
+    required string requestPipeFilename  = 2;
+    required string responsePipeFilename = 3;
+}
+
+message OSPCreateStatementRequest {
+    required string connID = 1;
+
+}
+
+message OSPCreateStatementResponse {
+    required int32 stmtID = 1;
+
+}
+
+message OSPExecuteRequest {
+    required string connID = 1;
+    required int32  stmtID = 2;
+    required string sql    = 3;
+
+}
+
+message OSPExecuteResponse {
+    optional int32  resultSetID          = 1;
+    optional int32  resultSetColumnCount = 2;
+    optional int32  rowsAffected          = 3;
+    optional int32  errorCode             = 4;
+    optional string errorMessage          = 5;
+
+}
+
+message OSPFetchResultsRequest {
+    required string connID   = 1;
+    required int32  stmtID   = 2;
+    required int32  resultID = 3;
+
+}
+
+message OSPFetchResultsResponse {
+    required int32  columnCount  = 1;
+    repeated string columnNames  = 2;
+    repeated int32  columnTypes  = 3 [packed=true];
+    repeated string columnValues = 4;
+}
+
+message OSPDisconnectRequest {
+    required string connID = 1;
+}
+
+message OSPDisconnectResponse {
+    // empty message
+}
+
+// if a request fails due to an unexpected error, OSPWireResponse will contain an OSPErrorResponse
+message OSPErrorResponse {
+    required int32  errorCode;
+    required string errorMessage;
+}
+
+message OSPWireRequest {
+
+  enum MessageType {
+    connect         = 1;
+    createStatement = 2;
+    execute         = 3;
+    fetchResults    = 4;
+    disconnect      = 5;
+  }
+
+  required int32       requestID   = 1;
+  required MessageType messageType = 2;
+  optional int32       options     = 3;  // reserved for future use
+  optional int32       action      = 4;  // reserved for future use
+
+  optional OSPConnectRequest         connectRequest         = 100;
+  optional OSPCreateStatementRequest createStatementRequest = 101;
+  optional OSPExecuteRequest         executeRequest         = 102;
+  optional OSPFetchResultsRequest    fetchResultsRequest    = 103;
+  optional OSPDisconnectRequest      disconnectRequest      = 104;
+}
+
+message OSPWireResponse {
+
+  enum MessageType {
+    connect         = 1;
+    createStatement = 2;
+    execute         = 3;
+    fetchResults    = 4;
+    disconnect      = 5;
+  }
+
+  // required header information
+  required int32 requestID         = 1;
+  required MessageType messageType = 2;
+  required int32 finalResponse     = 3;
+  optional int32 status            = 4; // reserved for future use
+
+  optional OSPConnectResponse         connectResponse         = 100;
+  optional OSPCreateStatementResponse createStatementResponse = 101;
+  optional OSPExecuteResponse         executeResponse         = 102;
+  optional OSPFetchResultsResponse    fetchResultsResponse    = 103;
+  optional OSPDisconnectResponse      disconnectResponse      = 104;
+}
+
+// New Streaming message types.
+// Message ID: 1
+message OSPMessageControlMessage {
+	// Field IDs 1..20 are reserved for OSP control messages.
+	// Currently only a single field is used, message_control.
+	// This message has 4 required bytes:
+	//   message start/end: 1 byte: 1|2 (1 is the Start of a streaming message, 2 is the End of a streaming message)
+	//   mode: 1 byte: 1|2 (1 is streaming mode, 2 is fixed-length mode for future support)
+	//   message ID: 2 bytes: 11 - 32767 (the unique ID of a given OSP message; IDs 1 - 10 are reserved)
+	required bytes message_control = 1;
+	// Client ID is required for shared connections only.
+	optional int32 client_id = 2;
+	optional int32 request_id = 3;
+	optional int32 message_length = 4;
+}
+
+// OSPResultSetMetaDataMessage
+// Message ID: 20
+message OSPResultSetMetaDataMessage {
+	optional int32 client_id = 2;
+	optional int32 request_id = 3;
+	required int32 column_count = 2;
+	repeated string column_names = 21;
+	repeated int32 column_types = 22;
+}
+
+// OSPResultSetRowMessage
+// Used for one or more rows
+// Message ID: 30
+message OSPResultSetRowMessage {
+	optional int32 client_id = 2;
+	optional int32 request_id = 3;
+	required bytes values = 30;
+}
+
+
+

@@ -1,0 +1,58 @@
+=====================================
+Open Sharding Protocol Driver Installation
+=====================================
+
+The installation of the Open Sharding Protocol for MySQl can be executed with the ruby script build.rb. This Script will compile and package the neccesary libraries for use with dbshards.
+
+
+----Executing Build.rb---------
+
+Executing build.rb format. 
+
+ruby build.rb [options arguments] [mysql version(5.0 or 5.1)]
+
+Executing build.rb be can be carried out with the following steps. 
+
+$ ruby build.rb build 5.0
+* This command will build the myosp libraries for the mysql version 5.0 assuming build-real has been executed.
+
+$ ruby build.rb build 5.1 
+* This command will build the myosp libraries for the mysql version 5.1 assuming build-real has been executed.
+
+$ ruby build.rb build-real [5.0 or 5.1]
+* This command will install all the depencies for the actual build of myosp, if this has not 
+* been executed before, the build option will fail. This only has to be executed once. This will also build the mysql
+*libraries with the _real extension for MyOSP use. 
+
+$ ruby build.rb install-mysql [5.0 or 5.1]
+* This command will actually install the mysql software if it has been previously called with build-real.
+* This is not a requirement for the actual build of MyOSP.
+
+
+-------Installing the MyOSP Driver--------
+
+In order for proper installation. The myosp package should be placed in the /usr/lib64/myosp or /usr/lib/myosp depending on what system. 
+
+$ mkdir /usr/lib64/myosp 
+* This is for any x86_64 architecture system excluding ubuntu.
+
+$ mkdir /usr/lib/myosp
+* This is for any i386 architectures and all Ubuntu systems.
+
+In the directory created above, untar the myosp build package, 
+
+$ tar xvfz [myosp-build-package]
+* This will untar the svn export package.
+
+$ ruby setup.rb 
+* This script will actually place the config files in the desired location as well as creating the ldconfig
+* script for myosp. 
+
+NOTE: Do not forget to edit the myosp.conf file. This file is necessary for myosp to work correctly, it can be found in the /etc/osp/ directory created from the setup.rb.
+
+
+
+------------------------------------------------
+
+THIS FINISHES THE INSTALLATION PROCEDURE.
+
