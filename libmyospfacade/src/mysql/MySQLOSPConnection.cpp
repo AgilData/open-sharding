@@ -621,82 +621,65 @@ void MySQLOSPConnection::processMessage(OSPMessage *message) {
         // create buffer to store data for entire row in a contiguous block
         unsigned int rowDataSize = 0;
         unsigned int col;
-        //log.info("CALC row length");
+
+        // calculate size of the row upfront so we can allocate the memory without having to resize later
         for (col = 1; col <= columnCount; col++) {
             if (currentRowData[col-1]) {
-                rowDataSize += currentRowData[col-1]->getLength();
+                rowDataSize += currentRowData[col-1]->getLength() + 1; // +1 is for null terminator
             }
-            rowDataSize += 1; // null terminator
-            //log.info(string("interim row data size now is ") + Util::toString((int)rowDataSize));
+            else {
+                // if the field is NULL then we don't allocate any space for it in the row buffer
+            }
         }
 
-        //log.info(string("TOTAL row data size is ") + Util::toString((int)rowDataSize));
+        //log.trace(string("TOTAL row data size is ") + Util::toString((int)rowDataSize));
 
         unsigned int rowDataOffset = 0;
         char *rowData = new char[rowDataSize];
 
-        // temporary array for storing length of each column
-        int rowDataLength[columnCount];
+        // this memset should not be necessary at all, but leaving it here for safety for now
+        memset(rowData, 0, rowDataSize);
 
         // fetch each field's value as a string
         for (col = 1; col <= columnCount; col++) {
 
-            //TODO: this can all be optimized to avoid copying data from the message and just store the pointer directly
-            // no need to have  currentRowData at all
-
             if (currentRowData[col-1]) {
 
-                unsigned int l = currentRowData[col-1] ? currentRowData[col-1]->getLength() : 0;
-
-                // ensure the buffer is large enough to store this data plus a null terminator
-                rowData = ensureCapacity(rowData, &rowDataSize, rowDataOffset+l+1);
+                int fieldLength = currentRowData[col-1]->getLength();
 
                 // calculate pointer to offset where we will store the data
                 char *fieldValue = rowData + rowDataOffset;
 
                 // store data
-                memcpy(fieldValue, currentRowData[col-1]->getBuffer(), l);
-                rowDataOffset += l;
-
-                // store length (excluding null terminator)
-                rowDataLength[col-1] = l;
+                memcpy(fieldValue, currentRowData[col-1]->getBuffer(), fieldLength);
+                rowDataOffset += fieldLength;
 
                 // we always store a null terminator after the data just to be safe
                 rowData[rowDataOffset++] = '\0';
 
                 // update max length
-                if (l > currentRes->fields[col - 1].max_length) {
-                    currentRes->fields[col - 1].max_length = l;
+                if (fieldLength > currentRes->fields[col - 1].max_length) {
+                    currentRes->fields[col - 1].max_length = fieldLength;
                 }
+
+                // store pointer to data for this column
+                currentRow->data[col-1] = fieldValue;
+
+                // calculate total row length
+                currentRow->length += fieldLength + 1; // add 1 for each null terminator
+
             }
             else {
-                // store -1 to indicate a NULL field
-                rowDataLength[col-1] = -1;
-            }
-
-        }
-
-        // store char** pointers based on rowDataLength array
-        unsigned int tempOffset = 0;
-        for (col=1; col<=columnCount; col++) {
-
-            if (rowDataLength[col-1] == -1) {
                 // NULL
                 currentRow->data[col-1] = NULL;
             }
-            else {
-
-                // store pointer to data for this column
-                currentRow->data[col-1] = rowData + tempOffset;
-
-                // increase offset
-                tempOffset += rowDataLength[col-1] + 1; // add 1 for each null terminator
-
-                // calculate total row length
-                currentRow->length += rowDataLength[col-1] + 1; // add 1 for each null terminator
-            }
         }
 
+        // paranoid safety check
+        if (currentRow->length != rowDataSize) {
+            log.error("currentRow->length != rowDataSize");
+            throw "currentRow->length != rowDataSize";
+        }
 
         if (prevRow != NULL) {
             prevRow->next = currentRow;
