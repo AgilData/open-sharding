@@ -35,6 +35,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <syslog.h>
+#include <typelib.h>
 
 #include <mysql/BuildInfo.h>
 #include <mysql/MySQLClient.h>
