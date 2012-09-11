@@ -99,9 +99,9 @@ def create_tar(mysql_version)
     
     tar_filename = ""
     if branch == "master"
-        tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-#{MYOSP_TIMESTAMP}.tgz"
+        tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
         else
-        tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-#{MYOSP_TIMESTAMP}.tgz"
+        tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
     end
     
     # create temp dir
@@ -129,10 +129,27 @@ def create_tar(mysql_version)
     
     # remove temp dir
     run_command "rm -rf _temp"
-    
+
+    svn_import_command = "svn import #{tar_filename} https://subversion.assembla.com/svn/open-sharding/trunk/myosp/#{get_platform}/#{tar_filename} -m \"New release #{tar_filename}\""
+
+    puts "***********************************************************************************************************"
+    puts "***********************************************************************************************************"
+
+    puts "RUN THIS COMMAND IF YOU WANT TO RELEASE THIS VERSION:"
+    puts
+    puts svn_import_command
+    puts
+
+    puts "***********************************************************************************************************"
+    puts "***********************************************************************************************************"
+
 end
 
 begin
+    if ARGV.length == 0
+      puts "Usage: build.rb mysql-version"
+    end
+
     mysql_version = ARGV[1]
     start = Time.now
     clean
@@ -143,5 +160,6 @@ begin
     
     elapsed = (finish-start).to_i
     puts "Compiled in #{elapsed} seconds"
+
 end
 

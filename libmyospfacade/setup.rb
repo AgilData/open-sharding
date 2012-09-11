@@ -71,7 +71,7 @@ def myosp_ldconfig
     platfrom = get_platform
     if platfrom.match("ubuntu") || platfrom.match("i386")
         library = "lib"
-        elsif platfrom.match("centos") && platfrom.match("x86_64")
+        elsif (platfrom.match("centos") || platfrom.match("redhat")) && platfrom.match("x86_64")
         library = "lib64"
         else
         puts "Non existing platform."
@@ -91,8 +91,16 @@ def myosp_ldconfig
         end
     end
     run_command("ldconfig")
-    ldd_value = `ldd /usr/bin/mysql`
-    run_command("rm #{ldd_value}")
+    #TODO: This section is only a rough manner in which to remove the desired libmysqlcient path, however for the time being this will solve this issue.
+
+    #    ldd_value = `ldd /usr/bin/mysql | grep mysql`
+    #ldd_array = ldd_value.split(" => ")
+    #lib_path = ldd_array[1].split(" (")
+    #puts "Removing:: #{lib_path[0]}"
+    #run_command("rm #{lib_path[0]}")
+    #puts `ldd /usr/bin/mysql`
+    #puts "If the ldd shows that it is using the mysql lib found in myosp, then installation has completed."
+    #puts `export MYSQL_PS1="MyOSP(Mysql)>  "`
 end
 
 #################################################################################################

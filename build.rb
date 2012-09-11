@@ -91,7 +91,8 @@ def build(mysql_version)
     deployed_opensharding_libs = `find /usr -name \"libopensharding*\"`
     #puts "FOUND: #{deployed_opensharding_libs}"
     if deployed_opensharding_libs != ""
-        puts "Cannot build until you delete these already deployed versions: #{deployed_opensharding_libs}"
+        puts "Cannot build until you delete these already deployed versions: "
+        puts "#{deployed_opensharding_libs}"
         exit
     end
     puts "No deployed versions of libopensharding found"
@@ -109,7 +110,7 @@ end
 #################################################################################################
 ## Building MySQl
 #################################################################################################
-def mysql_install(mysql_version)
+def build_mysql(mysql_version)
     mysql_dir = "mysql-install-#{mysql_version}"
     if File.exists? mysql_dir
       return
@@ -134,41 +135,47 @@ def mysql_install(mysql_version)
     end
     puts `pwd`
      current_directory=`pwd`.chomp
-    run_command("./configure --prefix=/usr/local/mysql")
+    run_command("./configure --prefix=/usr/local/mysql -enable-thread-safe-client")
     run_command("make")
-
-    #TODO: need to discuss this with Jerry - when I build I don't want to install the
-    # mysql libs to /usr/local/mysql (I don't have permissions to do that either when
-    # I run this script since I'm not running as root). I just want to build the libs
-    # for inclusion in the tarball that we deliver to the customer. Maybe we need to
-    # have a separate build target/option for also performing a local install of the
-    # mysql libs?
-    install_local = false
-
-    if install_local
-
-      run_command("make install")
-      Dir.chdir("/usr/local/mysql")
-      puts `pwd`
-      run_command("chown -R mysql .")
-      run_command("chgrp -R mysql .")
-      run_command("bin/mysql_install_db --user=mysql")
-      run_command("chown -R root .")
-      run_command("chown -R mysql var")
-      FileUtils.cp "#{current_directory}/support-files/my-medium.cnf", "/etc/my.cnf"
-      #run_command("cp #{mysql_dir}/support-files/my-medium.cnf /etc/my.cnf")
-      run_command("bin/mysqld_safe --user=mysql &")
-      FileUtils.cp "#{current_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
-      #run_command("cp #{mysql_dir}/support-files/mysql.server /etc/init.d/mysql.server")
-      run_command("ln bin/mysql /usr/bin/mysql")
-      Dir.mkdir("/usr/local/include/mysql")
-      FileUtils.cp "#{current_directory}/include/","/usr/local/include/mysql/"
-      #run_command("cp -r #{mysql_dir}/include/* /usr/local/include/mysql/")
-
-    end
-
+    puts "Completed compiling mysql."
 end
+
+#################################################################################################
+## Install Mysql
+#################################################################################################
+def install_mysql(mysql_version)
+    mysql_dir = "mysql-install-#{mysql_version}"
+    puts `pwd`
+    puts mysql_dir
+    if File.exists? mysql_dir
+        Dir.chdir mysql_dir
+        if mysql_version.match("5.0")
+            Dir.chdir "mysql-5.0.96"
+            mysql_dir="#{mysql_dir}/mysql-5.0.96"
+        elsif mysql_version.match("5.1")
+            Dir.chdir "mysql-5.1.65"
+            mysql_dir="#{mysql_dir}/mysql-5.1.65"
+        else
+            puts "Failed to change directories."
+        end
+        run_command("make install")
+        installation_directory=`pwd`.chomp
+        Dir.chdir("/usr/local/mysql")
+        run_command("chown -R mysql .")
+        run_command("chgrp -R mysql .")
+        run_command("bin/mysql_install_db --user=mysql")
+        run_command("chown -R root .")
+        run_command("chown -R mysql var")
+        FileUtils.cp "#{installation_directory}/support-files/my-huge.cnf", "/etc/my.cnf"
+        run_command("#{installation_directory}/bin/mysqld_safe --user=mysql &")
+        FileUtils.cp "#{installation_directory}/support-files/mysql.server","/etc/init.d/mysql.server"
+        run_command("ln bin/mysql /usr/bin/mysql")
+        puts "Installation of mysql has completed, please use /usr/local/mysql/bin/mysqld_safe & to start mysql."
+    else
+        puts "Source compile has not been executed, please run the build script again with the option build-real."
+    end
     
+end
     
 
 #################################################################################################
@@ -235,7 +242,8 @@ begin
         puts "\tAvailable options: "
         puts "\t\t - setup-env "
         puts "\t\t - build (Installation of myosp only)"
-        puts "\t\t - build-real (Installation of mysql and myosp)"
+        puts "\t\t - build-real (Source compile of mysql)"
+        puts "\t\t - install-mysql"
         puts "\t MYSQL VERSION OPTIONS"
         puts "\t\t - 5.0 "
         puts "\t\t - 5.1 "
@@ -274,9 +282,12 @@ begin
             exit
         end
         install_dependencies
-        mysql_install(mysql_version)
+        build_mysql(mysql_version)
     elsif option == "check-dep"
         check_dep
+    elsif option == "install-mysql"
+        mysql_version = ARGV[1]
+        install_mysql(mysql_version)
     else
         puts "Error: Invalid Argument"
         exit 1

@@ -26,6 +26,8 @@
 #include <util/MutexLock.h>
 #include <logger/Logger.h>
 
+
+/*Not needed with the compatibility merge.
 #ifdef MYSQL_5_0
 const char *my_progname = "libmysqlclient_15";
 #endif
@@ -43,15 +45,18 @@ const char *my_progname = "libmysqlclient_r_16";
 #endif
 
 #ifdef MYSQL_5_5
-const char *my_progname = "libmysqlclient_18";
+extern const char *my_progname = "libmysqlclient_18";
 #endif
 
 #ifdef MYSQL_5_5_R
-const char *my_progname = "libmysqlclient_r_18";
+extern const char *my_progname = "libmysqlclient_r_18";
 #endif
+*/
 
 using namespace logger;
 using namespace util;
+
+
 
 namespace mysql {
 
@@ -836,6 +841,7 @@ int MySQLClient::mysql_drop_db(MYSQL *mysql, const char *DB){
     int tempValue = tempFunction(mysql, DB);
     return tempValue;
 }
+
 
 
 

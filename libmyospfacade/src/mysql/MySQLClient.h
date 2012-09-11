@@ -315,6 +315,7 @@ typedef int mysql_create_dbFnType(MYSQL *mysql, const char *DB);
 typedef int mysql_drop_dbFnType(MYSQL *mysql, const char *DB);
 
 
+
 namespace mysql {
 
 class MySQLClient {

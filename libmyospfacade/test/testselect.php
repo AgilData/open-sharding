@@ -1,6 +1,6 @@
 <?php
 
-for ($loop=0; $loop<1000; $loop++) {
+for ($loop=0; $loop<1; $loop++) {
 
 echo "loop " . $loop . "\n";
 
@@ -15,7 +15,7 @@ list($usec, $sec) = explode(' ', microtime());
 $script_start = (float) $sec + (float) $usec;
 
 
-for ($i=0; $i<1000; $i++) {
+for ($i=0; $i<100000; $i++) {
   //$result = mysql_query("SELECT 1");
   $result = mysql_query("SELECT * FROM country");
   //$result = mysql_query("SELECT id, name FROM country WHERE id = 1 AND name != 'whatever'");
@@ -39,7 +39,8 @@ $script_end = (float) $sec + (float) $usec;
 
 $elapsed_time = round($script_end - $script_start, 5);
 
-echo "<p>" . $elapsed_time . "</p>";
+echo "<p>loop " . $loop . " elapsed time: " . $elapsed_time . "</p>";
+
 
 mysql_close($link);
 

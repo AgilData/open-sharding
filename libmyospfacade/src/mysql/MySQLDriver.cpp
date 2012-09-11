@@ -22,8 +22,8 @@
 #include <map>
 
 // if we want to support all mysql symbols we need to *at least* import these headers
-//#include <my_global.h>
-//#include <m_ctype.h>
+//include "my_global.h"
+//include "m_ctype.h"
 
 #include <mysql.h>
 #include <errmsg.h>
@@ -35,6 +35,8 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <syslog.h>
+
+#include <typelib.h>
 
 #include <mysql/BuildInfo.h>
 #include <mysql/MySQLClient.h>
@@ -69,6 +71,8 @@ using namespace std;
 using namespace util;
 using namespace opensharding;
 
+extern TYPELIB sql_protocol_typelib;
+
 /* CONSTANTS */
 
 static int PROTOCOL_TCP = 1;
@@ -81,6 +85,7 @@ static Logger &xlog = MyOSPLogger::getLogger("MySQLDriver");
 static unsigned int Pid = 0;
 
 static bool bannerDisplayed = false;
+
 
 /* map for mysql structure that we created in mysql_init so we can delete them in mysql_close */
 static map<MYSQL*, bool> *mysqlAllocMap = new map<MYSQL*, bool>();
@@ -647,8 +652,8 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
         string databaseName = (db ? Util::toString(db) : string(""));
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("mysql_real_connect: ")
-            + string(", mysql handle: ") + Util::toString(mysql)
+            xlog.debug(string("mysql_real_connect")
+            + string(": mysql handle: ") + Util::toString(mysql)
             + string(", virtual-host: ") + info->virtual_host
             + string(", real-host: ") + info->host
             + string(", port: ") + Util::toString(info->port)
@@ -782,13 +787,13 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
                 getResourceMap()->setConnection(mysql, conn);
 
                 if (conn->connect(
-                        info->host.c_str(),
-                        info->user.c_str(),
-                        info->passwd.c_str(),
+                        _host,
+                        _user,
+                        _passwd,
                         db,
-                        info->port==0 ? 3306 : info->port,
-                        info->unix_socket,
-                        info->clientflag
+                        port,
+                        unix_socket,
+                        clientflag
                     )) {
 
                     // success
@@ -1054,6 +1059,7 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         xlog.error(string("mysql_real_query() returning -1 because no connection found for mysql handle ") + Util::toString((void*)mysql));
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "no connection found for mysql handle", "OSP01");
         return -1;
     }
 
@@ -1105,7 +1111,7 @@ int mysql_send_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //trace("mysql_send_query", mysql);
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
-        xlog.error("mysql_send_query() returning -1 because no connection found");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_send_query but there is no current connection", "OSP01");
         return -1;
     }
     return conn->mysql_send_query(mysql, sql, length);
@@ -1350,6 +1356,7 @@ int mysql_server_init(int argc, char **argv, char **groups) {
 
     if (!getMySQLClient()->init()) {
         xlog.error("mysql_server_init() failed to init mysqlclient");
+      //  setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_server_init() failed to init mysqlclient", "OSP01");
         return -1;
     }
 
@@ -1491,6 +1498,7 @@ int mysql_ping(MYSQL *mysql) {
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_ping but there is no current connection");
         // return non-zero to indicate the connection is bad
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_ping but there is no current connection", "OSP01");
         return -1;
     }
     return conn->mysql_ping(mysql);
@@ -1651,6 +1659,7 @@ int mysql_next_result(MYSQL *mysql) {
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_next_result but there is no current connection");
+        setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_next_result but there is no current connection", "OSP01");
         return -1;
     }
     return conn->mysql_next_result(mysql);
@@ -1934,12 +1943,14 @@ MYSQL * mysql_connect(MYSQL *mysql, const char *host, const char *user,
 int mysql_create_db(MYSQL *mysql, const char *DB) {
     //trace("mysql_create_db", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_create_db");
+    setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_create_db is not supported in myosp", "OSP01");
     return -1;
 }
 
 int mysql_drop_db(MYSQL *mysql, const char *DB) {
     //trace("mysql_drop_db", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_drop_db");
+    setErrorState(mysql, CR_UNKNOWN_ERROR, "mysql_drop_db is not supported in myosp", "OSP01");
     return -1;
 }
 
@@ -2232,3 +2243,6 @@ MYSQL_FIELD_OFFSET mysql_field_tell(MYSQL_RES *res) {
     return conn->mysql_field_tell(res);
 }
 
+void my_net_local_init(NET *net)
+{
+}
