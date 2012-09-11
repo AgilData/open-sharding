@@ -9,3 +9,4 @@ cf*.properties
 
 /libmyospfacade/MyOSPDriver
 /OpenSharding
+mysql-install-*
