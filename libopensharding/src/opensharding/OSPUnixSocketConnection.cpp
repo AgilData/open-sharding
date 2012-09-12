@@ -195,7 +195,7 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     // now use a second buffer to encode the OSPWireRequest
     requestBuffer2->reset();
     requestBuffer2->writeBytes(messageHeader, 0, 4);
-    requestBuffer2->writeShort(messageType);
+    requestBuffer2->writeShort(1); // message type for OSPWireRequest
     requestBuffer2->writeInt(0); // placeholder for message length
     requestBuffer2->writeInt(1, requestID);
     requestBuffer2->writeInt(2, messageType);
