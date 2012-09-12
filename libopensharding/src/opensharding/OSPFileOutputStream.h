@@ -58,11 +58,13 @@ public:
     ~OSPFileOutputStream();
 
     // write raw data
+    void writeShort(short i);
     void writeInt(int i);
     void writeVarInt(int i);
     void writeBytes(const char *buffer, unsigned int offset, unsigned int length);
 
     // write fields
+    void writeShort(int fieldNum, short i);
     void writeInt(int fieldNum, int i);
     void writeString(int fieldNum, string s);
     void writeBytes(int fieldNum, const char *buffer, unsigned int offset, unsigned int length);

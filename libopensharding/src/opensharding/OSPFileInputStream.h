@@ -65,6 +65,7 @@ public:
     ~OSPFileInputStream();
 
     // read raw data
+    short readShort();
     int readInt();
     void readBytes(char *buffer, unsigned int offset, unsigned int length);
 };

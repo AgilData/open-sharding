@@ -186,8 +186,16 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer->reset();
     message->write(requestBuffer);
 
+    char messageHeader[4];
+    messageHeader[0] = 1; // protocol
+    messageHeader[1] = 1; // version
+    messageHeader[2] = 1; // final request message
+    messageHeader[3] = 0;
+
     // now use a second buffer to encode the OSPWireRequest
     requestBuffer2->reset();
+    requestBuffer2->writeBytes(messageHeader, 0, 4);
+    requestBuffer2->writeShort(messageType);
     requestBuffer2->writeInt(0); // placeholder for message length
     requestBuffer2->writeInt(1, requestID);
     requestBuffer2->writeInt(2, messageType);
@@ -220,6 +228,8 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
 
     if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
+    unsigned int messageHeader = is->readInt(); // this value is ignored
+    unsigned int messageTypeID = is->readShort(); // this value is ignored
     unsigned int messageLength = is->readInt();
 
     if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));

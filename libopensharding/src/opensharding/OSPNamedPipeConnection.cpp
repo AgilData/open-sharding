@@ -336,17 +336,28 @@ int OSPNamedPipeConnection::doSendOnly(OSPMessage *message, bool flush) {
 
 #ifdef AVOID_COPY
 
-    //TODO: OSPFileOutputStream is not implemented correctly yet
+    //TODO: this is not implemented correctly yet
 
+    //os->writeInt();
+    //os->writeShort();
     os->writeInt(messageLength);
     os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
 
 #else
 
     // wrap the message in the messaging protocol
-    OSPByteBuffer zbuffer(tempBuffer.getOffset() + 4);
+    OSPByteBuffer zbuffer(tempBuffer.getOffset() + 10-);
 
     // message length
+
+    char messageHeader[4];
+    messageHeader[0] = 1; // protocol
+    messageHeader[1] = 1; // version
+    messageHeader[2] = 1; // final request message
+    messageHeader[3] = 0;
+
+    zbuffer.writeInt(messageHeader);
+    zbuffer.writeShort(message->getMessageTypeID());
     zbuffer.writeInt(messageLength);
 
     // message bytes
@@ -379,6 +390,8 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
 
     if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
+    unsigned int messageHeader = is->readInt(); // ignored
+    unsigned int messageTypeID = is->readShort(); // ignored
     unsigned int messageLength = is->readInt();
 
     if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));

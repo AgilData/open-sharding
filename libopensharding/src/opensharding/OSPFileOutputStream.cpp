@@ -73,6 +73,20 @@ void OSPFileOutputStream::writeVarInt(int n) {
     writeBytes(varIntBuffer, 0, offset);
 }
 
+void OSPFileOutputStream::writeShort(short n) {
+    intBuffer[1] = (char) (n); n = n >> 8;
+    intBuffer[0] = (char) (n);
+    writeBytes(intBuffer, 0, 2);
+}
+
+void OSPFileOutputStream::writeShort(int fieldNum, short n) {
+    writeFieldHeader(fieldNum, 0);
+    //log.trace("writeInt()");
+    intBuffer[1] = (char) (n); n = n >> 8;
+    intBuffer[0] = (char) (n);
+    writeBytes(intBuffer, 0, 2);
+}
+
 void OSPFileOutputStream::writeInt(int n) {
     intBuffer[3] = (char) (n); n = n >> 8;
     intBuffer[2] = (char) (n); n = n >> 8;

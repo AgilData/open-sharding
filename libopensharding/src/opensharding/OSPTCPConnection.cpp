@@ -205,11 +205,18 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
     request.write(&tempBuffer);
 
     // wrap the message in the messaging protocol
-    OSPByteBuffer buffer(tempBuffer.getOffset() + 4);
+    OSPByteBuffer buffer(tempBuffer.getOffset() + 10);
 
-    // message length
-    buffer.writeInt(tempBuffer.getOffset());
-    
+    char messageHeader[4];
+    messageHeader[0] = 1; // protocol
+    messageHeader[1] = 1; // version
+    messageHeader[2] = 1; // final request message
+    messageHeader[3] = 0;
+
+    buffer.writeBytes(messageHeader); // message header
+    buffer.writeShort(message->getMessageTypeID()); // message type
+    buffer.writeInt(tempBuffer.getOffset()); // message length
+
     // message bytes
     buffer.writeBytes(tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
 
@@ -357,15 +364,17 @@ OSPMessage* OSPTCPConnection::readResponseMessage(int hSocket, bool *finalMessag
     }
 
     //TODO: make these class-level buffers? does this class need to be thread-safe?
-    char header[4];
+    char header[10];
 
     // read header and message length
-    if (!read(hSocket, header, 0, 4)) {
-        log.error("Failed to read message size");
+    if (!read(hSocket, header, 0, 10)) {
+        log.error("Failed to read message header");
         return NULL;
     }
 
-    int messageBytes = OSPByteBuffer::readInt(header, 0);
+    // first 6 bytes of header are ignored for now
+
+    int messageBytes = OSPByteBuffer::readInt(header, 6);
     if (messageBytes<0 || messageBytes>1*1024*1024) {
         log.error(string("Invalid response messageLength: ") + Util::toString((int)messageBytes));
         return NULL;
