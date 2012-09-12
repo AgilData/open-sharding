@@ -201,7 +201,12 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer2->writeInt(2, messageType);
     requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, requestBuffer->getOffset()); // this is the encoded request from the first buffer
     int messageLength = requestBuffer2->getOffset() - 4;
+
+    // re-write header info
+    //TODO: need skipBytes(6) so we don't have to write the messageHeader and messageType fields again
     requestBuffer2->reset();
+    requestBuffer2->writeBytes(messageHeader, 0, 4);
+    requestBuffer2->writeShort(messageType);
     requestBuffer2->writeInt(messageLength); // message length of OSPWireRequest
 
     // write to output stream
