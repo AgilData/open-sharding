@@ -200,7 +200,7 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer2->writeInt(1, requestID);
     requestBuffer2->writeInt(2, messageType);
     requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, requestBuffer->getOffset()); // this is the encoded request from the first buffer
-    int messageLength = requestBuffer2->getOffset() - 4;
+    int messageLength = requestBuffer2->getOffset() - 10;
 
     // re-write header info
     //TODO: need skipBytes(6) so we don't have to write the messageHeader and messageType fields again
@@ -211,7 +211,7 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     // write to output stream
     if (DEBUG) log.debug("Writing request to request pipe");
-    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength+4);
+    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength+10);
 
     // flush the pipe if we are waiting for a response
     if (flush) {
