@@ -206,7 +206,7 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     //TODO: need skipBytes(6) so we don't have to write the messageHeader and messageType fields again
     requestBuffer2->reset();
     requestBuffer2->writeBytes(messageHeader, 0, 4);
-    requestBuffer2->writeShort(messageType);
+    requestBuffer2->writeShort(1); // message type for OSPWireRequest
     requestBuffer2->writeInt(messageLength); // message length of OSPWireRequest
 
     // write to output stream
