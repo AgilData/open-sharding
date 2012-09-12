@@ -40,8 +40,6 @@
 
 #define DEBUG log.isDebugEnabled()
 
-#define AVOID_COPY 0
-
 using namespace util;
 
 namespace opensharding {
@@ -334,40 +332,16 @@ int OSPNamedPipeConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     int messageLength = tempBuffer.getOffset();
 
-#ifdef AVOID_COPY
-
-    //TODO: this is not implemented correctly yet
-
-    //os->writeInt();
-    //os->writeShort();
-    os->writeInt(messageLength);
-    os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
-
-#else
-
-    // wrap the message in the messaging protocol
-    OSPByteBuffer zbuffer(tempBuffer.getOffset() + 10-);
-
-    // message length
-
     char messageHeader[4];
     messageHeader[0] = 1; // protocol
     messageHeader[1] = 1; // version
     messageHeader[2] = 1; // final request message
     messageHeader[3] = 0;
 
-    zbuffer.writeInt(messageHeader);
-    zbuffer.writeShort(message->getMessageTypeID());
-    zbuffer.writeInt(messageLength);
-
-    // message bytes
-    zbuffer.writeBytes(tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
-
-    // write to pipe
-    if (DEBUG) log.debug("Writing request to request pipe");
-    os->writeBytes((char *) zbuffer.getBuffer(), 0, zbuffer.getOffset());
-
-#endif
+    os->writeBytes(messageHeader, 0, 4);
+    os->writeShort(message->getMessageType());
+    os->writeInt(messageLength);
+    os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
 
     // flush the pipe if we are waiting for a response
     if (flush) {

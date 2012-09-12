@@ -213,8 +213,8 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
     messageHeader[2] = 1; // final request message
     messageHeader[3] = 0;
 
-    buffer.writeBytes(messageHeader); // message header
-    buffer.writeShort(message->getMessageTypeID()); // message type
+    buffer.writeBytes(messageHeader, 0, 4); // message header
+    buffer.writeShort(message->getMessageType()); // message type
     buffer.writeInt(tempBuffer.getOffset()); // message length
 
     // message bytes
