@@ -126,7 +126,7 @@ OSPMessage* OSPUnixSocketConnection::sendMessage(OSPMessage *message,  bool expe
     unsigned int count = 0;
     while (true) {
 
-        if (DEBUG) log.debug("BEFORE read message length from response pipe");
+        if (DEBUG) log.debug("BEFORE read response");
 
         response = dynamic_cast<OSPWireResponse*>(waitForResponse());
         count++;
@@ -233,9 +233,17 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
 
     if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
-    unsigned int messageHeader = is->readInt(); // this value is ignored
-    unsigned int messageTypeID = is->readShort(); // this value is ignored
-    unsigned int messageLength = is->readInt();
+    char messageHeader[10];
+
+    is->readBytes(messageHeader, 0, 10);
+
+    // this field isn't currently used
+    bool finalMessage = messageHeader[2] != 0;
+
+    // this field isn't currently used
+    unsigned int messageTypeID = OSPByteBuffer::readShort(messageHeader, 4);
+
+    unsigned int messageLength = OSPByteBuffer::readInt(messageHeader, 6);
 
     if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));
 
@@ -262,7 +270,7 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
         // create byte buffer to wrap the existing buffer (NOTE: this does not perform a memcpy)
         OSPByteBuffer byteBuffer(buffer, messageLength);
 
-        // create the wire respsone object
+        // create the wire response object
         response = new OSPWireResponse();
 
         // decode the data from the buffer into the newly created object
