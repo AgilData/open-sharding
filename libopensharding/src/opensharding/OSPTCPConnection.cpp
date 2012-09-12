@@ -211,10 +211,10 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
     messageHeader[0] = 1; // protocol
     messageHeader[1] = 1; // version
     messageHeader[2] = 1; // final request message
-    messageHeader[3] = 0;
+    messageHeader[3] = 0; // reserved
 
     buffer.writeBytes(messageHeader, 0, 4); // message header
-    buffer.writeShort(message->getMessageType()); // message type
+    buffer.writeShort(1); // message type for OSPWireRequest
     buffer.writeInt(tempBuffer.getOffset()); // message length
 
     // message bytes

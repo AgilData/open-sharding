@@ -336,10 +336,10 @@ int OSPNamedPipeConnection::doSendOnly(OSPMessage *message, bool flush) {
     messageHeader[0] = 1; // protocol
     messageHeader[1] = 1; // version
     messageHeader[2] = 1; // final request message
-    messageHeader[3] = 0;
+    messageHeader[3] = 0; // reserved
 
     os->writeBytes(messageHeader, 0, 4);
-    os->writeShort(message->getMessageType());
+    os->writeShort(1); // OSPWireRequest message type
     os->writeInt(messageLength);
     os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
 
