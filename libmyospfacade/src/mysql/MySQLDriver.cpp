@@ -171,6 +171,7 @@ const char *client_errors[]=
 };
 
 //QUESTIONABLE ISSUES//
+extern TYPELIB sql_protocol_typelib;
 
 const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NULL};
