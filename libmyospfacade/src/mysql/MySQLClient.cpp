@@ -68,7 +68,12 @@ MySQLClient::MySQLClient() {
     // init function pointers
     mysql_free_resultFn = NULL;
 }
+//QUESTIONABLE ISSUES//
 
+const char *sql_protocol_names_lib[] =
+{ "TCP", "SOCKET", "PIPE", "MEMORY", NULL};
+
+//////////////////////////////////////////////////
 bool MySQLClient::init() {
 
     if (initOK) {
