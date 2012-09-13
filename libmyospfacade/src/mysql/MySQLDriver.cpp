@@ -167,15 +167,29 @@ const char *client_errors[]=
   "Lost connection to MySQL server at '%s', system error: %d",
   "Statement closed indirectly because of a preceeding %s() call",
   "The number of columns in the result set differs from the number of bound buffers. You must reset the statement, rebind the result set columns, and execute the statement again",
-  "",
-  NullS
+  ""
 };
 
 //QUESTIONABLE ISSUES//
 
+static const char *default_options[]=
+{
+  "port","socket","compress","password","pipe", "timeout", "user",
+  "init-command", "host", "database", "debug", "return-found-rows",
+  "ssl-key" ,"ssl-cert" ,"ssl-ca" ,"ssl-capath",
+  "character-sets-dir", "default-character-set", "interactive-timeout",
+  "connect-timeout", "local-infile", "disable-local-infile",
+  "replication-probe", "enable-reads-from-master", "repl-parse-query",
+  "ssl-cipher", "max-allowed-packet", "protocol", "shared-memory-base-name",
+  "multi-results", "multi-statements", "multi-queries", "secure-auth",
+  "report-data-truncation",
+  NullS
+};
+
 const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 
+//////////////////////////////////////////////////
         
 MySQLConnMap* getResourceMap() {
     MutexLock lock("MySQLDriver_resource_mutex", &MySQLDriver_resource_mutex);
