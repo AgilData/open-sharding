@@ -177,7 +177,7 @@ static TYPELIB option_types={array_elements(default_options)-1,
 const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
-    sql_protocol_names_lib, NULL}; 
+    sql_protocol_names_lib, NULL};
 
 /* GLOBAL METHODS */
 
