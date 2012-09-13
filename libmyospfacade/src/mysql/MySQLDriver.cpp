@@ -177,17 +177,13 @@ extern TYPELIB sql_protocol_typelib;
 const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NULL};
 
-
 void __attribute__ ((constructor)) MySQLDriver_init(void) {
-    ////logger.info << "*** dbsclient_init()" << endl;
+  if (xlog.isDebugEnabled()) xlog.debug("INITIALIZE *&*&*&*&*.");
+
 }
 
 void __attribute__ ((destructor)) MySQLDriver_fini(void) {
-    ////logger.info << "*** dbsclient_fini()" << endl;
-    // this method is called when the library is removed from memory - no
-    // need to do any cleanup here.
   if (xlog.isDebugEnabled()) xlog.debug("Termination Complete.");
-
 }
 
 //////////////////////////////////////////////////
