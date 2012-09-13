@@ -2,8 +2,8 @@
 
 require 'time'
 
-MYOSP_VERSION   = "1.3"
-MYOSP_BUILDNUM  = "5"
+MYOSP_VERSION   = "1.4"
+MYOSP_BUILDNUM  = "1"
 MYOSP_TIMESTAMP = Time.new.strftime("%Y%m%d-%H%M%S")
 
 def run_command (cmd)
