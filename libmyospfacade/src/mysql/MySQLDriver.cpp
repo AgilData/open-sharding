@@ -172,7 +172,7 @@ const char *client_errors[]=
 };
 
 //QUESTIONABLE ISSUES//
-/*
+
 const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NULL};
 
@@ -206,7 +206,7 @@ const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
-*/
+
 //////////////////////////////////////////////////
 
 MySQLConnMap* getResourceMap() {
