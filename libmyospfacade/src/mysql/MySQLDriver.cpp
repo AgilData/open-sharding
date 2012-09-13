@@ -169,9 +169,17 @@ const char *client_errors[]=
   "The number of columns in the result set differs from the number of bound buffers. You must reset the statement, rebind the result set columns, and execute the statement again",
   ""
 };
+//QUESTIONABLE METHODS//
 
 /* GLOBAL METHODS */
+static TYPELIB option_types={array_elements(default_options)-1,
+           "options",default_options, NULL};
 
+const char *sql_protocol_names_lib[] =
+{ "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
+TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
+        sql_protocol_names_lib, NULL};
+        
 MySQLConnMap* getResourceMap() {
     MutexLock lock("MySQLDriver_resource_mutex", &MySQLDriver_resource_mutex);
     if (_mysqlResourceMap==NULL) {
