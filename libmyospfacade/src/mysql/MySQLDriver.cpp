@@ -186,6 +186,8 @@ void __attribute__ ((destructor)) MySQLDriver_fini(void) {
   if (xlog.isDebugEnabled()) xlog.debug("Termination Complete.");
 }
 
+extern TYPELIB sql_protocol_typelib;
+
 //////////////////////////////////////////////////
 
 MySQLConnMap* getResourceMap() {
