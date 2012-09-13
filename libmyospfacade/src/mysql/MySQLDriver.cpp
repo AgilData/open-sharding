@@ -172,25 +172,8 @@ const char *client_errors[]=
 
 //QUESTIONABLE ISSUES//
 
-static const char *default_options[]=
-{
-  "port","socket","compress","password","pipe", "timeout", "user",
-  "init-command", "host", "database", "debug", "return-found-rows",
-  "ssl-key" ,"ssl-cert" ,"ssl-ca" ,"ssl-capath",
-  "character-sets-dir", "default-character-set", "interactive-timeout",
-  "connect-timeout", "local-infile", "disable-local-infile",
-  "replication-probe", "enable-reads-from-master", "repl-parse-query",
-  "ssl-cipher", "max-allowed-packet", "protocol", "shared-memory-base-name",
-  "multi-results", "multi-statements", "multi-queries", "secure-auth",
-  "report-data-truncation",
-  NullS
-};
-
-static TYPELIB option_types={array_elements(default_options)-1,
-           "options",default_options, NULL};
-           
 const char *sql_protocol_names_lib[] =
-{ "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
+{ "TCP", "SOCKET", "PIPE", "MEMORY", NULL};
 
 //////////////////////////////////////////////////
 
