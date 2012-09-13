@@ -186,11 +186,14 @@ static const char *default_options[]=
   NullS
 };
 
+static TYPELIB option_types={array_elements(default_options)-1,
+           "options",default_options, NULL};
+           
 const char *sql_protocol_names_lib[] =
 { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 
 //////////////////////////////////////////////////
-        
+
 MySQLConnMap* getResourceMap() {
     MutexLock lock("MySQLDriver_resource_mutex", &MySQLDriver_resource_mutex);
     if (_mysqlResourceMap==NULL) {
