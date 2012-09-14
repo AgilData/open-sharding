@@ -178,12 +178,13 @@ const char *client_errors[]=
 
 
 void __attribute__ ((constructor)) MySQLDriver_init(void) {
-  if (xlog.isDebugEnabled()) xlog.debug("INITIALIZE *&*&*&*&*.");
+  if (xlog.isDebugEnabled()) xlog.debug("Inializing the driver.");
 
 }
 
-void __attribute__ ((destructor)) MySQLDriver_fini(void) {
+void __attribute__ ((destructor)) MySQLDriver_fini(MySQL *mysql) {
   if (xlog.isDebugEnabled()) xlog.debug("Termination Complete.");
+  mysql_close(mysql);
 }
 
 
