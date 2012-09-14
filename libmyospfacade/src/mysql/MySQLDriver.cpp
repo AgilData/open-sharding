@@ -18,7 +18,7 @@
 // if we want to support all mysql symbols we need to *at least* import these headers
 #include <my_global.h>
 #include <m_ctype.h>
-//#include <m_string.h>
+#include <m_string.h>
 
 #include <stdio.h>
 #include <string.h>
@@ -191,6 +191,8 @@ void __attribute__ ((destructor)) MySQLDriver_fini(void) {
 const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
+
+#define strmov(A,B) stpcpy((A),(B))
 
 char *strmov(char *dst,const char *src);
 
