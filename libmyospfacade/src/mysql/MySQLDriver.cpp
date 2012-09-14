@@ -19,7 +19,7 @@
 #include <my_global.h>
 #include <m_ctype.h>
 #include <m_string.h>
-   
+
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -189,6 +189,11 @@ void __attribute__ ((destructor)) MySQLDriver_fini(void) {
 const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
+
+extern char *stpcpy(char *, const char *);
+extern  char *strmake(char *dst,const char *src,uint length);
+extern  char *strmov_overlapp(char *dst,const char *src);
+extern  char *strnmov(char *dst,const char *src,uint n);
 
 //////////////////////////////////////////////////
 
