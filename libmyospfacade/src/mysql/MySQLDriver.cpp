@@ -18,7 +18,8 @@
 // if we want to support all mysql symbols we need to *at least* import these headers
 #include <my_global.h>
 #include <m_ctype.h>
-
+#include <m_string.h>
+   
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -173,8 +174,7 @@ const char *client_errors[]=
 
 //QUESTIONABLE ISSUES//
 
-const char *sql_protocol_names_lib[] =
-{ "TCP", "SOCKET", "PIPE", "MEMORY", NULL};
+
 
 void __attribute__ ((constructor)) MySQLDriver_init(void) {
   if (xlog.isDebugEnabled()) xlog.debug("INITIALIZE *&*&*&*&*.");
@@ -185,24 +185,8 @@ void __attribute__ ((destructor)) MySQLDriver_fini(void) {
   if (xlog.isDebugEnabled()) xlog.debug("Termination Complete.");
 }
 
-static const char *default_options[]=
-{
-  "port","socket","compress","password","pipe", "timeout", "user",
-  "init-command", "host", "database", "debug", "return-found-rows",
-  "ssl-key" ,"ssl-cert" ,"ssl-ca" ,"ssl-capath",
-  "character-sets-dir", "default-character-set", "interactive-timeout",
-  "connect-timeout", "local-infile", "disable-local-infile",
-  "replication-probe", "enable-reads-from-master", "repl-parse-query",
-  "ssl-cipher", "max-allowed-packet", "protocol", "shared-memory-base-name",
-  "multi-results", "multi-statements", "multi-queries", "secure-auth",
-  "report-data-truncation",
-  NullS
-};
 
-static TYPELIB option_types={array_elements(default_options)-1,
-           "options",default_options, NULL};
-
-//const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
+const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", NullS };
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
