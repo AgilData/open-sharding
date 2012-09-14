@@ -190,10 +190,7 @@ const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", Null
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
-extern char *stpcpy(char *, const char *);
-extern  char *strmake(char *dst,const char *src,uint length);
-extern  char *strmov_overlapp(char *dst,const char *src);
-extern  char *strnmov(char *dst,const char *src,uint n);
+extern  char *strmov(char *dst,const char *src);
 
 //////////////////////////////////////////////////
 
