@@ -193,6 +193,23 @@ TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
 
+#if defined(__cplusplus) && !defined(OS2)
+extern "C" {
+#endif
+
+/*
+  my_str_malloc() and my_str_free() are assigned to implementations in
+  strings/alloc.c, but can be overridden in the calling program.
+ */
+extern void *(*my_str_malloc)(size_t);
+extern void (*my_str_free)(void *);
+
+#if defined(HAVE_STPCPY) && !defined(HAVE_mit_thread)
+#define strmov(A,B) stpcpy((A),(B))
+#ifndef stpcpy
+extern char *stpcpy(char *, const char *);  /* For AIX with gcc 2.95.3 */
+#endif
+#endif
 
 #ifndef strmov
 extern  char *strmov(char *dst,const char *src);
