@@ -182,9 +182,9 @@ void __attribute__ ((constructor)) MySQLDriver_init(void) {
 
 }
 
-void __attribute__ ((destructor)) MySQLDriver_fini(MySQL *mysql) {
+void __attribute__ ((destructor)) MySQLDriver_fini(void) {
   if (xlog.isDebugEnabled()) xlog.debug("Termination Complete.");
-  mysql_close(mysql);
+  
 }
 
 
