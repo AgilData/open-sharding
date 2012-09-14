@@ -192,9 +192,13 @@ const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", Null
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
-#define strmov(A,B)
 
-char *strmov(char *dst,const char *src);
+
+#ifndef strmov
+extern  char *strmov(char *dst,const char *src);
+#else
+extern  char *strmov_overlapp(char *dst,const char *src);
+#endif
 
 //////////////////////////////////////////////////
 
