@@ -184,7 +184,7 @@ void __attribute__ ((constructor)) MySQLDriver_init(void) {
 
 void __attribute__ ((destructor)) MySQLDriver_fini(void) {
   if (xlog.isDebugEnabled()) xlog.debug("Termination Complete NEED TO ADD MYSQL CLOSE HERE.");
-  mysql_close();
+ //mysql_close();
 }
 
 
