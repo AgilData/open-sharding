@@ -192,7 +192,7 @@ const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", Null
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
-#define char *strmov(char *d, char *s) { strcpy(d,s); }
+char *strmov(char *d, char *s) { strcpy(d,s); }
 //////////////////////////////////////////////////
 
 MySQLConnMap* getResourceMap() {
