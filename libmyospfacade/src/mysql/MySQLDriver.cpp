@@ -183,7 +183,7 @@ void __attribute__ ((constructor)) MySQLDriver_init(void) {
 }
 
 void __attribute__ ((destructor)) MySQLDriver_fini(void) {
-  if (xlog.isDebugEnabled()) xlog.debug("Termination Complete.");
+  if (xlog.isDebugEnabled()) xlog.debug("Termination Complete NEED TO ADD MYSQL CLOSE HERE.");
   
 }
 
@@ -192,7 +192,7 @@ const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", Null
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
-
+#define char *strmov(char *d, char *s) { strcpy(d,s); }
 //////////////////////////////////////////////////
 
 MySQLConnMap* getResourceMap() {
