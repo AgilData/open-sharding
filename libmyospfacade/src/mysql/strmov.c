@@ -24,12 +24,12 @@
 
 #include <my_global.h>
 #include "m_string.h"
-/*
+
 #ifdef strmov
 #undef strmov
 #define strmov strmov_overlapp
 #endif
-*/
+
 #if !defined(MC68000) && !defined(DS90)
 
 char *strmov(register char *dst, register const char *src)
