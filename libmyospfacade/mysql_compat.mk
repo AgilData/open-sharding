@@ -136,8 +136,6 @@ MYDEP50_OBJ=$(MYDEP50_PATH)/vio.o $(MYDEP50_PATH)/viosocket.o  $(MYDEP50_PATH)/v
 
 MYSQL50_OBJ=$(MYSTRINGS50_OBJ) $(MYSYS50_OBJ) $(MYCMN50_OBJ) $(MYDEP50_OBJ)
 
-LINK=/root/open-sharding/mysql-install-5.0/mysql-5.0.96/libmysql/strmov.o
-
 
 
 ###############

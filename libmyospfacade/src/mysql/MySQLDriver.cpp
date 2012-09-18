@@ -190,7 +190,28 @@ const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", Null
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
+#if !defined(MC68000) && !defined(DS90)
 
+char *strmov(register char *dst, register const char *src)
+{
+  while ((*dst++ = *src++)) ;
+  return dst-1;
+}
+
+#else
+
+char *strmov(dst, src)
+     char *dst, *src;
+{
+  asm("   movl  4(a7),a1  ");
+  asm("   movl  8(a7),a0  ");
+  asm(".L4: movb  (a0)+,(a1)+ ");
+  asm("   jne .L4   ");
+  asm("   movl  a1,d0   ");
+  asm("   subql #1,d0   ");
+}
+
+#endif
 //////////////////////////////////////////////////
 
 MySQLConnMap* getResourceMap() {
