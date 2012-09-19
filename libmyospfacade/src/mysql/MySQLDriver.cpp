@@ -471,7 +471,7 @@ int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *con
     try {
 
         if (info->target_schema_name=="") {
-            if (strlen(db) == 0) {
+            if (strlen(info->target_schema_name) == 0) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
                 result = -1;
                 return result;
