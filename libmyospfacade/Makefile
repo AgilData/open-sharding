@@ -30,7 +30,7 @@ sixteen_debug:
 $(SO_FILE): $(OBJ)
 	@echo "Creating Shared Library"
 	#gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lz -lc -lstdc++ -lpthread -lopensharding -lmysys -lmystrings -L../libopensharding
-	gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o $(MYSQL_OBJ) -lz -lc -lstdc++ -lpthread -lmystrings -lopensharding -L../libopensharding
+	gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o $(MYSQL_OBJ) -lz -lc -lstdc++ -lpthread -l/root/open-sharding/mysql-install-5.0/mysql-5.0.96/strings/mystrings -lopensharding -L../libopensharding
 
 testsuite_fifteen: fifteen
 	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
