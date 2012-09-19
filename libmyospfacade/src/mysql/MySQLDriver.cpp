@@ -616,18 +616,18 @@ int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *con
         getResourceMap()->clearErrorState(mysql);
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("do_osp_select(\"") + Util::toString(mysql) + string(",") + string(info->target_schema_name) + string("\") SUCCESS"));
+            xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + string(info->target_schema_name) + string("\") SUCCESS"));
         }
 
                 
 
     } catch (const char *exception) {
-        xlog.error(string("do_osp_select() failed due to exception: ") + exception);
+        xlog.error(string("do_osp_connect(") + info->target_schema_name + string(") failed due to ") + exception);
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [2]", "OSP01");
         result = -1;
         return result;
     } catch (...) {
-        xlog.error(string("do_osp_connect(") + string(db==NULL?"NULL":db) + string(") failed due to exception"));
+        xlog.error(string("do_osp_connect(") + info->target_schema_name + string(") failed due to exception"));
         setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error [3]", "OSP01");
         result = -1;
         return result;
