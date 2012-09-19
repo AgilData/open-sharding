@@ -460,17 +460,17 @@ const char * mysql_sqlstate(MYSQL *mysql) {
 /*************Added function do_osp_connect****************/
 /******************************************************************/
 
-int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstractConnection *conn)
+int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *conn)
 {
     int result = 0;
     if (xlog.isDebugEnabled()) {
-        xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + string(db) + string("\")"));
+        xlog.debug(string("do_osp_connect(\"") + Util::toString(mysql) + string(",") + string(info->target_schema_name) + string("\")"));
     }
 
 
     try {
 
-        if (db!=NULL) {
+        if (info->target_schema_name=="") {
             if (strlen(db) == 0) {
                 setErrorState(mysql, CR_UNKNOWN_ERROR, "ERROR: database name is blank", "OSP05");
                 result = -1;
@@ -479,7 +479,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
        }
           //Check for osp: in database name for attempts to use deprecated functionality.
-          if (strncmp(db, "osp:", 4)==0) {
+          if (strncmp(info->target_schema_name.c_str(), "osp:", 4)==0) {
               //setErrorState writes message to xlog.error()
               setErrorState(mysql, CR_UNKNOWN_ERROR, "Failed to connect to DB, use of 'osp:dbname' in database string of the myosp driver is deprecated. [4]", "OSP01");
               result = -1;
@@ -507,11 +507,11 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
             // construct filename for request pipe
             char requestPipeName[256];
-            sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, mysql->db, getpid());
+            sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, info->target_schema_name, getpid());
 
             // construct filename for response pipe
             char responsePipeName[256];
-            sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, mysql->db, getpid());
+            sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, info->target_schema_name, getpid());
 
             if (xlog.isDebugEnabled()) {
                 xlog.debug(string("Creating ") + string(requestPipeName));
@@ -601,7 +601,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
 
         // create MySQL OSP connection object
         try {
-            conn = new MySQLOSPConnection(info->host, info->port, db, info->user, info->passwd, getResourceMap(), ospConn);
+            conn = new MySQLOSPConnection(info->host, info->port, info->target_schema_name, info->user, info->passwd, getResourceMap(), ospConn);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
@@ -616,7 +616,7 @@ int do_osp_connect(MYSQL *mysql, const char *db, ConnectInfo *info, MySQLAbstrac
         getResourceMap()->clearErrorState(mysql);
 
         if (xlog.isDebugEnabled()) {
-            xlog.debug(string("do_osp_select(\"") + Util::toString(mysql) + string(",") + string(db) + string("\") SUCCESS"));
+            xlog.debug(string("do_osp_select(\"") + Util::toString(mysql) + string(",") + string(info->target_schema_name) + string("\") SUCCESS"));
         }
 
                 
@@ -785,7 +785,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             if(MyOSPConfig::isShardAnalyze()) {
                 struct timeval tstart; gettimeofday(&tstart, NULL);
-                    if (-1 == do_osp_connect(mysql, databaseName.c_str(), info, conn)) {
+                    if (-1 == do_osp_connect(mysql, info, conn)) {
                         setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
                         return NULL;
 
@@ -808,7 +808,7 @@ MYSQL *mysql_real_connect(MYSQL *mysql, const char *_host, const char *_user,
 
             }   
             else {
-                  if (-1 == do_osp_connect(mysql, databaseName.c_str(), info, conn)) {
+                  if (-1 == do_osp_connect(mysql, info, conn)) {
                       setErrorState(mysql, 9001, "Failed to connect to DB [1]", "OSP01");
                       return NULL;
                   }
@@ -1103,7 +1103,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                 getResourceMap()->setConnectInfo(mysql, info);
             
 
-                result = do_osp_connect(mysql,db, info, conn);
+                result = do_osp_connect(mysql, info, conn);
 
                 struct timeval tend; gettimeofday(&tend, NULL);
                 string * params = new string[2];
@@ -1140,7 +1140,7 @@ int mysql_select_db(MYSQL *mysql, const char *db) {
                   getResourceMap()->setConnectInfo(mysql, info);
                   
 
-                result = do_osp_connect(mysql,db, info, conn);
+                result = do_osp_connect(mysql, info, conn);
 
                 return result;
             }
