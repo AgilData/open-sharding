@@ -114,7 +114,7 @@ def create_tar(mysql_version)
     run_command "cp setup.rb _temp"
     
     if mysql_version.match("5.0")
-        run_command "cp ../mysql-install-5.0/mysql-5.0.96/libmysql_r/.libs/libmysqlclient_real_r.so.15.0.0 _temp"
+        run_command "cp ../mysql-install-5.0/mysql-5.0.45/libmysql_r/.libs/libmysqlclient_real_r.so.15.0.0 _temp"
     elsif mysql_version.match("5.1")
         run_command "cp ../mysql-install-5.1/mysql-5.1.65/libmysql_r/.libs/libmysqlclient_real_r.so.16.0.0 _temp"
     else

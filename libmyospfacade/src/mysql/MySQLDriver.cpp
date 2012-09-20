@@ -18,7 +18,7 @@
 // if we want to support all mysql symbols we need to *at least* import these headers
 #include <my_global.h>
 #include <m_ctype.h>
-//#include <m_string.h>
+#include <m_string.h>
 
 #include <stdio.h>
 #include <time.h>
@@ -173,7 +173,6 @@ const char *client_errors[]=
 
 //QUESTIONABLE Functions that need to be evaluated more.//
 
-extern  char *strmov(char *dst,const char *src);
 
 
 void __attribute__ ((constructor)) MySQLDriver_init(void) {

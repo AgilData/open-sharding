@@ -69,7 +69,7 @@ def build(mysql_version)
     # to compile against the same exact version or we will end up with hard to diagnose segmentation
     # faults at runtime
     if mysql_version.match("5.0")
-        mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.0.96"
+        mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.0.45"
     elsif mysql_version.match("5.1")
         mysql_real_dir = "mysql-install-#{mysql_version}/mysql-5.1.65"
     else
@@ -120,9 +120,9 @@ def build_mysql(mysql_version)
     puts `useradd -g mysql mysql`
     Dir.mkdir(mysql_dir)
     if mysql_version.match("5.0")
-        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.96-myosp.tar.gz")
-       run_command("tar xvzf mysql-5.0.96-myosp.tar.gz -C #{mysql_dir}")
-        mysql_dir = "#{mysql_dir}/mysql-5.0.96"
+        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.0.45-myosp.tar.gz")
+       run_command("tar xvzf mysql-5.0.45-myosp.tar.gz -C #{mysql_dir}")
+        mysql_dir = "#{mysql_dir}/mysql-5.0.45"
         Dir.chdir("#{mysql_dir}")
      elsif mysql_version.match("5.1")
        run_command("svn export https://subversion.assembla.com/svn/open-sharding-test/trunk/mysql/mysql-5.1.65-myosp.tar.gz/")
@@ -150,8 +150,8 @@ def install_mysql(mysql_version)
     if File.exists? mysql_dir
         Dir.chdir mysql_dir
         if mysql_version.match("5.0")
-            Dir.chdir "mysql-5.0.96"
-            mysql_dir="#{mysql_dir}/mysql-5.0.96"
+            Dir.chdir "mysql-5.0.45"
+            mysql_dir="#{mysql_dir}/mysql-5.0.45"
         elsif mysql_version.match("5.1")
             Dir.chdir "mysql-5.1.65"
             mysql_dir="#{mysql_dir}/mysql-5.1.65"
