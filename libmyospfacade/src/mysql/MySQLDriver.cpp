@@ -514,14 +514,20 @@ int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *con
             // construct filename for request pipe
             char requestPipeName[256];
              if (xlog.isDebugEnabled()) {
-             xlog.debug("REQUEST PIPE TO BE NAMED::: %s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, info->target_schema_name, getpid());
+             xlog.debug("REQUEST PIPE TO BE NAMED:::");
+             if (P_tmpdir) xlog.debug(" P_tmpdir");
+             if (info->target_schema_name) xlog.debug("target_schema_name");
+             if (getpid()) xlog.debug("getpid");
         }
             sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, info->target_schema_name, getpid());
 
             // construct filename for response pipe
             char responsePipeName[256];
             if (xlog.isDebugEnabled()) {
-             xlog.debug("RESPONSE PIPE TO BE NAMED::: %s/mysqlosp_%s_%d_response.fifo", P_tmpdir, info->target_schema_name, getpid());
+             xlog.debug("RESPONSE PIPE TO BE NAMED::: ");
+             if (P_tmpdir) xlog.debug(" P_tmpdir");
+             if (info->target_schema_name) xlog.debug("target_schema_name");
+             if (getpid()) xlog.debug("getpid");
         }
             sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, info->target_schema_name, getpid());
 
