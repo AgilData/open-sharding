@@ -521,7 +521,7 @@ int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *con
             // construct filename for response pipe
             char responsePipeName[256];
             if (xlog.isDebugEnabled()) {
-             xlog.debug("RESPONSE PIPE TO BE NAMED::: %s/mysqlosp_%s_%d_response.fifo", P_tmpdir, info->target_schema_name, getpid()));
+             xlog.debug("RESPONSE PIPE TO BE NAMED::: %s/mysqlosp_%s_%d_response.fifo", P_tmpdir, info->target_schema_name, getpid());
         }
             sprintf(responsePipeName, "%s/mysqlosp_%s_%d_response.fifo", P_tmpdir, info->target_schema_name, getpid());
 
