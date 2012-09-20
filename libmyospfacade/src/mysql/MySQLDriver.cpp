@@ -172,16 +172,9 @@ const char *client_errors[]=
 };
 
 //QUESTIONABLE Functions that need to be evaluated more.//
-#ifndef strmov
-#define strmov_overlapp(A,B) strmov(A,B)
-#define strmake_overlapp(A,B,C) strmake(A,B,C)
-#endif
 
-#ifndef strmov
 extern  char *strmov(char *dst,const char *src);
-#else
-extern  char *strmov_overlapp(char *dst,const char *src);
-#endif
+
 
 void __attribute__ ((constructor)) MySQLDriver_init(void) {
   if (xlog.isDebugEnabled()) xlog.debug("Inializing the driver.");
