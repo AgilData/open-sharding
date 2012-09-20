@@ -56,6 +56,7 @@ MYSTRINGS50_OBJ=$(MYSTRINGS50_PATH)/bchange.o \
 	$(MYSTRINGS50_PATH)/strtod.o \
 	$(MYSTRINGS50_PATH)/strtoll.o \
 	$(MYSTRINGS50_PATH)/strtoull.o \
+	$(MYSTRINGS50_PATH)/strmov.o \
 	$(MYSTRINGS50_PATH)/strxmov.o \
 	$(MYSTRINGS50_PATH)/strxnmov.o \
 	$(MYSTRINGS50_PATH)/xml.o 
