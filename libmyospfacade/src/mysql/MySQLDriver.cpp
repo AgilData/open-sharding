@@ -171,7 +171,11 @@ const char *client_errors[]=
   ""
 };
 
-//QUESTIONABLE ISSUES//
+//QUESTIONABLE Functions that need to be evaluated more.//
+#ifndef strmov
+#define strmov_overlapp(A,B) strmov(A,B)
+#define strmake_overlapp(A,B,C) strmake(A,B,C)
+#endif
 
 #ifndef strmov
 extern  char *strmov(char *dst,const char *src);
