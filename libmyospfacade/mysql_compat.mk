@@ -72,8 +72,7 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/hash.o \
 	$(MYSYS50_PATH)/list.o \
 	$(MYSYS50_PATH)/md5.o \
-    $(MYSYS50_PATH)/mf_arr_appstr.o \
-	$(MYSYS50_PATH)/mf_cache.o \
+    $(MYSYS50_PATH)/mf_cache.o \
 	$(MYSYS50_PATH)/mf_dirname.o \
 	$(MYSYS50_PATH)/mf_fn_ext.o \
 	$(MYSYS50_PATH)/mf_format.o \
@@ -82,7 +81,6 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/mf_loadpath.o \
 	$(MYSYS50_PATH)/mf_pack.o \
 	$(MYSYS50_PATH)/mf_path.o \
-    $(MYSYS50_PATH)/mf_qsort.o \
 	$(MYSYS50_PATH)/mf_tempfile.o \
 	$(MYSYS50_PATH)/mf_unixpath.o \
 	$(MYSYS50_PATH)/mf_wcomp.o \
