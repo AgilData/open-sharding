@@ -501,10 +501,16 @@ int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *con
         // we need a mutex here in case multiple threads are connecting to the databaase at the same time....
         boost::mutex::scoped_lock lock(initMutex);
 
+         if (xlog.isDebugEnabled()) {
+             xlog.debug("Initiating Mutex");
+        }
         // get named pipe connection for this osp database
         OSPConnection *ospConn = getResourceMap()->getOSPConn(info->target_schema_name);
         if (!ospConn) {
 
+             if (xlog.isDebugEnabled()) {
+                xlog.debug("ospConn was empty.");
+              }
             // construct filename for request pipe
             char requestPipeName[256];
             sprintf(requestPipeName,  "%s/mysqlosp_%s_%d_request.fifo",  P_tmpdir, info->target_schema_name, getpid());
