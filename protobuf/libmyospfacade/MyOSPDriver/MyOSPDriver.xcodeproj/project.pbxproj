@@ -277,14 +277,14 @@
 		D1C20DC415CF1BE600C99279 /* mysql-headers */ = {
 			isa = PBXGroup;
 			children = (
-				D1C20DC515CF1BE600C99279 /* mysql-5.0.45 */,
+				D1C20DC515CF1BE600C99279 /* mysql-5.0.96 */,
 				D1C20DF215CF1BE600C99279 /* mysql-5.1.36 */,
 			);
 			name = "mysql-headers";
 			path = "../mysql-headers";
 			sourceTree = "<group>";
 		};
-		D1C20DC515CF1BE600C99279 /* mysql-5.0.45 */ = {
+		D1C20DC515CF1BE600C99279 /* mysql-5.0.96 */ = {
 			isa = PBXGroup;
 			children = (
 				D1C20DC615CF1BE600C99279 /* chardefs.h */,
@@ -332,7 +332,7 @@
 				D1C20DF015CF1BE600C99279 /* typelib.h */,
 				D1C20DF115CF1BE600C99279 /* xmalloc.h */,
 			);
-			path = "mysql-5.0.45";
+			path = "mysql-5.0.96";
 			sourceTree = "<group>";
 		};
 		D1C20DF215CF1BE600C99279 /* mysql-5.1.36 */ = {

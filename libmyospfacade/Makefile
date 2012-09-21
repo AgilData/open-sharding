@@ -12,28 +12,28 @@ TEST_OBJ=test/src/MySQLTest.o test/src/Test.o
 all: $(SO_FILE) $(TEST_FILE)
 
 fifteen:
-	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.45/include -DMYSQL_5_0" SO_FILE="libmyosp.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0" SO_FILE="libmyosp.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_real.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
 fifteen_r:
-	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.45/include -DMYSQL_5_0_R" SO_FILE="libmyosp_r.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0_R" SO_FILE="libmyosp_r.so.15" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_real_r.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
 fifteen_debug:
-	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.45/include -DMYSQL_5_0" SO_FILE="libmyosp.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0" SO_FILE="libmyosp.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_real.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
 fifteen_r_debug:
-	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.45/include -DMYSQL_5_0_R" SO_FILE="libmyosp_r.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0_R" SO_FILE="libmyosp_r.so.15.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_real_r.so.15" VERSION_SCRIPT="src/mysql/version/mysqlclient_15.ver" MYSQL_OBJ="$(MYSQL50_OBJ)"
 
 sixteen:
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver" MYSQL_OBJ="$(MYSQL51_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_real.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver" MYSQL_OBJ="$(MYSQL51_OBJ)"
 sixteen_r:
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1_R" SO_FILE="libmyosp_r.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_r.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver" MYSQL_OBJ="$(MYSQL51_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1_R" SO_FILE="libmyosp_r.so.16" CPP_OPTIONS=$(RELEASE_CPPOPTIONS) DEST_SO="libmysqlclient_real_r.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver" MYSQL_OBJ="$(MYSQL51_OBJ)"
 sixteen_debug:
-	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver" MYSQL_OBJ="$(MYSQL51_OBJ)"
+	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" SO_FILE="libmyosp.so.16.debug" CPP_OPTIONS=$(DEBUG_CPPOPTIONS) DEST_SO="libmysqlclient_real.so.16" VERSION_SCRIPT="src/mysql/version/mysqlclient_16.ver" MYSQL_OBJ="$(MYSQL51_OBJ)"
 
 $(SO_FILE): $(OBJ)
 	@echo "Creating Shared Library"
 	#gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o -lz -lc -lstdc++ -lpthread -lopensharding -lmysys -lmystrings -L../libopensharding
-	gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o $(MYSQL_OBJ) -lz -lc -lstdc++ -lpthread -lmystrings -L/root/open-sharding/mysql-install-5.0/mysql-5.0.45/strings -lmysys -L/root/open-sharding/mysql-install-5.0/mysql-5.0.45/mysys -lopensharding -L../libopensharding
+	gcc -shared -Wl,--version-script=$(VERSION_SCRIPT),-soname,$(DEST_SO) -o $(SO_FILE) src/mysql/*.o src/myutil/*.o $(MYSQL_OBJ) -lz -lc -lstdc++ -lpthread -lmystrings -L/root/open-sharding/mysql-install-5.0/mysql-5.0.96/strings -lmysys -L/root/open-sharding/mysql-install-5.0/mysql-5.0.96/mysys -lopensharding -L../libopensharding
 
 testsuite_fifteen: fifteen
-	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.45/include -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
+	make EXTRA_CFLAGS="-I../mysql-install-5.0/mysql-5.0.96/include -DMYSQL_5_0" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 testsuite_sixteen: sixteen
 	make EXTRA_CFLAGS="-I../mysql-install-5.1/mysql-5.1.65/include -DMYSQL_5_1" TEST_FILE="testsuite" CPP_OPTIONS=$(RELEASE_CPPOPTIONS)
 $(TEST_FILE): $(TEST_OBJ)

@@ -4,7 +4,7 @@
 # This is temporary, we need to settle how we are going to do the final build across all platforms
 # Currently, you must have the mysql 5.0 and 5.1 source installed and compiled to build myosp
 
-MYSQL50_SRC_PATH=/root/open-sharding/mysql-install-5.0/mysql-5.0.45/
+MYSQL50_SRC_PATH=/root/open-sharding/mysql-install-5.0/mysql-5.0.96/
 MYSQL51_SRC_PATH=/root/open-sharding/mysql-install-5.1/mysql-5.1.65/
 
 ###############
@@ -84,6 +84,8 @@ MYSYS50_OBJ= $(MYSYS50_PATH)/array.o \
 	$(MYSYS50_PATH)/mf_path.o \
 	$(MYSYS50_PATH)/mf_tempfile.o \
 	$(MYSYS50_PATH)/mf_unixpath.o \
+	$(MYSYS50_PATH)/mf_arr_appstr.o \
+   	$(MYSYS50_PATH)/mf_qsort.o \
 	$(MYSYS50_PATH)/mf_wcomp.o \
 	$(MYSYS50_PATH)/mulalloc.o \
 	$(MYSYS50_PATH)/my_alloc.o \
