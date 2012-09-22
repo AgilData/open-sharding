@@ -1036,6 +1036,10 @@ MYSQL_STMT * mysql_stmt_init(MYSQL *mysql) {
 
 int mysql_stmt_prepare(MYSQL_STMT *stmt, const char *query,
         unsigned long length) {
+
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_prepare not yet implemented)");
+    }
     //trace("mysql_stmt_prepare", stmt);
 
     return false;
@@ -1051,6 +1055,9 @@ int mysql_stmt_prepare(MYSQL_STMT *stmt, const char *query,
 
 int mysql_stmt_execute(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_execute", stmt);
+    if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_execute not yet implemented)");
+    }
     return false;
 
     /*
@@ -1063,6 +1070,9 @@ int mysql_stmt_execute(MYSQL_STMT *stmt) {
 }
 
 int mysql_query(MYSQL *mysql, const char *sql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_query implemented to mysql_real_query)");
+    }
     return mysql_real_query(mysql, sql, sql==NULL ? 0 : strlen(sql));
 }
 
@@ -1129,6 +1139,9 @@ int mysql_real_query(MYSQL *mysql, const char *sql, unsigned long length) {
 
 int mysql_send_query(MYSQL *mysql, const char *sql, unsigned long length) {
     //trace("mysql_send_query", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_send_query implemented)");
+    }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         setErrorState(mysql, CR_UNKNOWN_ERROR, "Call to mysql_send_query but there is no current connection", "OSP01");
@@ -1139,6 +1152,9 @@ int mysql_send_query(MYSQL *mysql, const char *sql, unsigned long length) {
 
 MYSQL_RES * mysql_store_result(MYSQL *mysql) {
     ////trace("mysql_store_result BEGIN", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_store_result implemented)");
+    }
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_store_result but there is no current connection");
@@ -1152,6 +1168,9 @@ MYSQL_RES * mysql_store_result(MYSQL *mysql) {
 
 my_bool mysql_more_results(MYSQL *mysql) {
     //trace("mysql_more_results", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_more_results implemented)");
+    }
     if (!valid(mysql)) {
         return false;
     }
@@ -1327,6 +1346,9 @@ void mysql_close(MYSQL *mysql) {
 
 my_bool mysql_stmt_bind_param(MYSQL_STMT * stmt, MYSQL_BIND * bnd) {
     //trace("mysql_stmt_bind_param", stmt);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_bind_param not yet implemented)");
+    }
 
     return false;
 
@@ -1339,6 +1361,9 @@ my_bool mysql_stmt_bind_param(MYSQL_STMT * stmt, MYSQL_BIND * bnd) {
 
 my_bool mysql_stmt_close(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_close", stmt);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_close not yet implemented)");
+    }
 
     return false;
 //    if (!valid(stmt)) {
@@ -1364,7 +1389,9 @@ bool serverInitDone = false;
 
 int mysql_server_init(int argc, char **argv, char **groups) {
     //trace("mysql_server_init");
-
+     if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_server_init implemented)");
+    }
     //TODO: add mutex
 
     if (serverInitDone) {
@@ -1388,11 +1415,17 @@ int mysql_server_init(int argc, char **argv, char **groups) {
 
 void mysql_server_end(void) {
     //trace("mysql_server_end");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_server_end implemented)");
+    }
     cleanup();
 }
 
 MYSQL_PARAMETERS * mysql_get_parameters(void) {
     //trace("mysql_get_parameters");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_get_parameters not yet implemented)");
+    }
     mysql_get_parametersFnType* tempFunction = (mysql_get_parametersFnType*)getMySQLClient()->get_mysql_function("mysql_get_parameters");
     MYSQL_PARAMETERS * tempValue = tempFunction();
     return tempValue;
@@ -1401,6 +1434,7 @@ MYSQL_PARAMETERS * mysql_get_parameters(void) {
 
 unsigned int mysql_field_count(MYSQL *mysql) {
     //trace("mysql_field_count", mysql);
+
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_field_count but there is no current connection");
@@ -1536,6 +1570,9 @@ const char * mysql_stat(MYSQL *mysql) {
 
 const char * mysql_get_server_info(MYSQL *mysql) {
     //trace("mysql_get_server_info", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_get_server_info implemented)");
+    }
     const char *ret = NULL;
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn) {
@@ -1550,6 +1587,9 @@ const char * mysql_get_server_info(MYSQL *mysql) {
 
 const char * mysql_get_client_info(void) {
     //trace("mysql_get_client_info");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_get_client_info implemented)");
+    }
     mysql_get_client_infoFnType* tempFunction = (mysql_get_client_infoFnType*)getMySQLClient()->get_mysql_function("mysql_get_client_info");
     const char * tempValue = tempFunction();
     return tempValue;
@@ -1557,6 +1597,9 @@ const char * mysql_get_client_info(void) {
 
 unsigned long mysql_get_client_version(void) {
     //trace("mysql_get_client_version");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_get_client_version implemented)");
+    }
     mysql_get_client_versionFnType* tempFunction = (mysql_get_client_versionFnType*)getMySQLClient()->get_mysql_function("mysql_get_client_version");
     unsigned long tempValue = tempFunction();
     //xlog.trace(string("mysql_get_client_version() returning ") + Util::toString((int)tempValue));
@@ -1565,6 +1608,7 @@ unsigned long mysql_get_client_version(void) {
 
 const char * mysql_get_host_info(MYSQL *mysql) {
     //trace("mysql_get_host_info", mysql);
+
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn == NULL) {
         if (xlog.isDebugEnabled()) xlog.debug("Call to mysql_get_host_info but there is no current connection");
@@ -1575,6 +1619,9 @@ const char * mysql_get_host_info(MYSQL *mysql) {
 
 unsigned long mysql_get_server_version(MYSQL *mysql) {
     //trace("mysql_get_server_version");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_get_server_version implemented)");
+    }
     unsigned long ret = 0;
     MySQLAbstractConnection *conn = getConnection(mysql, false);
     if (conn) {
@@ -1625,6 +1672,9 @@ MYSQL_RES * mysql_list_processes(MYSQL *mysql) {
 
 // this is the signature for MySQL prior to 5.1.18
 int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_options not yet implemented)");
+    }
     // mysql_options modifies the MYSQL struct so we can just delegate to the real driver for this
     return getMySQLClient()->mysql_options(mysql, option, arg);
     /*
@@ -1640,6 +1690,9 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const char *arg) {
 
 // this is the signature for MySQL 5.1.18 and later
 int mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_options not yet implemented)");
+    }
     // mysql_options modifies the MYSQL struct so we can just delegate to the real driver for this
     return getMySQLClient()->mysql_options(mysql, option, arg);
     //trace("mysql_options", mysql);
@@ -1656,12 +1709,18 @@ int mysql_options(MYSQL *mysql, enum mysql_option option, const void *arg) {
 unsigned long mysql_escape_string(char *to, const char *from,
         unsigned long from_length) {
     //trace("mysql_escape_string");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_escape_string implemented)");
+    }
 
     return getMySQLClient()->mysql_escape_string(to, from, from_length);
 }
 
 unsigned long mysql_hex_string(char *to, const char *from,
         unsigned long from_length) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_hex_string not yet implemented)");
+    }
     //trace("mysql_hex_string");
     return -1;
 }
@@ -1670,6 +1729,9 @@ unsigned long mysql_real_escape_string(MYSQL *mysql, char *to,
         const char *from, unsigned long length) {
 
     //trace("mysql_real_escape_string", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_real_escape_string implemented)");
+    }
 
     return getMySQLClient()->mysql_real_escape_string(mysql, to, from, length);
 }
@@ -1719,6 +1781,9 @@ int mysql_set_server_option(MYSQL *mysql, enum enum_mysql_set_option option) {
 
 void mysql_free_result(MYSQL_RES *res) {
     //trace("mysql_free_result", res);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_free_result implemented)");
+    }
     if (!res) {
         return;
     }
@@ -1770,18 +1835,27 @@ void myodbc_remove_escape(MYSQL *mysql, char *name) {
 }
 
 unsigned int mysql_thread_safe(void) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_thread_safe not implemented)");
+    }
     //trace("mysql_thread_safe");
     ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_safe");
     return 0;
 }
 
 my_bool mysql_embedded(void) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_embedded not implemented)");
+    }
     //trace("mysql_embedded");
     ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_embedded");
     return false;
 }
 
 MYSQL_MANAGER* mysql_manager_init(MYSQL_MANAGER* con) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_manager_init not yet implemented)");
+    }
     //trace("mysql_manager_init");
     ////if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_init");
     return NULL;
@@ -1789,18 +1863,27 @@ MYSQL_MANAGER* mysql_manager_init(MYSQL_MANAGER* con) {
 
 MYSQL_MANAGER* mysql_manager_connect(MYSQL_MANAGER* con, const char* host,
         const char* user, const char* passwd, unsigned int port) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_manager_connect not yet implemented)");
+    }
     //trace("mysql_manager_connect");
 //    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_connect");
     return NULL;
 }
 
 void mysql_manager_close(MYSQL_MANAGER* con) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_manager_close not yet implemented)");
+    }
     //trace("mysql_manager_close");
 //    //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_close");
 }
 
 int mysql_manager_command(MYSQL_MANAGER* con, const char* cmd, int cmd_len) {
     //trace("mysql_manager_command");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_manager_command not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_command");
     return -1;
 }
@@ -1808,18 +1891,27 @@ int mysql_manager_command(MYSQL_MANAGER* con, const char* cmd, int cmd_len) {
 int mysql_manager_fetch_line(MYSQL_MANAGER* con, char* res_buf,
         int res_buf_size) {
     //trace("mysql_manager_fetch_line");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_manager_fetch_line not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_manager_fetch_line");
     return -1;
 }
 
 my_bool mysql_read_query_result(MYSQL *mysql) {
     //trace("mysql_read_query_result", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_read_query_result not yet implemented)");
+    }
     if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_read_query_result");
     return false;
 }
 
 int mysql_stmt_fetch(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_fetch");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_fetch not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_fetch");
     return -1;
 }
@@ -1827,24 +1919,36 @@ int mysql_stmt_fetch(MYSQL_STMT *stmt) {
 int mysql_stmt_fetch_column(MYSQL_STMT *stmt, MYSQL_BIND *bind_arg,
         unsigned int column, unsigned long offset) {
     //trace("mysql_stmt_fetch_column");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_fetch_column not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_fetch_column");
     return -1;
 }
 
 int mysql_stmt_store_result(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_store_result");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_store_result not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_store_result");
     return -1;
 }
 
 unsigned long mysql_stmt_param_count(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_param_count");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_param_count not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_param_count");
     return 0;
 }
 
 my_bool mysql_stmt_attr_set(MYSQL_STMT *stmt,
         enum enum_stmt_attr_type attr_type, const void *attr) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_attr_set not yet implemented)");
+    }
     //trace("mysql_stmt_attr_set");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_attr_set");
     return 0;
@@ -1852,6 +1956,9 @@ my_bool mysql_stmt_attr_set(MYSQL_STMT *stmt,
 
 my_bool mysql_stmt_attr_get(MYSQL_STMT *stmt,
         enum enum_stmt_attr_type attr_type, void *attr) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_attr_get not yet implemented)");
+    }
     //trace("mysql_stmt_attr_get");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_attr_get");
     return false;
@@ -1859,54 +1966,81 @@ my_bool mysql_stmt_attr_get(MYSQL_STMT *stmt,
 
 my_bool mysql_stmt_bind_result(MYSQL_STMT * stmt, MYSQL_BIND * bnd) {
     //trace("mysql_stmt_bind_result");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_bind_result not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_bind_result");
     return false;
 }
 
 my_bool mysql_stmt_reset(MYSQL_STMT * stmt) {
     //trace("mysql_stmt_reset");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_reset not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_reset");
     return false;
 }
 
 my_bool mysql_stmt_free_result(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_free_result");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_free_result not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_free_result");
     return false;
 }
 
 my_bool mysql_stmt_send_long_data(MYSQL_STMT *stmt, unsigned int param_number,
         const char *data, unsigned long length) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_send_long_data not yet implemented)");
+    }
     //trace("mysql_stmt_send_long_data");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_send_long_data");
     return false;
 }
 
 MYSQL_RES * mysql_stmt_result_metadata(MYSQL_STMT *stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_result_metadata not yet implemented)");
+    }
     //trace("mysql_stmt_result_metadata");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_result_metadata");
     return NULL;
 }
 
 MYSQL_RES * mysql_stmt_param_metadata(MYSQL_STMT *stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_param_metadata not yet implemented)");
+    }
     //trace("mysql_stmt_param_metadata");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_param_metadata");
     return NULL;
 }
 
 unsigned int mysql_stmt_errno(MYSQL_STMT * stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_errno not yet implemented)");
+    }
     //trace("mysql_stmt_errno");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_errno");
     return -1;
 }
 
 const char * mysql_stmt_error(MYSQL_STMT * stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_error not yet implemented)");
+    }
     //trace("mysql_stmt_error");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_error");
     return NULL;
 }
 
 const char * mysql_stmt_sqlstate(MYSQL_STMT * stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_sqlstate not yet implemented)");
+    }
     //trace("mysql_stmt_sqlstate");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_sqlstate");
     return NULL;
@@ -1914,40 +2048,61 @@ const char * mysql_stmt_sqlstate(MYSQL_STMT * stmt) {
 
 MYSQL_ROW_OFFSET mysql_stmt_row_seek(MYSQL_STMT *stmt, MYSQL_ROW_OFFSET offset) {
     //trace("mysql_stmt_row_seek");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_row_seek not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_row_seek");
     return NULL;
 }
 
 MYSQL_ROW_OFFSET mysql_stmt_row_tell(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_row_tell");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_row_tell not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_row_tell");
     return NULL;
 }
 
 void mysql_stmt_data_seek(MYSQL_STMT *stmt, my_ulonglong offset) {
     //trace("mysql_stmt_data_seek");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_data_seek not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_data_seek");
 }
 
 my_ulonglong mysql_stmt_num_rows(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_num_rows");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_num_rows not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_num_rows");
     return 0;
 }
 
 my_ulonglong mysql_stmt_affected_rows(MYSQL_STMT *stmt) {
     //trace("mysql_stmt_affected_rows");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_affected_rows not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_affected_rows");
     return 0;
 }
 
 my_ulonglong mysql_stmt_insert_id(MYSQL_STMT *stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_insert_id not yet implemented)");
+    }
     //trace("mysql_stmt_insert_id");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_insert_id");
     return 0;
 }
 
 unsigned int mysql_stmt_field_count(MYSQL_STMT *stmt) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_stmt_field_count not yet implemented)");
+    }
     //trace("mysql_stmt_field_count");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_stmt_field_count");
     return -1;
@@ -1955,6 +2110,9 @@ unsigned int mysql_stmt_field_count(MYSQL_STMT *stmt) {
 
 MYSQL * mysql_connect(MYSQL *mysql, const char *host, const char *user,
         const char *passwd) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_connect not yet implemented)");
+    }
     //trace("mysql_connect", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_connect");
     return NULL;
@@ -1976,23 +2134,35 @@ int mysql_drop_db(MYSQL *mysql, const char *DB) {
 
 my_bool mysql_thread_init(void) {
     //trace("mysql_thread_init");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_thread_init not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_init");
     return false;
 }
 
 void mysql_thread_end(void) {
     //trace("mysql_thread_end");
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_thread_end not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_thread_end");
 }
 
 my_bool mysql_ssl_set(MYSQL *mysql, const char *key, const char *cert,
         const char *ca, const char *capath, const char *cipher) {
     //trace("mysql_ssl_set", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_ssl_set not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_ssl_set");
     return false;
 }
 
 const char * mysql_get_ssl_cipher(MYSQL *mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_get_ssl_cipher not yet implemented)");
+    }
     //trace("mysql_get_ssl_cipher", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_get_ssl_cipher");
     return NULL;
@@ -2000,6 +2170,9 @@ const char * mysql_get_ssl_cipher(MYSQL *mysql) {
 
 my_bool mysql_change_user(MYSQL *mysql, const char *user, const char *passwd,
         const char *db) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_change_user not yet implemented)");
+    }
     //trace("mysql_change_user", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_change_user");
     return false;
@@ -2007,12 +2180,18 @@ my_bool mysql_change_user(MYSQL *mysql, const char *user, const char *passwd,
 
 my_bool mysql_master_query(MYSQL *mysql, const char *q, unsigned long length) {
     //trace("mysql_master_query", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_master_query not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_master_query");
     return false;
 }
 
 my_bool mysql_master_send_query(MYSQL *mysql, const char *q,
         unsigned long length) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_master_send_query not yet implemented)");
+    }
     //trace("mysql_master_send_query", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_master_query");
     return false;
@@ -2020,50 +2199,77 @@ my_bool mysql_master_send_query(MYSQL *mysql, const char *q,
 
 my_bool mysql_slave_query(MYSQL *mysql, const char *q, unsigned long length) {
     //trace("mysql_slave_query", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_slave_query not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_slave_query");
     return false;
 }
 
 my_bool mysql_slave_send_query(MYSQL *mysql, const char *q,
         unsigned long length) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_slave_send_query not yet implemented)");
+    }
     //trace("mysql_slave_send_query", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_slave_query");
     return false;
 }
 
 void mysql_enable_rpl_parse(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_enable_rpl_parse not yet implemented)");
+    }
     //trace("mysql_enable_rpl_parse", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_enable_rpl_parse");
 }
 
 void mysql_disable_rpl_parse(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_disable_rpl_parse not yet implemented)");
+    }
     //trace("mysql_disable_rpl_parse", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_disable_rpl_parse_rpl_parse");
 }
 
 int mysql_rpl_parse_enabled(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_rpl_parse_enabled not yet implemented)");
+    }
     //trace("mysql_rpl_parse_enabled", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_parse_enabled");
     return 0;
 }
 
 void mysql_enable_reads_from_master(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_enable_reads_from_master not yet implemented)");
+    }
     //trace("mysql_enable_reads_from_master", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_enable_reads_from_master");
 }
 
 void mysql_disable_reads_from_master(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_disable_reads_from_master not yet implemented)");
+    }
     //trace("mysql_disable_reads_from_master", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_disable_reads_from_master");
 }
 
 my_bool mysql_reads_from_master_enabled(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_reads_from_master_enabled not yet implemented)");
+    }
     //trace("mysql_reads_from_master_enabled", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_reads_from_master_enabled");
     return false;
 }
 
 enum mysql_rpl_type mysql_rpl_query_type(const char* q, int len) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_rpl_query_type not yet implemented)");
+    }
     //trace("mysql_rpl_query_type");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_query_type");
     //TODO: not sure what to return here
@@ -2071,6 +2277,9 @@ enum mysql_rpl_type mysql_rpl_query_type(const char* q, int len) {
 }
 
 my_bool mysql_rpl_probe(MYSQL* mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_rpl_probe not yet implemented)");
+    }
     //trace("mysql_rpl_probe", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_rpl_probe");
     return false;
@@ -2078,6 +2287,9 @@ my_bool mysql_rpl_probe(MYSQL* mysql) {
 
 int mysql_set_master(MYSQL* mysql, const char* host, unsigned int port,
         const char* user, const char* passwd) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_set_master not yet implemented)");
+    }
     //trace("mysql_set_master", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_master");
     return 0;
@@ -2085,6 +2297,9 @@ int mysql_set_master(MYSQL* mysql, const char* host, unsigned int port,
 
 int mysql_add_slave(MYSQL* mysql, const char* host, unsigned int port,
         const char* user, const char* passwd) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_add_slave not yet implemented)");
+    }
     //trace("mysql_add_slave", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_add_slave");
     return 0;
@@ -2092,23 +2307,35 @@ int mysql_add_slave(MYSQL* mysql, const char* host, unsigned int port,
 
 int mysql_shutdown(MYSQL *mysql, enum mysql_enum_shutdown_level shutdown_level) {
     //trace("mysql_shutdown", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_shutdown not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_shutdown");
     return 0;
 }
 
 int mysql_dump_debug_info(MYSQL *mysql) {
     //trace("mysql_dump_debug_info", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_dump_debug_info not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_dump_debug_info");
     return 0;
 }
 
 int mysql_refresh(MYSQL *mysql, unsigned int refresh_options) {
     //trace("mysql_refresh", mysql);
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_refresh not yet implemented)");
+    }
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_refresh");
     return 0;
 }
 
 int mysql_kill(MYSQL *mysql, unsigned long pid) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_kill not yet implemented)");
+    }
     //trace("mysql_kill", mysql);
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_kill");
     return 0;
@@ -2121,12 +2348,18 @@ void mysql_set_local_infile_handler(MYSQL *mysql,
     int (*local_infile_error)(void *, char*, unsigned int),
     void *)
 {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_set_local_infile_handler not yet implemented)");
+    }
     // no implementation
     //trace("mysql_set_local_infile_handler");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_local_infile_handler");
 }
 
 void mysql_set_local_infile_default(MYSQL *mysql) {
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("mysql_set_local_infile_default not yet implemented)");
+    }
     // no implementation
     //trace("mysql_set_local_infile_default");
     //if (xlog.isTraceEnabled()) xlog.trace("CALL TO UNIMPLEMENTED METHOD: mysql_set_local_infile_default");
@@ -2263,6 +2496,8 @@ MYSQL_FIELD_OFFSET mysql_field_tell(MYSQL_RES *res) {
     return conn->mysql_field_tell(res);
 }
 
-void my_net_local_init(NET *net)
-{
+void my_net_local_init(NET *net){
+   if (xlog.isDebugEnabled()) {
+        xlog.debug("my_net_local_init not yet implemented)");
+    }
 }
