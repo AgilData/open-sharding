@@ -207,9 +207,6 @@ TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA */
 
-#include <my_global.h>
-#include "m_string.h"
-#include "m_ctype.h"
 
 static uchar ctype_latin1[] = {
     0,
