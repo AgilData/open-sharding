@@ -84,6 +84,11 @@ MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, stri
         throw "OSP_CONNECT_ERROR";
     }
 
+    if (!wireResponse->getResponse()) {
+        log.error("OSPWireResponse does not contain a response object");
+        throw "OSP_CONNECT_ERROR";
+    }
+
     //log.info(("wireResponse = ") + Util::toString((void*)wireResponse));
     OSPConnectResponse* response = dynamic_cast<OSPConnectResponse*>(wireResponse->getResponse());
     //log.info(("response = ") + Util::toString((void*)response));

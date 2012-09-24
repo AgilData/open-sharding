@@ -57,13 +57,13 @@ void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, 
 
     if (fieldNum > 99) {
         switch (fieldNum-99) {
-            case 3:
+            case 4:
                 response = new OSPConnectResponse();
                 break;
-            case 5:
+            case 6:
                 response = new OSPCreateStatementResponse();
                 break;
-            case 9:
+            case 10:
                 response = new OSPExecuteResponse();
                 break;
             case 11:
