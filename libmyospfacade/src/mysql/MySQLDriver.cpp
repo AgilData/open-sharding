@@ -190,6 +190,37 @@ const char *sql_protocol_names_lib[] = { "TCP", "SOCKET", "PIPE", "MEMORY", Null
 TYPELIB sql_protocol_typelib = {array_elements(sql_protocol_names_lib)-1,"",
         sql_protocol_names_lib, NULL};
 
+CHARSET_INFO my_charset_latin1=
+{
+    8,0,0,        /* number    */
+    MY_CS_COMPILED | MY_CS_PRIMARY, /* state     */
+    "latin1",       /* cs name    */
+    "latin1_swedish_ci",    /* name      */
+    "",         /* comment   */
+    NULL,       /* tailoring */
+    ctype_latin1,
+    to_lower_latin1,
+    to_upper_latin1,
+    sort_order_latin1,
+    NULL,   /* contractions */
+    NULL,   /* sort_order_big*/
+    cs_to_uni,    /* tab_to_uni   */
+    NULL,   /* tab_from_uni */
+    my_unicase_default, /* caseinfo     */
+    NULL,   /* state_map    */
+    NULL,   /* ident_map    */
+    1,      /* strxfrm_multiply */
+    1,                  /* caseup_multiply  */
+    1,                  /* casedn_multiply  */
+    1,      /* mbminlen   */
+    1,      /* mbmaxlen  */
+    0,      /* min_sort_char */
+    255,    /* max_sort_char */
+    ' ',                /* pad char      */
+    0,                  /* escape_with_backslash_is_dangerous */
+    &my_charset_handler,
+    &my_collation_8bit_simple_ci_handler
+};
 //////////////////////////////////////////////////
 
 MySQLConnMap* getResourceMap() {
