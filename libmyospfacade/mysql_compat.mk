@@ -27,7 +27,6 @@ MYSTRINGS50_OBJ=$(MYSTRINGS50_PATH)/bchange.o \
 	$(MYSTRINGS50_PATH)/ctype-extra.o \
 	$(MYSTRINGS50_PATH)/ctype-gb2312.o \
 	$(MYSTRINGS50_PATH)/ctype-gbk.o \
-	$(MYSTRINGS50_PATH)/ctype-latin1.o \
 	$(MYSTRINGS50_PATH)/ctype-mb.o \
 	$(MYSTRINGS50_PATH)/ctype-simple.o \
 	$(MYSTRINGS50_PATH)/ctype-sjis.o \
