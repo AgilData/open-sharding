@@ -5,7 +5,7 @@ DEBUG_CPPOPTIONS="-O0 -g3 -Wall -c -fmessage-length=0 -fPIC -fno-inline -MMD -MP
 
 include mysql_compat.mk
 
-OBJ=src/mysql/MySQLClient.o src/mysql/MySQLAbstractConnection.o src/mysql/MySQLAbstractResultSet.o src/mysql/MySQLConnectionInfo.o src/mysql/MySQLConnMap.o src/mysql/MySQLDriver.o src/mysql/MySQLErrorState.o src/mysql/MySQLOSPConnection.o src/mysql/MySQLNativeConnection.o src/mysql/MySQLNativeResultSet.o src/mysql/MySQLOSPResultSet.o src/mysql/strmov.o src/myutil/MyOSPConfig.o src/myutil/MyOSPLogger.o 
+OBJ=src/mysql/MySQLClient.o src/mysql/MySQLAbstractConnection.o src/mysql/MySQLAbstractResultSet.o src/mysql/MySQLConnectionInfo.o src/mysql/MySQLConnMap.o src/mysql/MySQLDriver.o src/mysql/MySQLErrorState.o src/mysql/MySQLOSPConnection.o src/mysql/MySQLNativeConnection.o src/mysql/MySQLNativeResultSet.o src/mysql/MySQLOSPResultSet.o src/myutil/MyOSPConfig.o src/myutil/MyOSPLogger.o 
 
 TEST_OBJ=test/src/MySQLTest.o test/src/Test.o
 
