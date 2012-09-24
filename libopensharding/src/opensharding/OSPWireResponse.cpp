@@ -54,39 +54,42 @@ void OSPWireResponse::write(OSPOutputStream *buffer) {
 }
 
 void OSPWireResponse::setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length) {
-    switch (fieldNum) {
-        case 100:
-            response = new OSPConnectResponse();
-            break;
-        case 101:
-            response = new OSPCreateStatementResponse();
-            break;
-        case 102:
-            response = new OSPExecuteResponse();
-            break;
-        case 103:
-            response = new OSPResultSetMetaResponse();
-            break;
-        case 104:
-            response = new OSPDisconnectResponse();
-            break;
-        case 109:
-            response = new OSPResultSetRowResponse();
-            break;
-        case 200:
-            response = new OSPErrorResponse();
-            errorResponse = true;
-            break;
-        default:
-            // always ignore fields we don't recognize
-            break;
-    }
 
-    // decode the response message
-    if (response) {
-        OSPByteBuffer temp(buffer+offset, length);
-        OSPMessageDecoder decoder;
-        decoder.decode(response, &temp);
+    if (fieldNum > 99) {
+        switch (fieldNum-99) {
+            case 3:
+                response = new OSPConnectResponse();
+                break;
+            case 5:
+                response = new OSPCreateStatementResponse();
+                break;
+            case 9:
+                response = new OSPExecuteResponse();
+                break;
+            case 11:
+                response = new OSPErrorResponse();
+                errorResponse = true;
+                break;
+            case 12:
+                response = new OSPResultSetMetaResponse();
+                break;
+            case 13:
+                response = new OSPResultSetRowResponse();
+                break;
+            case 16:
+                response = new OSPDisconnectResponse();
+                break;
+            default:
+                // always ignore fields we don't recognize
+                break;
+        }
+
+        // decode the response message
+        if (response) {
+            OSPByteBuffer temp(buffer+offset, length);
+            OSPMessageDecoder decoder;
+            decoder.decode(response, &temp);
+        }
     }
 
 }
