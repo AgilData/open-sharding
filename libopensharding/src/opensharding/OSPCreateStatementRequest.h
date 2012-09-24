@@ -35,7 +35,7 @@ public:
     OSPCreateStatementRequest(string connID);
     virtual ~OSPCreateStatementRequest();
 
-    unsigned char getMessageType() { return 0x02; }
+    unsigned char getMessageType() { return 5; }
 
     unsigned int getEstimatedEncodingLength() { return connID.length() + 16; }
     void write(OSPOutputStream *);

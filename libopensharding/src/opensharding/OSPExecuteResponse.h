@@ -41,7 +41,7 @@ public:
     OSPExecuteResponse();
     virtual ~OSPExecuteResponse();
 
-    unsigned char getMessageType() { return 0x03; }
+    unsigned char getMessageType() { return 10; }
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
 

@@ -36,7 +36,7 @@ public:
     OSPErrorResponse();
     virtual ~OSPErrorResponse();
 
-    unsigned char getMessageType() { return 101; }
+    unsigned char getMessageType() { return 11; }
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);
     void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length);

@@ -43,7 +43,7 @@ public:
     OSPConnectRequest(string database, string user, string password, bool createStatement);
     virtual ~OSPConnectRequest();
 
-    unsigned char getMessageType() { return 0x01; }
+    unsigned char getMessageType() { return 3; }
 
     unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);

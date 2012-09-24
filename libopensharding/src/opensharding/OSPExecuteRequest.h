@@ -37,7 +37,7 @@ public:
     OSPExecuteRequest(string connID, int stmtID, string sql);
     virtual ~OSPExecuteRequest();
 
-    unsigned char getMessageType() { return 0x03; }
+    unsigned char getMessageType() { return 9; }
     void write(OSPOutputStream *);
 
     // setField implementation not required for request messages since C only encodes them

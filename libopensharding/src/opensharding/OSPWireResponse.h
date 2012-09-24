@@ -39,7 +39,7 @@ public:
     OSPWireResponse();
     ~OSPWireResponse();
 
-    unsigned char getMessageType() { return 0xa6; }
+    unsigned char getMessageType() { return 2; }
     OSPMessage *getResponse() { return response; }
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);

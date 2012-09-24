@@ -34,7 +34,7 @@ public:
     OSPPingResponse();
     virtual ~OSPPingResponse();
 
-    unsigned char getMessageType() { return 0x08; }
+    unsigned char getMessageType() { return 19; }
 
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);

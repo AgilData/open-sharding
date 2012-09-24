@@ -35,7 +35,7 @@ public:
     OSPDisconnectRequest(string connID);
     virtual ~OSPDisconnectRequest();
 
-    unsigned char getMessageType() { return 0x05; }
+    unsigned char getMessageType() { return 16; }
 
     unsigned int getEstimatedEncodingLength() { return connID.length() + 16; }
     void write(OSPOutputStream *);

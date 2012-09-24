@@ -34,7 +34,7 @@ public:
     OSPDisconnectResponse();
     virtual ~OSPDisconnectResponse();
 
-    unsigned char getMessageType() { return 0x05; }
+    unsigned char getMessageType() { return 17; }
 
     unsigned int getEstimatedEncodingLength() { return 0; }
     void write(OSPOutputStream *);

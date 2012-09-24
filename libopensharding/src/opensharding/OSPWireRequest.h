@@ -37,7 +37,7 @@ public:
     OSPWireRequest(int requestID, int messageType, OSPMessage *request);
     ~OSPWireRequest();
 
-    unsigned char getMessageType() { return 0x01; }
+    unsigned char getMessageType() { return 1; }
 
     unsigned int getEstimatedEncodingLength();
     void write(OSPOutputStream *);
