@@ -197,6 +197,8 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     // now use a second buffer to encode the OSPWireRequest
 
+    if (DEBUG) log.debug("BEFORE WRITE HEADER");
+
     // first the OSP protocol
     requestBuffer2->reset();
     requestBuffer2->writeByte(1);        // protocol
@@ -207,16 +209,22 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer2->writeShort(1); // message type for OSPWireRequest
     requestBuffer2->writeInt(0); // placeholder for message length
 
+    if (DEBUG) log.debug(string("AFTER WRITE HEADER: ") + requestBuffer2->toString());
+
     // now the OSPWireRequest
     requestBuffer2->writeInt(1, requestID);
     requestBuffer2->writeInt(2, messageType);
     requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, requestBuffer->getOffset()); // this is the encoded request from the first buffer
     int messageLength = requestBuffer2->getOffset() - 14;
 
+    if (DEBUG) log.debug(string("AFTER WRITE MESSAGE: ") + requestBuffer2->toString());
+
     // re-write header info
     requestBuffer2->reset();
     requestBuffer2->skip(10);
     requestBuffer2->writeInt(messageLength); // message length of OSPWireRequest
+
+    if (DEBUG) log.debug(string("AFTER RE-WRITE HEADER WITH MESSAGE LENGTH: ") + requestBuffer2->toString());
 
     // write to output stream
     if (DEBUG) log.debug(string("Writing request to unix socket. Message length = ") + Util::toString(messageLength) + " + 14 byte header");
@@ -245,7 +253,7 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
 
     OSPWireResponse *response = NULL;
 
-    if (DEBUG) log.debug("BEFORE read message length from response pipe");
+    if (DEBUG) log.debug("BEFORE read message header from unix socket");
 
     char messageHeader[14];
 
@@ -263,7 +271,7 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
     // this field isn't currently used
     unsigned int messageLength = OSPByteBuffer::readInt(messageHeader, 10);
 
-    if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));
+    if (DEBUG) log.debug(string("AFTER read message header from response pipe - messageLength is ") + Util::toString((int)messageLength));
 
     // make sure our read buffer is large enough
     if (messageLength > bufferSize) {

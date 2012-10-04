@@ -597,12 +597,12 @@ void OSPByteBuffer::writeLong(char *b, int offset, long n) {
     b[offset+0] = (char) (n);
 }
 
-void OSPByteBuffer::display() {
-    ////logger.info << "display() {";
+string OSPByteBuffer::toString() {
+    string ret = "";
     for (unsigned int i=0; i<length; i++) {
-        ////logger.info << (int) (0xFF & buffer[i]) << " ";
+        ret << (int) (0xFF & buffer[i]) << " ";
     }
-    ////logger.info << "}\n";
+    return ret;
 }
 
 void OSPByteBuffer::flush() {
