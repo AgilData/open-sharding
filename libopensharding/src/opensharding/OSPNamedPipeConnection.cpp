@@ -270,6 +270,15 @@ OSPMessage* OSPNamedPipeConnection::sendMessage(OSPMessage *message,  bool expec
 
         // no background thread, wait for message directly
         response = dynamic_cast<OSPWireResponse*>(waitForResponse());
+
+        if (response->getRequestID() != requestID) {
+            log.error(
+                    "Received response #" + Util::toString(response->getRequestID()) +
+                    " for request #" + Util::toString(requestID)
+            );
+            response = NULL;
+        }
+
         count++;
         if (DEBUG) log.debug(string("sendMessage (non-threaded) got response number ") + Util::toString(count) + string("; RequestID=") + Util::toString(requestID));
 
@@ -363,9 +372,13 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
 
     if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
-    unsigned int messageHeader = is->readInt(); // ignored
-    unsigned int messageTypeID = is->readShort(); // ignored
-    unsigned int messageLength = is->readInt();
+    unsigned int protocol        = is->readByte();  // ignored
+    unsigned int protocolVersion = is->readByte();  // ignored
+    unsigned int sequenceNumber  = is->readInt();   // ignored
+    unsigned int finalMessage    = is->readByte();  // ignored
+    unsigned int reserverd       = is->readByte();  // ignored
+    unsigned int messageTypeID   = is->readShort(); // ignored
+    unsigned int messageLength   = is->readInt();
 
     if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));
 
@@ -394,6 +407,7 @@ OSPMessage* OSPNamedPipeConnection::waitForResponse() {
 
         // create the wire respsone object
         response = new OSPWireResponse();
+        response->setRequestID(sequenceNumber);
 
         // decode the data from the buffer into the newly created object
         OSPMessageDecoder decoder;

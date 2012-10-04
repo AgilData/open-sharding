@@ -283,7 +283,16 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
             finalMessage = false;
             while (!finalMessage) {
                 OSPMessage *message = readResponse(hSocket, key, &finalMessage);
-                messageConsumer->processMessage(message);
+
+                if (message->getRequestID() != requestID) {
+                    log.error(
+                            "Received response #" + Util::toString(message->getRequestID()) +
+                            " for request #" + Util::toString(requestID)
+                    );
+                }
+                else {
+                    messageConsumer->processMessage(message);
+                }
             }
             return NULL;
         }
@@ -293,6 +302,15 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
                 log.debug("Expecting single response");
             }
             OSPMessage *message = readResponse(hSocket, key, &finalMessage);
+
+            if (message->getRequestID() != requestID) {
+                log.error(
+                        "Received response #" + Util::toString(message->getRequestID()) +
+                        " for request #" + Util::toString(requestID)
+                );
+                return NULL;
+            }
+
             if (!finalMessage) {
                 log.error("Expected a single response, but this was not the final message");
             }
@@ -361,17 +379,19 @@ OSPMessage* OSPTCPConnection::readResponseMessage(int hSocket, bool *finalMessag
     }
 
     //TODO: make these class-level buffers? does this class need to be thread-safe?
-    char header[10];
+    char header[14];
 
     // read header and message length
-    if (!read(hSocket, header, 0, 10)) {
+    if (!read(hSocket, header, 0, 14)) {
         log.error("Failed to read message header");
         return NULL;
     }
 
-    // first 6 bytes of header are ignored for now
+    *finalMessage = OSPByteBuffer::readByte(header, 6);
 
-    int messageBytes = OSPByteBuffer::readInt(header, 6);
+    int sequenceNumber = OSPByteBuffer::readInt(header, 2);
+
+    int messageBytes = OSPByteBuffer::readInt(header, 10);
     if (messageBytes<0 || messageBytes>1*1024*1024) {
         log.error(string("Invalid response messageLength: ") + Util::toString((int)messageBytes));
         return NULL;
@@ -391,10 +411,7 @@ OSPMessage* OSPTCPConnection::readResponseMessage(int hSocket, bool *finalMessag
 
     OSPMessageDecoder decoder;
     decoder.decode(message, &bb);
-
-    *finalMessage = message->isFinalResponse();
-
-    //message->read(&bb);
+    message->setRequestID(sequenceNumber);
 
     if (log.isDebugEnabled()) {
         log.debug("readResponseMessage() returning valid message");

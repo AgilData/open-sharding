@@ -129,6 +129,15 @@ OSPMessage* OSPUnixSocketConnection::sendMessage(OSPMessage *message,  bool expe
         if (DEBUG) log.debug("BEFORE read response");
 
         response = dynamic_cast<OSPWireResponse*>(waitForResponse());
+
+        if (response->getRequestID() != requestID) {
+            log.error(
+                    "Received response #" + Util::toString(response->getRequestID()) +
+                    " for request #" + Util::toString(requestID)
+            );
+            response = NULL;
+        }
+
         count++;
         if (DEBUG) log.debug(string("sendMessage (non-threaded) got response number ") + Util::toString(count) + string("; RequestID=") + Util::toString(requestID));
 
@@ -233,17 +242,21 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
 
     if (DEBUG) log.debug("BEFORE read message length from response pipe");
 
-    char messageHeader[10];
+    char messageHeader[14];
 
-    is->readBytes(messageHeader, 0, 10);
-
-    // this field isn't currently used
-    bool finalMessage = messageHeader[2] != 0;
+    is->readBytes(messageHeader, 0, 14);
 
     // this field isn't currently used
-    unsigned int messageTypeID = OSPByteBuffer::readShort(messageHeader, 4);
+    bool finalMessage = messageHeader[6] != 0;
 
-    unsigned int messageLength = OSPByteBuffer::readInt(messageHeader, 6);
+    // this field isn't currently used
+    unsigned int sequenceNumber = OSPByteBuffer::readShort(messageHeader, 2);
+
+    // this field isn't currently used
+    unsigned int messageTypeID = OSPByteBuffer::readShort(messageHeader, 8);
+
+    // this field isn't currently used
+    unsigned int messageLength = OSPByteBuffer::readInt(messageHeader, 10);
 
     if (DEBUG) log.debug(string("AFTER read message length from response pipe - messageLength is ") + Util::toString((int)messageLength));
 
@@ -272,6 +285,7 @@ OSPMessage* OSPUnixSocketConnection::waitForResponse() {
 
         // create the wire response object
         response = new OSPWireResponse();
+        response->setRequestID(sequenceNumber);
 
         // decode the data from the buffer into the newly created object
         OSPMessageDecoder decoder;

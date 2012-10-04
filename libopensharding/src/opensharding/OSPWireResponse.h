@@ -51,6 +51,7 @@ public:
     bool isFinalResponse() { return finalResponse; }
 
     int getRequestID() { return requestID; }
+    void setRequestID(int requestID) { this->requestID = requestID; }
 
 };
 
