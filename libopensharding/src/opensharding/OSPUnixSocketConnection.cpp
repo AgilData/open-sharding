@@ -209,7 +209,8 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer2->writeShort(1); // message type for OSPWireRequest
     requestBuffer2->writeInt(0); // placeholder for message length
 
-    if (DEBUG) log.debug(string("AFTER WRITE HEADER: ") + requestBuffer2->toString());
+    if (DEBUG) log.debug(string("AFTER WRITE HEADER"));
+    requestBuffer2->dump();
 
     // now the OSPWireRequest
     requestBuffer2->writeInt(1, requestID);
@@ -217,17 +218,20 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, requestBuffer->getOffset()); // this is the encoded request from the first buffer
     int messageLength = requestBuffer2->getOffset() - 14;
 
-    if (DEBUG) log.debug(string("AFTER WRITE MESSAGE: ") + requestBuffer2->toString());
+    if (DEBUG) log.debug(string("AFTER WRITE MESSAGE"));
+    requestBuffer2->dump();
 
     // re-write header info
     requestBuffer2->reset();
     requestBuffer2->skip(10);
     requestBuffer2->writeInt(messageLength); // message length of OSPWireRequest
 
-    if (DEBUG) log.debug(string("AFTER RE-WRITE HEADER WITH MESSAGE LENGTH: ") + requestBuffer2->toString());
+    if (DEBUG) log.debug(string("AFTER RE-WRITE HEADER WITH MESSAGE LENGTH"));
+    requestBuffer2->dump();
 
     // write to output stream
     if (DEBUG) log.debug(string("Writing request to unix socket. Message length = ") + Util::toString(messageLength) + " + 14 byte header");
+    requestBuffer2->dump();
 
     os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength + 14);
 

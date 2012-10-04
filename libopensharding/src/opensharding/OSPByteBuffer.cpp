@@ -597,12 +597,8 @@ void OSPByteBuffer::writeLong(char *b, int offset, long n) {
     b[offset+0] = (char) (n);
 }
 
-string OSPByteBuffer::toString() {
-    string ret = "";
-    for (unsigned int i=0; i<length; i++) {
-        ret << (int) (0xFF & buffer[i]) << " ";
-    }
-    return ret;
+void OSPByteBuffer::dump() {
+    Util::dump(buffer, offset, 80);
 }
 
 void OSPByteBuffer::flush() {

@@ -90,7 +90,7 @@ public:
 
     void flip();
 
-    string toString();
+    void dump();
 
     // STATIC METHODS
     static short readShort(char *data, int offset);
