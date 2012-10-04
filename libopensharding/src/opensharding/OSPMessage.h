@@ -36,7 +36,6 @@ public:
     OSPMessage();
     virtual ~OSPMessage();
     virtual unsigned char getMessageType()=0;
-    virtual int getRequestID()=0;
 
     // set field (called from OSPMessageDecoder)
     virtual void setField(int fieldNum, char *buffer, unsigned int offset, unsigned int length)=0;

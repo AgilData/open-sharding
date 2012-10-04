@@ -282,7 +282,7 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
             // expect multiple responses
             finalMessage = false;
             while (!finalMessage) {
-                OSPMessage *message = readResponse(hSocket, key, &finalMessage);
+                OSPWireResponse *message = dynamic_cast<OSPWireResponse*>(readResponse(hSocket, key, &finalMessage));
 
                 if (message->getRequestID() != requestID) {
                     log.error(
@@ -301,7 +301,7 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
             if (log.isDebugEnabled()) {
                 log.debug("Expecting single response");
             }
-            OSPMessage *message = readResponse(hSocket, key, &finalMessage);
+            OSPWireResponse *message = dynamic_cast<OSPWireResponse*>(readResponse(hSocket, key, &finalMessage));
 
             if (message->getRequestID() != requestID) {
                 log.error(
