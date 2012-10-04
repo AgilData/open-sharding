@@ -387,7 +387,7 @@ OSPMessage* OSPTCPConnection::readResponseMessage(int hSocket, bool *finalMessag
         return NULL;
     }
 
-    *finalMessage = OSPByteBuffer::readByte(header, 6);
+    *finalMessage = OSPByteBuffer::readByte(header, 6)==1;
 
     int sequenceNumber = OSPByteBuffer::readInt(header, 2);
 
