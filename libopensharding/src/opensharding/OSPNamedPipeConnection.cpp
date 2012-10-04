@@ -332,14 +332,13 @@ int OSPNamedPipeConnection::doSendOnly(OSPMessage *message, bool flush) {
 
     int messageLength = tempBuffer.getOffset();
 
-    char messageHeader[4];
-    messageHeader[0] = 1; // protocol
-    messageHeader[1] = 1; // version
-    messageHeader[2] = 1; // final request message
-    messageHeader[3] = 0; // reserved
+    os->writeByte(1);        // protocol
+    os->writeByte(2);        // protocol version
+    os->writeInt(requestID); // sequence number
+    os->writeByte(1);        // final request message?
+    os->writeByte(0);        // reserved
+    os->writeShort(1); // message type for OSPWireRequest
 
-    os->writeBytes(messageHeader, 0, 4);
-    os->writeShort(1); // OSPWireRequest message type
     os->writeInt(messageLength);
     os->writeBytes((char *) tempBuffer.getBuffer(), 0, tempBuffer.getOffset());
 

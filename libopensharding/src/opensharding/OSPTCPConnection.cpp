@@ -205,16 +205,13 @@ OSPMessage* OSPTCPConnection::sendMessage(OSPMessage *message, bool expectACK, O
     request.write(&tempBuffer);
 
     // wrap the message in the messaging protocol
-    OSPByteBuffer buffer(tempBuffer.getOffset() + 10);
-
-    char messageHeader[4];
-    messageHeader[0] = 1; // protocol
-    messageHeader[1] = 1; // version
-    messageHeader[2] = 1; // final request message
-    messageHeader[3] = 0; // reserved
-
-    buffer.writeBytes(messageHeader, 0, 4); // message header
-    buffer.writeShort(1); // message type for OSPWireRequest
+    OSPByteBuffer buffer(tempBuffer.getOffset() + 14); // 14-byte header
+    buffer.writeByte(1);        // protocol
+    buffer.writeByte(2);        // protocol version
+    buffer.writeInt(requestID); // sequence number
+    buffer.writeByte(1);        // final request message?
+    buffer.writeByte(0);        // reserved
+    buffer.writeShort(1);       // message type for OSPWireRequest
     buffer.writeInt(tempBuffer.getOffset()); // message length
 
     // message bytes

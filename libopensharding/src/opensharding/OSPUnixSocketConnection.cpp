@@ -186,32 +186,32 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer->reset();
     message->write(requestBuffer);
 
-    char messageHeader[4];
-    messageHeader[0] = 1; // protocol
-    messageHeader[1] = 1; // version
-    messageHeader[2] = 1; // final request message
-    messageHeader[3] = 0;
-
     // now use a second buffer to encode the OSPWireRequest
+
+    // first the OSP protocol
     requestBuffer2->reset();
-    requestBuffer2->writeBytes(messageHeader, 0, 4);
+    requestBuffer2->writeByte(1);        // protocol
+    requestBuffer2->writeByte(2);        // protocol version
+    requestBuffer2->writeInt(requestID); // sequence number
+    requestBuffer2->writeByte(1);        // final request message?
+    requestBuffer2->writeByte(0);        // reserved
     requestBuffer2->writeShort(1); // message type for OSPWireRequest
     requestBuffer2->writeInt(0); // placeholder for message length
+
+    // now the OSPWireRequest
     requestBuffer2->writeInt(1, requestID);
     requestBuffer2->writeInt(2, messageType);
     requestBuffer2->writeBytes(99+messageType, requestBuffer->getBuffer(), 0, requestBuffer->getOffset()); // this is the encoded request from the first buffer
-    int messageLength = requestBuffer2->getOffset() - 10;
+    int messageLength = requestBuffer2->getOffset() - 14;
 
     // re-write header info
-    //TODO: need skipBytes(6) so we don't have to write the messageHeader and messageType fields again
     requestBuffer2->reset();
-    requestBuffer2->writeBytes(messageHeader, 0, 4);
-    requestBuffer2->writeShort(1); // message type for OSPWireRequest
+    requestBuffer2->skip(10);
     requestBuffer2->writeInt(messageLength); // message length of OSPWireRequest
 
     // write to output stream
     if (DEBUG) log.debug("Writing request to request pipe");
-    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength+10);
+    os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength + 14);
 
     // flush the pipe if we are waiting for a response
     if (flush) {
