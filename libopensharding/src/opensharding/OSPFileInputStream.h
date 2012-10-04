@@ -67,6 +67,7 @@ public:
     // read raw data
     short readShort();
     int readInt();
+    char readByte();
     void readBytes(char *buffer, unsigned int offset, unsigned int length);
 };
 

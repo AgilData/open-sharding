@@ -73,6 +73,11 @@ void OSPFileOutputStream::writeVarInt(int n) {
     writeBytes(varIntBuffer, 0, offset);
 }
 
+void OSPFileOutputStream::writeByte(char n) {
+    intBuffer[0] = (char) (n);
+    writeBytes(intBuffer, 0, 1);
+}
+
 void OSPFileOutputStream::writeShort(short n) {
     intBuffer[1] = (char) (n); n = n >> 8;
     intBuffer[0] = (char) (n);

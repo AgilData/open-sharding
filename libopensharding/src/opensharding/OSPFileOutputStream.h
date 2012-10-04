@@ -58,6 +58,7 @@ public:
     ~OSPFileOutputStream();
 
     // write raw data
+    void writeByte(char b);
     void writeShort(short i);
     void writeInt(int i);
     void writeVarInt(int i);

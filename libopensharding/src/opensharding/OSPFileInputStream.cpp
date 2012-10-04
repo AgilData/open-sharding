@@ -56,6 +56,12 @@ OSPFileInputStream::~OSPFileInputStream() {
     }
 }
 
+char OSPFileInputStream::readByte() {
+    readBytes(intBuffer, 0, 1);
+    int byte0 = (int) (0xFF & *(intBuffer+0));
+    return byte0;
+}
+
 short OSPFileInputStream::readShort() {
     readBytes(intBuffer, 0, 2);
     int byte0 = (int) (0xFF & *(intBuffer+0));

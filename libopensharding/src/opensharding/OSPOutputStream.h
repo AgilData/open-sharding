@@ -38,6 +38,7 @@ public:
 
     // write raw data
     void writeVarInt(int i);
+    void writeByte(char b);
     void writeInt(int i);
 
     // write fields
