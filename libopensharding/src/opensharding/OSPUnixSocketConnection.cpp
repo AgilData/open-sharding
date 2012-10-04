@@ -219,12 +219,17 @@ int OSPUnixSocketConnection::doSendOnly(OSPMessage *message, bool flush) {
     requestBuffer2->writeInt(messageLength); // message length of OSPWireRequest
 
     // write to output stream
-    if (DEBUG) log.debug("Writing request to request pipe");
+    if (DEBUG) log.debug(string("Writing request to unix socket. Message length = ") + Util::toString(messageLength) + " + 14 byte header");
+
     os->writeBytes((char *) requestBuffer2->getBuffer(), 0, messageLength + 14);
 
     // flush the pipe if we are waiting for a response
     if (flush) {
+        if (DEBUG) log.debug("Flushing request");
         os->flush();
+    }
+    else {
+        if (DEBUG) log.debug("NOT flushing request");
     }
 
     return requestID;
