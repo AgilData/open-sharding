@@ -8,53 +8,55 @@ import java.util.Calendar;
 import java.util.Date;
 
 public class NewOrder implements TpccConstants {
-	private char[] s_dist_01 = new char[25];
-	private char[] s_dist_02 = new char[25];
-	private char[] s_dist_03 = new char[25];
-	private char[] s_dist_04 = new char[25];
-	private char[] s_dist_05 = new char[25];
-	private char[] s_dist_06 = new char[25];
-	private char[] s_dist_07 = new char[25];
-	private char[] s_dist_08 = new char[25];
-	private char[] s_dist_09 = new char[25];
-	private char[] s_dist_10 = new char[25];
 	
-	private char[] pickDistInfo(char[] ol_dist_info, int ol_supply_w_id){
+	private String s_dist_01 = null;
+	private String s_dist_02 = null;
+	private String s_dist_03 = null;
+	private String s_dist_04 = null;
+	private String s_dist_05 = null;
+	private String s_dist_06 = null;
+	private String s_dist_07 = null;
+	private String s_dist_08 = null;
+	private String s_dist_09 = null;
+	private String s_dist_10 = null;
+	
+	private String pickDistInfo(String ol_dist_info, int ol_supply_w_id){
 		switch(ol_supply_w_id){
 		case 1:
-			ol_dist_info = String.copyValueOf(s_dist_01, 0, 25).toCharArray();
+			ol_dist_info = s_dist_01;
 			break;
 		case 2:
-			ol_dist_info = String.copyValueOf(s_dist_02, 0, 25).toCharArray();
+			ol_dist_info = s_dist_02;
 			break;
 		case 3:
-			ol_dist_info = String.copyValueOf(s_dist_03, 0, 25).toCharArray();
+			ol_dist_info = s_dist_03;
 			break;
 		case 4:
-			ol_dist_info = String.copyValueOf(s_dist_04, 0, 25).toCharArray();
+			ol_dist_info = s_dist_04;
 			break;
 		case 5:
-			ol_dist_info = String.copyValueOf(s_dist_05, 0, 25).toCharArray();
+			ol_dist_info = s_dist_05;
 			break;
 		case 6:
-			ol_dist_info = String.copyValueOf(s_dist_06, 0, 25).toCharArray();
+			ol_dist_info = s_dist_06;
 			break;
 		case 7:
-			ol_dist_info = String.copyValueOf(s_dist_07, 0, 25).toCharArray();
+			ol_dist_info = s_dist_07;
 			break;
 		case 8:
-			ol_dist_info = String.copyValueOf(s_dist_08, 0, 25).toCharArray();
+			ol_dist_info = s_dist_08;
 			break;
 		case 9:
-			ol_dist_info = String.copyValueOf(s_dist_09, 0, 25).toCharArray();
+			ol_dist_info = s_dist_09;
 			break;
 		case 10:
-			ol_dist_info = String.copyValueOf(s_dist_10, 0, 25).toCharArray();
+			ol_dist_info = s_dist_10;
 			break;
 		}
 		
 		return ol_dist_info;
 	}
+	
 	public int neword( int t_num,
 		    int w_id_arg,		/* warehouse id */
 		    int d_id_arg,		/* district id */
@@ -75,28 +77,27 @@ public class NewOrder implements TpccConstants {
 		int o_ol_cnt = o_ol_cnt_arg;
 		int o_all_local = o_all_local_arg;
 		float c_discount = 0;
-		char[] c_last = new char[17];
-		char[] c_credit = new char[3];
+		String c_last = null;
+		String c_credit = null;
 		float w_tax = 0;
 		int d_next_o_id = 0;
 		float d_tax = 0;
-		char[] datetime = new char[81];
 		int o_id = 0;
-		char[] i_name = new char[25];
+		String i_name = null;
 		float i_price = 0;
-		char[] i_data = new char[51];
+		String i_data = null;
 		int ol_i_id = 0;
 		int s_quantity = 0;
-		char[] s_data = new char[51];
+		String s_data = null;
 		
-		char[] ol_dist_info = new char[25];
+		String ol_dist_info = null;
 		int ol_supply_w_id = 0;
 		float ol_amount = 0;
 		int ol_number = 0;
 		int ol_quantity = 0;
 
-		char[][]  iname = new char[MAX_NUM_ITEMS][MAX_ITEM_LEN];
-		char[] bg = new char[MAX_NUM_ITEMS];
+		String[] iname = new String[MAX_NUM_ITEMS];
+		String[] bg = new String[MAX_NUM_ITEMS];
 		float[] amt = new float[MAX_NUM_ITEMS];
 		float[] price = new float[MAX_NUM_ITEMS];
 		int[] stock = new int[MAX_NUM_ITEMS];
@@ -123,10 +124,10 @@ public class NewOrder implements TpccConstants {
 			pStmts.getStatement(0).setInt(2, d_id);
 			pStmts.getStatement(0).setInt(3, c_id);
 			ResultSet rs = pStmts.getStatement(0).executeQuery();
-			while(rs.next()){
+			if(rs.next()){
 				c_discount = rs.getFloat(1);
-				c_last = rs.getString(2).toCharArray();
-				c_credit = rs.getString(3).toCharArray();
+				c_last = rs.getString(2);
+				c_credit = rs.getString(3);
 				w_tax = rs.getFloat(4);
 			}
 			rs.close();
@@ -142,7 +143,7 @@ public class NewOrder implements TpccConstants {
 			pStmts.getStatement(1).setInt(1, d_id);
 			pStmts.getStatement(1).setInt(2, w_id);
 			ResultSet rs = pStmts.getStatement(1).executeQuery();
-			while(rs.next()){
+			if(rs.next()){
 				d_next_o_id = rs.getInt(1);
 				d_tax = rs.getFloat(2);
 			}
@@ -160,7 +161,8 @@ public class NewOrder implements TpccConstants {
 			pStmts.getStatement(2).setInt(1, d_next_o_id);
 			pStmts.getStatement(2).setInt(2, d_id);
 			pStmts.getStatement(2).setInt(3, w_id);
-			pStmts.getStatement(2).executeQuery();
+			
+			pStmts.getStatement(2).executeUpdate();
 		} catch (SQLException e) {
 			throw new RuntimeException("NewOrder update transaction error", e);
 		}
@@ -179,7 +181,8 @@ public class NewOrder implements TpccConstants {
 			pStmts.getStatement(3).setString(5, currentTimeStamp.toString());
 			pStmts.getStatement(3).setInt(6, o_ol_cnt);
 			pStmts.getStatement(3).setInt(7, o_all_local);
-			pStmts.getStatement(3).executeQuery();
+			
+			pStmts.getStatement(3).executeUpdate();
 		} catch (SQLException e) {
 			throw new RuntimeException("NewOrder insert transaction error",e );
 		}
@@ -191,7 +194,8 @@ public class NewOrder implements TpccConstants {
 			pStmts.getStatement(4).setInt(1, o_id);
 			pStmts.getStatement(4).setInt(2, d_id);
 			pStmts.getStatement(4).setInt(3, w_id);
-			pStmts.getStatement(4).executeQuery();
+			
+			pStmts.getStatement(4).executeUpdate();
 		} catch (SQLException e) {
 			throw new RuntimeException("NewOrder insert transaction error", e);
 		}
@@ -230,11 +234,15 @@ public class NewOrder implements TpccConstants {
 			try {
 				pStmts.getStatement(5).setInt(1, ol_i_id);
 				ResultSet rs = pStmts.getStatement(5).executeQuery();
-				while(rs.next()){
+				if(rs.next()){
 					i_price = rs.getFloat(1);
-					i_name = rs.getString(2).toCharArray();
-					i_data = rs.getString(3).toCharArray();
+					i_name = rs.getString(2);
+					i_data = rs.getString(3);
 					
+				} else {
+					// If not item found, return and rollback.
+					rs.close();
+					return -1;
 				}
 				rs.close();
 			} catch (SQLException e) {
@@ -242,7 +250,7 @@ public class NewOrder implements TpccConstants {
 			}
 			
 			price[ol_num_seq[ol_number - 1]] = i_price;
-			iname[ol_num_seq[ol_number -1]] = String.copyValueOf(i_name, 0, 25).toCharArray();
+			iname[ol_num_seq[ol_number -1]] = i_name;
 			
 			proceed = 7;
 			//Get prepared statement
@@ -251,19 +259,19 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(6).setInt(1, ol_i_id);
 				pStmts.getStatement(6).setInt(2, ol_supply_w_id);
 				ResultSet rs = pStmts.getStatement(6).executeQuery();
-				while(rs.next()){
+				if(rs.next()){
 					s_quantity = rs.getInt(1);
-					s_data = rs.getString(2).toCharArray();
-					s_dist_01 = rs.getString(3).toCharArray();
-					s_dist_02 = rs.getString(4).toCharArray();
-					s_dist_03 = rs.getString(5).toCharArray();
-					s_dist_04 = rs.getString(6).toCharArray();
-					s_dist_05 = rs.getString(7).toCharArray();
-					s_dist_06 = rs.getString(8).toCharArray();
-					s_dist_07 = rs.getString(9).toCharArray();
-					s_dist_08 = rs.getString(10).toCharArray();
-					s_dist_09 = rs.getString(11).toCharArray();
-					s_dist_10 = rs.getString(12).toCharArray();
+					s_data = rs.getString(2);
+					s_dist_01 = rs.getString(3);
+					s_dist_02 = rs.getString(4);
+					s_dist_03 = rs.getString(5);
+					s_dist_04 = rs.getString(6);
+					s_dist_05 = rs.getString(7);
+					s_dist_06 = rs.getString(8);
+					s_dist_07 = rs.getString(9);
+					s_dist_08 = rs.getString(10);
+					s_dist_09 = rs.getString(11);
+					s_dist_10 = rs.getString(12);
 				}
 
 				rs.close();
@@ -276,10 +284,10 @@ public class NewOrder implements TpccConstants {
 			stock[ol_num_seq[ol_number - 1]] = s_quantity;
 			
 			if ( (i_data.toString().contains("original")) &&  ( s_data.toString().contains("original")) ){
-				bg[ol_num_seq[ol_number - 1]] = 'B';
+				bg[ol_num_seq[ol_number - 1]] = "B";
 
 			} else {
-				bg[ol_num_seq[ol_number - 1]] = 'G';
+				bg[ol_num_seq[ol_number - 1]] = "G";
 
 			}
 			
@@ -296,7 +304,8 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(7).setInt(1, s_quantity);
 				pStmts.getStatement(7).setInt(2, ol_i_id);
 				pStmts.getStatement(7).setInt(3, ol_supply_w_id);
-				pStmts.getStatement(7).executeQuery();
+				
+				pStmts.getStatement(7).executeUpdate();
 			} catch (SQLException e) {
 				throw new RuntimeException("NewOrder update transaction error", e);
 			}
@@ -319,7 +328,8 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(8).setInt(7, ol_quantity);
 				pStmts.getStatement(8).setFloat(8, ol_amount);
 				pStmts.getStatement(8).setString(9, ol_dist_info.toString());
-				pStmts.getStatement(8).executeQuery();
+				
+				pStmts.getStatement(8).executeUpdate();
 			} catch (SQLException e) {
 				throw new RuntimeException("NewOrder insert transaction error", e);
 			}

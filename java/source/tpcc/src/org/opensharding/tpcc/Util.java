@@ -141,7 +141,7 @@ public class Util implements TpccConstants {
 	  * characters of a random length of minimum x, maximum y, and
 	  * mean (y+x)/2
 	  */
-	 public int MakeAlphaString(int x, int y, char str[]) {
+	 public int makeAlphaString(int x, int y, char str[]) {
 		 
 		 char[] alphanum = ("0123456789" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz").toCharArray();
 		 int arrmax = 61;  /* index of last array element */
