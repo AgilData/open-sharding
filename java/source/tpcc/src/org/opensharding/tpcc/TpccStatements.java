@@ -1,5 +1,6 @@
 package org.opensharding.tpcc;
 
+import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 
@@ -64,5 +65,35 @@ public class TpccStatements {
 			throw new RuntimeException("Index is out of bounds. idx: " + idx);
 		}
 		return pStmts[idx];
+	}
+	
+	/**
+	 * Return connection.
+	 * @return
+	 */
+	public Connection getConnection() {
+		return conn;
+	}
+	
+	/**
+	 * Commit a transaction.
+	 */
+	public void commit() {
+		try {
+			conn.commit();
+		} catch(Throwable th) {
+			th.printStackTrace();
+		}
+	}
+
+	/**
+	 * Rollback a transaction.
+	 */
+	public void rollback() {
+		try {
+			conn.rollback();
+		} catch(Throwable th) {
+			th.printStackTrace();
+		}
 	}
 }
