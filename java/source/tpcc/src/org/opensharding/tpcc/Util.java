@@ -12,14 +12,14 @@ public class Util implements TpccConstants {
 	static int sl;
 	static int total;
 	
-	private int[] seq = null;
-	private int nextNum = 0;
+	private static int[] seq = null;
+	private static int nextNum = 0;
 	
 	static int permCount;
-	private Random generate = new Random();
+	private static Random generate = new Random();
 	
 	//Member Functions
-	public void shuffle(){
+	public static void shuffle(){
 		//Counters
 		int i;
 		int j;
@@ -67,7 +67,7 @@ public class Util implements TpccConstants {
 		
 	}
 	
-	public synchronized int seqGet()
+	public synchronized static int seqGet()
 	{
 	  int retval = 0;
 
@@ -91,7 +91,7 @@ public class Util implements TpccConstants {
 	/*
 	 * return number uniformly distributed b/w min and max, inclusive
 	 */
-	public int randomNumber (int min, int max)
+	public static int randomNumber (int min, int max)
 	{
 		return min + (generate.nextInt() % ((max - min) + 1));
 	}
@@ -103,7 +103,7 @@ public class Util implements TpccConstants {
 	 * value of C should be used for all calls with the same value of
 	 * A.  however, we know in advance which values of A will be used.
 	 */
-	 public int nuRand(int A, int x, int y){
+	 public static int nuRand(int A, int x, int y){
 		Boolean first = true;
 		int C = 0;
 		int C_255 = 0;
@@ -210,6 +210,19 @@ public class Util implements TpccConstants {
 			}
 			return nums[permCount++];
 		}
+	 static void lastName(int num, String name)
+	{
+		
+	  String[] n = 
+	    {"BAR", "OUGHT", "ABLE", "PRI", "PRES", 
+	     "ESE", "ANTI", "CALLY", "ATION", "EING"};
+	  
+	  name = name + n[num/100];
+	  name = name + n[(num/10)%10];
+	  name = name + n[num%10];
+	 
+	 return;
+	}
 	 
 }
 

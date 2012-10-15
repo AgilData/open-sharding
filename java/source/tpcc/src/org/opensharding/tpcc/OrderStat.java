@@ -5,19 +5,18 @@ import java.sql.SQLException;
 
 public class OrderStat implements TpccConstants{
 	
-	TpccStatements pStmts;
+	private static TpccStatements pStmts;
 	
 	public OrderStat(TpccStatements pStmts) {
 		this.pStmts = pStmts;
 	}
 
-	int ordStat( int t_num,
+	static int ordStat( int t_num,
 		     int w_id_arg,		/* warehouse id */
 		     int d_id_arg,		/* district id */
 		     int byname,		/* select by c_id or c_last? */
 		     int c_id_arg,		/* customer id */
-		     String c_last_arg, /* customer last name, format? */
-		     TpccStatements pStmts
+		     String c_last_arg  /* customer last name, format? */
 	)
 	{
 		

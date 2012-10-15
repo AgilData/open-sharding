@@ -8,24 +8,24 @@ import java.util.Date;
 
 public class NewOrder implements TpccConstants {
 	
-	private TpccStatements pStmts;
+	private static TpccStatements pStmts;
 	
-	private String s_dist_01 = null;
-	private String s_dist_02 = null;
-	private String s_dist_03 = null;
-	private String s_dist_04 = null;
-	private String s_dist_05 = null;
-	private String s_dist_06 = null;
-	private String s_dist_07 = null;
-	private String s_dist_08 = null;
-	private String s_dist_09 = null;
-	private String s_dist_10 = null;
+	private static String s_dist_01 = null;
+	private static String s_dist_02 = null;
+	private static String s_dist_03 = null;
+	private static String s_dist_04 = null;
+	private static String s_dist_05 = null;
+	private static String s_dist_06 = null;
+	private static String s_dist_07 = null;
+	private static String s_dist_08 = null;
+	private static String s_dist_09 = null;
+	private static String s_dist_10 = null;
 	
 	public NewOrder(TpccStatements pStmts) {
 		this.pStmts = pStmts;
 	}
 	
-	private String pickDistInfo(String ol_dist_info, int ol_supply_w_id){
+	private static String pickDistInfo(String ol_dist_info, int ol_supply_w_id){
 		switch(ol_supply_w_id){
 		case 1:
 			ol_dist_info = s_dist_01;
@@ -62,7 +62,7 @@ public class NewOrder implements TpccConstants {
 		return ol_dist_info;
 	}
 	
-	public int neword( int t_num,
+	public static int neword( int t_num,
 		    int w_id_arg,		/* warehouse id */
 		    int d_id_arg,		/* district id */
 		    int c_id_arg,		/* customer id */
@@ -117,7 +117,9 @@ public class NewOrder implements TpccConstants {
 
 			int proceed = 0;
 			//struct timespec tbuf1,tbuf_start;
-			//clock_t clk1,clk_start;	
+			//clock_t clk1,clk_start;
+			long beginTime = 0;
+			long endTime = 0;
 			
 			//Timestamp 
 			Calendar calendar = Calendar.getInstance();
