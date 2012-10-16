@@ -1,6 +1,5 @@
 package org.opensharding.tpcc;
 
-import java.io.File;
 import java.io.PrintWriter;
 
 

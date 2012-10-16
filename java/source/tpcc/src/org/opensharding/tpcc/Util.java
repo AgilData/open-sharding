@@ -83,7 +83,7 @@ public class Util implements TpccConstants {
 	  
 	}
 	
-	public void setSeed (int seed)
+	public static void setSeed (int seed)
 	{
 		generate.setSeed(seed);
 	}
@@ -141,16 +141,16 @@ public class Util implements TpccConstants {
 	  * characters of a random length of minimum x, maximum y, and
 	  * mean (y+x)/2
 	  */
-	 public int makeAlphaString(int x, int y, char str[]) {
+	 public static int makeAlphaString(int x, int y, String str) {
 		 
 		 char[] alphanum = ("0123456789" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz").toCharArray();
 		 int arrmax = 61;  /* index of last array element */
 		 int i;
 		 int len;
 		 len = randomNumber(x, y);
-
+		 
 		 for (i = 0; i < len; i++)
-		 		str[i] = alphanum[randomNumber(0, arrmax)];
+		 		str = str + alphanum[randomNumber(0, arrmax)];
 
 		 return len;
 
@@ -159,7 +159,7 @@ public class Util implements TpccConstants {
 	 /*
 	  * like MakeAlphaString, only numeric characters only
 	  */
-	 public int makeNumberString (int x, int y, char str[])
+	 public static int makeNumberString (int x, int y, String str)
 	 {
 	 	char[] numeric = "0123456789".toCharArray();
 	 	int arrmax = 9;
@@ -169,12 +169,12 @@ public class Util implements TpccConstants {
 	 	len = randomNumber(x, y);
 
 	 	for (i = 0; i < len; i++)
-	 		str[i] = numeric[randomNumber(0, arrmax)];
+	 		str = str + numeric[randomNumber(0, arrmax)];
 
 	 	return len;
 	 }
 	 
-	 public void initPermutation () 
+	 public static void initPermutation () 
 	 {
 	 	int i,j = 0;
 	 	int[] tempNums = new int[CUST_PER_DIST];
@@ -203,7 +203,7 @@ public class Util implements TpccConstants {
 	 	}
 	 }
 
-	 public int getPermutation ()
+	 public static int getPermutation ()
 	 {
 			if ( permCount >= ORD_PER_DIST ) {
 				throw new RuntimeException("GetPermutation: past end of list!\n");
