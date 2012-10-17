@@ -93,7 +93,13 @@ public class Util implements TpccConstants {
 	 */
 	public static int randomNumber (int min, int max)
 	{
-		return min + (generate.nextInt() % ((max - min) + 1));
+		int next = generate.nextInt();
+		int div = next % ((max - min) + 1);
+		if(div < 0){
+			div = div * -1;
+		}
+		int value = min + div;
+		return value;
 	}
 	
 	/*
@@ -141,18 +147,23 @@ public class Util implements TpccConstants {
 	  * characters of a random length of minimum x, maximum y, and
 	  * mean (y+x)/2
 	  */
-	 public static int makeAlphaString(int x, int y, String str) {
-		 
-		 char[] alphanum = ("0123456789" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz").toCharArray();
+	 public static String makeAlphaString(int x, int y) {
+		 String str = null;
+		 String temp = "0123456789" + "ABCDEFGHIJKLMNOPQRSTUVWXYZ" + "abcdefghijklmnopqrstuvwxyz";
+		 char[] alphanum = temp.toCharArray();
 		 int arrmax = 61;  /* index of last array element */
 		 int i;
 		 int len;
 		 len = randomNumber(x, y);
 		 
 		 for (i = 0; i < len; i++)
-		 		str = str + alphanum[randomNumber(0, arrmax)];
+			 if (str != null){
+				 str = str + alphanum[randomNumber(0, arrmax)];
+			 }else{
+				 str = "" + alphanum[randomNumber(0, arrmax)];
+			 }
 
-		 return len;
+		 return str;
 
 	 }
 	

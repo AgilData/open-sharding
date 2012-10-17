@@ -4,31 +4,28 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.sql.Timestamp;
-import java.util.Calendar;
-import java.util.Date;
+
 
 public class Tpcc implements TpccConstants {
 	/* Global SQL Variables */
-	long count_ware = 0;
-	int fd = 0;
-	int seed = 0;
+	static long count_ware = 0;
+	static int fd = 0;
+	static int seed = 0;
 
-	int particle_flg = 0; /* "1" means particle mode */
-	int part_no = 0; /* 1:items 2:warehouse 3:customer 4:orders */
-	long min_ware = 1;
-	long max_ware;
+	static int particle_flg = 0; /* "1" means particle mode */
+	static int part_no = 0; /* 1:items 2:warehouse 3:customer 4:orders */
+	static long min_ware = 1;
+	static long max_ware;
 
 	/* Global Variables */
-	int i = 0;
-	int is_local = 1;           /* "1" mean local */
-	int DB_STRING_MAX = 51;
-	boolean option_debug = false;	/* 1 if generating debug output    */
+	static int i = 0;
+	static int is_local = 1;           /* "1" mean local */
+	static int DB_STRING_MAX = 51;
+	static boolean option_debug = false;	/* 1 if generating debug output    */
 
 	
-	private void parseHost(String host, String from)
+	private static void parseHost(String host, String from)
 	{
-	  int length = 0;
 	  if( !from.contains(":") ){
 		  host = from;
 	  }
@@ -40,7 +37,7 @@ public class Tpcc implements TpccConstants {
 	 host = host + '\0';
 	}
 	
-	private int parsePort(String from)
+	private static int parsePort(String from)
 	{
 	  if(!from.contains(":"))
 	    return 3306;
@@ -65,17 +62,14 @@ public class Tpcc implements TpccConstants {
 	 * main() | ARGUMENTS |      Warehouses n [Debug] [Help]
 	 * +==================================================================
 	 */
-	void main(String[] argv){
-		String arg = null;
-	    String ptr = null;
+	@SuppressWarnings("null")
+	public static void main(String[] argv){
 		String connect_string = null;
 		String db_string = null;
 		String db_user = null;
 		String db_password = null;
 	    int port= 3306;
 	    int shardCount = 0;
-
-		int i = 0;
 
 		System.out.printf("*************************************\n");
 		System.out.printf("*** ###easy### TPC-C Data Loader  ***\n");
@@ -114,12 +108,17 @@ public class Tpcc implements TpccConstants {
 		    System.out.printf("\n expecting positive number of warehouses\n");
 		    System.exit(1);
 		}
-	        //strcpy(connect_string, argv[1]);
-	    parseHost(connect_string, argv[1]);
+	    //strcpy(connect_string, argv[1]);
+	    /*parseHost(connect_string, argv[1]);
+	    if(connect_string == null){
+	    	System.out.println("Failed to parse the host.");
+	    	System.exit(1);
+	    }*/
+		connect_string = argv[1];
 	    port= parsePort(argv[1]);
-		db_string = db_string + argv[2];
-		db_user = db_user + argv[3];
-		db_password = db_password + argv[4];
+		db_string = argv[2];
+		db_user = argv[3];
+		db_password = argv[4];
 		shardCount = Integer.parseInt(argv[5]);
 
 		if(connect_string.equals("1")){
@@ -152,28 +151,9 @@ public class Tpcc implements TpccConstants {
 		    System.out.printf("     [MAX WH]: %d\n", max_ware);
 		}
 
-		/*fd = open("/dev/urandom", O_RDONLY);
-		if (fd == -1) {
-		    fd = open("/dev/random", O_RDONLY);
-		    if (fd == -1) {
-			struct timeval  tv;
-			gettimeofday(&tv, NNULL);
-			seed = (tv.tv_sec ^ tv.tv_usec) * tv.tv_sec * tv.tv_usec ^ tv.tv_sec;
-		    }else{
-			read(fd, &seed, sizeof(seed));
-			close(fd);
-		    }
-		}else{
-		    read(fd, &seed, sizeof(seed));
-		    close(fd);
-		}*/ 
 		//TODO: Pass the seed in as a variable.
 		Util.setSeed(seed);
 
-		//Time Stamp
-        Calendar calendar = Calendar.getInstance();
-		Date now = calendar.getTime();
-		Timestamp currentTimeStamp = new Timestamp(now.getTime());
 
 		/* EXEC SQL WHENEVER SQLERROR GOTO Error_SqlCall; */
 		try {
@@ -225,8 +205,6 @@ public class Tpcc implements TpccConstants {
 		} catch (SQLException e) {
 			throw new RuntimeException("Could not set foreign key checks error", e);
 		}
-	
-
 	
 
 		System.out.printf("TPCC Data Load Started...\n");

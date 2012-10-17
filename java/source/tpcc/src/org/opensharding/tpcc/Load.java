@@ -47,7 +47,7 @@ public class Load implements TpccConstants {
 		for (i = 0; i < MAXITEMS / 10; i++) {
 			do {
 				pos = Util.randomNumber(0, MAXITEMS);
-			} while (orig[pos] != 0); //TODO: Fix this check system
+			} while (orig[pos] != 0); 
 			orig[pos] = 1;
 		}
 		
@@ -60,15 +60,19 @@ public class Load implements TpccConstants {
 			/* Generate Item Data */
 			i_im_id = Util.randomNumber(1, 10000);
 
-	        Util.makeAlphaString(14, 24, i_name);
+	       i_name =  Util.makeAlphaString(14, 24);
+	        if(i_name == null){
+	        	System.out.println("I_name null.");
+	        	System.exit(1);
+	        }
 
 			i_price = (float) ((int)( Util.randomNumber(100, 10000) ) / 100.0);
 
-			idatasize = Util.makeAlphaString(26, 50, i_data);
-
+			i_data =  Util.makeAlphaString(26, 50);
 			if (orig[i_id] != 0) {
-				char[] tempData = i_data.toCharArray();
-				pos = Util.randomNumber(0, idatasize - 8);
+				
+				pos = Util.randomNumber(0, i_data.length() - 8);
+				char[] tempData = new char[i_data.length() + 8];
 				tempData[pos] = 'o';
 				tempData[pos + 1] = 'r';
 				tempData[pos + 2] = 'i';
@@ -77,17 +81,18 @@ public class Load implements TpccConstants {
 				tempData[pos + 5] = 'n';
 				tempData[pos + 6] = 'a';
 				tempData[pos + 7] = 'l';
+				i_data = tempData.toString();
 			}
-			if (option_debug)
-				System.out.printf("IID = %ld, Name= %16s, Price = %5.2f\n",
-				       i_id, i_name, i_price);
+			
+			/*System.out.printf("IID = %d, Name= %s, Price = %f\n",
+				       i_id, i_name, i_price); *///DEBUG
 
 			/* EXEC SQL INSERT INTO
 			                item
 			                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
 			try {
-				stmt.addBatch("INSERT INTO item values(" + i_id + ":" + i_im_id + ":" 
-								+ i_name + ":" + i_price + ":" + i_data + ")");
+				stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+								+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 			} catch (SQLException e) {
 				throw new RuntimeException("Item insert error", e);
 			}
@@ -95,7 +100,7 @@ public class Load implements TpccConstants {
 			if ( (i_id % 100) == 0) {
 				System.out.printf(".");
 				if ( (i_id % 5000) == 0)
-					System.out.printf(" %ld\n", i_id);
+					System.out.printf(" %d\n", i_id);
 			}
 		}
 
@@ -158,18 +163,18 @@ public class Load implements TpccConstants {
 				}
 				/* Generate Warehouse Data */
 	
-		        Util.makeAlphaString(6, 10, w_name);
-				Util.makeAlphaString(10, 20, w_street_1);
-				Util.makeAlphaString(10, 20, w_street_2);
-				Util.makeAlphaString(10, 20, w_city);
-				Util.makeAlphaString(2, 2, w_state);
-				Util.makeAlphaString(9, 9, w_zip);
+		        w_name = Util.makeAlphaString(6, 10);
+				w_street_1 =Util.makeAlphaString(10, 20);
+				w_street_2 = Util.makeAlphaString(10, 20);
+				w_city = Util.makeAlphaString(10, 20);
+				w_state = Util.makeAlphaString(2, 2);
+				w_zip = Util.makeAlphaString(9, 9);
 	
 				w_tax = (float) (((float) Util.randomNumber(10, 20)) / 100.0);
 				w_ytd = (float) 3000000.00;
 	
 				if (option_debug)
-					System.out.printf("WID = %ld, Name= %16s, Tax = %5.2f\n",
+					System.out.printf("WID = %d, Name= %s, Tax = %f\n",
 					       w_id, w_name, w_tax);
 	
 				/*EXEC SQL INSERT INTO
@@ -179,9 +184,9 @@ public class Load implements TpccConstants {
 						       :w_zip,:w_tax,:w_ytd);*/
 				//   /*DBS_HINT: dbs_shard_action=shard_read, dbs_pshard=2 */
 				try {
-					stmt[currentShard].addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-								   + currentShard + " "
-								   + "INSET INTO warehouse values("
+					stmt[currentShard].addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+								   + currentShard + "*/"
+								   + "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_yd) values("
 							       + w_id + "," 
 							       + w_name + "," 
 							       + w_street_1 + "," 
@@ -299,7 +304,7 @@ public class Load implements TpccConstants {
 	    	shardValue++;
 	    }
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr;*/
-		System.out.printf("Loading Stock Wid=%ld\n", w_id);
+		System.out.printf("Loading Stock Wid=%d\n", w_id);
 		s_w_id = w_id;
 
 		for (i = 0; i < MAXITEMS / 10; i++)
@@ -317,18 +322,20 @@ public class Load implements TpccConstants {
 			/* Generate Stock Data */
 			s_quantity = Util.randomNumber(10, 100);
 
-			Util.makeAlphaString(24, 24, s_dist_01);
-			Util.makeAlphaString(24, 24, s_dist_02);
-			Util.makeAlphaString(24, 24, s_dist_03);
-			Util.makeAlphaString(24, 24, s_dist_04);
-			Util.makeAlphaString(24, 24, s_dist_05);
-			Util.makeAlphaString(24, 24, s_dist_06);
-			Util.makeAlphaString(24, 24, s_dist_07);
-			Util.makeAlphaString(24, 24, s_dist_08);
-			Util.makeAlphaString(24, 24, s_dist_09);
-			Util.makeAlphaString(24, 24, s_dist_10);
-			sdatasize = Util.makeAlphaString(26, 50, s_data);
+			s_dist_01 = Util.makeAlphaString(24, 24);
+			s_dist_02 = Util.makeAlphaString(24, 24);
+			s_dist_03 = Util.makeAlphaString(24, 24);
+			s_dist_04 = Util.makeAlphaString(24, 24);
+			s_dist_05 = Util.makeAlphaString(24, 24);
+			s_dist_06 = Util.makeAlphaString(24, 24);
+			s_dist_07 = Util.makeAlphaString(24, 24);
+			s_dist_08 = Util.makeAlphaString(24, 24);
+			s_dist_09 = Util.makeAlphaString(24, 24);
+			s_dist_10 = Util.makeAlphaString(24, 24);
 
+			
+			s_data = Util.makeAlphaString(26, 50);
+			sdatasize = s_data.length();
 			if (orig[s_i_id] != 0) {//TODO:Change this later
 				pos = Util.randomNumber(0, sdatasize - 8);
 				s_data = s_data + 'o' + 'r' + 'i' + 'g' + 'i' + 'n' + 'a' + 'l';
@@ -340,9 +347,9 @@ public class Load implements TpccConstants {
 					       :s_dist_06,:s_dist_07,:s_dist_08,:s_dist_09,:s_dist_10,
 					       0, 0, 0,:s_data);*/
 			try {
-				stmt.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							  + shardValue + " "
-							  + "INSERT INTO stock values("
+				stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							  + shardValue + "*/"
+							  + "INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
 							  + s_i_id + ","
 							  + s_w_id + ","
 							  + s_quantity + ","
@@ -365,13 +372,13 @@ public class Load implements TpccConstants {
 			}
 
 			if (optionDebug)
-				System.out.printf("SID = %ld, WID = %ld, Quan = %ld\n",
+				System.out.printf("SID = %d, WID = %d, Quan = %d\n",
 				       s_i_id, s_w_id, s_quantity);
 
 			if ((s_i_id % 100) == 0) {
 				System.out.printf(".");
 				if ((s_i_id % 5000) == 0)
-					System.out.printf(" %ld\n", s_i_id);
+					System.out.printf(" %d\n", s_i_id);
 			}
 		}
 		
@@ -432,12 +439,12 @@ public class Load implements TpccConstants {
 
 			/* Generate District Data */
 
-			Util.makeAlphaString(6, 10, d_name);
-			Util.makeAlphaString(10, 20, d_street_1);
-			Util.makeAlphaString(10, 20, d_street_2);
-			Util.makeAlphaString(10, 20, d_city);
-			Util.makeAlphaString(2, 2, d_state);
-			Util.makeAlphaString(9, 9, d_zip);
+			d_name = Util.makeAlphaString(6, 10);
+			d_street_1 = Util.makeAlphaString(10, 20);
+			d_street_2 = Util.makeAlphaString(10, 20);
+			d_city = Util.makeAlphaString(10, 20);
+			d_state = Util.makeAlphaString(2, 2);
+			d_zip = Util.makeAlphaString(9, 9);
 
 			d_tax = (float) (((float) Util.randomNumber(10, 20)) / 100.0);
 
@@ -447,9 +454,9 @@ public class Load implements TpccConstants {
 					       :d_street_1,:d_street_2,:d_city,:d_state,:d_zip,
 					       :d_tax,:d_ytd,:d_next_o_id);*/
 			try {
-				stmt.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							  + shardValue + " "
-							  + "INSERT INTO district values("
+				stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							  + shardValue + "*/"
+							  + "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
 							  + d_id + ","
 							  + d_w_id + ","
 							  + d_name + ","
@@ -465,7 +472,7 @@ public class Load implements TpccConstants {
 				throw new RuntimeException("District insert batch error", e);
 			}
 			if (optionDebug)
-				System.out.printf("DID = %ld, WID = %ld, Name = %10s, Tax = %5.2f\n",
+				System.out.printf("DID = %d, WID = %d, Name = %s, Tax = %f\n",
 				       d_id, d_w_id, d_name, d_tax);
 
 		}
@@ -529,7 +536,7 @@ public class Load implements TpccConstants {
 	    	shardValue++;
 	    }
 
-		System.out.printf("Loading Customer for DID=%ld, WID=%ld\n", d_id, w_id);
+		System.out.printf("Loading Customer for DID=%d, WID=%d\n", d_id, w_id);
 
 	retry:
 	    if (retried)
@@ -541,7 +548,7 @@ public class Load implements TpccConstants {
 			c_d_id = d_id;
 			c_w_id = w_id;
 
-			Util.makeAlphaString(8, 16, c_first);
+			c_first = Util.makeAlphaString(8, 16);
 			c_middle = c_middle + 'O' + 'E' + 0;
 
 			if (c_id <= 1000) {
@@ -550,11 +557,11 @@ public class Load implements TpccConstants {
 				Util.lastName(Util.nuRand(255, 0, 999), c_last);
 			}
 
-			Util.makeAlphaString(10, 20, c_street_1);
-			Util.makeAlphaString(10, 20, c_street_2);
-			Util.makeAlphaString(10, 20, c_city);
-			Util.makeAlphaString(2, 2, c_state);
-			Util.makeAlphaString(9, 9, c_zip);
+			c_street_1 = Util.makeAlphaString(10, 20);
+			c_street_2 = Util.makeAlphaString(10, 20);
+			c_city = Util.makeAlphaString(10, 20);
+			c_state = Util.makeAlphaString(2, 2);
+			c_zip = Util.makeAlphaString(9, 9);
 			
 			Util.makeNumberString(16, 16, c_phone);
 
@@ -568,7 +575,7 @@ public class Load implements TpccConstants {
 			c_discount = (float) (((float) Util.randomNumber(0, 50)) / 100.0);
 			c_balance = (float) -10.0;
 
-			Util.makeAlphaString(300, 500, c_data);
+			c_data = Util.makeAlphaString(300, 500);
 			//gettimestamp(datetime, STRFTIME_FORMAT, TIMESTAMP_LEN); Java Equivalent below?
 			Calendar calendar = Calendar.getInstance();
 			Date now = calendar.getTime();
@@ -585,9 +592,9 @@ public class Load implements TpccConstants {
 					  :c_credit_lim,:c_discount,:c_balance,
 					  10.0, 1, 0,:c_data);*/
 			try {
-				stmtCust.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-						  + shardValue + " "
-						  + "INSERT INTO customer values("
+				stmtCust.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+						  + shardValue + "*/"
+						  + "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
 						  + c_id + ","
 						  + c_d_id + ","
 						  + c_w_id + ","
@@ -615,7 +622,7 @@ public class Load implements TpccConstants {
 
 			h_amount = (float) 10.0;
 
-			Util.makeAlphaString(12, 24, h_data);
+			h_data = Util.makeAlphaString(12, 24);
 
 			/*EXEC SQL INSERT INTO
 			                history
@@ -623,9 +630,9 @@ public class Load implements TpccConstants {
 					       :c_d_id,:c_w_id, :timestamp,
 					       :h_amount,:h_data);*/
 			try {
-				stmtHist.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-						      + shardValue + " "
-						      + "INSERT INT history values("
+				stmtHist.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+						      + shardValue + "*/"
+						      + "INSERT INT history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
 						      + c_id + ","
 						      + c_d_id + ","
 						      + c_w_id + ","
@@ -638,12 +645,12 @@ public class Load implements TpccConstants {
 				throw new RuntimeException("Insert into History error", e);
 			}
 			if (optionDebug)
-				System.out.printf("CID = %ld, LST = %s, P# = %s\n",
+				System.out.printf("CID = %d, LST = %s, P# = %s\n",
 				       c_id, c_last, c_phone);
 			if ((c_id % 100) == 0) {
 	 			System.out.printf(".");
 				if ((c_id % 1000) == 0)
-					System.out.printf(" %ld\n", c_id);
+					System.out.printf(" %d\n", c_id);
 			}
 		}
 		
@@ -708,7 +715,7 @@ public class Load implements TpccConstants {
 	    	shardValue++;
 	    }
 
-		System.out.printf("Loading Orders for D=%ld, W= %ld\n", d_id, w_id);
+		System.out.printf("Loading Orders for D=%d, W= %d\n", d_id, w_id);
 		o_d_id = d_id;
 		o_w_id = w_id;
 	retry:
@@ -736,9 +743,9 @@ public class Load implements TpccConstants {
 						       :timestamp,
 						       NULL,:o_ol_cnt, 1);*/
 				try {
-					stmtOrd.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + " "
-							      + "INSERT INTO orders values("
+					stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							      + shardValue + "*/"
+							      + "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ","
@@ -755,9 +762,9 @@ public class Load implements TpccConstants {
 				                new_orders
 				                values(:o_id,:o_d_id,:o_w_id);*/
 				try {
-					stmtNewOrd.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + " "
-							      + "INSERT INTO new_orders values("
+					stmtNewOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							      + shardValue + "*/"
+							      + "INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ")");
@@ -771,9 +778,9 @@ public class Load implements TpccConstants {
 					   :timestamp,
 					   :o_carrier_id,:o_ol_cnt, 1);*/
 				try {
-					stmtOrd.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + " "
-							      + "INSERT INTO orders values("
+					stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							      + shardValue + "*/"
+							      + "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ","
@@ -790,7 +797,7 @@ public class Load implements TpccConstants {
 
 
 			if (optionDebug)
-				System.out.printf("OID = %ld, CID = %ld, DID = %ld, WID = %ld\n",
+				System.out.printf("OID = %d, CID = %d, DID = %d, WID = %d\n",
 				       o_id, o_c_id, o_d_id, o_w_id);
 
 			for (ol = 1; ol <= o_ol_cnt; ol++) {
@@ -800,7 +807,7 @@ public class Load implements TpccConstants {
 				ol_quantity = 5;
 				ol_amount = (float) 0.0;
 
-				Util.makeAlphaString(24, 24, ol_dist_info);
+				ol_dist_info = Util.makeAlphaString(24, 24);
 
 				tmp_float = (float) ((float) (Util.randomNumber(10, 10000)) / 100.0);
 
@@ -811,9 +818,9 @@ public class Load implements TpccConstants {
 							       :ol_i_id,:ol_supply_w_id, NULL,
 							       :ol_quantity,:ol_amount,:ol_dist_info);*/
 					try {
-						stmtOrdLn.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + " "
-							      + "INSERT INTO order_line values("
+						stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							      + shardValue + "*/"
+							      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ","
@@ -835,9 +842,9 @@ public class Load implements TpccConstants {
 						   :timestamp,
 						   :ol_quantity,:tmp_float,:ol_dist_info);*/
 					try {
-						stmtOrdLn.addBatch("DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + " "
-							      + "INSERT INTO order_line values("
+						stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							      + shardValue + "*/"
+							      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ","
@@ -854,7 +861,7 @@ public class Load implements TpccConstants {
 				}
 
 				if (optionDebug)
-					System.out.printf("OL = %ld, IID = %ld, QUAN = %ld, AMT = %8.2f\n",
+					System.out.printf("OL = %d, IID = %d, QUAN = %d, AMT = %f\n",
 					       ol, ol_i_id, ol_quantity, ol_amount);
 
 			}
@@ -862,7 +869,7 @@ public class Load implements TpccConstants {
 				System.out.printf(".");
 
 	 			if ( (o_id % 1000) == 0)
-					System.out.printf(" %ld\n", o_id);
+					System.out.printf(" %d\n", o_id);
 			}
 		}
 		try {
