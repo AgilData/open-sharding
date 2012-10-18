@@ -109,6 +109,7 @@ public class Payment implements TpccConstants{
 			Timestamp currentTimeStamp = new Timestamp(now.getTime());
 	
 			proceed = 1;
+			System.out.printf("PROCEED %d", proceed);
 			//Get prepared statement
 			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
 			try {
@@ -281,6 +282,7 @@ public class Payment implements TpccConstants{
 				//Get prepared statement
 				//"UPDATE customer SET c_balance = ?, c_data = ? WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
 				try {
+					System.out.print("Executed UPDATE.\n");
 					pStmts.getStatement(17).setFloat(1, c_balance);
 					pStmts.getStatement(17).setString(2, c_data);
 					pStmts.getStatement(17).setInt(3, c_w_id);

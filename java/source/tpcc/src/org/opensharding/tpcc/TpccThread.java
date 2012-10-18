@@ -5,7 +5,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 
 public class TpccThread extends Thread {
-	Thread runner;
+
 	int number;
 	int port;
 	int is_local;
