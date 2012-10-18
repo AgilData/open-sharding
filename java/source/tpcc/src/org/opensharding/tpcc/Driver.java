@@ -42,6 +42,9 @@ public class Driver implements TpccConstants {
 	private Connection conn;
 	private TpccStatements pStmts;
 	
+	// Transaction instances.
+	private NewOrder newOrder;
+	
 	/**
 	 * Constructor.
 	 * @param conn
@@ -51,6 +54,9 @@ public class Driver implements TpccConstants {
 			this.conn = conn;
 			
 			pStmts = new TpccStatements(conn);
+			
+			// Initialize the transactions.
+			newOrder = new NewOrder(pStmts);
 			
 		} catch(Throwable th) {
 			throw new RuntimeException("Error initializing Driver", th);
@@ -155,7 +161,7 @@ public class Driver implements TpccConstants {
 	   // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = NewOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, pStmts);
+	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, pStmts);
 	    //  clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime =  System.nanoTime();
 
