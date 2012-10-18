@@ -22,8 +22,14 @@ public class NewOrder implements TpccConstants {
 	private String s_dist_09 = null;
 	private String s_dist_10 = null;
 	
+	TpccStatements pStmts;
+	
+	/**
+	 * Constructor.
+	 * @param pStmts
+	 */
 	public NewOrder(TpccStatements pStmts) {
-		//this.pStmts = pStmts;
+		this.pStmts = pStmts;
 	}
 	
 	private String pickDistInfo(String ol_dist_info, int ol_supply_w_id){
