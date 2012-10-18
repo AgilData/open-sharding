@@ -144,28 +144,15 @@ public class Load implements TpccConstants {
 		int tmp = 0;
 	    boolean retried = false;
 	    int currentShard = 0;
-	    Statement[] stmt;
-	    if(shardCount > 0){
-	    	stmt = new Statement[shardCount];
-	    }else{
-	    	 stmt = new Statement[1];
-	    }
+	    Statement stmt;
 	    
-	    for (int j =0; j<stmt.length; j++){
-	    	try {
-				stmt[j] = conn.createStatement();
-			} catch (SQLException e) {
-				throw new RuntimeException("Creation of statement failed", e);
-			}
-	    }
-	    
-	    for(int i =0; i<shardCount; i++){
-	    	try {
-				stmt[i] = conn.createStatement();
-			} catch (SQLException e) {
-				throw new RuntimeException("Statement warehouse creation error");
-			}
-	    }
+
+    	try {
+			stmt = conn.createStatement();
+		} catch (SQLException e) {
+			throw new RuntimeException("Creation of statement failed", e);
+		}
+
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
 
 		System.out.printf("Loading Warehouse \n");
@@ -176,7 +163,7 @@ public class Load implements TpccConstants {
 		    if (retried )
 		        System.out.printf("Retrying ....\n");
 		    retried = true;
-			for (; w_id <= max_ware; w_id++) {
+			for (w_id = 0; w_id <= max_ware; w_id++) {
 				
 				if( currentShard == shardCount){
 					currentShard = 1;
@@ -204,27 +191,27 @@ public class Load implements TpccConstants {
 				//   /*DBS_HINT: dbs_shard_action=shard_read, dbs_pshard=2 */
 				try {
 					if (shardCount > 0){
-						stmt[currentShard-1].addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+						stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 								   + currentShard + "*/"
-								   + "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_yd) values("
+								   + "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_ytd) values("
 							       + w_id + "," 
-							       + w_name + "," 
-							       + w_street_1 + "," 
-							       + w_street_2 + ","
-							       + w_city + ","
-							       + w_state + ","
-							       + w_zip + ","
+							       + "'" + w_name + "'" + "," 
+							       + "'" + w_street_1 + "'" + "," 
+							       + "'" + w_street_2 + "'" + ","
+							       + "'" + w_city + "'" + ","
+							       + "'" + w_state + "'" + ","
+							       + "'"  + w_zip + "'" + ","
 							       + w_tax + ","
 							       + w_ytd + ")");
 					}else{
-						stmt[0].addBatch("INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_yd) values("
+						stmt.addBatch("INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_ytd) values("
 							       + w_id + "," 
-							       + w_name + "," 
-							       + w_street_1 + "," 
-							       + w_street_2 + ","
-							       + w_city + ","
-							       + w_state + ","
-							       + w_zip + ","
+							       + "'" + w_name + "'" + "," 
+							       + "'" + w_street_1 + "'" + "," 
+							       + "'" + w_street_2 + "'" + ","
+							       + "'" + w_city + "'" + ","
+							       + "'" + w_state + "'" + ","
+							       + "'"  + w_zip + "'" + ","
 							       + w_tax + ","
 							       + w_ytd + ")");
 					}
@@ -235,19 +222,21 @@ public class Load implements TpccConstants {
 			
 	
 				currentShard++;
+				/** Make Rows associated with Warehouse **/
+				stock(w_id, conn, shardCount);
+				district(w_id, conn, shardCount);
 
 		}
 		/* EXEC SQL COMMIT WORK; */
 		//TODO: Throw an exception here
-		for(int i=0; i<shardCount; i++){
+		
 			try {
-				stmt[i].executeBatch();
-				stmt[i].close();
+				stmt.executeBatch();
+				stmt.close();
 			} catch (SQLException e) {
 				throw new RuntimeException("Warehouse batch error", e);
 			}
 			
-		}
 		
 		return;
 
@@ -301,7 +290,7 @@ public class Load implements TpccConstants {
 	 * ARGUMENTS |      w_id - warehouse id
 	 * +==================================================================
 	 */
-	public boolean stock(int w_id, Connection conn, int shardCount){
+	public static boolean stock(int w_id, Connection conn, int shardCount){
 		int s_i_id = 0;
 		int s_w_id = 0;
 		int s_quantity = 0;
@@ -371,7 +360,7 @@ public class Load implements TpccConstants {
 			sdatasize = s_data.length();
 			if (orig[s_i_id] != 0) {//TODO:Change this later
 				pos = Util.randomNumber(0, sdatasize - 8);
-				s_data = s_data + 'o' + 'r' + 'i' + 'g' + 'i' + 'n' + 'a' + 'l';
+				s_data = "original";
 			}
 			/*EXEC SQL INSERT INTO
 			                stock
@@ -387,39 +376,39 @@ public class Load implements TpccConstants {
 							  + s_i_id + ","
 							  + s_w_id + ","
 							  + s_quantity + ","
-							  + s_dist_01 + ","
-							  + s_dist_02 + ","
-							  + s_dist_03 + ","
-							  + s_dist_04 + ","
-							  + s_dist_05 + ","
-							  + s_dist_06 + ","
-							  + s_dist_07 + ","
-							  + s_dist_08 + ","
-							  + s_dist_09 + ","
-							  + s_dist_10 + ","
+							  + "'" + s_dist_01 + "'" + ","
+							  + "'" + s_dist_02 + "'" + ","
+							  + "'" + s_dist_03 + "'" + ","
+							  + "'" + s_dist_04 + "'" + ","
+							  + "'" + s_dist_05 + "'" + ","
+							  + "'" + s_dist_06 + "'" + ","
+							  + "'" + s_dist_07 + "'" + ","
+							  + "'" + s_dist_08 + "'" + ","
+							  + "'" + s_dist_09 + "'" + ","
+							  + "'" + s_dist_10 + "'" + ","
 							  + 0 + ","
 							  + 0 + ","
 							  + 0 + ","
-							  + s_data + ")");
+							  + "'" + s_data + "'" + ")");
 				}else{
 					stmt.addBatch("INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
 							  + s_i_id + ","
 							  + s_w_id + ","
 							  + s_quantity + ","
-							  + s_dist_01 + ","
-							  + s_dist_02 + ","
-							  + s_dist_03 + ","
-							  + s_dist_04 + ","
-							  + s_dist_05 + ","
-							  + s_dist_06 + ","
-							  + s_dist_07 + ","
-							  + s_dist_08 + ","
-							  + s_dist_09 + ","
-							  + s_dist_10 + ","
+							  + "'" + s_dist_01 + "'" + ","
+							  + "'" + s_dist_02 + "'" + ","
+							  + "'" + s_dist_03 + "'" + ","
+							  + "'" + s_dist_04 + "'" + ","
+							  + "'" + s_dist_05 + "'" + ","
+							  + "'" + s_dist_06 + "'" + ","
+							  + "'" + s_dist_07 + "'" + ","
+							  + "'" + s_dist_08 + "'" + ","
+							  + "'" + s_dist_09 + "'" + ","
+							  + "'" + s_dist_10 + "'" + ","
 							  + 0 + ","
 							  + 0 + ","
 							  + 0 + ","
-							  + s_data + ")");
+							  + "'" + s_data + "'" + ")");
 				}
 				
 			} catch (SQLException e) {
@@ -456,7 +445,7 @@ public class Load implements TpccConstants {
 	 * | ARGUMENTS |      w_id - warehouse id
 	 * +==================================================================
 	 */
-	public boolean district(int w_id, Connection conn, int shardCount) {
+	public static boolean district(int w_id, Connection conn, int shardCount) {
 		int d_id = 0;
 		int d_w_id = 0;
 		String d_name = null;
@@ -515,12 +504,12 @@ public class Load implements TpccConstants {
 							  + "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
 							  + d_id + ","
 							  + d_w_id + ","
-							  + d_name + ","
-							  + d_street_1 + ","
-							  + d_street_2 + ","
-							  + d_city + ","
-							  + d_state + ","
-							  + d_zip + ","
+							  + "'" + d_name + "'" + ","
+							  + "'" + d_street_1 + "'" + ","
+							  + "'" + d_street_2 + "'" + ","
+							  + "'" + d_city + "'" + ","
+							  + "'" + d_state + "'" + ","
+							  + "'" + d_zip + "'" + ","
 							  + d_tax + ","
 							  + d_ytd + ","
 							  + d_next_o_id + ")");
@@ -528,12 +517,12 @@ public class Load implements TpccConstants {
 					stmt.addBatch("INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
 							  + d_id + ","
 							  + d_w_id + ","
-							  + d_name + ","
-							  + d_street_1 + ","
-							  + d_street_2 + ","
-							  + d_city + ","
-							  + d_state + ","
-							  + d_zip + ","
+							  + "'" + d_name + "'" + ","
+							  + "'" + d_street_1 + "'" + ","
+							  + "'" + d_street_2 + "'" + ","
+							  + "'" + d_city + "'" + ","
+							  + "'" + d_state + "'" + ","
+							  + "'" + d_zip + "'" + ","
 							  + d_tax + ","
 							  + d_ytd + ","
 							  + d_next_o_id + ")");

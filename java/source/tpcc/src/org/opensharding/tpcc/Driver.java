@@ -27,7 +27,7 @@ public class Driver implements TpccConstants {
 	public int[][] retry2;
 	public int[][] failure2;
 
-	public double[] max_rt;
+	public double[] max_rt = new double[5];
 
 	public long[] clk_tck;
 
@@ -44,6 +44,10 @@ public class Driver implements TpccConstants {
 	
 	// Transaction instances.
 	private NewOrder newOrder;
+	private Payment payment;
+	private OrderStat orderStat;
+	private Slev slev;
+	private Delivery delivery;
 	
 	/**
 	 * Constructor.
@@ -57,6 +61,11 @@ public class Driver implements TpccConstants {
 			
 			// Initialize the transactions.
 			newOrder = new NewOrder(pStmts);
+			payment = new Payment(pStmts);
+			orderStat = new OrderStat(pStmts);
+			slev = new Slev(pStmts);
+			delivery = new Delivery(pStmts);
+			
 			
 		} catch(Throwable th) {
 			throw new RuntimeException("Error initializing Driver", th);
@@ -137,6 +146,7 @@ public class Driver implements TpccConstants {
 		w_id =Util.randomNumber(1 + (num_ware * c_num)/num_node,
 				    (num_ware * (c_num + 1))/num_node);
 	    }
+	    System.out.println("NUMBER OF WAREHOUSES " + w_id);
 	    d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST);
 
@@ -161,7 +171,7 @@ public class Driver implements TpccConstants {
 	   // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, pStmts);
+	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn);
 	    //  clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime =  System.nanoTime();
 
@@ -246,7 +256,8 @@ public class Driver implements TpccConstants {
 	    int c_id = 0;
 	    int h_amount = 0;
 	    String c_last = null;
-
+	    
+	    System.out.println("DO PAYMENT TRANSACTIONS");
 	    if(num_node==0){
 		w_id = Util.randomNumber(1, num_ware);
 	    }else{
@@ -274,7 +285,7 @@ public class Driver implements TpccConstants {
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = Payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, conn, pStmts);
+	      ret = payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, conn);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -356,7 +367,7 @@ public class Driver implements TpccConstants {
 	      //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = OrderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last, conn, pStmts);
+	      ret = orderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last, conn);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -428,7 +439,7 @@ public class Driver implements TpccConstants {
 	      //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = Delivery.delivery(t_num, w_id, o_carrier_id, conn, pStmts);
+	      ret = delivery.delivery(t_num, w_id, o_carrier_id, conn);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 	      if(ret >=1 ){
@@ -498,7 +509,7 @@ public class Driver implements TpccConstants {
 	     // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = Slev.slev(t_num, w_id, d_id, level, conn, pStmts);
+	      ret = slev.slev(t_num, w_id, d_id, level, conn);
 	      //clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 

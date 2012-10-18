@@ -10,13 +10,13 @@ import java.util.Date;
 
 public class Payment implements TpccConstants{
 	
-	private static TpccStatements pStmts;
+	private  TpccStatements pStmts;
 	
 	public Payment(TpccStatements pStmts){
 		this.pStmts = pStmts;
 	}
 	
-	public static int payment( int t_num,
+	public  int payment( int t_num,
 		     int w_id_arg,		/* warehouse id */
 		     int d_id_arg,		/* district id */
 		     int byname,		/* select by c_id or c_last? */
@@ -25,11 +25,13 @@ public class Payment implements TpccConstants{
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,	        /* customer last name */
 		     float h_amount_arg,	 /* payment amount */
-		     Connection conn,
-		     TpccStatements pStmts
+		     Connection conn
 	)
 	{
 		try{
+			// Start a transaction.
+			pStmts.getConnection().setAutoCommit(false);
+			
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;
@@ -109,10 +111,12 @@ public class Payment implements TpccConstants{
 			Timestamp currentTimeStamp = new Timestamp(now.getTime());
 	
 			proceed = 1;
-			System.out.printf("PROCEED %d", proceed);
+			
+			System.out.println("PAYMENT TRANSACTION");
 			//Get prepared statement
 			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
 			try {
+				
 				pStmts.getStatement(9).setFloat(1, h_amount);
 				pStmts.getStatement(9).setInt(2, w_id);
 				pStmts.getStatement(9).executeUpdate();
@@ -126,6 +130,7 @@ public class Payment implements TpccConstants{
 			
 			try {
 				pStmts.getStatement(10).setInt(1, w_id);
+				System.out.printf("SELECT w_street_1, w_street_2, w_city, w_state, w_zip, w_name FROM warehouse WHERE w_id = %d\n", w_id);
 				ResultSet rs = pStmts.getStatement(10).executeQuery();
 				if(rs.next()){
 					w_street_1 = rs.getString(1);
@@ -134,6 +139,7 @@ public class Payment implements TpccConstants{
 					w_state = rs.getString(4);
 					w_zip = rs.getString(5);
 					w_name = rs.getString(6);
+					System.out.printf("street 1: %s, street_2: %s, city: %s, state: %s, xip: %s, name: %s\n\n", w_street_1, w_street_2, w_city, w_state, w_zip, w_name);
 				}
 				rs.close();
 				

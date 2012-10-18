@@ -6,27 +6,26 @@ import java.sql.SQLException;
 
 public class OrderStat implements TpccConstants{
 	
-	//private static TpccStatements pStmts;
+	private  TpccStatements pStmts;
 	
 	public OrderStat(TpccStatements pStmts) {
-		//this.pStmts = pStmts;
+		this.pStmts = pStmts;
 	}
 
-	static int ordStat( int t_num,
+	public int ordStat( int t_num,
 		     int w_id_arg,		/* warehouse id */
 		     int d_id_arg,		/* district id */
 		     int byname,		/* select by c_id or c_last? */
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,  /* customer last name, format? */
-		     Connection conn, 
-		     TpccStatements pStmts
+		     Connection conn
 	)
 	{
 		
 		try {
 			
 			pStmts.getConnection().setAutoCommit(false);
-			
+			System.out.println("ORDER STAT");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;

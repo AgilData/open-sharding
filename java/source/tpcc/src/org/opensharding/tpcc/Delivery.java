@@ -6,13 +6,13 @@ import java.util.Date;
 
 public class Delivery implements TpccConstants {
 	
-	//private static TpccStatements pStmts;
+	private  TpccStatements pStmts;
 	
 	public Delivery(TpccStatements pStmts) {
-		//this.pStmts = pStmts;
+		this.pStmts = pStmts;
 	}
 	
-	public static int delivery( int t_num, int w_id_arg, int o_carrier_id_arg,  Connection conn, TpccStatements pStmts){
+	public  int delivery( int t_num, int w_id_arg, int o_carrier_id_arg,  Connection conn){
 		try{
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);

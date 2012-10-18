@@ -72,7 +72,11 @@ public class TpccThread extends Thread {
 	//	    mysql_close(ctx[t_num]);
 	//	  
 	//	  }
-	
+			try {
+				conn.setAutoCommit(false);
+			} catch (SQLException e) {
+				throw new RuntimeException("Set AutoCommit error", e);
+			}
 			// Create a driver instance.
 			Driver driver = new Driver(conn);
 		 
