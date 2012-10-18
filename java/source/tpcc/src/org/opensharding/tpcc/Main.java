@@ -376,10 +376,8 @@ public class Main{
 //		    pthread_join( t[i], NULL );
 //		  }
 		  try {
-			//thr1.runner.join();
 			  thr1.join();
 		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
 			throw new RuntimeException("Could not join", e);
 		}
 

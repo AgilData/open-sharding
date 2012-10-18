@@ -1,5 +1,6 @@
 package org.opensharding.tpcc;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
@@ -8,7 +9,7 @@ import java.util.Date;
 
 public class NewOrder implements TpccConstants {
 	
-	private static TpccStatements pStmts;
+	//private static TpccStatements pStmts;
 	
 	private static String s_dist_01 = null;
 	private static String s_dist_02 = null;
@@ -22,7 +23,7 @@ public class NewOrder implements TpccConstants {
 	private static String s_dist_10 = null;
 	
 	public NewOrder(TpccStatements pStmts) {
-		this.pStmts = pStmts;
+		//this.pStmts = pStmts;
 	}
 	
 	private static String pickDistInfo(String ol_dist_info, int ol_supply_w_id){
@@ -70,7 +71,9 @@ public class NewOrder implements TpccConstants {
 		    int o_all_local_arg,	/* are all order lines local */
 		    int itemid[],		/* ids of items to be ordered */
 		    int supware[],		/* warehouses supplying items */
-		    int qty[]
+		    int qty[],
+		    Connection conn, 
+		    TpccStatements pStmts
 	)
 	{
 
@@ -127,6 +130,7 @@ public class NewOrder implements TpccConstants {
 			Timestamp currentTimeStamp = new Timestamp(now.getTime());
 			
 			proceed = 1;
+			
 			//Get prepared statement
 			//"SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = w_id AND c_d_id = ? AND c_id = ?"
 			try {

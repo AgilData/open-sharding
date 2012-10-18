@@ -1,14 +1,15 @@
 package org.opensharding.tpcc;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public class OrderStat implements TpccConstants{
 	
-	private static TpccStatements pStmts;
+	//private static TpccStatements pStmts;
 	
 	public OrderStat(TpccStatements pStmts) {
-		this.pStmts = pStmts;
+		//this.pStmts = pStmts;
 	}
 
 	static int ordStat( int t_num,
@@ -16,7 +17,9 @@ public class OrderStat implements TpccConstants{
 		     int d_id_arg,		/* district id */
 		     int byname,		/* select by c_id or c_last? */
 		     int c_id_arg,		/* customer id */
-		     String c_last_arg  /* customer last name, format? */
+		     String c_last_arg,  /* customer last name, format? */
+		     Connection conn, 
+		     TpccStatements pStmts
 	)
 	{
 		

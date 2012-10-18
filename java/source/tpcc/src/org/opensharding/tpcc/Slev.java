@@ -6,17 +6,19 @@ import java.sql.SQLException;
 
 public class Slev implements TpccConstants{
 	
-	private static TpccStatements pStmts;
+	//private static TpccStatements pStmts;
 	
 	public Slev(TpccStatements pStms){
-		this.pStmts = pStms;
+		//this.pStmts = pStms;
 	}
 	
 	
 	public static int slev( int t_num,
 			  int w_id_arg,		/* warehouse id */
 			  int d_id_arg,		/* district id */
-			  int level_arg		/* stock level */			  
+			  int level_arg,		/* stock level */	
+			  Connection conn, 
+			  TpccStatements pStmts
 		)
 		{
 			try{
