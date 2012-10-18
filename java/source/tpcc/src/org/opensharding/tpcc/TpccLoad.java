@@ -6,7 +6,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 
-public class Tpcc implements TpccConstants {
+public class TpccLoad implements TpccConstants {
 	/* Global SQL Variables */
 	static long count_ware = 0;
 	static int fd = 0;

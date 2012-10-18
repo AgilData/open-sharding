@@ -12,7 +12,7 @@ public class Util implements TpccConstants {
 	static int sl;
 	static int total;
 	
-	private static int[] seq = null;
+	private static int[] seq;
 	private static int nextNum = 0;
 	
 	static int permCount;
@@ -47,6 +47,9 @@ public class Util implements TpccConstants {
 		  for( i=0, j = total - 1; j>0; i++, j--){
 		    
 		    rmd = rnd.nextInt() % (j+1);
+		    if(rmd < 0){
+		    	rmd = rmd * -1;
+		    }
 		    tmp = seq[rmd+i];
 		    seq[rmd+i] = seq[i];
 		    seq[i] = tmp;
@@ -55,7 +58,7 @@ public class Util implements TpccConstants {
 		
 	}
 	
-	public void seqInit( int n, int p, int o, int d, int s){
+	public static void seqInit( int n, int p, int o, int d, int s){
 		
 		no = n;
 		py = p;
@@ -63,6 +66,10 @@ public class Util implements TpccConstants {
 		dl = d;
 		sl = s;
 		total = n + p + o + d + s;
+		System.out.printf("TOTAL:%d", total);
+		seq = new int[ total ];
+		  shuffle();
+		  nextNum = 0;
 		
 		
 	}
@@ -75,7 +82,6 @@ public class Util implements TpccConstants {
 		    shuffle();
 		    nextNum = 0;
 		  }
-	  
 	  retval = seq[nextNum];
 	  ++nextNum;
 		  

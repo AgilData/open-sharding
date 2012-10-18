@@ -6,10 +6,10 @@ import java.io.PrintWriter;
 public class Driver implements TpccConstants {
 	
 	//CHECK: The following variables are externs??
+	public static int activate_transaction = 1;
+	public static int counting_on;
 	public static int num_ware;
 	public static int num_conn;
-	public static int activate_transaction;
-	public static int counting_on;
 
 	public static int num_node;
 	public static int time_count;
@@ -37,8 +37,11 @@ public class Driver implements TpccConstants {
 	private static int RTIME_DELIVERY = 80;
 	private static int RTIME_SLEV = 20;
 	
-	public int driver (int t_num)
+	public static int driver (int t_num, int numWare, int numConn)
 	{
+		
+		num_ware = numWare;
+		num_conn = numConn;
 	    int i = 0;
 	    int j = 0;
 

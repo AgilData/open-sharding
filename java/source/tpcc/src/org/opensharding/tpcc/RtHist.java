@@ -14,7 +14,7 @@ public class RtHist implements TpccConstants{
 	
 	
 	/* initialize */
-	public void histInit(){
+	public static void histInit(){
 		int i = 0;
 		int j = 0;
 		  
@@ -41,7 +41,7 @@ public class RtHist implements TpccConstants{
 	}
 	
 	/* check point, add on total histgram, return 90% line */
-	public double histCkp( int transaction )
+	public static double histCkp( int transaction )
 	{
 	  int i;
 	  int total,tmp,line,line_set;
