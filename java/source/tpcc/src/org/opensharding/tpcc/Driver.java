@@ -1,6 +1,8 @@
 package org.opensharding.tpcc;
 
 import java.io.PrintWriter;
+import java.sql.Connection;
+import java.sql.Statement;
 
 
 public class Driver implements TpccConstants {
@@ -37,7 +39,7 @@ public class Driver implements TpccConstants {
 	private static int RTIME_DELIVERY = 80;
 	private static int RTIME_SLEV = 20;
 	
-	public static int driver (int t_num, int numWare, int numConn)
+	public static int driver (int t_num, int numWare, int numConn, Connection conn, TpccStatements pStmts)
 	{
 		
 		num_ware = numWare;
@@ -54,7 +56,7 @@ public class Driver implements TpccConstants {
 			doNeword(t_num);
 			break;
 		  case 1:
-			doPayment(t_num);
+			doPayment(t_num, conn, pStmts);
 			break;
 		  case 2:
 			doOrdstat(t_num);
@@ -199,7 +201,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * prepare data and execute payment transaction
 	 */
-	static int doPayment (int t_num)
+	static int doPayment (int t_num, Connection conn, TpccStatements pStmts)
 	{
 	    int c_num = 0;
 	    int byname = 0;
@@ -230,7 +232,7 @@ public class Driver implements TpccConstants {
 	    }
 	    d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST); 
-	    Util.lastName(Util.nuRand(255,0,999), c_last); 
+	    c_last = Util.lastName(Util.nuRand(255,0,999)); 
 	    h_amount = Util.randomNumber(1,5000);
 	    if (Util.randomNumber(1, 100) <= 60) {
 	        byname = 1; /* select by last name */
@@ -248,7 +250,7 @@ public class Driver implements TpccConstants {
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = Payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount);
+	      ret = Payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, conn, pStmts);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -320,7 +322,7 @@ public class Driver implements TpccConstants {
 	    }
 	    d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST); 
-	    Util.lastName(Util.nuRand(255,0,999), c_last); 
+	    c_last = Util.lastName(Util.nuRand(255,0,999)); 
 	    if (Util.randomNumber(1, 100) <= 60) {
 	        byname = 1; /* select by last name */
 	    }else{

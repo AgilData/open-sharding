@@ -3,6 +3,7 @@ package org.opensharding.tpcc;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
@@ -23,7 +24,9 @@ public class Payment implements TpccConstants{
 		     int c_d_id_arg,
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,	        /* customer last name */
-		     float h_amount_arg	        /* payment amount */
+		     float h_amount_arg,	 /* payment amount */
+		     Connection conn,
+		     TpccStatements pStmts
 	)
 	{
 		try{

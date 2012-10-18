@@ -16,7 +16,7 @@ public class Load implements TpccConstants {
 	 * ARGUMENTS |      none
 	 * +==================================================================
 	 */
-	public static void loadItems(Connection conn, boolean option_debug)
+	public static void loadItems(Connection conn, int shardCount, boolean option_debug)
 	{
 		optionDebug = option_debug;
 		int i_id = 0;
@@ -91,8 +91,14 @@ public class Load implements TpccConstants {
 			                item
 			                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
 			try {
-				stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-								+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+				if (shardCount > 0){
+					stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+				}else{
+					stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+				}
+				
 			} catch (SQLException e) {
 				throw new RuntimeException("Item insert error", e);
 			}
@@ -132,13 +138,27 @@ public class Load implements TpccConstants {
 	    String w_city = null;
 	    String w_state = null;
 	    String w_zip = null;
-		float w_tax = 0;
-		float w_ytd = 0;
+		double w_tax = 0;
+		double w_ytd = 0;
 
 		int tmp = 0;
 	    boolean retried = false;
 	    int currentShard = 0;
-	    Statement[] stmt = new Statement[shardCount];
+	    Statement[] stmt;
+	    if(shardCount > 0){
+	    	stmt = new Statement[shardCount];
+	    }else{
+	    	 stmt = new Statement[1];
+	    }
+	    
+	    for (int j =0; j<stmt.length; j++){
+	    	try {
+				stmt[j] = conn.createStatement();
+			} catch (SQLException e) {
+				throw new RuntimeException("Creation of statement failed", e);
+			}
+	    }
+	    
 	    for(int i =0; i<shardCount; i++){
 	    	try {
 				stmt[i] = conn.createStatement();
@@ -159,7 +179,7 @@ public class Load implements TpccConstants {
 			for (; w_id <= max_ware; w_id++) {
 				
 				if( currentShard == shardCount){
-					currentShard = 0;
+					currentShard = 1;
 				}
 				/* Generate Warehouse Data */
 	
@@ -170,13 +190,12 @@ public class Load implements TpccConstants {
 				w_state = Util.makeAlphaString(2, 2);
 				w_zip = Util.makeAlphaString(9, 9);
 	
-				w_tax = (float) (((float) Util.randomNumber(10, 20)) / 100.0);
-				w_ytd = (float) 3000000.00;
+				w_tax = ( (double) Util.randomNumber(10, 20) / 100.0);
+				w_ytd =  3000000.00;
 	
 				if (option_debug)
 					System.out.printf("WID = %d, Name= %s, Tax = %f\n",
 					       w_id, w_name, w_tax);
-	
 				/*EXEC SQL INSERT INTO
 				                warehouse
 				                values(:w_id,:w_name,
@@ -184,7 +203,8 @@ public class Load implements TpccConstants {
 						       :w_zip,:w_tax,:w_ytd);*/
 				//   /*DBS_HINT: dbs_shard_action=shard_read, dbs_pshard=2 */
 				try {
-					stmt[currentShard].addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+					if (shardCount > 0){
+						stmt[currentShard-1].addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 								   + currentShard + "*/"
 								   + "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_yd) values("
 							       + w_id + "," 
@@ -196,6 +216,19 @@ public class Load implements TpccConstants {
 							       + w_zip + ","
 							       + w_tax + ","
 							       + w_ytd + ")");
+					}else{
+						stmt[0].addBatch("INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_yd) values("
+							       + w_id + "," 
+							       + w_name + "," 
+							       + w_street_1 + "," 
+							       + w_street_2 + ","
+							       + w_city + ","
+							       + w_state + ","
+							       + w_zip + ","
+							       + w_tax + ","
+							       + w_ytd + ")");
+					}
+				
 				} catch (SQLException e) {
 					throw new RuntimeException("Warehouse insert error", e);
 				}
@@ -347,7 +380,8 @@ public class Load implements TpccConstants {
 					       :s_dist_06,:s_dist_07,:s_dist_08,:s_dist_09,:s_dist_10,
 					       0, 0, 0,:s_data);*/
 			try {
-				stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+				if(shardCount > 0){
+					stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 							  + shardValue + "*/"
 							  + "INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
 							  + s_i_id + ","
@@ -367,6 +401,27 @@ public class Load implements TpccConstants {
 							  + 0 + ","
 							  + 0 + ","
 							  + s_data + ")");
+				}else{
+					stmt.addBatch("INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
+							  + s_i_id + ","
+							  + s_w_id + ","
+							  + s_quantity + ","
+							  + s_dist_01 + ","
+							  + s_dist_02 + ","
+							  + s_dist_03 + ","
+							  + s_dist_04 + ","
+							  + s_dist_05 + ","
+							  + s_dist_06 + ","
+							  + s_dist_07 + ","
+							  + s_dist_08 + ","
+							  + s_dist_09 + ","
+							  + s_dist_10 + ","
+							  + 0 + ","
+							  + 0 + ","
+							  + 0 + ","
+							  + s_data + ")");
+				}
+				
 			} catch (SQLException e) {
 				throw new RuntimeException("Stock insert error", e);
 			}
@@ -454,7 +509,8 @@ public class Load implements TpccConstants {
 					       :d_street_1,:d_street_2,:d_city,:d_state,:d_zip,
 					       :d_tax,:d_ytd,:d_next_o_id);*/
 			try {
-				stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+				if(shardCount > 0 ){
+					stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 							  + shardValue + "*/"
 							  + "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
 							  + d_id + ","
@@ -468,6 +524,21 @@ public class Load implements TpccConstants {
 							  + d_tax + ","
 							  + d_ytd + ","
 							  + d_next_o_id + ")");
+				}else{
+					stmt.addBatch("INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
+							  + d_id + ","
+							  + d_w_id + ","
+							  + d_name + ","
+							  + d_street_1 + ","
+							  + d_street_2 + ","
+							  + d_city + ","
+							  + d_state + ","
+							  + d_zip + ","
+							  + d_tax + ","
+							  + d_ytd + ","
+							  + d_next_o_id + ")");
+				}
+				
 			} catch (SQLException e) {
 				throw new RuntimeException("District insert batch error", e);
 			}
@@ -516,7 +587,7 @@ public class Load implements TpccConstants {
 		float c_balance = 0;
 		String c_data = null;
 
-		float h_amount = 0;
+		double h_amount = 0.0;
 
 		String h_data = null;
 	    boolean retried = false;
@@ -549,12 +620,12 @@ public class Load implements TpccConstants {
 			c_w_id = w_id;
 
 			c_first = Util.makeAlphaString(8, 16);
-			c_middle = c_middle + 'O' + 'E' + 0;
+			c_middle = "O" + "E";
 
 			if (c_id <= 1000) {
-				Util.lastName(c_id - 1, c_last);
+				c_last = Util.lastName(c_id - 1);
 			} else {
-				Util.lastName(Util.nuRand(255, 0, 999), c_last);
+				c_last = Util.lastName(Util.nuRand(255, 0, 999));
 			}
 
 			c_street_1 = Util.makeAlphaString(10, 20);
@@ -566,10 +637,10 @@ public class Load implements TpccConstants {
 			Util.makeNumberString(16, 16, c_phone);
 
 			if (Util.randomNumber(0, 1) == 1)
-				c_credit = c_credit + 'G';
+				c_credit = "G";
 			else
-				c_credit = c_credit + 'B';
-			c_credit = c_credit + 'C'+ 0;
+				c_credit = "B";
+			c_credit = "C";
 
 			c_credit_lim = 50000;
 			c_discount = (float) (((float) Util.randomNumber(0, 50)) / 100.0);
@@ -580,7 +651,7 @@ public class Load implements TpccConstants {
 			Calendar calendar = Calendar.getInstance();
 			Date now = calendar.getTime();
 			Timestamp currentTimeStamp = new Timestamp(now.getTime());
-
+			Date date = new java.sql.Date(calendar.getTimeInMillis());
 			/*EXEC SQL INSERT INTO
 			                customer
 			                values(:c_id,:c_d_id,:c_w_id,
@@ -592,35 +663,61 @@ public class Load implements TpccConstants {
 					  :c_credit_lim,:c_discount,:c_balance,
 					  10.0, 1, 0,:c_data);*/
 			try {
-				stmtCust.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-						  + shardValue + "*/"
-						  + "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
-						  + c_id + ","
-						  + c_d_id + ","
-						  + c_w_id + ","
-						  + c_first + ","
-						  + c_middle + ","
-						  + c_last + ","
-						  + c_street_1 + ","
-						  + c_street_2 + ","
-						  + c_city + ","
-						  + c_state + ","
-						  + c_zip + ","
-						  + c_phone + ","
-						  + currentTimeStamp + ","
-						  + c_credit + ","
-						  + c_credit_lim + ","
-						  + c_discount + ","
-						  + c_balance + ","
-						  + 10.0 + ","
-						  + 1 + ","
-						  + 0 + ","
-						  + c_data + ")");
+				if(shardCount > 0){
+					stmtCust.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+							  + shardValue + "*/"
+							  + "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
+							  + c_id + ","
+							  + c_d_id + ","
+							  + c_w_id + ","
+							  + "'" + c_first + "'" + ","
+							  + "'" + c_middle + "'" + ","
+							  + "'" + c_last + "'" + ","
+							  + "'" + c_street_1 + "'" + ","
+							  + "'" + c_street_2 + "'" + ","
+							  + "'" + c_city + "'" + ","
+							  + "'" + c_state + "'" + ","
+							  + "'" + c_zip + "'" + ","
+							  + "'" + c_phone + "'" + ","
+							  + "'" + date + "'" + ","
+							  + "'" + c_credit + "'" + ","
+							  + c_credit_lim + ","
+							  + c_discount + ","
+							  + c_balance + ","
+							  + 10.0 + ","
+							  + 1 + ","
+							  + 0 + ","
+							  + "'" + c_data + "'" + ")");
+				}else{
+					stmtCust.addBatch("INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
+							  + c_id + ","
+							  + c_d_id + ","
+							  + c_w_id + ","
+							  + "'" + c_first + "'" + ","
+							  + "'" + c_middle + "'" + ","
+							  + "'" + c_last + "'" + ","
+							  + "'" + c_street_1 + "'" + ","
+							  + "'" + c_street_2 + "'" + ","
+							  + "'" + c_city + "'" + ","
+							  + "'" + c_state + "'" + ","
+							  + "'" + c_zip + "'" + ","
+							  + "'" + c_phone + "'" + ","
+							  + "'" + date + "'" + ","
+							  + "'" + c_credit + "'" + ","
+							  + c_credit_lim + ","
+							  + c_discount + ","
+							  + c_balance + ","
+							  + 10.0 + ","
+							  + 1 + ","
+							  + 0 + ","
+							  + "'" + c_data + "'" + ")");
+				}
+				
 			} catch (SQLException e) {
 				throw new RuntimeException("Customer insert error", e);
 			}
 
-			h_amount = (float) 10.0;
+			h_amount =  10.0;
 
 			h_data = Util.makeAlphaString(12, 24);
 
@@ -630,17 +727,30 @@ public class Load implements TpccConstants {
 					       :c_d_id,:c_w_id, :timestamp,
 					       :h_amount,:h_data);*/
 			try {
-				stmtHist.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+				if(shardCount > 0){
+					stmtHist.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 						      + shardValue + "*/"
-						      + "INSERT INT history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
+						      + "INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
 						      + c_id + ","
 						      + c_d_id + ","
 						      + c_w_id + ","
 						      + c_d_id + ","
 						      + c_w_id + ","
-						      + currentTimeStamp + ","
+						      + "'" + date + "'" + ","
 						      + h_amount + ","
-						      + h_data + ",");
+						      + "'" + h_data + "'" + ")");
+				}else{
+					stmtHist.addBatch( "INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
+							 + c_id + ","
+						      + c_d_id + ","
+						      + c_w_id + ","
+						      + c_d_id + ","
+						      + c_w_id + ","
+						      + "'" + date + "'" + ","
+						      + h_amount + ","
+						      + "'" + h_data + "'" + ")");
+				}
+				
 			} catch (SQLException e) {
 				throw new RuntimeException("Insert into History error", e);
 			}
@@ -734,6 +844,8 @@ public class Load implements TpccConstants {
 			Calendar calendar = Calendar.getInstance();
 			Date now = calendar.getTime();
 			Timestamp currentTimeStamp = new Timestamp(now.getTime());
+		    Date date = new java.sql.Date(calendar.getTimeInMillis());
+
 
 			if (o_id > 2100) {	/* the last 900 orders have not been
 						 * delivered) */
@@ -743,17 +855,30 @@ public class Load implements TpccConstants {
 						       :timestamp,
 						       NULL,:o_ol_cnt, 1);*/
 				try {
-					stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+					if(shardCount > 0){
+						stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 							      + shardValue + "*/"
 							      + "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ","
 							      + o_c_id + ","
-							      + currentTimeStamp + ","
+							      + "'" + date + "'" + ","
 							      + "NULL" + ","
 							      + o_ol_cnt + ","
 							      + 1 + ")");
+					}else{
+						stmtOrd.addBatch("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
+							      + o_id + ","
+							      + o_d_id + ","
+							      + o_w_id + ","
+							      + o_c_id + ","
+							      + "'" + date + "'" + ","
+							      + "NULL" + ","
+							      + o_ol_cnt + ","
+							      + 1 + ")");
+					}
+					
 				} catch (SQLException e) {
 					throw new RuntimeException("Orders insert error", e);
 				}
@@ -762,12 +887,20 @@ public class Load implements TpccConstants {
 				                new_orders
 				                values(:o_id,:o_d_id,:o_w_id);*/
 				try {
-					stmtNewOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+					if(shardCount > 0){
+						stmtNewOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 							      + shardValue + "*/"
 							      + "INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ")");
+					}else{
+						stmtNewOrd.addBatch("INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) values("
+							      + o_id + ","
+							      + o_d_id + ","
+							      + o_w_id + ")");
+					}
+					
 				} catch (SQLException e) {
 					throw new RuntimeException("New Orders insert error", e);
 				}
@@ -778,17 +911,30 @@ public class Load implements TpccConstants {
 					   :timestamp,
 					   :o_carrier_id,:o_ol_cnt, 1);*/
 				try {
-					stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+					if(shardCount > 0){
+						stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
 							      + shardValue + "*/"
 							      + "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
 							      + o_id + ","
 							      + o_d_id + ","
 							      + o_w_id + ","
 							      + o_c_id + ","
-							      + currentTimeStamp + ","
+							      + "'" + date + "'" + ","
 							      + o_carrier_id + ","
 							      + o_ol_cnt + "," 
 							      + 1 + ")");
+					}else{
+						stmtOrd.addBatch("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
+							      + o_id + ","
+							      + o_d_id + ","
+							      + o_w_id + ","
+							      + o_c_id + ","
+							      + "'" + date + "'" + ","
+							      + o_carrier_id + ","
+							      + o_ol_cnt + "," 
+							      + 1 + ")");
+					}
+					
 				} catch (SQLException e) {
 					throw new RuntimeException("Orders insert error", e);
 				}
@@ -818,19 +964,34 @@ public class Load implements TpccConstants {
 							       :ol_i_id,:ol_supply_w_id, NULL,
 							       :ol_quantity,:ol_amount,:ol_dist_info);*/
 					try {
-						stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + "*/"
-							      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
-							      + o_id + ","
-							      + o_d_id + ","
-							      + o_w_id + ","
-							      + ol + ","
-							      + ol_i_id + ","
-							      + ol_supply_w_id + ","
-							      + "NULL" + ","
-							      + ol_quantity + ","
-							      + ol_amount + ","
-							      + ol_dist_info + ")");
+						if(shardCount > 0){
+							stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+								      + shardValue + "*/"
+								      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
+								      + o_id + ","
+								      + o_d_id + ","
+								      + o_w_id + ","
+								      + ol + ","
+								      + ol_i_id + ","
+								      + ol_supply_w_id + ","
+								      + "NULL" + ","
+								      + ol_quantity + ","
+								      + ol_amount + ","
+								      + "'" + ol_dist_info + "'" + ")");
+						}else{
+							stmtOrdLn.addBatch("INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
+								      + o_id + ","
+								      + o_d_id + ","
+								      + o_w_id + ","
+								      + ol + ","
+								      + ol_i_id + ","
+								      + ol_supply_w_id + ","
+								      + "NULL" + ","
+								      + ol_quantity + ","
+								      + ol_amount + ","
+								      + "'" + ol_dist_info + "'" + ")");
+						}
+						
 					} catch (SQLException e) {
 						throw new RuntimeException("Order line insert error", e);
 					}
@@ -842,19 +1003,34 @@ public class Load implements TpccConstants {
 						   :timestamp,
 						   :ol_quantity,:tmp_float,:ol_dist_info);*/
 					try {
-						stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + "*/"
-							      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
-							      + o_id + ","
-							      + o_d_id + ","
-							      + o_w_id + ","
-							      + ol + ","
-							      + ol_i_id + ","
-							      + ol_supply_w_id + ","
-							      + currentTimeStamp + ","
-							      + ol_quantity + ","
-							      + tmp_float + ","
-							      + ol_dist_info + ")");
+						if(shardCount > 0){
+							stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
+								      + shardValue + "*/"
+								      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
+								      + o_id + ","
+								      + o_d_id + ","
+								      + o_w_id + ","
+								      + ol + ","
+								      + ol_i_id + ","
+								      + ol_supply_w_id + ","
+								      + "'" + date + "'" + ","
+								      + ol_quantity + ","
+								      + tmp_float + ","
+								      + "'" + ol_dist_info + "'" + ")");
+						}else{
+							stmtOrdLn.addBatch("INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
+								      + o_id + ","
+								      + o_d_id + ","
+								      + o_w_id + ","
+								      + ol + ","
+								      + ol_i_id + ","
+								      + ol_supply_w_id + ","
+								      + "'" + date + "'" + ","
+								      + ol_quantity + ","
+								      + tmp_float + ","
+								      + "'" + ol_dist_info + "'" + ")");
+						}
+						
 					} catch (SQLException e) {
 						throw new RuntimeException("Order line insert error", e);
 					}

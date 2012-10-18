@@ -227,18 +227,19 @@ public class Util implements TpccConstants {
 			}
 			return nums[permCount++];
 		}
-	 static void lastName(int num, String name)
+	 
+	 static String lastName(int num)
 	{
-		
+		 String name = null;
 	  String[] n = 
 	    {"BAR", "OUGHT", "ABLE", "PRI", "PRES", 
 	     "ESE", "ANTI", "CALLY", "ATION", "EING"};
 	  
-	  name = name + n[num/100];
+	  name = n[num/100];
 	  name = name + n[(num/10)%10];
 	  name = name + n[num%10];
 	 
-	 return;
+	 return name;
 	}
 	 
 }

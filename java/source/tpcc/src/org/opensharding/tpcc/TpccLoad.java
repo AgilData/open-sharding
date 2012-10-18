@@ -210,14 +210,14 @@ public class TpccLoad implements TpccConstants {
 		System.out.printf("TPCC Data Load Started...\n");
 
 		if(particle_flg==0){
-			Load.loadItems(conn, option_debug);
+			Load.loadItems(conn, shardCount, option_debug);
 		    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
 		    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
 		    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
-				 Load.loadItems(conn, option_debug);
+				 Load.loadItems(conn, shardCount, option_debug);
 				 break;
 			case 2:
 			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);

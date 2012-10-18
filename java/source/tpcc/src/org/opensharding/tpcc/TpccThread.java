@@ -74,7 +74,7 @@ public class TpccThread extends Thread {
 	//	  }
 	
 		 
-		  r = Driver.driver(this.number, this.num_ware, this.num_conn);
+		  r = Driver.driver(this.number, this.num_ware, this.num_conn,  conn,  pStmts);
 	
 	//	  /* EXEC SQL COMMIT WORK; */
 	//	  if( mysql_commit(ctx[t_num]) ) goto sqlerr;
