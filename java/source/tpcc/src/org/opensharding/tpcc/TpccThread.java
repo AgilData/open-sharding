@@ -73,8 +73,10 @@ public class TpccThread extends Thread {
 	//	  
 	//	  }
 	
+			// Create a driver instance.
+			Driver driver = new Driver(conn);
 		 
-		  r = Driver.driver(this.number, this.num_ware, this.num_conn,  conn,  pStmts);
+		  r = driver.runTransaction(number, num_ware, num_conn);
 	
 	//	  /* EXEC SQL COMMIT WORK; */
 	//	  if( mysql_commit(ctx[t_num]) ) goto sqlerr;

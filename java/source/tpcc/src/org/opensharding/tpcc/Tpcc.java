@@ -7,7 +7,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
-public class Main{
+public class Tpcc{
 	
 	/* Global SQL Variables */
 	static int DB_STRING_MAX = 128;

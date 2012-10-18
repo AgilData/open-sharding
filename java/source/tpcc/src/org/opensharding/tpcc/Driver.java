@@ -8,38 +8,56 @@ import java.sql.Statement;
 public class Driver implements TpccConstants {
 	
 	//CHECK: The following variables are externs??
-	public static int activate_transaction = 1;
-	public static int counting_on;
-	public static int num_ware;
-	public static int num_conn;
+	public int activate_transaction = 1;
+	public int counting_on;
+	public int num_ware;
+	public int num_conn;
 
-	public static int num_node;
-	public static int time_count;
-	public static PrintWriter freport_file;
+	public int num_node;
+	public int time_count;
+	public PrintWriter freport_file;
 
-	public static int[] success;
-	public static int[] late;
-	public static int[] retry;
-	public static int[] failure;
+	public int[] success;
+	public int[] late;
+	public int[] retry;
+	public int[] failure;
 
-	public static int[][] success2;
-	public static int[][] late2;
-	public static int[][] retry2;
-	public static int[][] failure2;
+	public int[][] success2;
+	public int[][] late2;
+	public int[][] retry2;
+	public int[][] failure2;
 
-	public static double[] max_rt;
+	public double[] max_rt;
 
-	public static long[] clk_tck;
+	public long[] clk_tck;
 
 	//Private variables
-	private static int MAX_RETRY = 2000;
-	private static int RTIME_NEWORD = 5;
-	private static int RTIME_PAYMENT = 5;
-	private static int RTIME_ORDSTAT = 5;
-	private static int RTIME_DELIVERY = 80;
-	private static int RTIME_SLEV = 20;
+	private int MAX_RETRY = 2000;
+	private int RTIME_NEWORD = 5;
+	private int RTIME_PAYMENT = 5;
+	private int RTIME_ORDSTAT = 5;
+	private int RTIME_DELIVERY = 80;
+	private int RTIME_SLEV = 20;
 	
-	public static int driver (int t_num, int numWare, int numConn, Connection conn, TpccStatements pStmts)
+	private Connection conn;
+	private TpccStatements pStmts;
+	
+	/**
+	 * Constructor.
+	 * @param conn
+	 */
+	public Driver(Connection conn) {
+		try {
+			this.conn = conn;
+			
+			pStmts = new TpccStatements(conn);
+			
+		} catch(Throwable th) {
+			throw new RuntimeException("Error initializing Driver", th);
+		}
+	}
+	
+	public int runTransaction(int t_num, int numWare, int numConn)
 	{
 		
 		num_ware = numWare;
@@ -81,7 +99,7 @@ public class Driver implements TpccConstants {
 	 * prepare data and execute the new order transaction for one order
 	 * officially, this is supposed to be simulated terminal I/O
 	 */
-	static int doNeword (int t_num, Connection conn, TpccStatements pStmts)
+	private int doNeword (int t_num, Connection conn, TpccStatements pStmts)
 	{
 	    int c_num = 0;
 	    int i = 0;
@@ -189,7 +207,7 @@ public class Driver implements TpccConstants {
 	 * produce the id of a valid warehouse other than home_ware
 	 * (assuming there is one)
 	 */
-	static int otherWare (int home_ware)
+	private int otherWare (int home_ware)
 	{
 	    int tmp;
 
@@ -201,7 +219,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * prepare data and execute payment transaction
 	 */
-	static int doPayment (int t_num, Connection conn, TpccStatements pStmts)
+	private int doPayment (int t_num, Connection conn, TpccStatements pStmts)
 	{
 	    int c_num = 0;
 	    int byname = 0;
@@ -295,7 +313,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * prepare data and execute order status transaction
 	 */
-	static int doOrdstat (int t_num, Connection conn, TpccStatements pStmts)
+	private int doOrdstat (int t_num, Connection conn, TpccStatements pStmts)
 	{
 	    int c_num = 0;
 	    int byname = 0;
@@ -378,7 +396,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * execute delivery transaction
 	 */
-	static int doDelivery (int t_num, Connection conn, TpccStatements pStmts)
+	private int doDelivery (int t_num, Connection conn, TpccStatements pStmts)
 	{
 	    int c_num = 0;
 	    int i = 0;
@@ -449,7 +467,7 @@ public class Driver implements TpccConstants {
 	/* 
 	 * prepare data and execute the stock level transaction
 	 */
-	static int doSlev (int t_num, Connection conn, TpccStatements pStmts)
+	private int doSlev (int t_num, Connection conn, TpccStatements pStmts)
 	{
 	    int c_num = 0;
 	    int i = 0;
