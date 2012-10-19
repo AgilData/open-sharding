@@ -191,7 +191,7 @@ public class Driver implements TpccConstants {
 	    
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	    	System.out.printf("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d supware: %d qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local, supware, qty);
+	    	System.out.printf("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d  qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local,  qty);
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn);
 	      endTime =  System.nanoTime();
 
