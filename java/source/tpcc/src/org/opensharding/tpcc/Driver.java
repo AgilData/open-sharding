@@ -82,16 +82,31 @@ public class Driver implements TpccConstants {
 
 	    /* Actually, WaitTimes are needed... */
 	    //CHECK: Is activate_transaction handled correctly?
-	    
+	    int sequence = Util.seqGet();
 	    while( activate_transaction >= 1 ){
-	      switch(Util.seqGet()){
-	      case 0:
-			doNeword(t_num, conn, pStmts);
-			break;
-		  case 1:
-			  System.out.println("Executing do payment");
-			doPayment(t_num, conn, pStmts);
-			break;
+	    	if(sequence == 0){
+	    		doNeword(t_num, conn, pStmts);
+	    	}else if( sequence == 1){
+	    		doPayment(t_num, conn, pStmts);
+	    	}else if(sequence == 2){
+	    		doOrdstat(t_num, conn, pStmts);
+	    	}else if(sequence == 3){
+	    		doDelivery(t_num, conn, pStmts);
+	    	}else if(sequence == 4){
+	    		doSlev(t_num, conn, pStmts);
+	    	}else{
+	    		System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
+				System.exit(1);
+	    	}
+	    	
+//	      switch(Util.seqGet()){
+//	      case 0:
+//			doNeword(t_num, conn, pStmts);
+//			break;
+//		  case 1:
+//			  System.out.println("Executing do payment");
+//			doPayment(t_num, conn, pStmts);
+//			break;
 //		  case 2:
 //			  System.out.println("Executing do ord stat");
 //			doOrdstat(t_num, conn, pStmts);
@@ -104,12 +119,12 @@ public class Driver implements TpccConstants {
 //			  System.out.println("Executing do slev");
 //			doSlev(t_num, conn, pStmts);
 //			break;
-		  default:
-			System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
-			System.exit(1);
+//		  default:
+//			System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
+//			System.exit(1);
 		  }
 
-	    }
+	    
 
 	    return(0);
 
