@@ -277,7 +277,7 @@ public class Driver implements TpccConstants {
 	    int h_amount = 0;
 	    String c_last = null;
 	    
-	    System.out.println("DO PAYMENT TRANSACTIONS");
+//	    System.out.println("DO PAYMENT TRANSACTIONS");
 	    if(num_node==0){
 		w_id = Util.randomNumber(1, num_ware);
 	    }else{
@@ -301,8 +301,8 @@ public class Driver implements TpccConstants {
 	        c_w_id = otherWare(w_id);
 	        c_d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    }
-	    System.out.printf("Payment| cnum: %d  w_id: %d d_id: %d c_id: %d c_last: %s h_amount: %d\n byname: %d c_w_id: %d c_d_id: %d", 
-	    		c_num, w_id, d_id, c_id, c_last, h_amount, byname, c_w_id, c_d_id );
+//	    System.out.printf("Payment| cnum: %d  w_id: %d d_id: %d c_id: %d c_last: %s h_amount: %d\n byname: %d c_w_id: %d c_d_id: %d", 
+//	    		c_num, w_id, d_id, c_id, c_last, h_amount, byname, c_w_id, c_d_id );
 
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
