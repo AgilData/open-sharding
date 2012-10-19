@@ -10,7 +10,7 @@ public class Util implements TpccConstants {
 	static int os;
 	static int dl;
 	static int sl;
-	static int total;
+	static int total = 0;
 	
 	private static int[] seq;
 	private static int nextNum = 0;
