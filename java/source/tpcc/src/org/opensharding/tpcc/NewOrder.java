@@ -85,7 +85,7 @@ public class NewOrder implements TpccConstants {
 			
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);
-			
+			System.out.println("==========================================New Order========================================");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;

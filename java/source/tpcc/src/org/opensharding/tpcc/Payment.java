@@ -31,7 +31,7 @@ public class Payment implements TpccConstants{
 		try{
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);
-			
+			System.out.println("=====================================PAYMENT TRANSACTION===========================================");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;
@@ -112,7 +112,6 @@ public class Payment implements TpccConstants{
 	
 			proceed = 1;
 			
-			System.out.println("PAYMENT TRANSACTION");
 			//Get prepared statement
 			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
 			try {
