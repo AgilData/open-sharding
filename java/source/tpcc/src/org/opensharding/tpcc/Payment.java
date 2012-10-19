@@ -119,6 +119,7 @@ public class Payment implements TpccConstants{
 				
 				pStmts.getStatement(9).setFloat(1, h_amount);
 				pStmts.getStatement(9).setInt(2, w_id);
+				System.out.printf("UPDATE warehouse SET w_ytd = w_ytd + %f WHERE w_id = %d\n", h_amount, w_id);
 				pStmts.getStatement(9).executeUpdate();
 			} catch (SQLException e) {
 				throw new RuntimeException("Payment Update transaction error", e);
@@ -154,6 +155,7 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(11).setFloat(1, h_amount);
 				pStmts.getStatement(11).setInt(2, w_id);
 				pStmts.getStatement(11).setInt(3, d_id);
+				System.out.printf("UPDATE district SET d_ytd = d_ytd + %f WHERE d_w_id = %d AND d_id = %d\n", h_amount, w_id, d_id);
 				pStmts.getStatement(11).executeUpdate();
 			} catch (SQLException e) {
 				throw new RuntimeException("Payment update transaction error", e);
@@ -166,6 +168,7 @@ public class Payment implements TpccConstants{
 			try {
 				pStmts.getStatement(12).setInt(1, w_id);
 				pStmts.getStatement(12).setInt(2, d_id);
+				System.out.printf("SELECT d_street_1, d_street_2, d_city, d_state, d_zip, d_name FROM district WHERE d_w_id = %d AND d_id = %d\n", w_id, d_id);
 				ResultSet rs = pStmts.getStatement(12).executeQuery();
 				if(rs.next()){
 					d_street_1 = rs.getString(1);
@@ -174,6 +177,7 @@ public class Payment implements TpccConstants{
 					d_state = rs.getString(4);
 					d_zip = rs.getString(5);
 					d_name = rs.getString(6);
+					System.out.printf("street1: %s street2: %s  city: %s  state: %s  zip: %s  name:  %s\n", d_street_1, d_street_2, d_city, d_state, d_zip, d_name);
 					
 				}
 				
@@ -194,9 +198,11 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(13).setInt(1, c_w_id);
 					pStmts.getStatement(13).setInt(2, c_d_id);
 					pStmts.getStatement(13).setString(3, c_last);
+					System.out.printf("SELECT count(c_id) FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_last = %s\n", c_w_id, c_d_id, c_last);
 					ResultSet rs = pStmts.getStatement(13).executeQuery();
 					if(rs.next()){
 						namecnt = rs.getInt(1);
+						System.out.printf("Namecnt: %d\n", namecnt);
 					}
 					
 					rs.close();
@@ -211,9 +217,11 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(14).setInt(1, c_w_id);
 					pStmts.getStatement(14).setInt(2, c_d_id);
 					pStmts.getStatement(14).setString(3, c_last);
+					System.out.printf("SELECT c_id FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_last = %s ORDER BY c_first\n", c_w_id, c_d_id, c_last);
 					ResultSet rs = pStmts.getStatement(14).executeQuery();
 					while(rs.next()){
 						c_id = rs.getInt(1);
+						System.out.printf("C_id: %d\n", c_id);
 					}
 					rs.close();
 				} catch (SQLException e) {
@@ -232,6 +240,7 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(15).setInt(1, c_w_id);
 				pStmts.getStatement(15).setInt(2, c_d_id);
 				pStmts.getStatement(15).setInt(3, c_id);
+				System.out.printf("SELECT c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d FOR UPDATE\n", c_w_id, c_d_id, c_id);
 				ResultSet rs = pStmts.getStatement(15).executeQuery();
 				if(rs.next()){
 					c_first = rs.getString(1);
@@ -248,8 +257,11 @@ public class Payment implements TpccConstants{
 					c_discount = rs.getFloat(12);
 					c_balance = rs.getFloat(13);
 					c_since = rs.getString(14);
+					System.out.printf("first: %s, middle: %s, last: %s, street1: %s, street2: %s, city: %s, zip: %s, phone: %s, credit: %s, credit_lm: %d, discount: %f, balance: %f, since: %s",
+							c_first, c_middle, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since);
 				}
 				rs.close();
+				
 			} catch (SQLException e) {
 				throw new RuntimeException("Payment select transaction error", e);
 			}
@@ -267,16 +279,18 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(16).setInt(1, c_w_id);
 					pStmts.getStatement(16).setInt(2, c_d_id);
 					pStmts.getStatement(16).setInt(3, c_id);
+					System.out.printf("SELECT c_data FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_w_id, c_d_id, c_id);
 					ResultSet rs = pStmts.getStatement(16).executeQuery();
 					if(rs.next()){
 						c_data = rs.getString(1);
+						System.out.printf("data: %s\n", c_data);
 					}
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("Payment select transaction error", e);
 				}
 				
-				c_new_data = String.format("| %4d %2d %4d %2d %4d $%7.2f %12c %24c", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
+				c_new_data = String.format("| %d %d %d %d %d $%f %c %c", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
 				
 				c_new_data = ( c_new_data + c_data.substring(0, (500 - c_new_data.length()) ) );
 				
@@ -294,6 +308,7 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(17).setInt(3, c_w_id);
 					pStmts.getStatement(17).setInt(4, c_d_id);
 					pStmts.getStatement(17).setInt(5, c_id);
+					System.out.printf("UPDATE customer SET c_balance = %f, c_data = %s WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_balance, c_data, c_w_id, c_d_id, c_id);
 					pStmts.getStatement(17).executeUpdate();
 				} catch (SQLException e) {
 					throw new RuntimeException("Payment update transaction error", e);
@@ -311,6 +326,7 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(18).setInt(2, c_w_id);
 					pStmts.getStatement(18).setInt(3, c_d_id);
 					pStmts.getStatement(18).setInt(4, c_id);
+					System.out.printf("UPDATE customer SET c_balance = %f WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_balance, c_w_id, c_d_id, c_id);
 					pStmts.getStatement(18).executeUpdate();
 				} catch (SQLException e) {
 					throw new RuntimeException("Payment update transaction error", e);
@@ -332,6 +348,8 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(19).setString(6, currentTimeStamp.toString());
 				pStmts.getStatement(19).setFloat(7, h_amount);
 				pStmts.getStatement(19).setString(8, h_data);
+				System.out.printf("INSERT INTO history(h_c_d_id, h_c_w_id, h_c_id, h_d_id, h_w_id, h_date, h_amount, h_data) VALUES(%d, %d, %d, %d, %d, %s, %f, %s)\n",
+						c_d_id, c_w_id, c_id, d_id, w_id, currentTimeStamp.toString(), h_amount, h_data);
 				pStmts.getStatement(19).executeUpdate();
 			} catch (SQLException e) {
 				throw new RuntimeException("Payment insert transaction error", e);

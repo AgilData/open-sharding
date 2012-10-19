@@ -89,15 +89,19 @@ public class Driver implements TpccConstants {
 			doNeword(t_num, conn, pStmts);
 			break;
 		  case 1:
+			  System.out.println("Executing do payment");
 			doPayment(t_num, conn, pStmts);
 			break;
 		  case 2:
+			  System.out.println("Executing do ord stat");
 			doOrdstat(t_num, conn, pStmts);
 			break;
 		  case 3:
+			  System.out.println("Executing do delivery");
 			doDelivery(t_num, conn, pStmts);
 			break;
 		  case 4:
+			  System.out.println("Executing do slev");
 			doSlev(t_num, conn, pStmts);
 			break;
 		  default:
@@ -266,7 +270,7 @@ public class Driver implements TpccConstants {
 				    (num_ware * (c_num + 1))/num_node);
 	    }
 	    d_id = Util.randomNumber(1, DIST_PER_WARE);
-	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST); 
+	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST);
 	    c_last = Util.lastName(Util.nuRand(255,0,999)); 
 	    h_amount = Util.randomNumber(1,5000);
 	    if (Util.randomNumber(1, 100) <= 60) {
@@ -281,6 +285,8 @@ public class Driver implements TpccConstants {
 	        c_w_id = otherWare(w_id);
 	        c_d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    }
+	    System.out.printf("Payment| cnum: %d  w_id: %d d_id: %d c_id: %d c_last: %s h_amount: %d\n byname: %d c_w_id: %d c_d_id: %d", 
+	    		c_num, w_id, d_id, c_id, c_last, h_amount, byname, c_w_id, c_d_id );
 
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();

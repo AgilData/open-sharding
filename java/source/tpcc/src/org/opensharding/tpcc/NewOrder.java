@@ -280,7 +280,6 @@ public class NewOrder implements TpccConstants {
 				try {
 					pStmts.getStatement(6).setInt(1, ol_i_id);
 					pStmts.getStatement(6).setInt(2, ol_supply_w_id);
-					System.out.println(pStmts.toString());
 					ResultSet rs = pStmts.getStatement(6).executeQuery();
 					if(rs.next()){
 						s_quantity = rs.getInt(1);
