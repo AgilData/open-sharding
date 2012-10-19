@@ -88,22 +88,22 @@ public class Driver implements TpccConstants {
 	      case 0:
 			doNeword(t_num, conn, pStmts);
 			break;
-		  case 1:
-			  System.out.println("Executing do payment");
-			doPayment(t_num, conn, pStmts);
-			break;
-		  case 2:
-			  System.out.println("Executing do ord stat");
-			doOrdstat(t_num, conn, pStmts);
-			break;
-		  case 3:
-			  System.out.println("Executing do delivery");
-			doDelivery(t_num, conn, pStmts);
-			break;
-		  case 4:
-			  System.out.println("Executing do slev");
-			doSlev(t_num, conn, pStmts);
-			break;
+//		  case 1:
+//			  System.out.println("Executing do payment");
+//			doPayment(t_num, conn, pStmts);
+//			break;
+//		  case 2:
+//			  System.out.println("Executing do ord stat");
+//			doOrdstat(t_num, conn, pStmts);
+//			break;
+//		  case 3:
+//			  System.out.println("Executing do delivery");
+//			doDelivery(t_num, conn, pStmts);
+//			break;
+//		  case 4:
+//			  System.out.println("Executing do slev");
+//			doSlev(t_num, conn, pStmts);
+//			break;
 		  default:
 			System.out.printf("Error - Unknown sequence.\n");
 		  }
