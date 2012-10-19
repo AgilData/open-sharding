@@ -166,7 +166,8 @@ public class Driver implements TpccConstants {
 		w_id =Util.randomNumber(1 + (num_ware * c_num)/num_node,
 				    (num_ware * (c_num + 1))/num_node);
 	    }
-	    System.out.println("NUMBER OF WAREHOUSES " + w_id);
+	    
+	    
 	    d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST);
 
@@ -188,17 +189,13 @@ public class Driver implements TpccConstants {
 		qty[i] = Util.randomNumber(1, 10);
 	    }
 	    
-	   // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
+	    	System.out.printf("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d supware: %d qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local, supware, qty);
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn);
-	    //  clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime =  System.nanoTime();
 
 	      if(ret >= 1){
-	    
-	    	  //CHECK: Is this correct?
-	    	  //rt = (double)(tbuf2.tv_sec * 1000.0 + tbuf2.tv_nsec/1000000.0-tbuf1.tv_sec * 1000.0 - tbuf1.tv_nsec/1000000.0);
 	    	  rt = (double)(endTime - beginTime);
 	    	  //printf("NOT : %.3f\n", rt);
 	        if (freport_file != null) {
