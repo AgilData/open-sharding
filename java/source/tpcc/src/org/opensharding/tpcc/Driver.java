@@ -106,6 +106,7 @@ public class Driver implements TpccConstants {
 //			break;
 		  default:
 			System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
+			System.exit(1);
 		  }
 
 	    }
