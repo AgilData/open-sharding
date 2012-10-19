@@ -16,7 +16,7 @@ public class Delivery implements TpccConstants {
 		try{
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);
-			
+			System.out.println("================================================Delivery==========================================");
 			int w_id = w_id_arg;
 			int o_carrier_id = o_carrier_id_arg;
 			int d_id = 0;

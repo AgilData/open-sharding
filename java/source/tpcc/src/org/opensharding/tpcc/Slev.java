@@ -23,7 +23,7 @@ public class Slev implements TpccConstants{
 			try{
 				pStmts.getConnection().setAutoCommit(false);
 
-				
+				System.out.println("===================================================+SLEV=============================================");
 				int w_id = w_id_arg;
 				int d_id = d_id_arg;
 				int level = level_arg;
