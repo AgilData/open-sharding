@@ -377,13 +377,13 @@ public class Tpcc{
 //		  }
 		  
 		  
-//		  try {
-//			  thr1.join();
-//		} catch (InterruptedException e) {
-//			throw new RuntimeException("Could not join", e);
-//		}
+		  try {
+			  thr1.join();
+		} catch (InterruptedException e) {
+			throw new RuntimeException("Could not join", e);
+		}
 
-		  System.out.printf("\n");
+		  System.out.printf("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[Thread Finished]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n");
 
 //		  free(ctx);
 //		  for( i=0; i < num_conn; i++ ){
