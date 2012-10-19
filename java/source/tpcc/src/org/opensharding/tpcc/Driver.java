@@ -105,7 +105,7 @@ public class Driver implements TpccConstants {
 //			doSlev(t_num, conn, pStmts);
 //			break;
 		  default:
-			System.out.printf("Error - Unknown sequence.\n");
+			System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
 		  }
 
 	    }
