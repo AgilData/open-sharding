@@ -375,11 +375,13 @@ public class Tpcc{
 //		  for( i=0; i < num_conn; i++ ){
 //		    pthread_join( t[i], NULL );
 //		  }
-		  try {
-			  thr1.join();
-		} catch (InterruptedException e) {
-			throw new RuntimeException("Could not join", e);
-		}
+		  
+		  
+//		  try {
+//			  thr1.join();
+//		} catch (InterruptedException e) {
+//			throw new RuntimeException("Could not join", e);
+//		}
 
 		  System.out.printf("\n");
 
