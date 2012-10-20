@@ -383,7 +383,6 @@ public class Tpcc{
 			throw new RuntimeException("Could not join", e);
 		}
 
-		  System.out.printf("[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[Thread Finished]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]]\n");
 
 //		  free(ctx);
 //		  for( i=0; i < num_conn; i++ ){
