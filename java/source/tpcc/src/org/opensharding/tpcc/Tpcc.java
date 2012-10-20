@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class Tpcc{
 	
@@ -299,7 +301,14 @@ public class Tpcc{
 //		    fprintf(stderr, "error at malloc(thread_arg)\n");
 //		    exit(1);
 //		  }
-		 TpccThread thr1 = new TpccThread(1, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn);
+		  
+		ExecutorService executor = Executors.newFixedThreadPool(1);
+
+		// Start each server.
+		// TODO: From configuration.
+		Runnable worker = new TpccThread(1, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn);
+		executor.execute(worker);
+		
 		  ctx = new int[num_conn];
 //		  stmt = malloc( sizeof(MYSQL_STMT **) * num_conn );
 //		  for( i=0; i < num_conn; i++ ){
@@ -324,16 +333,6 @@ public class Tpcc{
 //		    pthread_create( &t[t_num], NULL, (void *)thread_main, (void *)&(thd_arg[t_num]) );
 //		  }
 
-		  //thr1.runner.start();
-		  thr1.start();
-		  System.out.printf("\nRAMP-UP TIME.(%d sec.)\n",lampup_time);
-		  try {
-			//thr1.runner.sleep(lampup_time);
-			  thr1.sleep(lampup_time);
-			
-		} catch (InterruptedException e1) {
-			throw new RuntimeException("Failed to sleep", e1);
-		}
 		  System.out.printf("\nMEASURING START.\n\n");
 
 		  /* sleep(measure_time); */
@@ -377,12 +376,6 @@ public class Tpcc{
 //		  }
 		  
 		  
-		  try {
-			  thr1.join();
-		} catch (InterruptedException e) {
-			throw new RuntimeException("Could not join", e);
-		}
-
 
 //		  free(ctx);
 //		  for( i=0; i < num_conn; i++ ){
