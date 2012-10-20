@@ -10,7 +10,7 @@ import org.apache.logging.log4j.Logger;
 public class TpccThread extends Thread {
 
 	private static final Logger logger = LogManager.getLogger(TpccThread.class);
-	private boolean DEBUG = logger.isDebugEnabled();
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	int number;
 	int port;

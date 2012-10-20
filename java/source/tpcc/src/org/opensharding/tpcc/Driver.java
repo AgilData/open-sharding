@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 public class Driver implements TpccConstants {
 	
 	private static final Logger logger = LogManager.getLogger(Driver.class);
-	private boolean DEBUG = logger.isDebugEnabled();
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	//CHECK: The following variables are externs??
 	public int activate_transaction = 1;
