@@ -2,6 +2,12 @@
 	
 	<property name="version" value="1.0.0" />
 	
+	<path id="log4j2.classpath">
+      <fileset dir="../../../3rdparty/log4j2.0">
+          <include name="*.jar"/>
+      </fileset>
+  </path>
+
 	<target name="clean">
 	    <delete dir="dist">
 	        <include name="**" />
@@ -16,8 +22,12 @@
 		<mkdir dir="_classes"/>
 		<javac destdir="_classes" debug="${debug}" includejavaruntime="true" includeantruntime="false">
 			<src path="src/"/>
+			<classpath refid="log4j2.classpath"/>
 		</javac>
 		<jar destfile="dist/jars/tpcc.jar" basedir="_classes"/>
+		<copy todir="dist">
+	    <fileset dir="../../../3rdparty/log4j-2.0/"/>
+	  </copy>
 		<delete dir="_classes"/>
 	</target>
 	
