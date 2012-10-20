@@ -65,7 +65,6 @@ public class Tpcc {
 	static double[] max_rt = new double[5];
 	static double[] cur_max_rt = new double[5];
 
-	static int activate_transaction;
 	static int counting_on;
 
 	long clk_tck;
@@ -73,6 +72,7 @@ public class Tpcc {
 	static int is_local = 0; /* "1" mean local */
 	static int valuable_flg = 0; /* "1" mean valuable ratio */
 	static int[] ctx;
+	public static int activate_transaction = 0;;
 	
 	public static void main( String[] argv)
 	{
@@ -353,7 +353,7 @@ public class Tpcc {
 //		#endif
 
 		  System.out.printf("\nSTOPPING THREADS");
-		  activate_transaction = 0;
+		 activate_transaction = 0;
 
 //		  /* wait threads' ending and close connections*/
 //		  for( i=0; i < num_conn; i++ ){

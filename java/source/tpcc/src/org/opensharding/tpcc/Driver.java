@@ -14,7 +14,6 @@ public class Driver implements TpccConstants {
 	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	//CHECK: The following variables are externs??
-	public int activate_transaction = 1;
 	public int counting_on;
 	public int num_ware;
 	public int num_conn;
@@ -89,7 +88,7 @@ public class Driver implements TpccConstants {
 	    /* Actually, WaitTimes are needed... */
 	    //CHECK: Is activate_transaction handled correctly?
 	    int sequence = Util.seqGet();
-	    while( activate_transaction >= 1 ){
+	    while( Tpcc.activate_transaction == 1 ){
 	    	if(DEBUG) logger.debug("runTransaction: sequence: " + sequence);
 	    	
 	    	if(sequence == 0){
