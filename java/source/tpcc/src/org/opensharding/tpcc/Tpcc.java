@@ -9,7 +9,13 @@ import java.sql.SQLException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Tpcc{
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+public class Tpcc {
+	
+	private static final Logger logger = LogManager.getLogger(Tpcc.class);
+	private boolean DEBUG = logger.isDebugEnabled();
 	
 	/* Global SQL Variables */
 	static int DB_STRING_MAX = 128;
@@ -81,9 +87,9 @@ public class Tpcc{
 	  int port= 3306;
 	  int fd, seed;
 
-	  System.out.printf("***************************************\n");
-	  System.out.printf("*** ###easy### TPC-C Load Generator ***\n");
-	  System.out.printf("***************************************\n");
+	  logger.info("***************************************");
+	  logger.info("****** Java TPC-C Load Generator ******");
+	  logger.info("***************************************");
 
 	  /* initialize */
 	  RtHist.histInit();

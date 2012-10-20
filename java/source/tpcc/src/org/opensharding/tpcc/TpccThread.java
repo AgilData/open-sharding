@@ -4,8 +4,14 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class TpccThread extends Thread {
 
+	private static final Logger logger = LogManager.getLogger(TpccThread.class);
+	private boolean DEBUG = logger.isDebugEnabled();
+	
 	int number;
 	int port;
 	int is_local;
@@ -80,6 +86,7 @@ public class TpccThread extends Thread {
 			// Create a driver instance.
 			Driver driver = new Driver(conn);
 		 
+			if(DEBUG) logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
 		  r = driver.runTransaction(number, num_ware, num_conn);
 	
 	//	  /* EXEC SQL COMMIT WORK; */

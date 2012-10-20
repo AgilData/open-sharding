@@ -3,5 +3,7 @@
 	<classpathentry kind="src" path="java/source/myospbinlog/src"/>
 	<classpathentry kind="src" path="java/source/tpcc/src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="java/3rdparty/log4j-2.0/log4j-api-2.0-beta2.jar"/>
+	<classpathentry kind="lib" path="java/3rdparty/log4j-2.0/log4j-core-2.0-beta2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

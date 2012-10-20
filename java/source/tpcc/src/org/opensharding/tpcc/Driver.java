@@ -4,8 +4,14 @@ import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Statement;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 public class Driver implements TpccConstants {
+	
+	private static final Logger logger = LogManager.getLogger(Driver.class);
+	private boolean DEBUG = logger.isDebugEnabled();
 	
 	//CHECK: The following variables are externs??
 	public int activate_transaction = 1;
@@ -84,6 +90,8 @@ public class Driver implements TpccConstants {
 	    //CHECK: Is activate_transaction handled correctly?
 	    int sequence = Util.seqGet();
 	    while( activate_transaction >= 1 ){
+	    	if(DEBUG) logger.debug("runTransaction: sequence: " + sequence);
+	    	
 	    	if(sequence == 0){
 	    		doNeword(t_num, conn, pStmts);
 	    	}else if( sequence == 1){
