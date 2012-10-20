@@ -122,7 +122,7 @@ public class Tpcc {
 
 	  /* Parse args */
 	  if (argv.length == 0){
-		  System.out.println("Arguments need to be provided.");
+		  logger.error("Arguments need to be provided.");
 		  System.exit(0);
 	  }
 
@@ -168,7 +168,7 @@ public class Tpcc {
 	    		System.out.printf("Usage: tpcc_start -h server_host -P port -d database_name -u mysql_user -p mysql_password -w warehouses -c connections -r warmup_time -l running_time -i report_interval -f report_file -t trx_file\n");
 	            System.exit(0);
 	    	}else{
-	    		System.out.printf ("?? returned character code 0 %s ??\n", argv[j]);
+	    		logger.error("?? returned character code 0 %s ??\n", argv[j]);
 	    	}
 	    }
 	    
@@ -184,18 +184,18 @@ public class Tpcc {
 	        	(Integer.parseInt(argv[11 + arg_offset]) < 0)||
 	        	(Integer.parseInt(argv[12 + arg_offset]) < 0)||
 	        	(Integer.parseInt(argv[13 + arg_offset]) < 0) ) {
-	        		System.out.printf("\n expecting positive number of ratio parameters\n");
+	        		logger.error(" expecting positive number of ratio parameters");
 	        		System.exit(1);
 	        }
 	      }
 	      
 	      if( num_node > 0 ){
 	    	    if( num_ware % num_node != 0 ){
-	    	      System.out.printf("\n [warehouse] value must be devided by [num_node].\n");
+	    	      logger.error(" [warehouse] value must be devided by [num_node].");
 	    	      System.exit(1);
 	    	    }
 	    	    if( num_conn % num_node != 0 ){
-	    	      System.out.printf("\n [connection] value must be devided by [num_node].\n");
+	    	      logger.error("[connection] value must be devided by [num_node].");
 	    	      System.exit(1);
 	    	    }
 	    	  }
@@ -296,19 +296,8 @@ public class Tpcc {
 		  }
 
 		  /* set up threads */
-
-//		  t = malloc( sizeof(pthread_t) * num_conn );
-//		  if ( t == NULL ){
-//		    fprintf(stderr, "error at malloc(pthread_t)\n");
-//		    exit(1);
-//		  }
-//		  thd_arg = malloc( sizeof(thread_arg) * num_conn );
-//		  if( thd_arg == NULL ){
-//		    fprintf(stderr, "error at malloc(thread_arg)\n");
-//		    exit(1);
-//		  }
 		  
-		  if(DEBUG) logger.debug("Creating TpccThread");
+		if(DEBUG) logger.debug("Creating TpccThread");
 		ExecutorService executor = Executors.newFixedThreadPool(1);
 
 		// Start each server.
@@ -322,28 +311,12 @@ public class Tpcc {
 		}
 		
 		  ctx = new int[num_conn];
-//		  stmt = malloc( sizeof(MYSQL_STMT **) * num_conn );
-//		  for( i=0; i < num_conn; i++ ){
-//		      stmt[i] = malloc( sizeof(MYSQL_STMT *) * 40 );
-//		  }
 
 		  if ( ctx.length == 0 ){
-		    System.out.printf("error at ctx size\n");
+		    logger.error("error at ctx size");
 		    System.exit(1);
 		  }
 		  
-		  /* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
-
-//		  for( i=0; i < num_conn; i++ ){
-//		    ctx[i] = mysql_init(NULL);
-//		    if(!ctx[i]) goto sqlerr;
-//		  }
-
-//		  for( t_num=0; t_num < num_conn; t_num++ ){
-//		    thd_arg[t_num].port= port;
-//		    thd_arg[t_num].number= t_num;
-//		    pthread_create( &t[t_num], NULL, (void *)thread_main, (void *)&(thd_arg[t_num]) );
-//		  }
 
 		  System.out.printf("\nMEASURING START.\n\n");
 
@@ -444,7 +417,7 @@ public class Tpcc {
 		  }
 
 		  f = (float) (100.0 * (float)(success[1] + late[1])/(float)m);
-		  System.out.printf("        Payment: %f%% (>=43.0%%)",f);
+		  System.out.printf("        Payment: %f%% (>=4.0%%)",f);
 		  if ( f >= 43.0 ){
 		    System.out.printf(" [OK]\n");
 		  }else{

@@ -66,7 +66,7 @@ public class RtHist implements TpccConstants{
 	  return ( (double)(line)/(double)(REC_PER_SEC) );
 	}
 	
-	public void histReport()
+	public static void histReport()
 	{
 	  int i = 0;
 	  int j = 0;

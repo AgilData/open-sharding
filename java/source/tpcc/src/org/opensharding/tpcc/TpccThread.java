@@ -34,7 +34,6 @@ public class TpccThread extends Thread {
 		 this.is_local = is_local;
 		 this.num_conn = num_conn;
 		 this.num_ware -= num_ware;
-		// this.runner = new Thread();
 	}
 	
 	public void run() {
