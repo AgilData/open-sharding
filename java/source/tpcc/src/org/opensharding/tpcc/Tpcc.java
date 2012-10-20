@@ -316,6 +316,11 @@ public class Tpcc {
 		Runnable worker = new TpccThread(1, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn);
 		executor.execute(worker);
 		
+		executor.shutdown();
+		while(!executor.isTerminated()) {
+			
+		}
+		
 		  ctx = new int[num_conn];
 //		  stmt = malloc( sizeof(MYSQL_STMT **) * num_conn );
 //		  for( i=0; i < num_conn; i++ ){
