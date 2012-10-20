@@ -15,7 +15,7 @@ import org.apache.logging.log4j.Logger;
 public class Tpcc {
 	
 	private static final Logger logger = LogManager.getLogger(Tpcc.class);
-	private boolean DEBUG = logger.isDebugEnabled();
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	/* Global SQL Variables */
 	static int DB_STRING_MAX = 128;
@@ -308,6 +308,7 @@ public class Tpcc {
 //		    exit(1);
 //		  }
 		  
+		  if(DEBUG) logger.debug("Creating TpccThread");
 		ExecutorService executor = Executors.newFixedThreadPool(1);
 
 		// Start each server.
