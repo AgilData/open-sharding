@@ -9,7 +9,7 @@ require 'fileutils'
 require 'pathname'
 
 # Set the base dir. Expand path gives the absolute path of the current file, dirname gives the bin dir, and dirname again gives the parent dir.
-BASEDIR = Pathname.new(__FILE__).realpath 
+BASEDIR = File.dirname(File.dirname(Pathname.new(__FILE__).realpath))
 
 JAVA = "java"
 CLASS = "org.opensharding.tpcc.Tpcc"
