@@ -169,7 +169,7 @@ public class Load implements TpccConstants {
 					currentShard = 1;
 				}
 				
-				System.out.println("Shard Count: " + shardCount);
+				System.out.println("Current Shard: " + currentShard);
 				/* Generate Warehouse Data */
 	
 		        w_name = Util.makeAlphaString(6, 10);
