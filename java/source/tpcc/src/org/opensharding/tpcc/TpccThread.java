@@ -42,7 +42,7 @@ public class TpccThread extends Thread {
 		 int r,i;
 		 System.out.println("Connection to DBSHARDS.");
 		  try {
-				Class.forName("com.dbshardsl.jdbc.Driver"); //TODO:Change to dbshards driver
+				Class.forName("com.dbshardsl.jdbc.Driver"); 
 			} catch (ClassNotFoundException e1) {
 				throw new RuntimeException("Class for mysql error", e1);
 			}
@@ -50,8 +50,6 @@ public class TpccThread extends Thread {
 			Connection conn;
 			
 			if(is_local==1){
-			    /* exec sql connect :connect_string; */
-			   // resp = mysql_real_connect(mysql, "localhost", db_user, db_password, db_string, port, NULL, 0);
 				dbUrl = "jdbc:mysql://localhost:" + port + "/" + db_string;
 				try {
 					conn = DriverManager.getConnection (dbUrl, db_user, db_password);
@@ -60,8 +58,6 @@ public class TpccThread extends Thread {
 					throw new RuntimeException("Connection to local host error", e);
 				}
 			}else{
-			    /* exec sql connect :connect_string USING :db_string; */
-			   // resp = mysql_real_connect(mysql, connect_string, db_user, db_password, db_string, port, NULL, 0);
 				dbUrl = "jdbc:mysql://" + connect_string + ":" + port + "/" + db_string;
 				try {
 					conn = DriverManager.getConnection (dbUrl, db_user, db_password);
@@ -73,38 +69,23 @@ public class TpccThread extends Thread {
 	
 			}
 		  
-	//	  if(conn != null) {
-	//	    mysql_autocommit(ctx[t_num], 0);
-	//	  } else {
-	//	    mysql_close(ctx[t_num]);
-	//	  
-	//	  }
+
 			try {
 				conn.setAutoCommit(false);
 			} catch (SQLException e) {
 				throw new RuntimeException("Set AutoCommit error", e);
 			}
+			
 			// Create a driver instance.
 			Driver driver = new Driver(conn);
 		 
 			if(DEBUG) logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
-		  r = driver.runTransaction(number, count, num_ware, num_conn);
+			driver.runTransaction(number, count, num_ware, num_conn);
 	
-	//	  /* EXEC SQL COMMIT WORK; */
-	//	  if( mysql_commit(ctx[t_num]) ) goto sqlerr;
-	//
-	//	  for(i=0;i<40;i++){
-	//	      mysql_stmt_free_result(stmt[t_num][i]);
-	//	      mysql_stmt_close(stmt[t_num][i]);
-	//	  }
-	//
-	//	  /* EXEC SQL DISCONNECT; */
-	//	  mysql_close(ctx[t_num]);
+
 	
 		  System.out.printf(".");
-	
-	
-		  //return(r);
+
 	
 		}
 }
