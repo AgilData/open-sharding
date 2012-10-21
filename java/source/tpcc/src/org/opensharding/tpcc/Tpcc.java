@@ -237,18 +237,14 @@ public class Tpcc {
 		  /* set up threads */
 		  
 		if(DEBUG) logger.debug("Creating TpccThread");
-		TpccThread[] thread = new TpccThread[num_conn];
-		//ExecutorService executor = Executors.newFixedThreadPool(num_conn);
-		for (int t =0; t < num_conn; t++){
-			thread[t] = new TpccThread(t + 1, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count);
-			thread[t].start();
-		}
+		ExecutorService executor = Executors.newFixedThreadPool(num_conn);
+	
 		// Start each server.
-		// 
-//		for(i =0; i<num_conn; i++){
-//			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn);
-//			executor.execute(worker);
-//		}
+
+		for(i =0; i<num_conn; i++){
+			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count);
+			executor.execute(worker);
+		}
 		
 		
 		Calendar calendar = Calendar.getInstance();
@@ -268,24 +264,16 @@ public class Tpcc {
 		
 		activate_transaction = 0;
 		
-
+		executor.shutdown();
 		
-		for(int t = 0; t < num_conn; t++ ){
-			try {
-				thread[t].join();
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
+		while(!executor.isTerminated()) {
 		}
+		
+	
 		System.out.printf("TOTAL TRANSACTIONS: %d\n", count.getTotal());
 		System.out.printf("TOTAL TPMS: %f\n", (float)count.getTotal()/(float)measure_time);
 		
-		//executor.shutdown();
 		
-		//while(!executor.isTerminated()) {
-		//}
 
 		  RtHist.histReport();
 		  System.exit(0);
