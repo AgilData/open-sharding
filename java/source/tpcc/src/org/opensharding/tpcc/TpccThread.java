@@ -50,26 +50,16 @@ public class TpccThread extends Thread {
 			String dbUrl = null;
 			Connection conn;
 			
-			if(is_local==1){
-				dbUrl = "jdbc:mysql://localhost:" + port + "/" + db_string;
-				try {
-					conn = DriverManager.getConnection (dbUrl, db_user, db_password);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					throw new RuntimeException("Connection to local host error", e);
-				}
-			}else{
-				dbUrl = "jdbc:mysql://" + connect_string + ":" + port + "/" + db_string;
-				try {
-					conn = DriverManager.getConnection (dbUrl, db_user, db_password);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					throw new RuntimeException("Connection to specific host error", e);
-				}
 	
-	
+			dbUrl = "jdbc:mysql://" + connect_string + ":" + port + "/" + db_string;
+			try {
+				conn = DriverManager.getConnection (dbUrl, db_user, db_password);
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				throw new RuntimeException("Connection to specific host error", e);
 			}
-		  
+
+	  
 
 			try {
 				conn.setAutoCommit(false);
