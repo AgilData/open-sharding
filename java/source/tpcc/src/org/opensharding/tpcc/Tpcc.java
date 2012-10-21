@@ -84,6 +84,8 @@ public class Tpcc {
 	  int port= 3306;
 	  int fd, seed;
 	  
+	  String connectionClass = null;
+	  
 	  Counter count = new Counter();
 
 	  logger.info("***************************************");
@@ -125,6 +127,7 @@ public class Tpcc {
 	  }
 
 	
+		
 		for(int j = 0; j < argv.length; j= j+2) {
 	    	if (argv[j].equals("-h")){
 	    		System.out.printf("Option h with value %s \n", argv[j+1]);
@@ -162,6 +165,9 @@ public class Tpcc {
 	    	}else if(argv[j].equals("-P")){
 	    		System.out.printf("Option P with value %s \n", argv[j+1]);
 	    		port = Integer.parseInt(argv[j+1]);
+	    	}else if(argv[j].equals("-U")){
+	    		System.out.printf("Option U with value %s \n", argv[j+1]);
+	    		connectionClass = argv[j+1];
 	    	}else if(argv[j].equals("-?")){
 	    		System.out.printf("Usage: tpcc_start -h server_host -P port -d database_name -u mysql_user -p mysql_password -w warehouses -c connections -r warmup_time -l running_time -i report_interval -f report_file -t trx_file\n");
 	            System.exit(0);
@@ -242,7 +248,7 @@ public class Tpcc {
 		// Start each server.
 
 		for(i =0; i<num_conn; i++){
-			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count);
+			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count, connectionClass);
 			executor.execute(worker);
 		}
 		

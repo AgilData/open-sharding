@@ -21,11 +21,12 @@ public class TpccThread extends Thread {
 	String db_user;
 	String db_password;
 	String db_string;
+	String connectionClass;
 	
 	TpccStatements pStmts;
 	Counter count;
 	
-	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count) {
+	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count, String connectionClass) {
 		 this.number = number;
 		 this.port = port;
 		 this.connect_string = connect_string;
@@ -36,13 +37,13 @@ public class TpccThread extends Thread {
 		 this.num_conn = num_conn;
 		 this.num_ware -= num_ware;
 		 this.count = count;
+		 this.connectionClass = connectionClass;
 	}
 	
 	public void run() {
-		 int r,i;
-		 System.out.println("Connection to DBSHARDS.");
+		 logger.info("Connection to DBSHARDS.");
 		  try {
-				Class.forName("com.dbshardsl.jdbc.Driver"); 
+				Class.forName(connectionClass); 
 			} catch (ClassNotFoundException e1) {
 				throw new RuntimeException("Class for mysql error", e1);
 			}

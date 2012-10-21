@@ -76,11 +76,11 @@ public class TpccLoad implements TpccConstants {
 		System.out.printf("*************************************\n");
 
 		/* Parse args */
-		if (argv.length != 10) {
-		    if (argv.length != 7) {
-			System.out.printf("\n usage: tpcc_load [server] [DB] [user] [pass] [warehouse] [shardCount]\n"
+		if (argv.length != 11) {
+		    if (argv.length != 8) {
+			System.out.printf("\n usage: tpcc_load [server] [DB] [user] [pass] [warehouse] [shardCount] [Class}\n"
 								+ "      OR\n"
-								+ "        tpcc_load [server] [DB] [user] [pass] [warehouse] [shardCount] [part] [min_wh] [max_wh]\n\n"
+								+ "        tpcc_load [server] [DB] [user] [pass] [warehouse] [shardCount] [Class] [part] [min_wh] [max_wh]\n\n"
 								+ "           * [part]: 1=ITEMS 2=WAREHOUSE 3=CUSTOMER 4=ORDERS\n");
 			System.exit(1);
 		    }
@@ -104,7 +104,7 @@ public class TpccLoad implements TpccConstants {
 		    System.out.printf("\n pass phrase is too long\n");
 		    System.exit(1);
 		}
-		if ((count_ware = Integer.parseInt(argv[6])) <= 0) {
+		if ((count_ware = Integer.parseInt(argv[5])) <= 0) {
 		    System.out.printf("\n expecting positive number of warehouses\n");
 		    System.exit(1);
 		}
@@ -119,7 +119,8 @@ public class TpccLoad implements TpccConstants {
 		db_string = argv[2];
 		db_user = argv[3];
 		db_password = argv[4];
-		shardCount = Integer.parseInt(argv[5]);
+		shardCount = Integer.parseInt(argv[6]);
+		String connectionClass = argv[7];
 
 		if(connect_string.equals("1")){
 		  is_local = 1;
@@ -128,9 +129,9 @@ public class TpccLoad implements TpccConstants {
 		}
 
 		if(particle_flg==1){
-		    part_no = Integer.parseInt(argv[7]);
-		    min_ware = Integer.parseInt(argv[8]);
-		    max_ware = Integer.parseInt(argv[9]);
+		    part_no = Integer.parseInt(argv[8]);
+		    min_ware = Integer.parseInt(argv[9]);
+		    max_ware = Integer.parseInt(argv[10]);
 		}else{
 		    min_ware = 1;
 		    max_ware = count_ware;
@@ -157,7 +158,7 @@ public class TpccLoad implements TpccConstants {
 
 		/* EXEC SQL WHENEVER SQLERROR GOTO Error_SqlCall; */
 		try {
-			Class.forName("com.mysql.jdbc.Driver");
+			Class.forName(connectionClass);
 		} catch (ClassNotFoundException e1) {
 			throw new RuntimeException("Class for mysql error", e1);
 		}
