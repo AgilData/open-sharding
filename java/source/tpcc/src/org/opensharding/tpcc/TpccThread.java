@@ -42,7 +42,7 @@ public class TpccThread extends Thread {
 		 int r,i;
 		 System.out.println("Connection to DBSHARDS.");
 		  try {
-				Class.forName("com.mysql.jdbc.Driver"); //TODO:Change to dbshards driver
+				Class.forName("com.dbshardsl.jdbc.Driver"); //TODO:Change to dbshards driver
 			} catch (ClassNotFoundException e1) {
 				throw new RuntimeException("Class for mysql error", e1);
 			}
