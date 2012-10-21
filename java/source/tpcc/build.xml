@@ -24,8 +24,8 @@
 			<src path="src/"/>
 			<classpath refid="log4j2.classpath"/>
 		</javac>
-		<jar destfile="dist/jars/tpcc.jar" basedir="_classes"/>
-		<copy todir="dist">
+		<jar destfile="jars/tpcc.jar" basedir="_classes"/>
+		<copy todir="jars/">
 	    <fileset dir="../../3rdparty/log4j-2.0/"/>
 	  </copy>
 		<delete dir="_classes"/>
