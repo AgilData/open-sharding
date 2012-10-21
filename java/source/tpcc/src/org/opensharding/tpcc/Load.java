@@ -165,8 +165,10 @@ public class Load implements TpccConstants {
 		    retried = true;
 			for (w_id = 0; w_id <= max_ware; w_id++) {
 				
-				if( currentShard == shardCount){
-					currentShard = 1;
+				if(w_id + 1 > shardCount){
+					currentShard = (w_id + 1 % shardCount);
+				}else{
+					currentShard = w_id + 1;
 				}
 				
 				System.out.println("Current Shard: " + currentShard);
@@ -222,8 +224,6 @@ public class Load implements TpccConstants {
 					throw new RuntimeException("Warehouse insert error", e);
 				}
 			
-	
-				currentShard++;
 				/** Make Rows associated with Warehouse **/
 				//stock(w_id, conn, shardCount);
 				//district(w_id, conn, shardCount);
@@ -233,7 +233,7 @@ public class Load implements TpccConstants {
 		//TODO: Throw an exception here
 		
 			try {
-				stmt.executeBatch();
+				//stmt.executeBatch();
 				stmt.close();
 			} catch (SQLException e) {
 				throw new RuntimeException("Warehouse batch error", e);
