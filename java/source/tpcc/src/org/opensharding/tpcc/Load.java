@@ -225,8 +225,8 @@ public class Load implements TpccConstants {
 				}
 			
 				/** Make Rows associated with Warehouse **/
-				//stock(w_id, conn, shardCount);
-				//district(w_id, conn, shardCount);
+				stock(w_id, conn, shardCount, currentShard);
+				district(w_id, conn, shardCount, currentShard);
 
 		}
 		/* EXEC SQL COMMIT WORK; */
@@ -292,7 +292,7 @@ public class Load implements TpccConstants {
 	 * ARGUMENTS |      w_id - warehouse id
 	 * +==================================================================
 	 */
-	public static boolean stock(int w_id, Connection conn, int shardCount){
+	public static boolean stock(int w_id, Connection conn, int shardCount, int currentShard){
 		int s_i_id = 0;
 		int s_w_id = 0;
 		int s_quantity = 0;
@@ -320,13 +320,7 @@ public class Load implements TpccConstants {
 		} catch (SQLException e) {
 			throw new RuntimeException("Stament creation error", e);
 		}
-	    int shardValue = 1;
-	    for (int j = 1; j <= w_id; j++){
-	    	if(shardValue == shardCount){
-	    		shardValue = 1;
-	    	}
-	    	shardValue++;
-	    }
+	    
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr;*/
 		System.out.printf("Loading Stock Wid=%d\n", w_id);
 		s_w_id = w_id;
@@ -373,7 +367,7 @@ public class Load implements TpccConstants {
 			try {
 				if(shardCount > 0){
 					stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							  + shardValue + "*/"
+							  + currentShard + "*/"
 							  + "INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
 							  + s_i_id + ","
 							  + s_w_id + ","
@@ -447,7 +441,7 @@ public class Load implements TpccConstants {
 	 * | ARGUMENTS |      w_id - warehouse id
 	 * +==================================================================
 	 */
-	public static boolean district(int w_id, Connection conn, int shardCount) {
+	public static boolean district(int w_id, Connection conn, int shardCount, int currentShard) {
 		int d_id = 0;
 		int d_w_id = 0;
 		String d_name = null;
@@ -466,14 +460,6 @@ public class Load implements TpccConstants {
 		} catch (SQLException e1) {
 			throw new RuntimeException("District statemet creation error", e1);
 		}
-	    int shardValue = 1;
-	    for (int j = 1; j <= w_id; j++){
-	    	if(shardValue == shardCount){
-	    		shardValue = 1;
-	    	}
-	    	shardValue++;
-	    }
-
 
 		System.out.printf("Loading District\n");
 		d_w_id = w_id;
@@ -502,7 +488,7 @@ public class Load implements TpccConstants {
 			try {
 				if(shardCount > 0 ){
 					stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							  + shardValue + "*/"
+							  + currentShard + "*/"
 							  + "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
 							  + d_id + ","
 							  + d_w_id + ","
@@ -590,16 +576,16 @@ public class Load implements TpccConstants {
 		} catch (SQLException e1) {
 			throw new RuntimeException("Customer statemet creation error", e1);
 		}
-	    int shardValue = 1;
-	    for (int j = 1; j <= w_id; j++){
-	    	if(shardValue == shardCount){
-	    		shardValue = 1;
-	    	}
-	    	shardValue++;
-	    }
+	    
+		
 
 		System.out.printf("Loading Customer for DID=%d, WID=%d\n", d_id, w_id);
-
+		int currentShard;
+		if(w_id + 1 > shardCount){
+			currentShard = (w_id  % shardCount);
+		}else{
+			currentShard = w_id + 1;
+		}
 	retry:
 	    if (retried)
 	        System.out.printf("Retrying ...\n");
@@ -656,7 +642,7 @@ public class Load implements TpccConstants {
 			try {
 				if(shardCount > 0){
 					stmtCust.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							  + shardValue + "*/"
+							  + currentShard + "*/"
 							  + "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
 							  + c_id + ","
 							  + c_d_id + ","
@@ -720,7 +706,7 @@ public class Load implements TpccConstants {
 			try {
 				if(shardCount > 0){
 					stmtHist.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-						      + shardValue + "*/"
+						      + currentShard + "*/"
 						      + "INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
 						      + c_id + ","
 						      + c_d_id + ","
@@ -808,13 +794,13 @@ public class Load implements TpccConstants {
 		} catch (SQLException e1) {
 			throw new RuntimeException("District statemet creation error", e1);
 		}
-	    int shardValue = 1;
-	    for (int j = 1; j <= w_id; j++){
-	    	if(shardValue == shardCount){
-	    		shardValue = 1;
-	    	}
-	    	shardValue++;
-	    }
+		
+		int currentShard;
+		if(w_id + 1 > shardCount){
+			currentShard = (w_id  % shardCount);
+		}else{
+			currentShard = w_id + 1;
+		}
 
 		System.out.printf("Loading Orders for D=%d, W= %d\n", d_id, w_id);
 		o_d_id = d_id;
@@ -848,7 +834,7 @@ public class Load implements TpccConstants {
 				try {
 					if(shardCount > 0){
 						stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + "*/"
+							      + currentShard + "*/"
 							      + "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
 							      + o_id + ","
 							      + o_d_id + ","
@@ -880,7 +866,7 @@ public class Load implements TpccConstants {
 				try {
 					if(shardCount > 0){
 						stmtNewOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + "*/"
+							      + currentShard + "*/"
 							      + "INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) values("
 							      + o_id + ","
 							      + o_d_id + ","
@@ -904,7 +890,7 @@ public class Load implements TpccConstants {
 				try {
 					if(shardCount > 0){
 						stmtOrd.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-							      + shardValue + "*/"
+							      + currentShard + "*/"
 							      + "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) values("
 							      + o_id + ","
 							      + o_d_id + ","
@@ -957,7 +943,7 @@ public class Load implements TpccConstants {
 					try {
 						if(shardCount > 0){
 							stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-								      + shardValue + "*/"
+								      + currentShard + "*/"
 								      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
 								      + o_id + ","
 								      + o_d_id + ","
@@ -996,7 +982,7 @@ public class Load implements TpccConstants {
 					try {
 						if(shardCount > 0){
 							stmtOrdLn.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-								      + shardValue + "*/"
+								      + currentShard + "*/"
 								      + "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) values("
 								      + o_id + ","
 								      + o_d_id + ","
