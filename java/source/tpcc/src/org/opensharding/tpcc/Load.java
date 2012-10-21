@@ -113,7 +113,7 @@ public class Load implements TpccConstants {
 		/* EXEC SQL COMMIT WORK; */
 		
 		try {
-			stmt.executeBatch();
+			//stmt.executeBatch();
 			stmt.close();
 		} catch (SQLException e) {
 			throw new RuntimeException("Item batch error", e);
