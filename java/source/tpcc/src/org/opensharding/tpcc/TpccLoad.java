@@ -168,7 +168,7 @@ public class TpccLoad implements TpccConstants {
 		if(is_local==1){
 		    /* exec sql connect :connect_string; */
 		   // resp = mysql_real_connect(mysql, "localhost", db_user, db_password, db_string, port, NULL, 0);
-			dbUrl = "jdbc:mysql://localhost:" + port + "/" + db_string;
+			dbUrl = "jdbc:dbshards:" + db_string;
 			try {
 				conn = DriverManager.getConnection (dbUrl, db_user, db_password);
 			} catch (SQLException e) {
