@@ -233,7 +233,7 @@ public class Load implements TpccConstants {
 		//TODO: Throw an exception here
 		
 			try {
-				//stmt.executeBatch();
+				stmt.executeBatch();
 				stmt.close();
 			} catch (SQLException e) {
 				throw new RuntimeException("Warehouse batch error", e);
