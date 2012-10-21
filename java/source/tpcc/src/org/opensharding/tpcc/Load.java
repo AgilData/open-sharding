@@ -168,6 +168,8 @@ public class Load implements TpccConstants {
 				if( currentShard == shardCount){
 					currentShard = 1;
 				}
+				
+				System.out.println("Shard Count: " + shardCount);
 				/* Generate Warehouse Data */
 	
 		        w_name = Util.makeAlphaString(6, 10);
@@ -223,8 +225,8 @@ public class Load implements TpccConstants {
 	
 				currentShard++;
 				/** Make Rows associated with Warehouse **/
-				stock(w_id, conn, shardCount);
-				district(w_id, conn, shardCount);
+				//stock(w_id, conn, shardCount);
+				//district(w_id, conn, shardCount);
 
 		}
 		/* EXEC SQL COMMIT WORK; */

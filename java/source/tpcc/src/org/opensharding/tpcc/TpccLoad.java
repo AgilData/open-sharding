@@ -199,8 +199,8 @@ public class TpccLoad implements TpccConstants {
 			System.out.printf("Particle flag: %d", particle_flg);
 			Load.loadItems(conn, shardCount, option_debug);
 		    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
-		    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
-		    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
+		   // Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
+		 //   Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
