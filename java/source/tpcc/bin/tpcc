@@ -19,7 +19,7 @@ XMS = "-Xms16m"
 XMX = "-Xmx#{HEAPSIZE}"
 
 
-jars = "#{BASEDIR}/jars/*.jar"
+jars = "#{BASEDIR}/tpcc-jars/*.jar"
 
 class_path = "-classpath #{BASEDIR}/conf:#{Dir.glob(jars).join(':')}"
 

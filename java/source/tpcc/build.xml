@@ -24,8 +24,8 @@
 			<src path="src/"/>
 			<classpath refid="log4j2.classpath"/>
 		</javac>
-		<jar destfile="jars/tpcc.jar" basedir="_classes"/>
-		<copy todir="jars/">
+		<jar destfile="tpcc-jars/tpcc.jar" basedir="_classes"/>
+		<copy todir="tpcc-jars/">
 	    <fileset dir="../../3rdparty/log4j-2.0/"/>
 	  </copy>
 		<delete dir="_classes"/>
@@ -41,7 +41,7 @@
 				preserveLeadingSlashes="false">
 				<include name="bin/**"/>
 				<include name="conf/**"/>
-				<include name="jars/**"/>
+				<include name="tpcc-jars/**"/>
 			</tarfileset>
 		</tar>
 	</target>

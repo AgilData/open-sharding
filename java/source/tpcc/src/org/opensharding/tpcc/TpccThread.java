@@ -51,7 +51,7 @@ public class TpccThread extends Thread {
 			Connection conn;
 			
 	
-			dbUrl = "jdbc:dbshards:"+db_string;
+			dbUrl = "jdbc:dbshards:" + db_string;
 			try {
 				conn = DriverManager.getConnection (dbUrl, db_user, db_password);
 			} catch (SQLException e) {
