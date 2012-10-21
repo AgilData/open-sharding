@@ -4,7 +4,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Slev implements TpccConstants{
+	private static final Logger logger = LogManager.getLogger(Driver.class);
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	private  TpccStatements pStmts;
 	
@@ -17,13 +22,14 @@ public class Slev implements TpccConstants{
 			  int w_id_arg,		/* warehouse id */
 			  int d_id_arg,		/* district id */
 			  int level_arg,		/* stock level */	
-			  Connection conn
+			  Connection conn, 
+			  Counter count
 		)
 		{
 			try{
 				pStmts.getConnection().setAutoCommit(false);
 
-				System.out.println("===================================================+SLEV=============================================");
+				if(DEBUG) logger.debug("===================================================+SLEV=============================================");
 				int w_id = w_id_arg;
 				int d_id = d_id_arg;
 				int level = level_arg;
@@ -38,6 +44,8 @@ public class Slev implements TpccConstants{
 					pStmts.getStatement(32).setInt(1, d_id);
 					pStmts.getStatement(32).setInt(2, w_id);
 					ResultSet rs = pStmts.getStatement(32).executeQuery();
+					count.increment();
+
 					if(rs.next()){
 						d_next_o_id = rs.getInt(1);
 						}
@@ -54,9 +62,12 @@ public class Slev implements TpccConstants{
 					pStmts.getStatement(33).setInt(3, d_next_o_id);
 					pStmts.getStatement(33).setInt(4, d_next_o_id);
 					ResultSet rs = pStmts.getStatement(32).executeQuery();
+					
 					while(rs.next()){
 						ol_i_id = rs.getInt(1);
 					}
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("Slev select transaction error", e);
@@ -73,6 +84,8 @@ public class Slev implements TpccConstants{
 					if(rs.next()){
 						i_count = rs.getInt(1);
 					}
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("Slev select transaction error", e);

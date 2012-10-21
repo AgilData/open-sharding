@@ -4,7 +4,12 @@ import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class OrderStat implements TpccConstants{
+	private static final Logger logger = LogManager.getLogger(Driver.class);
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	private  TpccStatements pStmts;
 	
@@ -18,14 +23,15 @@ public class OrderStat implements TpccConstants{
 		     int byname,		/* select by c_id or c_last? */
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,  /* customer last name, format? */
-		     Connection conn
+		     Connection conn,
+		     Counter count
 	)
 	{
 		
 		try {
 			
 			pStmts.getConnection().setAutoCommit(false);
-			System.out.println("================================================ORDER STAT==============================================");
+			if(DEBUG) logger.debug("================================================ORDER STAT==============================================");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;
@@ -66,7 +72,8 @@ public class OrderStat implements TpccConstants{
 						namecnt = rs.getInt(1);
 //						System.out.printf("Namecnt: %d\n", namecnt);
 					}
-					
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("OrderStat Select transaction error", e);
@@ -99,7 +106,8 @@ public class OrderStat implements TpccConstants{
 						c_last = rs.getString(4);
 //						System.out.printf("balance: %f first: %s, middle: %s last: %s\n", c_balance, c_first, c_middle, c_last);
 					}
-					
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("OrderStat Select transaction error", e);
@@ -124,7 +132,8 @@ public class OrderStat implements TpccConstants{
 //						System.out.printf("balance: %f, first: %s, middle: %s last: %s\n", c_balance, c_first, c_middle, c_last);
 						
 					}
-				
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e){
 					throw new RuntimeException("OrderStat select transaction error", e);
@@ -155,7 +164,8 @@ public class OrderStat implements TpccConstants{
 					o_carrier_id = rs.getInt(3);
 //					System.out.printf("O_id: %d, entry: %s, carrier: %d\n", o_id, o_entry_d, o_carrier_id);
 				}
-				
+				count.increment();
+
 				rs.close();
 			} catch (SQLException e){
 				throw new RuntimeException("OrderState select transaction error", e);
@@ -181,7 +191,8 @@ public class OrderStat implements TpccConstants{
 //					System.out.printf("ol_I_id: %d supply: %d quantity: %d amout: %f delivery %s\n", ol_i_id, ol_supply_w_id, ol_quantity,
 //							ol_amount, ol_delivery_d);
 				}
-				
+				count.increment();
+
 				rs.close();
 			} catch (SQLException e){
 				throw new RuntimeException("OrderStat select transaction error", e);

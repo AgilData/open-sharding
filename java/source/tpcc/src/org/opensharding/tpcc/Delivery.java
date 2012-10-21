@@ -4,7 +4,12 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class Delivery implements TpccConstants {
+	private static final Logger logger = LogManager.getLogger(Driver.class);
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	
 	private  TpccStatements pStmts;
 	
@@ -12,11 +17,11 @@ public class Delivery implements TpccConstants {
 		this.pStmts = pStmts;
 	}
 	
-	public  int delivery( int t_num, int w_id_arg, int o_carrier_id_arg,  Connection conn){
+	public  int delivery( int t_num, int w_id_arg, int o_carrier_id_arg,  Connection conn, Counter count){
 		try{
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);
-			System.out.println("================================================Delivery==========================================");
+			if (DEBUG) logger.debug("================================================Delivery==========================================");
 			int w_id = w_id_arg;
 			int o_carrier_id = o_carrier_id_arg;
 			int d_id = 0;
@@ -48,6 +53,7 @@ public class Delivery implements TpccConstants {
 					if(rs.next()) {
 						no_o_id = rs.getInt(1);
 					}
+					count.increment();
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("Delivery Select transaction error", e);
@@ -63,6 +69,8 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(26).setInt(2, d_id);
 					pStmts.getStatement(26).setInt(3, w_id);
 					pStmts.getStatement(26).executeQuery();
+					count.increment();
+
 				} catch (SQLException e) {
 					throw new RuntimeException(" Delivery Delete transaction error", e);
 				}
@@ -81,6 +89,8 @@ public class Delivery implements TpccConstants {
 					if(rs.next()){
 						c_id = rs.getInt(1);
 					}
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException(" Delivery Select transaction error", e);
@@ -96,6 +106,8 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(28).setInt(3, d_id);
 					pStmts.getStatement(28).setInt(4, w_id);
 					pStmts.getStatement(28).executeUpdate();
+					count.increment();
+
 				} catch (SQLException e) {
 					throw new RuntimeException("Delivery Update transcation error", e);
 				}
@@ -110,6 +122,8 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(29).setInt(3, d_id);
 					pStmts.getStatement(29).setInt(4, w_id);
 					pStmts.getStatement(29).executeUpdate();
+					count.increment();
+
 				} catch (SQLException e) {
 					throw new RuntimeException("Delivery Update transaction error", e);
 				}
@@ -126,7 +140,8 @@ public class Delivery implements TpccConstants {
 					if(rs.next()){
 						ol_total = rs.getFloat(1);
 					}
-					
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("Delivery Select transaction error", e);
@@ -143,6 +158,8 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(31).setInt(2, d_id);
 					pStmts.getStatement(31).setInt(3, w_id);
 					pStmts.getStatement(31).executeUpdate();
+					count.increment();
+
 				} catch (SQLException e) {
 					throw new RuntimeException("Delivery Update transaction error", e);
 				}

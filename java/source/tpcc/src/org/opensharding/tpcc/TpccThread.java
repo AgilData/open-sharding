@@ -23,8 +23,9 @@ public class TpccThread extends Thread {
 	String db_string;
 	
 	TpccStatements pStmts;
+	Counter count;
 	
-	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn) {
+	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count) {
 		 this.number = number;
 		 this.port = port;
 		 this.connect_string = connect_string;
@@ -34,6 +35,7 @@ public class TpccThread extends Thread {
 		 this.is_local = is_local;
 		 this.num_conn = num_conn;
 		 this.num_ware -= num_ware;
+		 this.count = count;
 	}
 	
 	public void run() {
@@ -86,7 +88,7 @@ public class TpccThread extends Thread {
 			Driver driver = new Driver(conn);
 		 
 			if(DEBUG) logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
-		  r = driver.runTransaction(number, num_ware, num_conn);
+		  r = driver.runTransaction(number, count, num_ware, num_conn);
 	
 	//	  /* EXEC SQL COMMIT WORK; */
 	//	  if( mysql_commit(ctx[t_num]) ) goto sqlerr;

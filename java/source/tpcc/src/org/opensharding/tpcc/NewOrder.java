@@ -7,8 +7,13 @@ import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class NewOrder implements TpccConstants {
 	
+	private static final Logger logger = LogManager.getLogger(Driver.class);
+	private static final boolean DEBUG = logger.isDebugEnabled();
 	private TpccStatements pStmts;
 	
 	private String s_dist_01 = null;
@@ -77,7 +82,8 @@ public class NewOrder implements TpccConstants {
 		    int itemid[],		/* ids of items to be ordered */
 		    int supware[],		/* warehouses supplying items */
 		    int qty[],
-		    Connection conn
+		    Connection conn,
+		    Counter count
 	)
 	{
 
@@ -85,7 +91,7 @@ public class NewOrder implements TpccConstants {
 			
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);
-			System.out.println("==========================================New Order========================================");
+			if(DEBUG) logger.debug("==========================================New Order========================================");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;
@@ -151,6 +157,7 @@ public class NewOrder implements TpccConstants {
 					w_tax = rs.getFloat(4);
 				}
 //				System.out.printf("c_discount: %f, c_last: %s, c_credit: %s, w_tax: %f\n\n", c_discount, c_last, c_credit, w_tax);
+		
 				rs.close();
 			} catch (SQLException e) {
 				throw new RuntimeException("NewOrder select transaction error", e);
@@ -171,7 +178,7 @@ public class NewOrder implements TpccConstants {
 //					System.out.printf("d_next: %d , d_tax %f \n\n", d_next_o_id, d_tax);
 				}
 				rs.close();
-				
+				count.increment();
 			} catch (SQLException e) {
 				throw new RuntimeException("Neworder select transaction error", e);
 			}
@@ -185,6 +192,8 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(2).setInt(2, d_id);
 				pStmts.getStatement(2).setInt(3, w_id);
 				pStmts.getStatement(2).executeUpdate();
+				count.increment();
+
 			} catch (SQLException e) {
 				throw new RuntimeException("NewOrder update transaction error", e);
 			}
@@ -205,6 +214,8 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(3).setInt(7, o_all_local);
 				
 				pStmts.getStatement(3).executeUpdate();
+				count.increment();
+
 			} catch (SQLException e) {
 				throw new RuntimeException("NewOrder insert transaction error",e );
 			}
@@ -218,6 +229,8 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(4).setInt(3, w_id);
 				
 				pStmts.getStatement(4).executeUpdate();
+				count.increment();
+
 			} catch (SQLException e) {
 				throw new RuntimeException("NewOrder insert transaction error", e);
 			}
@@ -263,9 +276,13 @@ public class NewOrder implements TpccConstants {
 						i_data = rs.getString(3);
 //						System.out.println("i_price: " + i_price + " i_name " + i_name + " i_data " + i_data + "\n");
 					} else {
+						count.increment();
+
 						rs.close();
 						throw new AbortedTransactionException();
 					}
+					count.increment();
+
 					rs.close();
 				} catch (SQLException e) {
 					throw new RuntimeException("NewOrder select transaction error", e);
@@ -297,6 +314,7 @@ public class NewOrder implements TpccConstants {
 //						System.out.printf("s_quantity: %d s_data: %s dist_1: %s dist_2: %s dist_3: %s dist4: %s dist_5: %s dist_6: %s dist_7 %s dist_8 %s dist_9: %s dist10: %s \n\n", s_quantity, s_data, s_dist_01,
 //								s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10);
 					}
+					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {
@@ -330,6 +348,8 @@ public class NewOrder implements TpccConstants {
 					pStmts.getStatement(7).setInt(3, ol_supply_w_id);
 					
 					pStmts.getStatement(7).executeUpdate();
+					count.increment();
+
 				} catch (SQLException e) {
 					throw new RuntimeException("NewOrder update transaction error", e);
 				}
@@ -354,6 +374,8 @@ public class NewOrder implements TpccConstants {
 					pStmts.getStatement(8).setString(9, ol_dist_info.toString());
 					
 					pStmts.getStatement(8).executeUpdate();
+					count.increment();
+
 				} catch (SQLException e) {
 					throw new RuntimeException("NewOrder insert transaction error", e);
 				}

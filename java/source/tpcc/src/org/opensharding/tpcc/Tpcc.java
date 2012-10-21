@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -79,13 +80,11 @@ public class Tpcc {
 	  int i, k, t_num, arg_offset, c;
 	  long m;
 	  float f;
-	  //pthread_t t;
-	  //thread_arg thd_arg;
-	 // timer_t timer;
-	 // struct itimerval itval;
-	 // struct sigaction  sigact;
+	
 	  int port= 3306;
 	  int fd, seed;
+	  
+	  Counter count = new Counter();
 
 	  logger.info("***************************************");
 	  logger.info("****** Java TPC-C Load Generator ******");
@@ -117,8 +116,7 @@ public class Tpcc {
 	  /* number of node (default 0) */
 	  num_node = 0;
 	  arg_offset = 0;
-	  
-	 // clk_tck = sysconf(_SC_CLK_TCK);
+
 
 	  /* Parse args */
 	  if (argv.length == 0){
@@ -148,7 +146,7 @@ public class Tpcc {
 	    		trx_file = argv[j+1];
 	    	}else if(argv[j].equals("-w")){
 	    		System.out.printf("Option w with value %s \n", argv[j+1]);
-	    		num_ware = Integer.parseInt(argv[j+1]);
+	    		num_ware = Integer.parseInt(argv[j+1]) * -1;
 	    	}else if(argv[j].equals("-c")){
 	    		System.out.printf("Option c with value %s \n", argv[j+1]);
 	    		num_conn = Integer.parseInt(argv[j+1]);
@@ -199,27 +197,13 @@ public class Tpcc {
 	    	      System.exit(1);
 	    	    }
 	    	  }
-	      
-	      if ( report_file.length() > 0 ) {
-	    	    try {
-					BufferedWriter freport_file = new BufferedWriter(new FileWriter(report_file));
-				} catch (IOException e) {
-					throw new RuntimeException("Could not open report_file", e);
-				}
-	      }
-	      if (trx_file.length() > 0 ) {
-	    	    try {
-					BufferedWriter ftrx_file = new BufferedWriter(new FileWriter(trx_file));
-				} catch (IOException e) {
-					throw new RuntimeException("Could not open trx_file", e);
-				}
-	      	}
+	
 
 
     	  System.out.printf("<Parameters>\n");
     	  if(is_local==0) {
     	    System.out.printf("     [server]: ");
-    	      System.out.printf("%s",  connect_string);
+    	    System.out.printf("%s",  connect_string);
     	    System.out.printf("\n");
     	  }
     	  
@@ -241,38 +225,6 @@ public class Tpcc {
     		   Integer.parseInt(argv[11 + arg_offset]), Integer.parseInt(argv[12 + arg_offset]), Integer.parseInt(argv[13 + arg_offset]) );
     	  }
     	  
-//    	  /* alarm initialize */
-//    	  time_count = 0;
-//    	  itval.it_interval.tv_sec = PRINT_INTERVAL;
-//    	  itval.it_interval.tv_usec = 0;
-//    	  itval.it_value.tv_sec = PRINT_INTERVAL;
-//    	  itval.it_value.tv_usec = 0;
-//    	  sigact.sa_handler = alarm_handler;
-//    	  sigact.sa_flags = 0;
-//    	  sigemptyset(&sigact.sa_mask);
-//
-//    	  /* setup handler&timer */
-//    	  if( sigaction( SIGALRM, &sigact, NULL ) == -1 ) {
-//    	    fprintf(stderr, "error in sigaction()\n");
-//    	    exit(1);
-//    	  }
-//
-//    	  fd = open("/dev/urandom", O_RDONLY);
-//    	  if (fd == -1) {
-//    	    fd = open("/dev/random", O_RDONLY);
-//    	    if (fd == -1) {
-//    	      struct timeval  tv;
-//    	      gettimeofday(&tv, NULL);
-//    	      seed = (tv.tv_sec ^ tv.tv_usec) * tv.tv_sec * tv.tv_usec ^ tv.tv_sec;
-//    	    }else{
-//    	      read(fd, &seed, sizeof(seed));
-//    	      close(fd);
-//    	    }
-//    	  }else{
-//    	    read(fd, &seed, sizeof(seed));
-//    	    close(fd);
-//    	  }
-//    	  SetSeed(seed);
 		
 
 		  if(valuable_flg==0){
@@ -281,293 +233,63 @@ public class Tpcc {
 		    Util.seqInit( Integer.parseInt(argv[9 + arg_offset]), Integer.parseInt(argv[10 + arg_offset]), Integer.parseInt(argv[11 + arg_offset]),
 			     Integer.parseInt(argv[12 + arg_offset]), Integer.parseInt(argv[13 + arg_offset]) );
 		  }
-		  success2 = new int[5][num_conn];
-		  late2 = new int[5][num_conn];
-		  retry2 = new int[5][num_conn];
-		  failure2 = new int[5][num_conn];
-		  /* set up each counter */
-		  for ( i=0; i<5; i++ ){
-		      for ( k=0; k<num_conn; k++ ){
-				  success2[i][k] = 0;
-				  late2[i][k] = 0;
-				  retry2[i][k] = 0;
-				  failure2[i][k] = 0;
-		      }
-		  }
 
 		  /* set up threads */
 		  
 		if(DEBUG) logger.debug("Creating TpccThread");
-		ExecutorService executor = Executors.newFixedThreadPool(1);
-
+		TpccThread[] thread = new TpccThread[num_conn];
+		//ExecutorService executor = Executors.newFixedThreadPool(num_conn);
+		for (int t =0; t < num_conn; t++){
+			thread[t] = new TpccThread(t + 1, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count);
+			thread[t].start();
+		}
 		// Start each server.
-		// TODO: From configuration.
-		Runnable worker = new TpccThread(1, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn);
-		executor.execute(worker);
+		// 
+//		for(i =0; i<num_conn; i++){
+//			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn);
+//			executor.execute(worker);
+//		}
 		
-		executor.shutdown();
-		while(!executor.isTerminated()) {
+		
+		Calendar calendar = Calendar.getInstance();
+		int initialtime = calendar.get(Calendar.SECOND);
+		int time = 0;
+		System.out.printf("\nMEASURING START.\n\n");
+
+		if(DEBUG) logger.debug("main: measure_time: " + measure_time + " intial time: " + initialtime);
+		
+		do{
+			calendar = Calendar.getInstance();
+			time = calendar.get(Calendar.SECOND);
+			
+		}while( measure_time  > (time - initialtime) );
+		
+		System.out.printf("\nSTOPPING THREADS\n");
+		
+		activate_transaction = 0;
+		
+
+		
+		for(int t = 0; t < num_conn; t++ ){
+			try {
+				thread[t].join();
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			
 		}
+		System.out.printf("TOTAL TRANSACTIONS: %d\n", count.getTotal());
+		System.out.printf("TOTAL TPMS: %f\n", (float)count.getTotal()/(float)measure_time);
 		
-		  ctx = new int[num_conn];
+		//executor.shutdown();
+		
+		//while(!executor.isTerminated()) {
+		//}
 
-		  if ( ctx.length == 0 ){
-		    logger.error("error at ctx size");
-		    System.exit(1);
-		  }
-		  
-
-		  System.out.printf("\nMEASURING START.\n\n");
-
-		  /* sleep(measure_time); */
-		  /* start timer */
-
-//		#ifndef _SLEEP_ONLY_
-//		  if( setitimer(ITIMER_REAL, &itval, NULL) == -1 ) {
-//		    fprintf(stderr, "error in setitimer()\n");
-//		  }
-//		#endif
-
-		  counting_on = 1;
-		  /* wait signal */
-//		  for(i = 0; i < (measure_time / PRINT_INTERVAL); i++ ) {
-//		#ifndef _SLEEP_ONLY_
-//		    pause();
-//		#else
-//		    sleep(PRINT_INTERVAL);
-//		    alarm_dummy();
-//		#endif
-//		  }
-		  counting_on = 0;
-
-//		#ifndef _SLEEP_ONLY_
-//		  /* stop timer */
-//		  itval.it_interval.tv_sec = 0;
-//		  itval.it_interval.tv_usec = 0;
-//		  itval.it_value.tv_sec = 0;
-//		  itval.it_value.tv_usec = 0;
-//		  if( setitimer(ITIMER_REAL, &itval, NULL) == -1 ) {
-//		    fprintf(stderr, "error in setitimer()\n");
-//		  }
-//		#endif
-
-		  System.out.printf("\nSTOPPING THREADS");
-		 activate_transaction = 0;
-
-//		  /* wait threads' ending and close connections*/
-//		  for( i=0; i < num_conn; i++ ){
-//		    pthread_join( t[i], NULL );
-//		  }
-		  
-		  
-
-//		  free(ctx);
-//		  for( i=0; i < num_conn; i++ ){
-//		      free(stmt[i]);
-//		  }
-//		  free(stmt);
-//
-//		  free(t);
-//		  free(thd_arg);
-
-		  //hist_report();
-		  if (freport_file != null)
-			try {
-				freport_file.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException("Could not close file", e);
-			}
-
-		  if (ftrx_file != null)
-			try {
-				ftrx_file.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException("Could not close file", e);
-			}
-
-		  System.out.printf("\n<Raw Results>\n");
-		  for ( i=0; i<5; i++ ){
-		    System.out.printf("  [%d] sc:%d  lt:%d  rt:%d  fl:%d \n", i, success[i], late[i], retry[i], failure[i]);
-		  }
-		  System.out.printf(" in %d sec.\n", (measure_time / PRINT_INTERVAL) * PRINT_INTERVAL);
-
-		  System.out.printf("\n<Raw Results2(sum ver.)>\n");
-		  for( i=0; i<5; i++ ){
-		      success2_sum[i] = 0;
-		      late2_sum[i] = 0;
-		      retry2_sum[i] = 0;
-		      failure2_sum[i] = 0;
-		      for( k=0; k<num_conn; k++ ){
-			  success2_sum[i] += success2[i][k];
-			  late2_sum[i] += late2[i][k];
-			  retry2_sum[i] += retry2[i][k];
-			  failure2_sum[i] += failure2[i][k];
-		      }
-		  }
-		  for ( i=0; i<5; i++ ){
-		      System.out.printf("  [%d] sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
-		  }
-
-		  System.out.printf("\n<Constraint Check> (all must be [OK])\n [transaction percentage]\n");
-		  for ( i=0, m=0; i<5; i++ ){
-		    m += (success[i] + late[i]);
-		  }
-
-		  f = (float) (100.0 * (float)(success[1] + late[1])/(float)m);
-		  System.out.printf("        Payment: %f%% (>=4.0%%)",f);
-		  if ( f >= 43.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)(success[2] + late[2])/(float)m);
-		  System.out.printf("   Order-Status: %f%% (>= 4.0%%)",f);
-		  if ( f >= 4.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)(success[3] + late[3])/(float)m);
-		  System.out.printf("       Delivery: %f%% (>= 4.0%%)",f);
-		  if ( f >= 4.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)(success[4] + late[4])/(float)m);
-		  System.out.printf("    Stock-Level: %f%% (>= 4.0%%)",f);
-		  if ( f >= 4.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-
-		  System.out.printf(" [response time (at least 90%% passed)]\n");
-		  f = (float) (100.0 * (float)success[0]/(float)(success[0] + late[0]));
-		  System.out.printf("      New-Order: %f%% ",f);
-		  if ( f >= 90.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)success[1]/(float)(success[1] + late[1]));
-		   System.out.printf("        Payment: %f%% ",f);
-		  if ( f >= 90.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)success[2]/(float)(success[2] + late[2]));
-		  System.out.printf("   Order-Status: %f%% ",f);
-		  if ( f >= 90.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)success[3]/(float)(success[3] + late[3]));
-		  System.out.printf("       Delivery: %f%% ",f);
-		  if ( f >= 90.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-		  f = (float) (100.0 * (float)success[4]/(float)(success[4] + late[4]));
-		  	System.out.printf("    Stock-Level: %f%% ",f);
-		  if ( f >= 90.0 ){
-		    System.out.printf(" [OK]\n");
-		  }else{
-		    System.out.printf(" [NG] *\n");
-		  }
-
-		 System.out.println("\n<TpmC>\n");
-		  f = (float) ((float)(success[0] + late[0]) * 60.0
-		    / (float)((measure_time / PRINT_INTERVAL) * PRINT_INTERVAL));
-		  System.out.printf("                 %f TpmC\n",f);
+		  RtHist.histReport();
 		  System.exit(0);
 	}
-	
-	void alarm_handler(int signum)
-	{
-	  int i;
-	  int[] s = new int[5];
-	  int[] l = new int[5];
-	  double[] rt90 = new double[5];
-
-	  for( i=0; i<5; i++ ){
-	    s[i] = success[i];
-	    l[i] = late[i];
-	    rt90[i] = RtHist.histCkp(i);
-	  }
-	  
-	  time_count += PRINT_INTERVAL;
-	  System.out.printf("%d, %d(%d):%f|%f, %d(%d):%f|%f, %d(%d):%f|%f, %d(%d):%f|%f, %d(%d):%f|%f\n",
-		 time_count,
-		 ( s[0] + l[0] - prev_s[0] - prev_l[0] ),
-		 ( l[0] - prev_l[0] ),
-		 rt90[0],(double)cur_max_rt[0],
-		 ( s[1] + l[1] - prev_s[1] - prev_l[1] ),
-		 ( l[1] - prev_l[1] ),
-		 rt90[1],(double)cur_max_rt[1],
-		 ( s[2] + l[2] - prev_s[2] - prev_l[2] ),
-		 ( l[2] - prev_l[2] ),
-		 rt90[2],(double)cur_max_rt[2],
-		 ( s[3] + l[3] - prev_s[3] - prev_l[3] ),
-		 ( l[3] - prev_l[3] ),
-		 rt90[3],(double)cur_max_rt[3],
-		 ( s[4] + l[4] - prev_s[4] - prev_l[4] ),
-		 ( l[4] - prev_l[4] ),
-		 rt90[4],(double)cur_max_rt[4]
-		 );
-
-	  for( i=0; i<5; i++ ){
-	    prev_s[i] = s[i];
-	    prev_l[i] = l[i];
-	    cur_max_rt[i]=0.0;
-	  }
-	}
-	
-	void alarm_dummy()
-	{
-	  int i;
-	  int[] s = new int[5];
-	  int[] l = new int[5];
-	  float[] rt90 = new float[5];
-
-	  for( i=0; i<5; i++ ){
-	    s[i] = success[i];
-	    l[i] = late[i];
-	    rt90[i] = (float) RtHist.histCkp(i);
-	  }
-
-	  time_count += PRINT_INTERVAL;
-	 System.out.printf("%d, %d(%d):%f, %d(%d):%f, %d(%d):%f, %d(%d):%f, %d(%d):%f\n",
-		 time_count,
-		 ( s[0] + l[0] - prev_s[0] - prev_l[0] ),
-		 ( l[0] - prev_l[0] ),
-		 rt90[0],
-		 ( s[1] + l[1] - prev_s[1] - prev_l[1] ),
-		 ( l[1] - prev_l[1] ),
-		 rt90[1],
-		 ( s[2] + l[2] - prev_s[2] - prev_l[2] ),
-		 ( l[2] - prev_l[2] ),
-		 rt90[2],
-		 ( s[3] + l[3] - prev_s[3] - prev_l[3] ),
-		 ( l[3] - prev_l[3] ),
-		 rt90[3],
-		 ( s[4] + l[4] - prev_s[4] - prev_l[4] ),
-		 ( l[4] - prev_l[4] ),
-		 rt90[4]
-		 );
-
-	  for( i=0; i<5; i++ ){
-	    prev_s[i] = s[i];
-	    prev_l[i] = l[i];
-	  }
-	}
-			
 			
 
 }

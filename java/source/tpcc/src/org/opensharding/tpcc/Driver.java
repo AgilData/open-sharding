@@ -77,7 +77,7 @@ public class Driver implements TpccConstants {
 		}
 	}
 	
-	public int runTransaction(int t_num, int numWare, int numConn)
+	public int runTransaction(int t_num, Counter count, int numWare, int numConn)
 	{
 		
 		num_ware = numWare;
@@ -92,43 +92,21 @@ public class Driver implements TpccConstants {
 	    	if(DEBUG) logger.debug("runTransaction: sequence: " + sequence);
 	    	
 	    	if(sequence == 0){
-	    		doNeword(t_num, conn, pStmts);
+	    		doNeword(t_num, conn, pStmts, count);
 	    	}else if( sequence == 1){
-	    		doPayment(t_num, conn, pStmts);
+	    		doPayment(t_num, conn, pStmts, count);
 	    	}else if(sequence == 2){
-	    		doOrdstat(t_num, conn, pStmts);
+	    		doOrdstat(t_num, conn, pStmts, count);
 	    	}else if(sequence == 3){
-	    		doDelivery(t_num, conn, pStmts);
+	    		doDelivery(t_num, conn, pStmts, count);
 	    	}else if(sequence == 4){
-	    		doSlev(t_num, conn, pStmts);
+	    		doSlev(t_num, conn, pStmts, count);
 	    	}else{
 	    		System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
 				System.exit(1);
 	    	}
 	    	sequence = Util.seqGet();
-//	      switch(Util.seqGet()){
-//	      case 0:
-//			doNeword(t_num, conn, pStmts);
-//			break;
-//		  case 1:
-//			  System.out.println("Executing do payment");
-//			doPayment(t_num, conn, pStmts);
-//			break;
-//		  case 2:
-//			  System.out.println("Executing do ord stat");
-//			doOrdstat(t_num, conn, pStmts);
-//			break;
-//		  case 3:
-//			  System.out.println("Executing do delivery");
-//			doDelivery(t_num, conn, pStmts);
-//			break;
-//		  case 4:
-//			  System.out.println("Executing do slev");
-//			doSlev(t_num, conn, pStmts);
-//			break;
-//		  default:
-//			System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
-//			System.exit(1);
+
 		  }
 
 	    
@@ -141,7 +119,7 @@ public class Driver implements TpccConstants {
 	 * prepare data and execute the new order transaction for one order
 	 * officially, this is supposed to be simulated terminal I/O
 	 */
-	private int doNeword (int t_num, Connection conn, TpccStatements pStmts)
+	private int doNeword (int t_num, Connection conn, TpccStatements pStmts, Counter count)
 	{
 	    int c_num = 0;
 	    int i = 0;
@@ -199,7 +177,7 @@ public class Driver implements TpccConstants {
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
 //	    	System.out.printf("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d  qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local,  qty);
-	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn);
+	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, count);
 	      endTime =  System.nanoTime();
 
 	      if(ret >= 1){
@@ -259,7 +237,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * prepare data and execute payment transaction
 	 */
-	private int doPayment (int t_num, Connection conn, TpccStatements pStmts)
+	private int doPayment (int t_num, Connection conn, TpccStatements pStmts, Counter count)
 	{
 	    int c_num = 0;
 	    int byname = 0;
@@ -311,7 +289,7 @@ public class Driver implements TpccConstants {
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, conn);
+	      ret = payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, conn, count);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -356,7 +334,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * prepare data and execute order status transaction
 	 */
-	private int doOrdstat (int t_num, Connection conn, TpccStatements pStmts)
+	private int doOrdstat (int t_num, Connection conn, TpccStatements pStmts, Counter count)
 	{
 	    int c_num = 0;
 	    int byname = 0;
@@ -393,7 +371,7 @@ public class Driver implements TpccConstants {
 	      //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = orderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last, conn);
+	      ret = orderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last, conn, count);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -439,7 +417,7 @@ public class Driver implements TpccConstants {
 	/*
 	 * execute delivery transaction
 	 */
-	private int doDelivery (int t_num, Connection conn, TpccStatements pStmts)
+	private int doDelivery (int t_num, Connection conn, TpccStatements pStmts, Counter count)
 	{
 	    int c_num = 0;
 	    int i = 0;
@@ -465,7 +443,7 @@ public class Driver implements TpccConstants {
 	      //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = delivery.delivery(t_num, w_id, o_carrier_id, conn);
+	      ret = delivery.delivery(t_num, w_id, o_carrier_id, conn, count);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 	      if(ret >=1 ){
@@ -510,7 +488,7 @@ public class Driver implements TpccConstants {
 	/* 
 	 * prepare data and execute the stock level transaction
 	 */
-	private int doSlev (int t_num, Connection conn, TpccStatements pStmts)
+	private int doSlev (int t_num, Connection conn, TpccStatements pStmts, Counter count)
 	{
 	    int c_num = 0;
 	    int i = 0;
@@ -535,7 +513,7 @@ public class Driver implements TpccConstants {
 	     // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = slev.slev(t_num, w_id, d_id, level, conn);
+	      ret = slev.slev(t_num, w_id, d_id, level, conn, count);
 	      //clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
