@@ -163,10 +163,10 @@ public class Load implements TpccConstants {
 		    if (retried )
 		        System.out.printf("Retrying ....\n");
 		    retried = true;
-			for (w_id = 0; w_id <= max_ware; w_id++) {
+			for (w_id = 0; w_id < max_ware; w_id++) {
 				
 				if(w_id + 1 > shardCount){
-					currentShard = (w_id + 1 % shardCount);
+					currentShard = (w_id  % shardCount);
 				}else{
 					currentShard = w_id + 1;
 				}
