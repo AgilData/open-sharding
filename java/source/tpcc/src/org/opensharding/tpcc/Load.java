@@ -257,7 +257,7 @@ public class Load implements TpccConstants {
 		
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
 
-		for (w_id = min_ware; w_id <= max_ware; w_id++)
+		for (; w_id < max_ware; w_id++)
 			for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
 				customer(d_id, w_id, conn, shardCount);
 
@@ -279,7 +279,7 @@ public class Load implements TpccConstants {
 
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr;*/
 
-		for (w_id = min_ware; w_id <= max_ware; w_id++)
+		for (; w_id < max_ware; w_id++)
 			for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
 				orders(d_id, w_id, conn, shardCount);
 
