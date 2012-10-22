@@ -17,14 +17,17 @@ end
 properties = Hash.new
 
 while(line = file.gets)
+
   while line.eql?("\n")
     line = file.gets
   end
+  
   while line.match("#")
     line = file.gets
   end
+  
   tempLine = line.split("=")
-  puts "FIRST:"
+  puts "FIRST:" + tempLine
   puts tempLine[0]
 
   flags = ""
@@ -91,6 +94,7 @@ while(line = file.gets)
     puts "No driver specified."
     exit
   end
+  
 end
   
 
