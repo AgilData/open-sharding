@@ -24,6 +24,7 @@ while(line = file.gets)
     line = file.gets
   end
   tempLine = line.split("=")
+  puts "FIRST:"
   puts tempLine[0]
   properties[""" +tempLine[0]+ """] = tempLine[1]
 end
