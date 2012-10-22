@@ -26,12 +26,12 @@ while(line = file.gets)
   tempLine = line.split("=")
   puts "FIRST:"
   puts tempLine[0]
-  properties[""" +tempLine[0]+ """] = tempLine[1]
+  properties[tempLine[0]] = tempLine[1]
 end
 
 flags = ""
 
-if(properties.has_key?("HOST"))
+if(properties.has_key?(HOST))
     flags = "-h " + properties["HOST"]
 else
     puts "No host in properties"
