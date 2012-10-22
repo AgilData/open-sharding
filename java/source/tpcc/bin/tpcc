@@ -17,7 +17,7 @@ end
 properties = Hash.new
 
 while(line = file.gets)
-  if line.eqls?("\n")
+  if line.eql?("\n")
     line.gets
   end
   if line.match("#")
