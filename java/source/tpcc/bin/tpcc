@@ -29,7 +29,7 @@ end
 
 flags = ""
 
-if(properties["HOST"])
+if(properties.has_key?("HOST"))
     flags = "-h " + properties[HOST]
 else
     puts "No host in properties"
