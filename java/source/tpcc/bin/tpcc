@@ -24,6 +24,7 @@ while(line = file.gets)
   
   while line.match("#")
     line = file.gets
+    puts line
   end
   
   tempLine = line.split("=")
