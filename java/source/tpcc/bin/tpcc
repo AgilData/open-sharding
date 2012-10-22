@@ -24,13 +24,13 @@ while(line = file.gets)
     line = file.gets
   end
   tempLine = line.split("=")
-  properties[tempLine[0]] = tempLine[1]
+  properties[""" +tempLine[0]+ """] = tempLine[1]
 end
 
 flags = ""
 
 if(properties.has_key?("HOST"))
-    flags = "-h " + properties[HOST]
+    flags = "-h " + properties["HOST"]
 else
     puts "No host in properties"
     exit
