@@ -17,10 +17,10 @@ end
 properties = Hash.new
 
 while(line = file.gets)
-  if line.eql?("\n")
+  while line.eql?("\n")
     line = file.gets
   end
-  if line.match("#")
+  while line.match("#")
     line = file.gets
   end
   tempLine = line.split("=")
