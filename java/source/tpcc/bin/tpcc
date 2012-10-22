@@ -14,7 +14,6 @@ if(!file)
   exit
 end
 
-properties = Hash.new
 
 while(line = file.gets)
 
@@ -33,68 +32,7 @@ while(line = file.gets)
 
   flags = ""
   
-  if(tempLine[0].eql?("HOST"))
-      flags = "-h " + tempLine[1]
-  else
-      puts "No host in properties"
-      exit
-  end
-  
-  if (tempLine[0].eql?("DATABASE"))
-    flags = flags + " -d " + tempLine[1]
-  else
-    puts "No database in properties"
-    exit
-  end
-  
-  if(tempLine[0].eql?("USER"))
-    flags = flags + " -u " + tempLine[1]
-  else
-    puts "No user in properties"
-    exit
-  end
-  
-  if(tempLine[0].eql?("PASSWORD"))
-    flags = flags + " -p " + tempLine[1]
-  else
-    puts "No password in properties."
-    exit
-  end
-  
-  if(tempLine[0].eql?("WAREHOUSECOUNT"))
-    flags = flags + " -w " + tempLine[1]
-  else
-    puts "No warehouse count"
-    exit
-  end
-  
-  if(tempLine[0].eql?("CONNECTIONS"))
-    flags = flags + " -c " + tempLine[1]
-  else
-    puts "No connections in properties"
-    exit
-  end
-  
-  if(tempLine[0].eql?("RAMPUPTIME"))
-    flags = flags + " -r " + tempLine[1]
-  else
-    puts "No rampup time in properties"
-    exit
-  end
-  
-  if(tempLine[0].eql?("DURATION"))
-    flags = flags + " -l " + tempLine[1]
-  else
-    puts "No duration specified"
-    exit
-  end
-  
-  if(tempLine[0].eql?("DRIVER"))
-    flags = flags + " -U " + tempLine[1]
-  else
-    puts "No driver specified."
-    exit
-  end
+ 
   
 end
   
