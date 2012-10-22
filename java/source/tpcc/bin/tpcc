@@ -32,64 +32,24 @@ while(line = file.gets)
   
   if(tempLine[0].match("HOST"))
       flags = "-h " + tempLine[1]
-  else
-      puts "No host in properties"
-      exit
-  end
-  
-  if (tempLine[0].match("DATABASE"))
+  elsif (tempLine[0].match("DATABASE"))
     flags = flags + " -d " + tempLine[1]
-  else
-    puts "No database in properties"
-    exit
-  end
-  
-  if(tempLine[0].match("USER"))
+  elsif (tempLine[0].match("USER"))
     flags = flags + " -u " + tempLine[1]
-  else
-    puts "No user in properties"
-    exit
-  end
-  
-  if(tempLine[0].match("PASSWORD"))
+  elseif (tempLine[0].match("PASSWORD"))
     flags = flags + " -p " + tempLine[1]
-  else
-    puts "No password in properties."
-    exit
-  end
-  
-  if(tempLine[0].match("WAREHOUSECOUNT"))
+  elseif (tempLine[0].match("WAREHOUSECOUNT"))
     flags = flags + " -w " + tempLine[1]
-  else
-    puts "No warehouse count"
-    exit
-  end
-  
-  if(tempLine[0].match("CONNECTIONS"))
+  elsif (tempLine[0].match("CONNECTIONS"))
     flags = flags + " -c " + tempLine[1]
-  else
-    puts "No connections in properties"
-    exit
-  end
-  
-  if(tempLine[0].match("RAMPUPTIME"))
+  elsif (tempLine[0].match("RAMPUPTIME"))
     flags = flags + " -r " + tempLine[1]
-  else
-    puts "No rampup time in properties"
-    exit
-  end
-  
-  if(tempLine[0].match("DURATION"))
+  elsif (tempLine[0].match("DURATION"))
     flags = flags + " -l " + tempLine[1]
-  else
-    puts "No duration specified"
-    exit
-  end
-  
-  if(tempLine[0].match("DRIVER"))
+  elsif (tempLine[0].match("DRIVER"))
     flags = flags + " -U " + tempLine[1]
   else
-    puts "No driver specified."
+    puts "Incorrect Property Listing."
     exit
   end
   
