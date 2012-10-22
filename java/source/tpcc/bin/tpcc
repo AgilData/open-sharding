@@ -36,9 +36,9 @@ while(line = file.gets)
     flags = flags + " -d " + tempLine[1]
   elsif (tempLine[0].match("USER"))
     flags = flags + " -u " + tempLine[1]
-  elseif (tempLine[0].match("PASSWORD"))
+  elsif (tempLine[0].match("PASSWORD"))
     flags = flags + " -p " + tempLine[1]
-  elseif (tempLine[0].match("WAREHOUSECOUNT"))
+  elsif (tempLine[0].match("WAREHOUSECOUNT"))
     flags = flags + " -w " + tempLine[1]
   elsif (tempLine[0].match("CONNECTIONS"))
     flags = flags + " -c " + tempLine[1]
