@@ -18,10 +18,10 @@ properties = Hash.new
 
 while(line = file.gets)
   if line.eql?("\n")
-    line.gets
+    line = file.gets
   end
   if line.match("#")
-    line.gets
+    line = file.gets
   end
   tempLine = line.split("=")
   properties[tempLine[0]] = tempLine[1]
