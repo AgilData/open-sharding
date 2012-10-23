@@ -21,12 +21,13 @@ public class TpccThread extends Thread {
 	String db_user;
 	String db_password;
 	String db_string;
-	String connectionClass;
+	String driverClassName;
+	String jdbcUrl;
 	
 	TpccStatements pStmts;
 	Counter count;
 	
-	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count, String connectionClass) {
+	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count, String driver, String dURL) {
 		 this.number = number;
 		 this.port = port;
 		 this.connect_string = connect_string;
@@ -37,23 +38,22 @@ public class TpccThread extends Thread {
 		 this.num_conn = num_conn;
 		 this.num_ware -= num_ware;
 		 this.count = count;
-		 this.connectionClass = connectionClass;
+		 this.driverClassName = driver;
+		 this.jdbcUrl = dURL;
 	}
 	
 	public void run() {
-		 logger.info("Connection to DBSHARDS.");
+		 logger.info("Connection to database: driver: " + driverClassName + " url: " + jdbcUrl);
 		  try {
-				Class.forName(connectionClass); 
+				Class.forName(driverClassName); 
 			} catch (ClassNotFoundException e1) {
 				throw new RuntimeException("Class for mysql error", e1);
 			}
-			String dbUrl = null;
-			Connection conn;
 			
-	
-			dbUrl = "jdbc:dbshards:" + db_string;
+			Connection conn;
+
 			try {
-				conn = DriverManager.getConnection (dbUrl, db_user, db_password);
+				conn = DriverManager.getConnection (jdbcUrl, db_user, db_password);
 			} catch (SQLException e) {
 				// TODO Auto-generated catch block
 				throw new RuntimeException("Connection to specific host error", e);

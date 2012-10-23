@@ -20,7 +20,7 @@
 		<mkdir dir="dist"/>
 		<mkdir dir="dist/jars"/>
 		<mkdir dir="_classes"/>
-		<javac destdir="_classes" debug="${debug}" includejavaruntime="true" includeantruntime="false">
+		<javac destdir="_classes" debug="on" includejavaruntime="true" includeantruntime="false">
 			<src path="src/"/>
 			<classpath refid="log4j2.classpath"/>
 		</javac>

@@ -82,8 +82,6 @@ public class Driver implements TpccConstants {
 		
 		num_ware = numWare;
 		num_conn = numConn;
-	    int i = 0;
-	    int j = 0;
 
 	    /* Actually, WaitTimes are needed... */
 	    //CHECK: Is activate_transaction handled correctly?

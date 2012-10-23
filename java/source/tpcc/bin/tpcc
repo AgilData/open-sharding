@@ -8,52 +8,6 @@
 require 'fileutils'
 require 'pathname'
 
-file = File.open("/root/open-sharding/java/source/tpcc/bin/tpcc.properties","r")
-if(!file)
-  puts "Failed to open properties file."
-  exit
-end
-
-
-while(line = file.gets)
-
-  while line.eql?("\n")
-    line = file.gets
-  end
-  
-  while line.match("#")
-    line = file.gets
-  end
-  
-  tempLine = line.split("=")
-
-
-  flags = ""
-  
-  if(tempLine[0].match("HOST"))
-      flags = "-h " + tempLine[1]
-  elsif (tempLine[0].match("DATABASE"))
-    flags = flags + " -d " + tempLine[1]
-  elsif (tempLine[0].match("USER"))
-    flags = flags + " -u " + tempLine[1]
-  elsif (tempLine[0].match("PASSWORD"))
-    flags = flags + " -p " + tempLine[1]
-  elsif (tempLine[0].match("WAREHOUSECOUNT"))
-    flags = flags + " -w " + tempLine[1]
-  elsif (tempLine[0].match("CONNECTIONS"))
-    flags = flags + " -c " + tempLine[1]
-  elsif (tempLine[0].match("RAMPUPTIME"))
-    flags = flags + " -r " + tempLine[1]
-  elsif (tempLine[0].match("DURATION"))
-    flags = flags + " -l " + tempLine[1]
-  elsif (tempLine[0].match("DRIVER"))
-    flags = flags + " -U " + tempLine[1]
-  else
-    puts "Incorrect Property Listing."
-    exit
-  end
-  
-end
   
 
 # Set the base dir. Expand path gives the absolute path of the current file, dirname gives the bin dir, and dirname again gives the parent dir.
@@ -71,7 +25,7 @@ jars = "#{BASEDIR}/tpcc-jars/*.jar"
 
 class_path = "-classpath #{BASEDIR}/conf:#{Dir.glob(jars).join(':')}"
 
-cmd = [JAVA, OPTIONS, XMS, XMX, class_path, CLASS, flags].join(' ')
+cmd = [JAVA, OPTIONS, XMS, XMX, class_path, CLASS].join(' ')
     
 puts cmd
 
