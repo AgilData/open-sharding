@@ -97,8 +97,8 @@ public class Load implements TpccConstants {
 				}else{
 					stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
 							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-					System.out.println("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+//					System.out.println("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+//							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 				}
 				
 			} catch (SQLException e) {
