@@ -1,9 +1,15 @@
 package org.opensharding.tpcc;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Properties;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 public class TpccLoad implements TpccConstants {
@@ -22,6 +28,46 @@ public class TpccLoad implements TpccConstants {
 	static int is_local = 1;           /* "1" mean local */
 	static int DB_STRING_MAX = 51;
 	static boolean option_debug = false;	/* 1 if generating debug output    */
+	
+	private static final Logger logger = LogManager.getLogger(Tpcc.class);
+	private static final boolean DEBUG = logger.isDebugEnabled();
+	
+	private static final String DRIVER = "DRIVER";
+	private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";
+	private static final String HOST = "HOST";
+	private static final String DATABASE = "DATABASE";
+	private static final String USER = "USER";
+	private static final String PASSWORD = "PASSWORD";
+	private static final String SHARDCOUNT = "SHARDCOUNT";
+	private static final String JDBCURL = "JDBCURL";
+	
+	private Properties properties;
+	private InputStream inputStream;
+	
+	private static final String PROPERTIESFILE = "tpcc.properties";
+	
+	public TpccLoad() {
+		// Empty.
+	}
+	
+	private void init() {
+		
+		  
+		  
+		  logger.info("Loading properties from: " + PROPERTIESFILE);
+		  
+		  properties = new Properties();
+		  inputStream = getClass().getClassLoader().getResourceAsStream(PROPERTIESFILE);
+		  if(inputStream == null){
+			  throw new RuntimeException("Failed to access properties.");
+		  }
+		  try{
+			  properties.load(inputStream);
+		  }catch (IOException e){
+			  throw new RuntimeException("Error loading properties file", e);
+		  }
+		
+	}
 
 	
 	private static void parseHost(String host, String from)
@@ -62,81 +108,54 @@ public class TpccLoad implements TpccConstants {
 	 * main() | ARGUMENTS |      Warehouses n [Debug] [Help]
 	 * +==================================================================
 	 */
-	@SuppressWarnings("null")
-	public static void main(String[] argv){
+
+	
+	public int runLoad(){
 		String connect_string = null;
 		String db_string = null;
 		String db_user = null;
 		String db_password = null;
 	    int port= 3306;
 	    int shardCount = 0;
+	    int num_ware = 0;
+	    String jdbcUrl = null;
+	    String javaDriver = null;
 
 		System.out.printf("*************************************\n");
-		System.out.printf("*** ###easy### TPC-C Data Loader  ***\n");
+		System.out.printf("*** Java TPC-C Data Loader  ***\n");
 		System.out.printf("*************************************\n");
-
-		/* Parse args */
-		if (argv.length != 11) {
-		    if (argv.length != 8) {
-			System.out.printf("\n usage: tpcc_load [server] [DB] [user] [pass] [warehouse] [shardCount] [Class}\n"
-								+ "      OR\n"
-								+ "        tpcc_load [server] [DB] [user] [pass] [warehouse] [shardCount] [Class] [part] [min_wh] [max_wh]\n\n"
-								+ "           * [part]: 1=ITEMS 2=WAREHOUSE 3=CUSTOMER 4=ORDERS\n");
-			System.exit(1);
-		    }
-		}else{
-		    particle_flg = 1;
+		
+		connect_string = properties.getProperty(HOST);
+		db_string = properties.getProperty(DATABASE);
+		db_user = properties.getProperty(USER);
+		db_password = properties.getProperty(PASSWORD);
+		num_ware = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
+		shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
+		javaDriver = properties.getProperty(DRIVER);
+		jdbcUrl = properties.getProperty(JDBCURL);
+		  
+		if(connect_string == null){
+			throw new RuntimeException("Host is null.");
 		}
-
-		if ( argv[1].length() >= DB_STRING_MAX ) {
-		    System.out.printf("\n server phrase is too long\n");
-		    System.exit(1);
+		if(db_string == null){
+			  throw new RuntimeException("Database name is null.");
 		}
-		if (argv[2].length() >= DB_STRING_MAX ) {
-		    System.out.printf("\n DBname phrase is too long\n");
-		    System.exit(1);
+		if(db_user == null){
+			  throw new RuntimeException("User is null.");
 		}
-		if ( argv[3].length() >= DB_STRING_MAX ) {
-		    System.out.printf("\n user phrase is too long\n");
-		    System.exit(1);
+		if(db_password == null){
+			  throw new RuntimeException("Password is null.");
 		}
-		if ( argv[4].length() >= DB_STRING_MAX ) {
-		    System.out.printf("\n pass phrase is too long\n");
-		    System.exit(1);
+		if(num_ware < 1){
+			  throw new RuntimeException("Warehouse count has to be greater than or equal to 1.");
 		}
-		if ((count_ware = Integer.parseInt(argv[5])) <= 0) {
-		    System.out.printf("\n expecting positive number of warehouses\n");
-		    System.exit(1);
+		if(javaDriver == null){
+			  throw new RuntimeException("Java Driver is null.");
 		}
-	    //strcpy(connect_string, argv[1]);
-	    /*parseHost(connect_string, argv[1]);
-	    if(connect_string == null){
-	    	System.out.println("Failed to parse the host.");
-	    	System.exit(1);
-	    }*/
-		connect_string = argv[1];
-	    port= parsePort(argv[1]);
-		db_string = argv[2];
-		db_user = argv[3];
-		db_password = argv[4];
-		shardCount = Integer.parseInt(argv[6]);
-		String connectionClass = argv[7];
-
-		if(connect_string.equals("1")){
-		  is_local = 1;
-		}else{
-		  is_local = 0;
+		if(jdbcUrl == null){
+			  throw new RuntimeException("JDBC Url is null.");
 		}
-
-		if(particle_flg==1){
-		    part_no = Integer.parseInt(argv[8]);
-		    min_ware = Integer.parseInt(argv[9]);
-		    max_ware = Integer.parseInt(argv[10]);
-		}else{
-		    min_ware = 1;
-		    max_ware = count_ware;
-		}
-
+		
 		System.out.printf("<Parameters>\n");
 		if(is_local==0) System.out.printf("     [server]: %s\n", connect_string);
 		if(is_local==0) System.out.printf("     [port]: %d\n", port);
@@ -158,7 +177,7 @@ public class TpccLoad implements TpccConstants {
 
 		/* EXEC SQL WHENEVER SQLERROR GOTO Error_SqlCall; */
 		try {
-			Class.forName(connectionClass);
+			Class.forName(javaDriver);
 		} catch (ClassNotFoundException e1) {
 			throw new RuntimeException("Class for mysql error", e1);
 		}
@@ -222,9 +241,17 @@ public class TpccLoad implements TpccConstants {
 		}
 
 		System.out.printf("\n...DATA LOADING COMPLETED SUCCESSFULLY.\n");
-		System.exit(0);
+		return 0;
 
 	}
+	
+	public void main(){
+		TpccLoad tpccLoad = new TpccLoad();
+		tpccLoad.init();
+		int ret = tpccLoad.runLoad();
+		System.exit(ret);
+	}
+
 
 
 }
