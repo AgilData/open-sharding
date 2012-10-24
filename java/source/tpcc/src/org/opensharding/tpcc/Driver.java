@@ -174,7 +174,7 @@ public class Driver implements TpccConstants {
 	    
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      if(DEBUG) logger.debug("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d  qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local,  qty);
+	      if(DEBUG) logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local  + " qty: " +  qty);
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, count);
 	      endTime =  System.nanoTime();
 
@@ -280,8 +280,7 @@ public class Driver implements TpccConstants {
 	        c_w_id = otherWare(w_id);
 	        c_d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    }
-	    if(DEBUG) logger.debug("Payment| cnum: %d  w_id: %d d_id: %d c_id: %d c_last: %s h_amount: %d\n byname: %d c_w_id: %d c_d_id: %d", 
-    		c_num, w_id, d_id, c_id, c_last, h_amount, byname, c_w_id, c_d_id );
+	    if(DEBUG) logger.debug("Payment| cnum: " + c_num + "  w_id: " +w_id + " d_id: " + d_id + " c_id: " + c_id + " c_last: " + c_last + " h_amount: " + h_amount + " byname: " + byname + " c_w_id: " + c_w_id +  " c_d_id: " + c_d_id );
 
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
@@ -420,9 +419,6 @@ public class Driver implements TpccConstants {
 	    int i = 0;
 	    int ret = 0;
 	    double rt = 0.0;
-	  /*clock_t clk1,clk2;
-	    struct timespec tbuf1;
-	    struct timespec tbuf2;*/
 	    long beginTime = 0;
 	    long endTime = 0;
 	    int  w_id = 0;
@@ -437,15 +433,12 @@ public class Driver implements TpccConstants {
 	    }
 	    o_carrier_id = Util.randomNumber(1, 10);
 
-	      //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
 	      ret = delivery.delivery(t_num, w_id, o_carrier_id, conn, count);
-	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 	      if(ret >=1 ){
 
-	    	  //rt = (double)(tbuf2.tv_sec * 1000.0 + tbuf2.tv_nsec/1000000.0-tbuf1.tv_sec * 1000.0 - tbuf1.tv_nsec/1000000.0);
 			rt = (double)(endTime - beginTime);
 	    	if(rt > max_rt[3])
 			  max_rt[3]=rt;
