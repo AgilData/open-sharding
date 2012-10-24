@@ -14,14 +14,14 @@ import org.apache.logging.log4j.Logger;
 
 public class TpccLoad implements TpccConstants {
 	/* Global SQL Variables */
-	static long count_ware = 0;
+	static int num_ware = 0;
 	static int fd = 0;
 	static int seed = 0;
 
-	static int particle_flg = 0; /* "1" means particle mode */
-	static int part_no = 0; /* 1:items 2:warehouse 3:customer 4:orders */
-	static long min_ware = 1;
-	static long max_ware;
+	 int particle_flg = 0; /* "1" means particle mode */
+	 int part_no = 0; /* 1:items 2:warehouse 3:customer 4:orders */
+	 long min_ware = 1;
+	 long max_ware;
 
 	/* Global Variables */
 	static int i = 0;
@@ -69,48 +69,9 @@ public class TpccLoad implements TpccConstants {
 		
 	}
 
-	
-	private static void parseHost(String host, String from)
-	{
-	  if( !from.contains(":") ){
-		  host = from;
-	  }
-	  else{
-		  String[] tempSplit;
-		  tempSplit = from.split(":");
-		  host = tempSplit[1];
-	  }
-	 host = host + '\0';
-	}
-	
-	private static int parsePort(String from)
-	{
-	  if(!from.contains(":"))
-	    return 3306;
-	  else
-	  {
-		String[] tempPort;
-		tempPort = from.split(":");
-		int portValue = Integer.parseInt(tempPort[1]);
-		if( portValue <= 0xFFFF ){
-		    return portValue;
-	    } else {
-	      System.out.printf("Incorrect port value: %s\n");
-	      return -1;
-	    }
-	    
-	  }
-	  
-	}
-	
-	/*
-	 * ==================================================================+ |
-	 * main() | ARGUMENTS |      Warehouses n [Debug] [Help]
-	 * +==================================================================
-	 */
 
 	
-	public int runLoad(){
+	private int runLoad(){
 		String connect_string = null;
 		String db_string = null;
 		String db_user = null;
@@ -163,7 +124,7 @@ public class TpccLoad implements TpccConstants {
 		System.out.printf("       [user]: %s\n", db_user);
 		System.out.printf("       [pass]: %s\n", db_password);
 
-		System.out.printf("  [warehouse]: %d\n", count_ware);
+		System.out.printf("  [warehouse]: %d\n", num_ware);
 
 		if(particle_flg==1){
 		    System.out.printf("  [part(1-4)]: %d\n", part_no);
@@ -181,17 +142,16 @@ public class TpccLoad implements TpccConstants {
 		} catch (ClassNotFoundException e1) {
 			throw new RuntimeException("Class for mysql error", e1);
 		}
-		String dbUrl = null;
+		
 		Connection conn;
 
-			dbUrl = "jdbc:dbshards:" + db_string;
-			try {
-				conn = DriverManager.getConnection (dbUrl, db_user, db_password);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException("Connection to local host error", e);
-			}
-		
+		try {
+			conn = DriverManager.getConnection (jdbcUrl, db_user, db_password);
+		} catch (SQLException e) {
+			// TODO Auto-generated catch block
+			throw new RuntimeException("Connection to local host error", e);
+		}
+	
 		
 		Statement stmt;
 		try {
@@ -213,13 +173,13 @@ public class TpccLoad implements TpccConstants {
 	
 
 		System.out.printf("TPCC Data Load Started...\n");
-
+		max_ware = num_ware;
 		if(particle_flg==0){
-			System.out.printf("Particle flag: %d", particle_flg);
-			//Load.loadItems(conn, shardCount, option_debug);
-		   // Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
-		   Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
-		   Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
+			System.out.printf("Particle flag: %d\n", particle_flg);
+			Load.loadItems(conn, shardCount, option_debug);
+			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
+			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
+			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
@@ -245,7 +205,7 @@ public class TpccLoad implements TpccConstants {
 
 	}
 	
-	public void main(){
+	public static void main(String[] argv){
 		TpccLoad tpccLoad = new TpccLoad();
 		tpccLoad.init();
 		int ret = tpccLoad.runLoad();

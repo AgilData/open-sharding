@@ -113,7 +113,7 @@ public class Load implements TpccConstants {
 		/* EXEC SQL COMMIT WORK; */
 		
 		try {
-			//stmt.executeBatch();
+			stmt.executeBatch();
 			stmt.close();
 		} catch (SQLException e) {
 			throw new RuntimeException("Item batch error", e);
@@ -165,10 +165,12 @@ public class Load implements TpccConstants {
 		    retried = true;
 			for (w_id = 0; w_id < max_ware; w_id++) {
 				
-				if(w_id + 1 > shardCount){
-					currentShard = (w_id  % shardCount);
-				}else{
-					currentShard = w_id + 1;
+				if(shardCount > 0){
+					if(w_id + 1 > shardCount){
+						currentShard = (w_id  % shardCount);
+					}else{
+						currentShard = w_id + 1;
+					}
 				}
 				
 				System.out.println("Current Shard: " + currentShard);
@@ -581,11 +583,16 @@ public class Load implements TpccConstants {
 
 		System.out.printf("Loading Customer for DID=%d, WID=%d\n", d_id, w_id);
 		int currentShard;
-		if(w_id + 1 > shardCount){
-			currentShard = (w_id  % shardCount);
+		if (shardCount > 0){
+			if(w_id + 1 > shardCount){
+				currentShard = (w_id  % shardCount);
+			}else{
+				currentShard = w_id + 1;
+			}
 		}else{
 			currentShard = w_id + 1;
 		}
+		
 	retry:
 	    if (retried)
 	        System.out.printf("Retrying ...\n");
@@ -796,11 +803,16 @@ public class Load implements TpccConstants {
 		}
 		
 		int currentShard;
-		if(w_id + 1 > shardCount){
-			currentShard = (w_id  % shardCount);
+		if(shardCount > 0){
+			if(w_id + 1 > shardCount){
+				currentShard = (w_id  % shardCount);
+			}else{
+				currentShard = w_id + 1;
+			}
 		}else{
 			currentShard = w_id + 1;
 		}
+		
 
 		System.out.printf("Loading Orders for D=%d, W= %d\n", d_id, w_id);
 		o_d_id = d_id;

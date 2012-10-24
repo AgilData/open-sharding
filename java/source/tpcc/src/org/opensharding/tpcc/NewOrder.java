@@ -148,7 +148,7 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(0).setInt(2, w_id);
 				pStmts.getStatement(0).setInt(3, d_id);
 				pStmts.getStatement(0).setInt(4, c_id);
-//				System.out.println("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
+				if(DEBUG) logger.debug("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
 				ResultSet rs = pStmts.getStatement(0).executeQuery();
 				if(rs.next()){
 					c_discount = rs.getFloat(1);
