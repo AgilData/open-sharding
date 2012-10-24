@@ -240,8 +240,8 @@ public class Tpcc {
 		System.out.printf("TOTAL TPMS: %f\n", (float)count.getTotal()/(float)measure_time);
 		
 		
-		
-		RtHist.histReport();
+		//TODO: To be implemented better later.
+		//RtHist.histReport();
 		return 0;
 
 	}

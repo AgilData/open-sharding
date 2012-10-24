@@ -174,13 +174,12 @@ public class Driver implements TpccConstants {
 	    
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-//	    	System.out.printf("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d  qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local,  qty);
+	      if(DEBUG) logger.debug("t_num: %d w_id: %d, c_id: %d, ol_cnt: %d, all_local: %d  qty: %d\n", t_num, w_id, d_id, c_id, ol_cnt, all_local,  qty);
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, count);
 	      endTime =  System.nanoTime();
 
 	      if(ret >= 1){
 	    	  rt = (double)(endTime - beginTime);
-	    	  //printf("NOT : %.3f\n", rt);
 	        if (freport_file != null) {
 	        	freport_file.printf("%d %.3f\n", time_count, rt);
 	        }
@@ -257,7 +256,7 @@ public class Driver implements TpccConstants {
 	    int h_amount = 0;
 	    String c_last = null;
 	    
-//	    System.out.println("DO PAYMENT TRANSACTIONS");
+	    if(DEBUG) logger.debug("DO PAYMENT TRANSACTIONS");
 	    if(num_node==0){
 		w_id = Util.randomNumber(1, num_ware);
 	    }else{
@@ -281,8 +280,8 @@ public class Driver implements TpccConstants {
 	        c_w_id = otherWare(w_id);
 	        c_d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    }
-//	    System.out.printf("Payment| cnum: %d  w_id: %d d_id: %d c_id: %d c_last: %s h_amount: %d\n byname: %d c_w_id: %d c_d_id: %d", 
-//	    		c_num, w_id, d_id, c_id, c_last, h_amount, byname, c_w_id, c_d_id );
+	    if(DEBUG) logger.debug("Payment| cnum: %d  w_id: %d d_id: %d c_id: %d c_last: %s h_amount: %d\n byname: %d c_w_id: %d c_d_id: %d", 
+    		c_num, w_id, d_id, c_id, c_last, h_amount, byname, c_w_id, c_d_id );
 
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
