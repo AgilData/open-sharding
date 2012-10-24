@@ -220,11 +220,11 @@ public class Tpcc {
 		
 		if(DEBUG) logger.debug("main: measure_time: " + measure_time + " intial time: " + initialtime);
 		
-		do {
+		while( measure_time  > (time - initialtime) ) {
 			calendar = Calendar.getInstance();
 			time = calendar.get(Calendar.SECOND);
 			
-		} while( measure_time  > (time - initialtime) );
+		} 
 		
 		System.out.printf("\nSTOPPING THREADS\n");
 		
