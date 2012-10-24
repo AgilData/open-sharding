@@ -219,11 +219,15 @@ public class Tpcc {
 		System.out.printf("\nMEASURING START.\n\n");
 		
 		if(DEBUG) logger.debug("main: measure_time: " + measure_time + " intial time: " + initialtime);
-		
+		int logTime = 0;
 		while( measure_time  > (time - initialtime) ) {
+			
 			calendar = Calendar.getInstance();
 			time = calendar.get(Calendar.SECOND);
-			
+			if(logTime < time - initialtime){
+				System.out.println("Current time of execution: " + (time-initialtime));
+				logTime = time - initialtime;
+			}
 		} 
 		
 		System.out.printf("\nSTOPPING THREADS\n");
