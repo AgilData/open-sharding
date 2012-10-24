@@ -36,7 +36,7 @@ public class TpccThread extends Thread {
 		 this.db_user = db_user;
 		 this.is_local = is_local;
 		 this.num_conn = num_conn;
-		 this.num_ware -= num_ware;
+		 this.num_ware = num_ware;
 		 this.count = count;
 		 this.driverClassName = driver;
 		 this.jdbcUrl = dURL;

@@ -85,6 +85,9 @@ public class TpccLoad implements TpccConstants {
 		System.out.printf("*************************************\n");
 		System.out.printf("*** Java TPC-C Data Loader  ***\n");
 		System.out.printf("*************************************\n");
+
+		long start = System.currentTimeMillis();
+		System.out.println("Execution time start: " + start);
 		
 		connect_string = properties.getProperty(HOST);
 		db_string = properties.getProperty(DATABASE);
@@ -201,6 +204,9 @@ public class TpccLoad implements TpccConstants {
 		}
 
 		System.out.printf("\n...DATA LOADING COMPLETED SUCCESSFULLY.\n");
+
+		long end = System.currentTimeMillis();
+		System.out.println("Total execution time: " + (double)((((double)end-(double)start) / 1000.0))/60.0 + " Min");
 		return 0;
 
 	}
