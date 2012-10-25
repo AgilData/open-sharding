@@ -101,10 +101,7 @@ public class Tpcc {
 		
 	}
 	
-	private void stopTransactions(){
-		activate_transaction = 0;
-	}
-	
+
 	private int runBenchmark() {
 		
 		logger.info("***************************************");
@@ -114,7 +111,6 @@ public class Tpcc {
 		/* initialize */
 		RtHist.histInit();
 		activate_transaction = 1;
-		Timer timer1 = new Timer();  
 		
 		for (int i=0; i<5; i++ ){
 		    success[i]=0;
@@ -234,7 +230,7 @@ public class Tpcc {
 		}
 		
 		System.out.printf("\nSTOPPING THREADS\n");
-		
+		activate_transaction = 0;
 		
 		executor.shutdown();
 		
