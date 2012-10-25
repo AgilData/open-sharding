@@ -221,11 +221,14 @@ public class Tpcc {
 		System.out.printf("\nMEASURING START.\n\n");
 		
 		long currentTime = 0;
-		
+		double tempTime = 0;
 		while(measure_time > ((currentTime - initialtime) / 1000.0) ){
 			currentTime = System.currentTimeMillis();
 			if( ((currentTime - initialtime) / 1000.0) % 1 == 0 ){
-				System.out.println("Current execution time lapse: " + ((currentTime - initialtime) / 1000.0) );
+				if(tempTime != ((currentTime - initialtime) / 1000.0) ){
+					tempTime = ((currentTime - initialtime) / 1000.0);
+					System.out.println("Current execution time lapse: " + ((currentTime - initialtime) / 1000.0) );
+				}
 			}
 		}
 		
