@@ -14,6 +14,7 @@ import org.apache.logging.log4j.Logger;
 public class Payment implements TpccConstants{
 	private static final Logger logger = LogManager.getLogger(Driver.class);
 	private static final boolean DEBUG = logger.isDebugEnabled();
+	private static final boolean TRACE = logger.isTraceEnabled();
 	
 	private  TpccStatements pStmts;
 	
@@ -37,7 +38,7 @@ public class Payment implements TpccConstants{
 		try{
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);
-			if(DEBUG) logger.debug("=====================================PAYMENT TRANSACTION===========================================");
+			if(DEBUG) logger.debug("Transaction:	PAYMENT");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;
@@ -47,13 +48,6 @@ public class Payment implements TpccConstants{
 			String w_city = null;
 			String w_state = null;
 			String w_zip = null;
-			
-			/*char[] w_name = new char[11];
-			char[] w_street_1 = new char[21];
-			char[] w_street_2 = new char[21];
-			char[] w_city = new char[21];
-			char[] w_state = new char[3];
-			char[] w_zip = new char[10];*/
 			
 			int c_d_id = c_d_id_arg;
 			int c_w_id = c_w_id_arg;
@@ -69,17 +63,6 @@ public class Payment implements TpccConstants{
 			String c_since = null;
 			String c_credit = null;
 			
-			/*char[] c_first = new char[17];
-			char[] c_middle = new char[3];
-			char[] c_last = new char[17];
-			char[] c_street_1 = new char[21];
-			char[] c_street_2 = new char[21];
-			char[] c_city = new char[21];
-			char[] c_state = new char[3];
-			char[] c_zip = new char[10];
-			char[] c_phone =  new char[17];
-			char[] c_since = new char[20];
-			char[] c_credit = new char[4];*/
 			
 			int c_credit_lim = 0;
 			float c_discount = 0;
@@ -87,8 +70,6 @@ public class Payment implements TpccConstants{
 			String c_data = null;
 			String c_new_data = null;
 			
-			/*char[] c_data = new char[502];
-			char[] c_new_data = new char[502];*/
 			
 			float h_amount = h_amount_arg;
 			String h_data = null;
@@ -99,13 +80,6 @@ public class Payment implements TpccConstants{
 			String d_state = null;
 			String d_zip = null;
 			
-			/*char[] h_data = new char[26];
-			char[] d_name = new char[11];
-			char[] d_street_1 = new char[21];
-			char[] d_street_2 = new char[21];
-			char[] d_city = new char[21];
-			char[] d_state = new char[3];
-			char[] d_zip = new char[10];*/
 			
 			int namecnt = 0;
 			int n;
@@ -124,7 +98,7 @@ public class Payment implements TpccConstants{
 				
 				pStmts.getStatement(9).setFloat(1, h_amount);
 				pStmts.getStatement(9).setInt(2, w_id);
-//				System.out.printf("UPDATE warehouse SET w_ytd = w_ytd + %f WHERE w_id = %d\n", h_amount, w_id);
+				if(TRACE) logger.trace("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
 				pStmts.getStatement(9).executeUpdate();
 				count.increment();
 
@@ -138,7 +112,7 @@ public class Payment implements TpccConstants{
 			
 			try {
 				pStmts.getStatement(10).setInt(1, w_id);
-//				System.out.printf("SELECT w_street_1, w_street_2, w_city, w_state, w_zip, w_name FROM warehouse WHERE w_id = %d\n", w_id);
+				if(TRACE) logger.trace("SELECT w_street_1, w_street_2, w_city, w_state, w_zip, w_name FROM warehouse WHERE w_id = "+ w_id);
 				ResultSet rs = pStmts.getStatement(10).executeQuery();
 				if(rs.next()){
 					w_street_1 = rs.getString(1);
@@ -147,7 +121,6 @@ public class Payment implements TpccConstants{
 					w_state = rs.getString(4);
 					w_zip = rs.getString(5);
 					w_name = rs.getString(6);
-//					System.out.printf("street 1: %s, street_2: %s, city: %s, state: %s, xip: %s, name: %s\n\n", w_street_1, w_street_2, w_city, w_state, w_zip, w_name);
 				}
 				count.increment();
 
@@ -164,7 +137,7 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(11).setFloat(1, h_amount);
 				pStmts.getStatement(11).setInt(2, w_id);
 				pStmts.getStatement(11).setInt(3, d_id);
-//				System.out.printf("UPDATE district SET d_ytd = d_ytd + %f WHERE d_w_id = %d AND d_id = %d\n", h_amount, w_id, d_id);
+				if(TRACE) logger.trace("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id);
 				pStmts.getStatement(11).executeUpdate();
 				count.increment();
 
@@ -179,7 +152,7 @@ public class Payment implements TpccConstants{
 			try {
 				pStmts.getStatement(12).setInt(1, w_id);
 				pStmts.getStatement(12).setInt(2, d_id);
-//				System.out.printf("SELECT d_street_1, d_street_2, d_city, d_state, d_zip, d_name FROM district WHERE d_w_id = %d AND d_id = %d\n", w_id, d_id);
+				if(TRACE) logger.trace("SELECT d_street_1, d_street_2, d_city, d_state, d_zip, d_name FROM district WHERE d_w_id = " + w_id +" AND d_id = " + d_id);
 				ResultSet rs = pStmts.getStatement(12).executeQuery();
 				if(rs.next()){
 					d_street_1 = rs.getString(1);
@@ -187,9 +160,7 @@ public class Payment implements TpccConstants{
 					d_city = rs.getString(3);
 					d_state = rs.getString(4);
 					d_zip = rs.getString(5);
-					d_name = rs.getString(6);
-//					System.out.printf("street1: %s street2: %s  city: %s  state: %s  zip: %s  name:  %s\n", d_street_1, d_street_2, d_city, d_state, d_zip, d_name);
-					
+					d_name = rs.getString(6);					
 				}
 				count.increment();
 
@@ -210,11 +181,10 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(13).setInt(1, c_w_id);
 					pStmts.getStatement(13).setInt(2, c_d_id);
 					pStmts.getStatement(13).setString(3, c_last);
-//					System.out.printf("SELECT count(c_id) FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_last = %s\n", c_w_id, c_d_id, c_last);
+					if(TRACE) logger.trace("SELECT count(c_id) FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last);
 					ResultSet rs = pStmts.getStatement(13).executeQuery();
 					if(rs.next()){
 						namecnt = rs.getInt(1);
-//						System.out.printf("Namecnt: %d\n", namecnt);
 					}
 					count.increment();
 
@@ -230,11 +200,10 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(14).setInt(1, c_w_id);
 					pStmts.getStatement(14).setInt(2, c_d_id);
 					pStmts.getStatement(14).setString(3, c_last);
-//					System.out.printf("SELECT c_id FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_last = %s ORDER BY c_first\n", c_w_id, c_d_id, c_last);
+					if(TRACE) logger.trace("SELECT c_id FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last + " ORDER BY c_first");
 					ResultSet rs = pStmts.getStatement(14).executeQuery();
 					while(rs.next()){
 						c_id = rs.getInt(1);
-//						System.out.printf("C_id: %d\n", c_id);
 					}
 					count.increment();
 
@@ -248,14 +217,14 @@ public class Payment implements TpccConstants{
 				
 			}
 				
-			proceed = 6;
 			//Get the prepared statement
 			//"SELECT c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_id = ? FOR UPDATE"
 			try {
 				pStmts.getStatement(15).setInt(1, c_w_id);
 				pStmts.getStatement(15).setInt(2, c_d_id);
 				pStmts.getStatement(15).setInt(3, c_id);
-//				System.out.printf("SELECT c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d FOR UPDATE\n", c_w_id, c_d_id, c_id);
+				if(TRACE) logger.trace("SELECT c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since FROM customer " +
+						"WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id + " FOR UPDATE");
 				ResultSet rs = pStmts.getStatement(15).executeQuery();
 				if(rs.next()){
 					c_first = rs.getString(1);
@@ -272,8 +241,6 @@ public class Payment implements TpccConstants{
 					c_discount = rs.getFloat(12);
 					c_balance = rs.getFloat(13);
 					c_since = rs.getString(14);
-//					System.out.printf("first: %s, middle: %s, last: %s, street1: %s, street2: %s, city: %s, zip: %s, phone: %s, credit: %s, credit_lm: %d, discount: %f, balance: %f, since: %s",
-//							c_first, c_middle, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since);
 				}
 				count.increment();
 
@@ -296,11 +263,10 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(16).setInt(1, c_w_id);
 					pStmts.getStatement(16).setInt(2, c_d_id);
 					pStmts.getStatement(16).setInt(3, c_id);
-//					System.out.printf("SELECT c_data FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_w_id, c_d_id, c_id);
+					if(TRACE) logger.trace("SELECT c_data FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 					ResultSet rs = pStmts.getStatement(16).executeQuery();
 					if(rs.next()){
 						c_data = rs.getString(1);
-//						System.out.printf("data: %s\n", c_data);
 					}
 					count.increment();
 
@@ -327,7 +293,7 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(17).setInt(3, c_w_id);
 					pStmts.getStatement(17).setInt(4, c_d_id);
 					pStmts.getStatement(17).setInt(5, c_id);
-//					System.out.printf("UPDATE customer SET c_balance = %f, c_data = %s WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_balance, c_data, c_w_id, c_d_id, c_id);
+					if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + ", c_data = " + c_data + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 					pStmts.getStatement(17).executeUpdate();
 					count.increment();
 
@@ -347,7 +313,7 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(18).setInt(2, c_w_id);
 					pStmts.getStatement(18).setInt(3, c_d_id);
 					pStmts.getStatement(18).setInt(4, c_id);
-//					System.out.printf("UPDATE customer SET c_balance = %f WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_balance, c_w_id, c_d_id, c_id);
+					if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 					pStmts.getStatement(18).executeUpdate();
 					count.increment();
 
@@ -371,8 +337,8 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(19).setString(6, currentTimeStamp.toString());
 				pStmts.getStatement(19).setFloat(7, h_amount);
 				pStmts.getStatement(19).setString(8, h_data);
-//				System.out.printf("INSERT INTO history(h_c_d_id, h_c_w_id, h_c_id, h_d_id, h_w_id, h_date, h_amount, h_data) VALUES(%d, %d, %d, %d, %d, %s, %f, %s)\n",
-//						c_d_id, c_w_id, c_id, d_id, w_id, currentTimeStamp.toString(), h_amount, h_data);
+				if(TRACE) logger.trace("INSERT INTO history(h_c_d_id, h_c_w_id, h_c_id, h_d_id, h_w_id, h_date, h_amount, h_data)" +
+						" VALUES( " + c_d_id + "," + c_w_id + "," + c_id + "," + d_id + "," + w_id + "," + currentTimeStamp.toString() + "," + h_amount + "," + h_data);
 				pStmts.getStatement(19).executeUpdate();
 				count.increment();
 

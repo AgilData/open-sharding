@@ -10,6 +10,7 @@ import org.apache.logging.log4j.Logger;
 public class OrderStat implements TpccConstants{
 	private static final Logger logger = LogManager.getLogger(Driver.class);
 	private static final boolean DEBUG = logger.isDebugEnabled();
+	private static final boolean TRACE = logger.isTraceEnabled();
 	
 	private  TpccStatements pStmts;
 	
@@ -31,7 +32,7 @@ public class OrderStat implements TpccConstants{
 		try {
 			
 			pStmts.getConnection().setAutoCommit(false);
-			if(DEBUG) logger.debug("================================================ORDER STAT==============================================");
+			if(DEBUG) logger.debug("Transaction: ORDER STAT");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
 			int c_id = c_id_arg;
@@ -52,12 +53,10 @@ public class OrderStat implements TpccConstants{
 			int namecnt = 0;
 
 			int  n = 0;
-			int proceed = 0;
 			
 			if (byname > 0) { 
 				
 				c_last = c_last_arg;
-				proceed = 1;
 				
 				//Get Prepared Statement
 				//"SELECT count(c_id) FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_last = ?"
@@ -65,12 +64,11 @@ public class OrderStat implements TpccConstants{
 					pStmts.getStatement(20).setInt(1, c_w_id);
 					pStmts.getStatement(20).setInt(2, c_d_id);
 					pStmts.getStatement(20).setString(3, c_last);
-//					System.out.printf("SELECT count(c_id) FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_last = %s\n", c_w_id, c_d_id, c_last);
+					if(TRACE) logger.trace("SELECT count(c_id) FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last);
 					
 					ResultSet rs = pStmts.getStatement(20).executeQuery();
 					if(rs.next()){
 						namecnt = rs.getInt(1);
-//						System.out.printf("Namecnt: %d\n", namecnt);
 					}
 					count.increment();
 
@@ -79,7 +77,6 @@ public class OrderStat implements TpccConstants{
 					throw new RuntimeException("OrderStat Select transaction error", e);
 				}
 				
-				proceed = 2;
 				
 				//Get the prepared statement
 				//"SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_last = ? ORDER BY c_first"
@@ -88,11 +85,10 @@ public class OrderStat implements TpccConstants{
 					pStmts.getStatement(21).setInt(1, c_w_id);
 					pStmts.getStatement(21).setInt(2, c_d_id);
 					pStmts.getStatement(21).setString(3, c_last);
-//					System.out.printf("SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_last = %s ORDER BY c_first", c_w_id, c_d_id, c_last);
+					if(TRACE) logger.trace("SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE " +
+							"c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last + " ORDER BY c_first");
 					
 					ResultSet rs = pStmts.getStatement(21).executeQuery();
-
-
 					if (namecnt % 2 == 1){ //?? Check
 						namecnt++;	
 					} /* Locate midpoint customer; */
@@ -104,7 +100,6 @@ public class OrderStat implements TpccConstants{
 						c_first = rs.getString(2);
 						c_middle = rs.getString(3);
 						c_last = rs.getString(4);
-//						System.out.printf("balance: %f first: %s, middle: %s last: %s\n", c_balance, c_first, c_middle, c_last);
 					}
 					count.increment();
 
@@ -114,7 +109,6 @@ public class OrderStat implements TpccConstants{
 				}
 				
 			} else {		/* by number */
-				proceed = 6;
 				
 				//Get Transaction Number 
 				//"SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
@@ -122,15 +116,14 @@ public class OrderStat implements TpccConstants{
 					pStmts.getStatement(22).setInt(1, c_w_id);
 					pStmts.getStatement(22).setInt(2, c_d_id);
 					pStmts.getStatement(22).setInt(3, c_id);
-//					System.out.printf("SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE c_w_id = %d AND c_d_id = %d AND c_id = %d\n", c_w_id, c_d_id, c_id);
+					if(TRACE) logger.trace("SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE " +
+							"c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 					ResultSet rs = pStmts.getStatement(22).executeQuery();
 					if(rs.next()){
 						c_balance = rs.getFloat(1);
 						c_first = rs.getString(2);
 						c_middle = rs.getString(3);
-						c_last = rs.getString(4);
-//						System.out.printf("balance: %f, first: %s, middle: %s last: %s\n", c_balance, c_first, c_middle, c_last);
-						
+						c_last = rs.getString(4);						
 					}
 					count.increment();
 
@@ -143,7 +136,6 @@ public class OrderStat implements TpccConstants{
 
 			/* find the most recent order for this customer */
 
-			proceed = 7;
 			//Get prepared statement
 			//"SELECT o_id, o_entry_d, COALESCE(o_carrier_id,0) FROM orders WHERE o_w_id = ? AND o_d_id = ? AND o_c_id = ? AND o_id = (SELECT MAX(o_id) FROM orders WHERE o_w_id = ? AND o_d_id = ? AND o_c_id = ?)"
 			try{
@@ -153,16 +145,14 @@ public class OrderStat implements TpccConstants{
 				pStmts.getStatement(23).setInt(4, c_w_id);
 				pStmts.getStatement(23).setInt(5, c_d_id);
 				pStmts.getStatement(23).setInt(6, c_id);
-//				System.out.printf("SELECT o_id, o_entry_d, COALESCE(o_carrier_id,0) FROM orders " +
-//						"WHERE o_w_id = %d AND o_d_id = %d AND o_c_id = %d AND o_id = " +
-//						"(SELECT MAX(o_id) FROM orders WHERE o_w_id = %d AND o_d_id = %d AND o_c_id = ?)\n",
-//						c_w_id, c_d_id, c_id, c_w_id, c_d_id, c_id);
+				if(TRACE)  logger.trace("SELECT o_id, o_entry_d, COALESCE(o_carrier_id,0) FROM orders " +
+				"WHERE o_w_id = " + c_w_id + " AND o_d_id = " + c_d_id + " AND o_c_id = " + c_id + " AND o_id = " +
+					"(SELECT MAX(o_id) FROM orders WHERE o_w_id = " + c_w_id + " AND o_d_id = " + c_d_id + " AND o_c_id = " + c_id);
 				ResultSet rs = pStmts.getStatement(23).executeQuery();
 				if (rs.next()){
 					o_id = rs.getInt(1);
 					o_entry_d = rs.getString(2);
 					o_carrier_id = rs.getInt(3);
-//					System.out.printf("O_id: %d, entry: %s, carrier: %d\n", o_id, o_entry_d, o_carrier_id);
 				}
 				count.increment();
 
@@ -171,7 +161,6 @@ public class OrderStat implements TpccConstants{
 				throw new RuntimeException("OrderState select transaction error", e);
 			}
 
-			proceed = 8;
 			
 			//Get prepared statement 
 			//"SELECT ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_delivery_d FROM order_line WHERE ol_w_id = ? AND ol_d_id = ? AND ol_o_id = ?"
@@ -179,8 +168,8 @@ public class OrderStat implements TpccConstants{
 				pStmts.getStatement(24).setInt(1, c_w_id);
 				pStmts.getStatement(24).setInt(2, c_d_id);
 				pStmts.getStatement(24).setInt(3, o_id);
-//				System.out.printf("SELECT ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_delivery_d FROM order_line " +
-//						"WHERE ol_w_id = %d AND ol_d_id = %d AND ol_o_id = %d\n", c_w_id, c_d_id, o_id);
+				if(TRACE) logger.trace("SELECT ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_delivery_d FROM order_line " +
+						"WHERE ol_w_id = " + c_w_id + " AND ol_d_id = " + c_d_id + " AND ol_o_id = " + o_id);
 				ResultSet rs = pStmts.getStatement(24).executeQuery();
 				while(rs.next()){
 					ol_i_id = rs.getInt(1);
@@ -188,8 +177,6 @@ public class OrderStat implements TpccConstants{
 					ol_quantity = rs.getInt(3);
 					ol_amount = rs.getFloat(4);
 					ol_delivery_d = rs.getString(5);
-//					System.out.printf("ol_I_id: %d supply: %d quantity: %d amout: %f delivery %s\n", ol_i_id, ol_supply_w_id, ol_quantity,
-//							ol_amount, ol_delivery_d);
 				}
 				count.increment();
 
