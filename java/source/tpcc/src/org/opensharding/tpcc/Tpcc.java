@@ -9,6 +9,7 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.Properties;
+import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -100,6 +101,10 @@ public class Tpcc {
 		
 	}
 	
+	private void stopTransactions(){
+		activate_transaction = 0;
+	}
+	
 	private int runBenchmark() {
 		
 		logger.info("***************************************");
@@ -109,6 +114,7 @@ public class Tpcc {
 		/* initialize */
 		RtHist.histInit();
 		activate_transaction = 1;
+		Timer timer1 = new Timer();  
 		
 		for (int i=0; i<5; i++ ){
 		    success[i]=0;
@@ -180,6 +186,7 @@ public class Tpcc {
 		}
 		
 		      
+		long delay1 = measure_time*1000;
 		
 		System.out.printf("<Parameters>\n");
 		 
@@ -213,29 +220,21 @@ public class Tpcc {
 		}
 		
 		
-		Calendar calendar = Calendar.getInstance();
-		int initialtime = calendar.get(Calendar.SECOND);
-		int time = 0;
+		long initialtime = System.currentTimeMillis();
+		
 		System.out.printf("\nMEASURING START.\n\n");
 		
-		if(DEBUG) logger.debug("main: measure_time: " + measure_time + " intial time: " + initialtime);
-		int logTime = 0;
-		int countWhile =0;
-		while( measure_time  > (time - initialtime) ) {
-			countWhile++;
-			calendar = Calendar.getInstance();
-			time = calendar.get(Calendar.SECOND);
-			if(logTime < time - initialtime){
-				System.out.println("Current time of execution: " + (time-initialtime));
-				logTime = time - initialtime;
+		long currentTime = 0;
+		
+		while(measure_time > ((currentTime - initialtime) / 1000.0) ){
+			currentTime = System.currentTimeMillis();
+			if( ((currentTime - initialtime) / 1000.0) % 1 == 0 ){
+				System.out.println("Current execution time lapse: " + ((currentTime - initialtime) / 1000.0) % 1 );
 			}
-			logger.info("Count of the while loop: " + countWhile);
-			
-		} 
+		}
 		
 		System.out.printf("\nSTOPPING THREADS\n");
 		
-		activate_transaction = 0;
 		
 		executor.shutdown();
 		
