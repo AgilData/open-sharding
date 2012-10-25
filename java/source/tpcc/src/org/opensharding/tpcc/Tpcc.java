@@ -229,7 +229,7 @@ public class Tpcc {
 		while(measure_time > ((currentTime - initialtime) / 1000.0) ){
 			currentTime = System.currentTimeMillis();
 			if( ((currentTime - initialtime) / 1000.0) % 1 == 0 ){
-				System.out.println("Current execution time lapse: " + ((currentTime - initialtime) / 1000.0) % 1 );
+				System.out.println("Current execution time lapse: " + ((currentTime - initialtime) / 1000.0) );
 			}
 		}
 		
