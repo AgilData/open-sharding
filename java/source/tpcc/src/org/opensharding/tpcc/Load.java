@@ -188,7 +188,7 @@ public class Load implements TpccConstants {
 				w_tax = ( (double) Util.randomNumber(10, 20) / 100.0);
 				w_ytd =  3000000.00;
 	
-				if (option_debug)
+				//if (option_debug)
 					System.out.printf("WID = %d, Name= %s, Tax = %f\n",
 					       w_id, w_name, w_tax);
 				/*EXEC SQL INSERT INTO
