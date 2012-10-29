@@ -169,7 +169,7 @@ public class Load implements TpccConstants {
 				
 				if(shardCount > 0){
 					if(w_id + 1 > shardCount){
-						currentShard = (w_id  % shardCount);
+						currentShard = ((w_id + 1)  % shardCount);
 					}else{
 						currentShard = w_id + 1;
 					}
@@ -587,7 +587,7 @@ public class Load implements TpccConstants {
 		int currentShard;
 		if (shardCount > 0){
 			if(w_id + 1 > shardCount){
-				currentShard = (w_id  % shardCount);
+				currentShard = ((w_id + 1) % shardCount);
 			}else{
 				currentShard = w_id + 1;
 			}
@@ -807,7 +807,7 @@ public class Load implements TpccConstants {
 		int currentShard;
 		if(shardCount > 0){
 			if(w_id + 1 > shardCount){
-				currentShard = (w_id  % shardCount);
+				currentShard = ((w_id + 1) % shardCount);
 			}else{
 				currentShard = w_id + 1;
 			}
