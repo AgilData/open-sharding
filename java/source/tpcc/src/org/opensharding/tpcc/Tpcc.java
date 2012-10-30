@@ -76,7 +76,7 @@ public class Tpcc {
 	private Properties properties;
 	private InputStream inputStream;
 
-	public static int activate_transaction = 0;
+	public static volatile int activate_transaction = 0;
 
 	public Tpcc() {
 		// Empty.
