@@ -14,7 +14,7 @@ BASEDIR = File.dirname(File.dirname(Pathname.new(__FILE__).realpath))
 JAVA = "java"
 CLASS = "org.opensharding.tpcc.TpccLoad"
 OPTIONS = "-Dfile.encoding=UTF8"
-HEAPSIZE = "128m"
+HEAPSIZE = "512m"
 XMS = "-Xms16m"
 XMX = "-Xmx#{HEAPSIZE}"
 
