@@ -49,13 +49,11 @@ end
 def install_dependencies
     puts "Installing Dependencies *****************************************"
     platform = get_platform
-    if platform.match("centos")
-        run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel java-1.6.0-openjdk-devel kernel-devel")
-    elsif platform.match("ubuntu") || platform.match("debian")
-        run_command("sudo apt-get install -y build-essential libncurses5-dev libltdl3-dev")
+    if platform.match("ubuntu")
+      run_command("sudo apt-get install -y build-essential libncurses5-dev libltdl3-dev")
     else
-        puts "Platform not found: #{platform}"
-        exit
+        puts "Defaulting to a centos setup."
+        run_command("yum install -y gcc e2fsprogs-devel ncurses-devel libtool-ltdl-devel python-devel subversion-devel openssl-devel java-1.6.0-openjdk-devel kernel-devel")
     end
 end
 #################################################################################################
