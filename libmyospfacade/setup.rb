@@ -36,9 +36,9 @@ end
 def get_platform
     if RUBY_PLATFORM.downcase =~ /darwin/
         return MAC
-        elsif RUBY_PLATFORM.downcase =~ /windows/
+    elsif RUBY_PLATFORM.downcase =~ /windows/
         return WINDOW
-        else
+    else
         # get linux distro name and version (might now work on all distros)
         
         if(File.exists?("/etc/issue")) 
@@ -48,6 +48,7 @@ def get_platform
         else
           puts "Unknown platform. Defaulting to a #{DEFAULTSERVER} procedure."
           return DEFAULTSERVER
+        end
     end
 end
 
@@ -105,7 +106,7 @@ def myosp_conf_placement
         #Double Checking
         if File.exist?("/etc/osp/myosp.conf")
             puts "Succesfully copied myosp.conf to the appropriate location."
-            else
+        else
             puts "Failed to copy the myosp.conf"
             exit
         end
