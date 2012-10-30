@@ -64,14 +64,14 @@ def myosp_conf_placement
     platform = get_platform
     
     #Checking to see if the platform is Ubuntu
-    if platfrom.match(UBUNTU)
+    if platform.match(UBUNTU)
         puts "Platform obtained: #{platform}"
         library = LIBRARY
         puts "Library file set to #{LIBRARY}"
     else
       
       #Checking platform 
-      if plantform.match(DEFAULTSERVER)
+      if platform.match(DEFAULTSERVER)
          puts "Using the default setup for Centos."
          puts "This is only called for centos and unsupported platforms."
       else
@@ -123,16 +123,16 @@ def myosp_ldconfig
   architecture = `uname -m`
   
   puts "Obtaining platform for ldconfig setup."
-  platfrom = get_platform
+  platform = get_platform
   
   #Checking for ubuntu platform
-  if platfrom.match(UBUNTU)
+  if platform.match(UBUNTU)
       puts "Platform obtained: #{platform}"
       library = LIBRARY
       puts "Library file set to #{library}"
   else
     #Checking platform 
-    if plantform.match(DEFAULTSERVER)
+    if platform.match(DEFAULTSERVER)
        puts "Using the default setup for Centos."
        puts "This is only called for centos and unsupported platforms."
     else
