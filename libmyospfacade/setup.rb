@@ -2,11 +2,22 @@
 
 require 'fileutils'
 
-##############################
+##################################
 #
-# Setup Up Script to 
+# Setup Up Script For MyOSP Driver
 #
-##############################
+##################################
+DEFAULTSERVER = "centos"
+UBUNTU = "ubuntu"
+CENTOS = "centos"
+REDHAT = "redhat"
+CARBON = "carbon"
+FREEBDSD = "freebdsd"
+MAC  = "mac"
+WINDOW = "window"
+LIBRARY64 = "lib64"
+LIBRARY = "lib"
+MYOSPCONFDIR = "/etc/osp/myosp.conf"
 
 #################################################################################################
 ## Run an operating system command
@@ -14,7 +25,7 @@ require 'fileutils'
 def run_command(cmd)
     puts "Executing: #{cmd}"
     if ! system cmd
-        puts "FAILED to execute #{cmd}"
+        puts "FAILED to execute the  following command: #{cmd}"
         exit 1
     end
 end
@@ -24,84 +35,145 @@ end
 #################################################################################################
 def get_platform
     if RUBY_PLATFORM.downcase =~ /darwin/
-        return "mac"
-        elsif RUBY_PLATFORM.downcase =~ /windows/
-        return "win"
-        else
-        
+        return MAC
+    elsif RUBY_PLATFORM.downcase =~ /windows/
+        return WINDOW
+    else
         # get linux distro name and version (might now work on all distros)
-        issue = `cat /etc/issue`.downcase.split
-        arch = `uname -i`
-        platform = "#{issue} #{arch}"
-        return platform
+        
+        if(File.exists?("/etc/issue")) 
+          issue = `cat /etc/issue`.downcase.split
+          platform = "#{issue}"
+          return platform
+        else
+          puts "Unknown platform. Defaulting to a #{DEFAULTSERVER} procedure."
+          return DEFAULTSERVER
+        end
     end
 end
+
 #################################################################################################
-## Myosp Placement
+## myosp.conf Placement
 #################################################################################################
 def myosp_conf_placement
-    platfrom = get_platform
-    if platfrom.match("ubuntu") || platfrom.match("i386")
-        library = "lib"
-    elsif platfrom.match("centos") && platfrom.match("x86_64")
-        library = "lib64"
+    
+    puts "Obtaining architecture."
+    architecture = `uname -i`
+    
+    puts "Obtaining platform"
+    platform = get_platform
+    
+    #Checking to see if the platform is Ubuntu
+    if platform.match(UBUNTU)
+        puts "Platform obtained: #{platform}"
+        library = LIBRARY
+        puts "Library file set to #{LIBRARY}"
     else
-        puts "Non existing platform."
-        exit
+      
+      #Checking platform 
+      if platform.match(DEFAULTSERVER)
+         puts "Using the default setup for Centos."
+         puts "This is only called for centos and unsupported platforms."
+      else
+        puts "Using the platform: #{platform}"
+      end
+      
+      #Checking Architecture
+      if (architecture.match("x86_64"))
+          puts "Architecture of #{architecture}"
+          library = LIBRARY64
+          puts "Library file set to #{LIBRARY64}"
+      elsif (architecture.match("i386"))
+          puts "Architecture of #{architecture}"
+          library = LIBRARY
+          puts "Library file set to #{LIBRARY}"
+      else
+          puts "Undefined architecture defaulting to a x86_64 architecture."
+          library = LIBRARY64
+      end
+      
     end
-    if File.exist?("/etc/osp/myosp.conf")
-        puts "The myosp.conf file is already in place."
-        else
-        puts "Moving the myosp.conf in the directory /etc/osp/, please edit this config for proper use of MyOSP."
+    
+    #Checking to see if the Myosp.conf is already in place.
+    if File.exist?(MYOSPCONFDIR)
+        puts "The file #{MYOSPCONFDIR} exists, nothing else needs to be done."
+    else
+        #Moving the template myosp.conf
+        puts "Moving the template myosp.conf in the directory /etc/osp/, please edit this config for proper use of MyOSP."
         Dir.mkdir("/etc/osp/")
         run_command("cp /usr/#{library}/myosp/myosp.conf /etc/osp/")
+        
+        #Double Checking
         if File.exist?("/etc/osp/myosp.conf")
             puts "Succesfully copied myosp.conf to the appropriate location."
-            else
+        else
             puts "Failed to copy the myosp.conf"
             exit
         end
+        
     end
+    
 end
 
 #################################################################################################
 ## Set Up LDCONFIG
 #################################################################################################
 def myosp_ldconfig
-    platfrom = get_platform
-    if platfrom.match("ubuntu") || platfrom.match("i386")
-        library = "lib"
-        elsif (platfrom.match("centos") || platfrom.match("redhat")) && platfrom.match("x86_64")
-        library = "lib64"
-        else
-        puts "Non existing platform."
-        exit
-    end
-    if File.exist?("/etc/ld.so.conf.d/1.so.myosp.conf")
-        puts "File /etc/ld.so.conf.d/1.so.myosp.conf already exsists, now running ldconfig."
+  puts "Obtaining architecture for ldconfig setup."
+  architecture = `uname -m`
+  
+  puts "Obtaining platform for ldconfig setup."
+  platform = get_platform
+  
+  #Checking for ubuntu platform
+  if platform.match(UBUNTU)
+      puts "Platform obtained: #{platform}"
+      library = LIBRARY
+      puts "Library file set to #{library}"
+  else
+    #Checking platform 
+    if platform.match(DEFAULTSERVER)
+       puts "Using the default setup for Centos."
+       puts "This is only called for centos and unsupported platforms."
     else
-        puts "Creating the /etc/ld.so.conf.d/1.so.myosp.conf for setting up myosp."
-        ld_config=File.open("/etc/ld.so.conf.d/1.so.myosp.conf", 'w')
-        if ! ld_config
-            puts "Failed to open the file /etc/ld.so.conf.d/1.so.myosp.conf"
-            exit
-        else
-            ld_config.puts "/usr/#{library}/myosp"
-            ld_config.close
-        end
+      puts "Using the platform: #{platform}"
     end
-    run_command("ldconfig")
-    #TODO: This section is only a rough manner in which to remove the desired libmysqlcient path, however for the time being this will solve this issue.
-
-    #    ldd_value = `ldd /usr/bin/mysql | grep mysql`
-    #ldd_array = ldd_value.split(" => ")
-    #lib_path = ldd_array[1].split(" (")
-    #puts "Removing:: #{lib_path[0]}"
-    #run_command("rm #{lib_path[0]}")
-    #puts `ldd /usr/bin/mysql`
-    #puts "If the ldd shows that it is using the mysql lib found in myosp, then installation has completed."
-    #puts `export MYSQL_PS1="MyOSP(Mysql)>  "`
+    
+    #Checking Architecture
+    if (architecture.match("x86_64"))
+        puts "Architecture of #{architecture}"
+        library = LIBRARY64
+        puts "Library file set to #{LIBRARY64}"
+    elsif (architecture.match("i386"))
+        puts "Architecture of #{architecture}"
+        library = LIBRARY
+        puts "Library file set to #{LIBRARY}"
+    else
+        puts "Undefined architecture defaulting to a x86_64 architecture."
+        library = LIBRARY64
+    end
+    
+  end
+  
+  #Checking to see if ldconfig has been setup before.   
+  if File.exist?("/etc/ld.so.conf.d/1.so.myosp.conf")
+      puts "File /etc/ld.so.conf.d/1.so.myosp.conf already exsists, now running ldconfig."
+  else
+      puts "Creating the /etc/ld.so.conf.d/1.so.myosp.conf for setting up myosp libraries."
+      ld_config=File.open("/etc/ld.so.conf.d/1.so.myosp.conf", 'w')
+      
+      if ! ld_config
+          puts "Failed to open the file /etc/ld.so.conf.d/1.so.myosp.conf"
+          exit
+      else
+          ld_config.puts "/usr/#{library}/myosp"
+          ld_config.close
+      end
+      
+  end
+      run_command("ldconfig")
 end
+
 
 #################################################################################################
 ## Command Line
