@@ -253,7 +253,7 @@ public class Payment implements TpccConstants{
 			c_balance += h_amount;
 			
 			//CHECK: Do we need to do it this way?
-			c_credit.toCharArray()[2] = '\0';
+			//c_credit.toCharArray()[2] = '\0';
 			
 			if (c_credit.contains("BC")) {
 				proceed = 7;
