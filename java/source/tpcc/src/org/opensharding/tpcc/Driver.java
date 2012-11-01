@@ -151,7 +151,7 @@ public class Driver implements TpccConstants {
 	    }
 	    
 	    
-	    d_id = Util.randomNumber(0, DIST_PER_WARE);
+	    d_id = Util.randomNumber(1, DIST_PER_WARE);
 	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST);
 
 	    ol_cnt = Util.randomNumber(5, 15);
