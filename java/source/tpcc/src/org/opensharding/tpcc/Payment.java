@@ -254,55 +254,74 @@ public class Payment implements TpccConstants{
 			
 			//CHECK: Do we need to do it this way?
 			//c_credit.toCharArray()[2] = '\0';
-			
-			if (c_credit.contains("BC")) {
-				proceed = 7;
-				//Get Prepared Statement
-				//"SELECT c_data FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
-				try {
-					pStmts.getStatement(16).setInt(1, c_w_id);
-					pStmts.getStatement(16).setInt(2, c_d_id);
-					pStmts.getStatement(16).setInt(3, c_id);
-					if(TRACE) logger.trace("SELECT c_data FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
-					ResultSet rs = pStmts.getStatement(16).executeQuery();
-					if(rs.next()){
-						c_data = rs.getString(1);
+			if(c_credit != null){
+				if (c_credit.contains("BC")) {
+					proceed = 7;
+					//Get Prepared Statement
+					//"SELECT c_data FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
+					try {
+						pStmts.getStatement(16).setInt(1, c_w_id);
+						pStmts.getStatement(16).setInt(2, c_d_id);
+						pStmts.getStatement(16).setInt(3, c_id);
+						if(TRACE) logger.trace("SELECT c_data FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
+						ResultSet rs = pStmts.getStatement(16).executeQuery();
+						if(rs.next()){
+							c_data = rs.getString(1);
+						}
+						count.increment();
+
+						rs.close();
+					} catch (SQLException e) {
+						throw new Exception("Payment select transaction error", e);
 					}
-					count.increment();
+					
+					c_new_data = String.format("| %d %d %d %d %d $%f %c %c", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
+					
+					c_new_data = ( c_new_data + c_data.substring(0, (500 - c_new_data.length()) ) );
+					
+					
+					//CHECK: Is this how we want to do this?
+					c_new_data.toCharArray()[500] = '\0';
+		
+					proceed = 8;
+					//Get prepared statement
+					//"UPDATE customer SET c_balance = ?, c_data = ? WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
+					try {
+						System.out.print("Executed UPDATE.\n");
+						pStmts.getStatement(17).setFloat(1, c_balance);
+						pStmts.getStatement(17).setString(2, c_data);
+						pStmts.getStatement(17).setInt(3, c_w_id);
+						pStmts.getStatement(17).setInt(4, c_d_id);
+						pStmts.getStatement(17).setInt(5, c_id);
+						if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + ", c_data = " + c_data + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
+						pStmts.getStatement(17).executeUpdate();
+						count.increment();
 
-					rs.close();
-				} catch (SQLException e) {
-					throw new Exception("Payment select transaction error", e);
-				}
+					} catch (SQLException e) {
+						throw new Exception("Payment update transaction error", e);
+					}
 				
-				c_new_data = String.format("| %d %d %d %d %d $%f %c %c", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
-				
-				c_new_data = ( c_new_data + c_data.substring(0, (500 - c_new_data.length()) ) );
-				
-				
-				//CHECK: Is this how we want to do this?
-				c_new_data.toCharArray()[500] = '\0';
-	
-				proceed = 8;
-				//Get prepared statement
-				//"UPDATE customer SET c_balance = ?, c_data = ? WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
-				try {
-					System.out.print("Executed UPDATE.\n");
-					pStmts.getStatement(17).setFloat(1, c_balance);
-					pStmts.getStatement(17).setString(2, c_data);
-					pStmts.getStatement(17).setInt(3, c_w_id);
-					pStmts.getStatement(17).setInt(4, c_d_id);
-					pStmts.getStatement(17).setInt(5, c_id);
-					if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + ", c_data = " + c_data + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
-					pStmts.getStatement(17).executeUpdate();
-					count.increment();
+					
+					
+				} else {
+					proceed = 9;
+					//Get prepared statement
+					//"UPDATE customer SET c_balance = ? WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
+					
+					try {
+						pStmts.getStatement(18).setFloat(1, c_balance);
+						pStmts.getStatement(18).setInt(2, c_w_id);
+						pStmts.getStatement(18).setInt(3, c_d_id);
+						pStmts.getStatement(18).setInt(4, c_id);
+						if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
+						pStmts.getStatement(18).executeUpdate();
+						count.increment();
 
-				} catch (SQLException e) {
-					throw new Exception("Payment update transaction error", e);
+					} catch (SQLException e) {
+						throw new Exception("Payment update transaction error", e);
+					}
+					
 				}
-			
-				
-				
 			} else {
 				proceed = 9;
 				//Get prepared statement
