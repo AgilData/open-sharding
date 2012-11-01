@@ -135,8 +135,7 @@ public class NewOrder implements TpccConstants {
 			
 			
 			//Timestamp 
-			long time = System.currentTimeMillis();
-			java.sql.Timestamp currentTimeStamp = new java.sql.Timestamp(time);
+			java.sql.Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
 			
 			
 			
@@ -207,11 +206,11 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(3).setInt(2, d_id);
 				pStmts.getStatement(3).setInt(3, w_id);
 				pStmts.getStatement(3).setInt(4, c_id);
-				pStmts.getStatement(3).setString(5, currentTimeStamp.toString());
+				pStmts.getStatement(3).setTimestamp(5, currentTimeStamp);
 				pStmts.getStatement(3).setInt(6, o_ol_cnt);
 				pStmts.getStatement(3).setInt(7, o_all_local);
 				if(TRACE) logger.trace("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) " +
-						"VALUES(" + o_id + ","+ d_id + "," + w_id + "," + c_id + "," +  currentTimeStamp.toString() + "," + o_ol_cnt + "," + o_all_local+ ")");
+						"VALUES(" + o_id + ","+ d_id + "," + w_id + "," + c_id + "," +  currentTimeStamp + "," + o_ol_cnt + "," + o_all_local+ ")");
 				pStmts.getStatement(3).executeUpdate();
 				count.increment();
 
