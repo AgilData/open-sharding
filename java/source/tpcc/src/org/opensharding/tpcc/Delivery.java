@@ -67,7 +67,7 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(26).setInt(1, no_o_id);
 					pStmts.getStatement(26).setInt(2, d_id);
 					pStmts.getStatement(26).setInt(3, w_id);
-					pStmts.getStatement(26).executeQuery();
+					pStmts.getStatement(26).executeUpdate();
 					count.increment();
 
 				} catch (SQLException e) {

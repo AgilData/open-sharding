@@ -174,6 +174,8 @@ public class NewOrder implements TpccConstants {
 					d_tax = rs.getFloat(2);
 				}else{
 					logger.error("Failed to obtain d_next_o_id");
+					rs.close();
+					System.exit(1);
 				}
 				rs.close();
 				count.increment();
