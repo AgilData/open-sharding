@@ -53,7 +53,7 @@ public class Slev implements TpccConstants{
 						}
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Slev select transaction error", e);
+					throw new Exception("Slev select transaction error", e);
 				}
 				
 				//Get prepared statement
@@ -74,7 +74,7 @@ public class Slev implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Slev select transaction error", e);
+					throw new Exception("Slev select transaction error", e);
 				}
 				
 				//Get prepared statement
@@ -93,14 +93,16 @@ public class Slev implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Slev select transaction error", e);
+					throw new Exception("Slev select transaction error", e);
 				}
 			} catch (Exception e) {
 				try {
 					// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 					pStmts.getConnection().rollback();
 				} catch(Throwable th) {
-					throw new RuntimeException("New Order error", th);
+					throw new RuntimeException("Slev error", th);
+				} finally {
+					logger.error("Slev error", e);
 				}
 			}
 			

@@ -74,7 +74,7 @@ public class OrderStat implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("OrderStat Select transaction error", e);
+					throw new Exception("OrderStat Select transaction error", e);
 				}
 				
 				
@@ -105,7 +105,7 @@ public class OrderStat implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("OrderStat Select transaction error", e);
+					throw new Exception("OrderStat Select transaction error", e);
 				}
 				
 			} else {		/* by number */
@@ -129,7 +129,7 @@ public class OrderStat implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e){
-					throw new RuntimeException("OrderStat select transaction error", e);
+					throw new Exception("OrderStat select transaction error", e);
 				}
 				
 			}
@@ -158,7 +158,7 @@ public class OrderStat implements TpccConstants{
 
 				rs.close();
 			} catch (SQLException e){
-				throw new RuntimeException("OrderState select transaction error", e);
+				throw new Exception("OrderState select transaction error", e);
 			}
 
 			
@@ -182,11 +182,17 @@ public class OrderStat implements TpccConstants{
 
 				rs.close();
 			} catch (SQLException e){
-				throw new RuntimeException("OrderStat select transaction error", e);
+				throw new Exception("OrderStat select transaction error", e);
 			}
 		} catch (Exception e) {
-			pStmts.rollback();
-			e.printStackTrace();
+			try {
+				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
+				pStmts.getConnection().rollback();
+			} catch(Throwable th) {
+				throw new RuntimeException("Order stat error", th);
+			} finally {
+				logger.error("Order stat error", e);
+			}
 		}
 		
 		// Commit.

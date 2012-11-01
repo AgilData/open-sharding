@@ -158,7 +158,7 @@ public class NewOrder implements TpccConstants {
 				}		
 				rs.close();
 			} catch (SQLException e) {
-				throw new RuntimeException("NewOrder select transaction error", e);
+				throw new Exception("NewOrder select transaction error", e);
 			}
 			
 			//Get prepared statement
@@ -176,7 +176,7 @@ public class NewOrder implements TpccConstants {
 				rs.close();
 				count.increment();
 			} catch (SQLException e) {
-				throw new RuntimeException("Neworder select transaction error", e);
+				throw new Exception("Neworder select transaction error", e);
 			}
 			
 			//Get prepared statement
@@ -191,7 +191,7 @@ public class NewOrder implements TpccConstants {
 				count.increment();
 
 			} catch (SQLException e) {
-				throw new RuntimeException("NewOrder update transaction error", e);
+				throw new Exception("NewOrder update transaction error", e);
 			}
 			
 			o_id = d_next_o_id;
@@ -213,7 +213,7 @@ public class NewOrder implements TpccConstants {
 				count.increment();
 
 			} catch (SQLException e) {
-				throw new RuntimeException("NewOrder insert transaction error",e );
+				throw new Exception("NewOrder insert transaction error",e );
 			}
 			
 			//Get prepared statement
@@ -227,7 +227,7 @@ public class NewOrder implements TpccConstants {
 				count.increment();
 
 			} catch (SQLException e) {
-				throw new RuntimeException("NewOrder insert transaction error", e);
+				throw new Exception("NewOrder insert transaction error", e);
 			}
 			
 			/* sort orders to avoid DeadLock */
@@ -278,7 +278,7 @@ public class NewOrder implements TpccConstants {
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("NewOrder select transaction error", e);
+					throw new Exception("NewOrder select transaction error", e);
 				}
 				
 				price[ol_num_seq[ol_number - 1]] = i_price;
@@ -310,7 +310,7 @@ public class NewOrder implements TpccConstants {
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("NewOrder select transaction error", e);
+					throw new Exception("NewOrder select transaction error", e);
 				}
 			
 				ol_dist_info = pickDistInfo(ol_dist_info, d_id);	/* pick correct * s_dist_xx */
@@ -342,7 +342,7 @@ public class NewOrder implements TpccConstants {
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("NewOrder update transaction error", e);
+					throw new Exception("NewOrder update transaction error", e);
 				}
 
 				ol_amount = ol_quantity * i_price * (1 + w_tax + d_tax) * (1 - c_discount);
@@ -369,7 +369,7 @@ public class NewOrder implements TpccConstants {
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("NewOrder insert transaction error", e);
+					throw new Exception("NewOrder insert transaction error", e);
 				}
 			
 			}
@@ -384,6 +384,8 @@ public class NewOrder implements TpccConstants {
 				pStmts.getConnection().rollback();
 			} catch(Throwable th) {
 				throw new RuntimeException("New Order error", th);
+			} finally {
+				logger.error("New Order error", e);
 			}
 		}
 		

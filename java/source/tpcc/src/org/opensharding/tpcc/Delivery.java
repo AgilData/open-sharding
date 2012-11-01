@@ -51,7 +51,7 @@ public class Delivery implements TpccConstants {
 					count.increment();
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Delivery Select transaction error", e);
+					throw new Exception("Delivery Select transaction error", e);
 				}
 				
 				if(no_o_id == 0){
@@ -71,7 +71,7 @@ public class Delivery implements TpccConstants {
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException(" Delivery Delete transaction error", e);
+					throw new Exception(" Delivery Delete transaction error", e);
 				}
 				
 				
@@ -91,7 +91,7 @@ public class Delivery implements TpccConstants {
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException(" Delivery Select transaction error", e);
+					throw new Exception(" Delivery Select transaction error", e);
 				}
 								
 				//Get the prepared Statement 
@@ -106,7 +106,7 @@ public class Delivery implements TpccConstants {
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("Delivery Update transcation error", e);
+					throw new Exception("Delivery Update transcation error", e);
 				}
 				
 				
@@ -122,7 +122,7 @@ public class Delivery implements TpccConstants {
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("Delivery Update transaction error", e);
+					throw new Exception("Delivery Update transaction error", e);
 				}
 				
 				
@@ -141,7 +141,7 @@ public class Delivery implements TpccConstants {
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Delivery Select transaction error", e);
+					throw new Exception("Delivery Select transaction error", e);
 				}
 				
 				
@@ -157,7 +157,7 @@ public class Delivery implements TpccConstants {
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("Delivery Update transaction error", e);
+					throw new Exception("Delivery Update transaction error", e);
 				}
 			}
 		
@@ -166,7 +166,9 @@ public class Delivery implements TpccConstants {
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 				pStmts.getConnection().rollback();
 			} catch(Throwable th) {
-				throw new RuntimeException("New Order error", th);
+				throw new RuntimeException("Delivery error", th);
+			} finally {
+				logger.error("Delivery error", e);
 			}
 		}
 		

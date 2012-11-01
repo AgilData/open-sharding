@@ -103,7 +103,7 @@ public class Payment implements TpccConstants{
 				count.increment();
 
 			} catch (SQLException e) {
-				throw new RuntimeException("Payment Update transaction error", e);
+				throw new Exception("Payment Update transaction error", e);
 			}
 			
 			proceed = 2;
@@ -127,7 +127,7 @@ public class Payment implements TpccConstants{
 				rs.close();
 				
 			} catch (SQLException e) {
-				throw new RuntimeException("Payment select transaction error", e);
+				throw new Exception("Payment select transaction error", e);
 			}
 			
 			proceed = 3;
@@ -142,7 +142,7 @@ public class Payment implements TpccConstants{
 				count.increment();
 
 			} catch (SQLException e) {
-				throw new RuntimeException("Payment update transaction error", e);
+				throw new Exception("Payment update transaction error", e);
 			}
 			
 			proceed = 4;
@@ -166,7 +166,7 @@ public class Payment implements TpccConstants{
 
 				rs.close();
 			} catch (SQLException e) {
-				throw new RuntimeException("Payment select transaction error", e);
+				throw new Exception("Payment select transaction error", e);
 			}
 			
 			if (byname >= 1) {
@@ -190,7 +190,7 @@ public class Payment implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Payment select transaction error", e);
+					throw new Exception("Payment select transaction error", e);
 				}
 				
 				//Get prepared Transaction
@@ -209,7 +209,7 @@ public class Payment implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Payment select transaction error", e);
+					throw new Exception("Payment select transaction error", e);
 				}
 			
 				if (namecnt % 2 == 1) 
@@ -247,7 +247,7 @@ public class Payment implements TpccConstants{
 				rs.close();
 				
 			} catch (SQLException e) {
-				throw new RuntimeException("Payment select transaction error", e);
+				throw new Exception("Payment select transaction error", e);
 			}
 			
 			c_balance += h_amount;
@@ -272,7 +272,7 @@ public class Payment implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
-					throw new RuntimeException("Payment select transaction error", e);
+					throw new Exception("Payment select transaction error", e);
 				}
 				
 				c_new_data = String.format("| %d %d %d %d %d $%f %c %c", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
@@ -298,7 +298,7 @@ public class Payment implements TpccConstants{
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("Payment update transaction error", e);
+					throw new Exception("Payment update transaction error", e);
 				}
 			
 				
@@ -318,7 +318,7 @@ public class Payment implements TpccConstants{
 					count.increment();
 
 				} catch (SQLException e) {
-					throw new RuntimeException("Payment update transaction error", e);
+					throw new Exception("Payment update transaction error", e);
 				}
 				
 			}
@@ -343,7 +343,7 @@ public class Payment implements TpccConstants{
 				count.increment();
 
 			} catch (SQLException e) {
-				throw new RuntimeException("Payment insert transaction error", e);
+				throw new Exception("Payment insert transaction error", e);
 			}
 		
 		} catch (Exception e) {
@@ -351,7 +351,9 @@ public class Payment implements TpccConstants{
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 				pStmts.getConnection().rollback();
 			} catch(Throwable th) {
-				throw new RuntimeException("New Order error", th);
+				throw new RuntimeException("Payment error", th);
+			} finally {
+				logger.error("Payment error", e);
 			}
 		}
 		
