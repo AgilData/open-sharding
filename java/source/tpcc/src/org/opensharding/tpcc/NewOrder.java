@@ -175,7 +175,7 @@ public class NewOrder implements TpccConstants {
 				}else{
 					logger.error("Failed to obtain d_next_o_id");
 					rs.close();
-					System.exit(1);
+					//System.exit(1);
 				}
 				rs.close();
 				count.increment();
