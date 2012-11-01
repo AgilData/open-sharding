@@ -135,9 +135,8 @@ public class NewOrder implements TpccConstants {
 			
 			
 			//Timestamp 
-			Calendar calendar = Calendar.getInstance();
-			Date now = calendar.getTime();
-			Timestamp currentTimeStamp = new Timestamp(now.getTime());
+			long time = System.currentTimeMillis();
+			java.sql.Timestamp currentTimeStamp = new java.sql.Timestamp(time);
 			
 			
 			
