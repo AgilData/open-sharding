@@ -151,8 +151,8 @@ public class Delivery implements TpccConstants {
 				try {
 					pStmts.getStatement(31).setFloat(1, ol_total);
 					pStmts.getStatement(31).setInt(2, c_id);
-					pStmts.getStatement(31).setInt(2, d_id);
-					pStmts.getStatement(31).setInt(3, w_id);
+					pStmts.getStatement(31).setInt(3, d_id);
+					pStmts.getStatement(31).setInt(4, w_id);
 					pStmts.getStatement(31).executeUpdate();
 					count.increment();
 
