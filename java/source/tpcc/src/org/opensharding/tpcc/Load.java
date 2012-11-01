@@ -168,13 +168,9 @@ public class Load implements TpccConstants {
 			for (w_id = 0; w_id < max_ware; w_id++) {
 				
 				if(shardCount > 0){
-					if(w_id + 1 > shardCount){
-						currentShard = ((w_id + 1)  % shardCount);
-						if (currentShard == 0){
-							currentShard = shardCount;
-						}
-					}else{
-						currentShard = w_id + 1;
+					currentShard = (w_id  % shardCount);
+					if (currentShard == 0){
+						currentShard = shardCount;
 					}
 				}
 				
@@ -587,18 +583,12 @@ public class Load implements TpccConstants {
 		
 
 		System.out.printf("Loading Customer for DID=%d, WID=%d\n", d_id, w_id);
-		int currentShard;
-		if (shardCount > 0){
-			if(w_id + 1 > shardCount){
-				currentShard = ((w_id + 1) % shardCount);
-				if (currentShard == 0){
-					currentShard = shardCount;
-				}
-			}else{
-				currentShard = w_id + 1;
+		int currentShard = 0;
+		if(shardCount > 0){
+			currentShard = (w_id  % shardCount);
+			if (currentShard == 0){
+				currentShard = shardCount;
 			}
-		}else{
-			currentShard = w_id + 1;
 		}
 		
 	retry:
@@ -810,18 +800,12 @@ public class Load implements TpccConstants {
 			throw new RuntimeException("District statemet creation error", e1);
 		}
 		
-		int currentShard;
+		int currentShard =0;
 		if(shardCount > 0){
-			if(w_id + 1 > shardCount){
-				currentShard = ((w_id + 1) % shardCount);
-				if (currentShard == 0){
-					currentShard = shardCount;
-				}
-			}else{
-				currentShard = w_id + 1;
+			currentShard = (w_id  % shardCount);
+			if (currentShard == 0){
+				currentShard = shardCount;
 			}
-		}else{
-			currentShard = w_id + 1;
 		}
 		
 
