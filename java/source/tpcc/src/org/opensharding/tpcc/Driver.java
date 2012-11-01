@@ -143,15 +143,15 @@ public class Driver implements TpccConstants {
 	    int[] qty = new int[MAX_NUM_ITEMS];
 
 	    if(num_node==0){
-		w_id = Util.randomNumber(1, num_ware);
+		w_id = Util.randomNumber(0, num_ware-1);
 	    }else{
 		c_num = ((num_node * t_num)/num_conn); /* drop moduls */
-		w_id =Util.randomNumber(1 + (num_ware * c_num)/num_node,
-				    (num_ware * (c_num + 1))/num_node);
+		w_id =Util.randomNumber(0 + ((num_ware-1) * c_num)/num_node,
+				    ((num_ware-1) * (c_num + 1))/num_node);
 	    }
 	    
 	    
-	    d_id = Util.randomNumber(1, DIST_PER_WARE);
+	    d_id = Util.randomNumber(0, DIST_PER_WARE);
 	    c_id = Util.nuRand(1023, 1, CUST_PER_DIST);
 
 	    ol_cnt = Util.randomNumber(5, 15);
