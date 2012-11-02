@@ -216,11 +216,13 @@ public class Tpcc {
 		}
 
         // rampup time
+        System.out.printf("\nRAMPUP START.\n\n");
         try {
             Thread.sleep(rampup_time * 1000);
         } catch (InterruptedException e) {
             logger.error("Rampup wait interrupted", e);
         }
+        System.out.printf("\nRAMPUP END.\n\n");
 
         // measure time
 		System.out.printf("\nMEASURING START.\n\n");
