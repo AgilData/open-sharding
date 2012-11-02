@@ -7,6 +7,7 @@ import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 import java.util.Calendar;
 import java.util.Properties;
 import java.util.Timer;
@@ -223,13 +224,17 @@ public class Tpcc {
 
         // measure time
 		System.out.printf("\nMEASURING START.\n\n");
+
+        // reset counter
         count.reset();
 
+        // loop for the measure_time
         final long startTime = System.currentTimeMillis();
+        DecimalFormat df = new DecimalFormat("#,##0.0");
         long runTime = 0;
 		while (runTime < measure_time) {
             runTime = System.currentTimeMillis() - startTime;
-            System.out.println("Current execution time lapse: " + runTime + " ms");
+            System.out.println("Current execution time lapse: " + df.format(runTime/1000.0f) + " seconds");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
@@ -239,9 +244,9 @@ public class Tpcc {
         final long actualTestTime = System.currentTimeMillis() - startTime;
 
         // show results
-        final long total = count.getTotal();
-        System.out.printf("TOTAL TRANSACTIONS: %d\n", total);
-        System.out.printf("TOTAL TPMS        : %f\n", total*1.0f/actualTestTime);
+        final long total = count.get();
+        System.out.printf("TOTAL TRANSACTIONS: %s\n", df.format(total));
+        System.out.printf("TOTAL TPMS        : %s\n", df.format(total*1.0f/actualTestTime));
 
         // stop threads
         System.out.printf("\nSTOPPING THREADS\n");
