@@ -225,21 +225,23 @@ public class Tpcc {
 		System.out.printf("\nMEASURING START.\n\n");
         count.reset();
 
-        final long starttime = System.currentTimeMillis();
+        final long startTime = System.currentTimeMillis();
         long runTime = 0;
 		while (runTime < measure_time) {
-            runTime = System.currentTimeMillis() - starttime;
-            System.out.println("Current execution time lapse: " + runTime);
+            runTime = System.currentTimeMillis() - startTime;
+            System.out.println("Current execution time lapse: " + runTime + " ms");
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {
                 logger.error("Sleep interrupted", e);
             }
         }
+        final long actualTestTime = System.currentTimeMillis() - startTime;
 
         // show results
-        System.out.printf("TOTAL TRANSACTIONS: %d\n", count.getTotal());
-        System.out.printf("TOTAL TPMS: %f\n", (float)count.getTotal()/(float)measure_time);
+        final long total = count.getTotal();
+        System.out.printf("TOTAL TRANSACTIONS: %d\n", total);
+        System.out.printf("TOTAL TPMS        : %f\n", total*1.0f/actualTestTime);
 
         // stop threads
         System.out.printf("\nSTOPPING THREADS\n");
