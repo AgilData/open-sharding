@@ -12,6 +12,7 @@ import java.util.Properties;
 import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -182,23 +183,21 @@ public class Tpcc {
 		}
 		
 		      
-		long delay1 = measure_time*1000;
+		//long delay1 = measure_time*1000;
 		
 		System.out.printf("<Parameters>\n");
 		 
-		System.out.printf("     [server]: ");
-		System.out.printf("%s",  connect_string);
-		
+		System.out.printf("     [server]: %s\n",connect_string);
 		System.out.printf("     [DBname]: %s\n", db_string);
 		System.out.printf("       [user]: %s\n", db_user);
 		System.out.printf("       [pass]: %s\n", db_password);
 		
-		System.out. printf("  [warehouse]: %d\n", num_ware);
-		System.out.printf("  [connection]: %d\n", num_conn);
-		System.out. printf("     [rampup]: %d (sec.)\n", rampup_time);
-		System.out. printf("    [measure]: %d (sec.)\n", measure_time);
-		System.out.printf("	   [driver]: %s\n", javaDriver);
-		System.out.printf("		  [URL]: %s\n", jdbcUrl);
+		System.out.printf("  [warehouse]: %d\n", num_ware);
+		System.out.printf(" [connection]: %d\n", num_conn);
+		System.out.printf("     [rampup]: %d (sec.)\n", rampup_time);
+		System.out.printf("    [measure]: %d (sec.)\n", measure_time);
+		System.out.printf("     [driver]: %s\n", javaDriver);
+		System.out.printf("        [URL]: %s\n", jdbcUrl);
 		
 		Util.seqInit(10,10,1,1,1);
 		
@@ -214,37 +213,45 @@ public class Tpcc {
 			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count, javaDriver, jdbcUrl);
 			executor.execute(worker);
 		}
-		
-		
-		long initialtime = System.currentTimeMillis();
-		
+
+        // rampup time
+        try {
+            Thread.sleep(rampup_time * 1000);
+        } catch (InterruptedException e) {
+            logger.error("Rampup wait interrupted", e);
+        }
+
+        // measure time
 		System.out.printf("\nMEASURING START.\n\n");
-		
-		long currentTime = 0;
-		double tempTime = 0;
-		while(measure_time > ((currentTime - initialtime) / 1000.0) ){
-			currentTime = System.currentTimeMillis();
-			if( ((currentTime - initialtime) / 1000.0) % 1 == 0 ){
-				if(tempTime != ((currentTime - initialtime) / 1000.0) ){
-					tempTime = ((currentTime - initialtime) / 1000.0);
-					System.out.println("Current execution time lapse: " + ((currentTime - initialtime) / 1000.0) );
-				}
-			}
-		}
-		
-		System.out.printf("\nSTOPPING THREADS\n");
+        count.reset();
+
+        final long starttime = System.currentTimeMillis();
+        long runTime = 0;
+		while (runTime < measure_time) {
+            runTime = System.currentTimeMillis() - starttime;
+            System.out.println("Current execution time lapse: " + runTime);
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                logger.error("Sleep interrupted", e);
+            }
+        }
+
+        // show results
+        System.out.printf("TOTAL TRANSACTIONS: %d\n", count.getTotal());
+        System.out.printf("TOTAL TPMS: %f\n", (float)count.getTotal()/(float)measure_time);
+
+        // stop threads
+        System.out.printf("\nSTOPPING THREADS\n");
 		activate_transaction = 0;
 		
 		executor.shutdown();
-		
-		while(!executor.isTerminated()) {
-		}
-		
-		
-		System.out.printf("TOTAL TRANSACTIONS: %d\n", count.getTotal());
-		System.out.printf("TOTAL TPMS: %f\n", (float)count.getTotal()/(float)measure_time);
-		
-		
+        try {
+            executor.awaitTermination(30, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            System.out.println("Timed out waiting for executor to terminate");
+        }
+
 		//TODO: To be implemented better later.
 		//RtHist.histReport();
 		return 0;
