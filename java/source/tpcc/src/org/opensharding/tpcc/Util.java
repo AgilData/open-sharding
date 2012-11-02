@@ -14,10 +14,15 @@ public class Util implements TpccConstants {
 	
 	private static int[] seq;
 	private static int nextNum = 0;
+	static Boolean first = true;
 	
 	static int permCount;
 	private static Random generate = new Random();
 	
+	private static final int C_255 = randomNumber(0, 255);
+	private static final int C_1023 = randomNumber(0, 1023);
+	private static final int C_8191 = randomNumber(0, 8191);
+
 	//Member Functions
 	public static void shuffle(){
 		//Counters
@@ -116,18 +121,7 @@ public class Util implements TpccConstants {
 	 * A.  however, we know in advance which values of A will be used.
 	 */
 	 public static int nuRand(int A, int x, int y){
-		Boolean first = true;
 		int C = 0;
-		int C_255 = 0;
-		int C_1023 = 0; 
-		int C_8191 = 0;
-		
-		if (first) {
-			C_255 = randomNumber(0, 255);
-			C_1023 = randomNumber(0, 1023);
-			C_8191 = randomNumber(0, 8191);
-			first = false;
-		}
 		
 		switch (A) {
 			case 255: 
