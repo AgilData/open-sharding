@@ -246,8 +246,9 @@ public class Tpcc {
 
         // show results
         final long total = count.get();
-        System.out.printf("TOTAL TRANSACTIONS: %s\n", df.format(total));
-        System.out.printf("TOTAL TPMS        : %s\n", df.format(total*1.0f/actualTestTime));
+        System.out.printf("TEST TIME              : %s\n", df.format(actualTestTime/1000.0f));
+        System.out.printf("TOTAL TRANSACTIONS     : %s\n", df.format(total));
+        System.out.printf("TRANSACTIONS PER MINUTE: %s\n", df.format(total*60000.0f/actualTestTime));
 
         // stop threads
         System.out.printf("\nSTOPPING THREADS\n");
