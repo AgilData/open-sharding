@@ -41,43 +41,46 @@ public class TpccThread extends Thread {
 		 this.driverClassName = driver;
 		 this.jdbcUrl = dURL;
 	}
-	
-	public void run() {
-		 logger.info("Connection to database: driver: " + driverClassName + " url: " + jdbcUrl);
-		  try {
-				Class.forName(driverClassName); 
-			} catch (ClassNotFoundException e1) {
-				throw new RuntimeException("Class for mysql error", e1);
-			}
-			
-			Connection conn;
 
-			try {
-				conn = DriverManager.getConnection (jdbcUrl, db_user, db_password);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				throw new RuntimeException("Connection to specific host error", e);
-			}
+    public void run() {
+        logger.info("Connection to database: driver: " + driverClassName + " url: " + jdbcUrl);
+        try {
+            Class.forName(driverClassName);
+        } catch (ClassNotFoundException e1) {
+            throw new RuntimeException("Class for mysql error", e1);
+        }
 
-	  
+        Connection conn;
 
-			try {
-				conn.setAutoCommit(false);
-			} catch (SQLException e) {
-				throw new RuntimeException("Set AutoCommit error", e);
-			}
-			
-			// Create a driver instance.
-			Driver driver = new Driver(conn);
-		 
-			if(DEBUG) logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
-			driver.runTransaction(number, count, num_ware, num_conn);
-	
+        try {
+            conn = DriverManager.getConnection(jdbcUrl, db_user, db_password);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            throw new RuntimeException("Connection to specific host error", e);
+        }
 
-	
-		  System.out.printf(".");
 
-	
-		}
+        try {
+            conn.setAutoCommit(false);
+        } catch (SQLException e) {
+            throw new RuntimeException("Set AutoCommit error", e);
+        }
+
+        try {
+            // Create a driver instance.
+            Driver driver = new Driver(conn);
+
+            if (DEBUG) {
+                logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
+            }
+
+            driver.runTransaction(number, count, num_ware, num_conn);
+
+            System.out.printf(".");
+        } catch (Throwable e) {
+            logger.error("Unhandled exception", e);
+        }
+
+    }
 }
 
