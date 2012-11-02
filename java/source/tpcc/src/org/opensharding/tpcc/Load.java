@@ -616,7 +616,7 @@ public class Load implements TpccConstants {
 			c_state = Util.makeAlphaString(2, 2);
 			c_zip = Util.makeAlphaString(9, 9);
 			
-			Util.makeNumberString(16, 16, c_phone);
+			c_phone = Util.makeNumberString(16, 16);
 
 			if (Util.randomNumber(0, 1) == 1)
 				c_credit = "G";
