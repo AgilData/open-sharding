@@ -170,8 +170,9 @@ public class Util implements TpccConstants {
 	 /*
 	  * like MakeAlphaString, only numeric characters only
 	  */
-	 public static int makeNumberString (int x, int y, String str)
+	 public static String makeNumberString (int x, int y)
 	 {
+		 String str = null;
 	 	char[] numeric = "0123456789".toCharArray();
 	 	int arrmax = 9;
 	 	int i;
@@ -180,9 +181,13 @@ public class Util implements TpccConstants {
 	 	len = randomNumber(x, y);
 
 	 	for (i = 0; i < len; i++)
-	 		str = str + numeric[randomNumber(0, arrmax)];
+	 		if(str != null){
+		 		str = str + numeric[randomNumber(0, arrmax)];
+	 		}else{
+	 			str = "0";
+	 		}
 
-	 	return len;
+	 	return str;
 	 }
 	 
 	 public static void initPermutation () 
