@@ -30,8 +30,7 @@ public class Payment implements TpccConstants{
 		     int c_d_id_arg,
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,	        /* customer last name */
-		     float h_amount_arg,	 /* payment amount */
-		     Connection conn, 
+		     float h_amount_arg,	 /* payment amount */ 
 		     Counter count
 	)
 	{

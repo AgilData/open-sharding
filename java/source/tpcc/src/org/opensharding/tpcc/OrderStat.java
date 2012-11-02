@@ -24,7 +24,6 @@ public class OrderStat implements TpccConstants{
 		     int byname,		/* select by c_id or c_last? */
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,  /* customer last name, format? */
-		     Connection conn,
 		     Counter count
 	)
 	{

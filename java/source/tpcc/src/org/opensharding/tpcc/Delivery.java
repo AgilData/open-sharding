@@ -18,7 +18,7 @@ public class Delivery implements TpccConstants {
 		this.pStmts = pStmts;
 	}
 	
-	public  int delivery( int t_num, int w_id_arg, int o_carrier_id_arg,  Connection conn, Counter count){
+	public  int delivery(int w_id_arg, int o_carrier_id_arg, Counter count){
 		try{
 			// Start a transaction.
 			pStmts.getConnection().setAutoCommit(false);

@@ -175,7 +175,7 @@ public class Driver implements TpccConstants {
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
 	      if(DEBUG) logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local  + " qty: " +  qty);
-	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, conn, count);
+	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, count);
 	      endTime =  System.nanoTime();
 
 	      if(ret >= 1){
@@ -284,7 +284,7 @@ public class Driver implements TpccConstants {
 	    //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, conn, count);
+	      ret = payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount, count);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -366,7 +366,7 @@ public class Driver implements TpccConstants {
 	      //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = orderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last, conn, count);
+	      ret = orderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last, count);
 	     // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 
@@ -434,7 +434,7 @@ public class Driver implements TpccConstants {
 
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = delivery.delivery(t_num, w_id, o_carrier_id, conn, count);
+	      ret = delivery.delivery(w_id, o_carrier_id, count);
 	      endTime = System.nanoTime();
 	      if(ret >=1 ){
 
@@ -502,7 +502,7 @@ public class Driver implements TpccConstants {
 	     // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
 	    beginTime = System.nanoTime();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      ret = slev.slev(t_num, w_id, d_id, level, conn, count);
+	      ret = slev.slev(t_num, w_id, d_id, level, count);
 	      //clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
 	      endTime = System.nanoTime();
 

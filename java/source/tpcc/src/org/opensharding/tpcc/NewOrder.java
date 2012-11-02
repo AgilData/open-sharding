@@ -83,7 +83,6 @@ public class NewOrder implements TpccConstants {
 		    int itemid[],		/* ids of items to be ordered */
 		    int supware[],		/* warehouses supplying items */
 		    int qty[],
-		    Connection conn,
 		    Counter count
 	)
 	{

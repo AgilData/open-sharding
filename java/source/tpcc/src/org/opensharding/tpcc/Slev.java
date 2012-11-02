@@ -23,7 +23,6 @@ public class Slev implements TpccConstants{
 			  int w_id_arg,		/* warehouse id */
 			  int d_id_arg,		/* district id */
 			  int level_arg,		/* stock level */	
-			  Connection conn, 
 			  Counter count
 		)
 		{
