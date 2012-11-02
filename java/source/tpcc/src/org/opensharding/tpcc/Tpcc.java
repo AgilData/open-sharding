@@ -232,8 +232,7 @@ public class Tpcc {
         final long startTime = System.currentTimeMillis();
         DecimalFormat df = new DecimalFormat("#,##0.0");
         long runTime = 0;
-		while (runTime < measure_time) {
-            runTime = System.currentTimeMillis() - startTime;
+		while ((runTime = System.currentTimeMillis() - startTime) < measure_time*1000) {
             System.out.println("Current execution time lapse: " + df.format(runTime/1000.0f) + " seconds");
             try {
                 Thread.sleep(1000);
