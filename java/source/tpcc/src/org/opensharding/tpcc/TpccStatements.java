@@ -92,13 +92,12 @@ public class TpccStatements {
 	/**
 	 * Rollback a transaction.
 	 */
-	public void rollback() throws SQLException {
+	public void rollback() {
         logger.trace("rollback()");
         try {
             conn.rollback();
         } catch (SQLException e) {
             logger.error("ROLLBACK FAILED", e);
-            throw e;
         }
     }
 }
