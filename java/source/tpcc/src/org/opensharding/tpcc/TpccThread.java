@@ -77,7 +77,6 @@ public class TpccThread extends Thread {
 
             driver.runTransaction(number, count, num_ware, num_conn);
 
-            System.out.printf(".");
         } catch (Throwable e) {
             logger.error("Unhandled exception", e);
         }

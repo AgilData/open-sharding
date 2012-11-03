@@ -88,24 +88,31 @@ public class Driver implements TpccConstants {
 	    int sequence = Util.seqGet();
 	    while( Tpcc.activate_transaction == 1 ){
 
-	    	if(DEBUG) logger.debug("BEFORE runTransaction: sequence: " + sequence);
-	    	
-	    	if(sequence == 0){
-	    		doNeword(t_num, conn, pStmts, count);
-	    	}else if( sequence == 1){
-	    		doPayment(t_num, conn, pStmts, count);
-	    	}else if(sequence == 2){
-	    		doOrdstat(t_num, conn, pStmts, count);
-	    	}else if(sequence == 3){
-	    		doDelivery(t_num, conn, pStmts, count);
-	    	}else if(sequence == 4){
-	    		doSlev(t_num, conn, pStmts, count);
-	    	}else{
-	    		System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
-				System.exit(1);
-	    	}
+            try {
+                if(DEBUG) logger.debug("BEFORE runTransaction: sequence: " + sequence);
 
-            if(DEBUG) logger.debug("AFTER runTransaction: sequence: " + sequence);
+                if(sequence == 0){
+                    doNeword(t_num, conn, pStmts, count);
+                }else if( sequence == 1){
+                    doPayment(t_num, conn, pStmts, count);
+                }else if(sequence == 2){
+                    doOrdstat(t_num, conn, pStmts, count);
+                }else if(sequence == 3){
+                    doDelivery(t_num, conn, pStmts, count);
+                }else if(sequence == 4){
+                    doSlev(t_num, conn, pStmts, count);
+                }else{
+                    System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
+                    System.exit(1);
+                }
+            }
+            catch (Throwable th) {
+                logger.error("FAILED", th);
+                return -1;
+            }
+            finally {
+                if(DEBUG) logger.debug("AFTER runTransaction: sequence: " + sequence);
+            }
 
             sequence = Util.seqGet();
 
