@@ -80,7 +80,7 @@ public class TpccStatements {
 	/**
 	 * Commit a transaction.
 	 */
-	public void commit() throws SQLException {
+	public void commit() {
         logger.trace("commit()");
         try {
             conn.commit();
