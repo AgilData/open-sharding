@@ -206,7 +206,7 @@ public class Tpcc {
 		/* set up threads */
 		  
 		if(DEBUG) logger.debug("Creating TpccThread");
-		ExecutorService executor = Executors.newFixedThreadPool(num_conn);
+		ExecutorService executor = Executors.newFixedThreadPool(num_conn, new NamedThreadFactory("tpcc-thread"));
 		
 		// Start each server.
 		

@@ -41,10 +41,6 @@ public class TpccThread extends Thread {
         this.count = count;
         this.driverClassName = driver;
         this.jdbcUrl = dURL;
-
-        DecimalFormat df = new DecimalFormat("0000");
-        Thread.currentThread().setName("tpcc-" + df.format(number));
-
 	}
 
     public void run() {
