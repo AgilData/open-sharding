@@ -280,7 +280,7 @@ public class Payment implements TpccConstants{
 					
 					
 					//CHECK: Is this how we want to do this?
-					c_new_data.toCharArray()[500] = '\0';
+					//c_new_data.toCharArray()[500] = '\0';
 		
 					proceed = 8;
 					//Get prepared statement
@@ -356,7 +356,7 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(19).setFloat(7, h_amount);
 				pStmts.getStatement(19).setString(8, h_data);
 				if(TRACE) logger.trace("INSERT INTO history(h_c_d_id, h_c_w_id, h_c_id, h_d_id, h_w_id, h_date, h_amount, h_data)" +
-						" VALUES( " + c_d_id + "," + c_w_id + "," + c_id + "," + d_id + "," + w_id + "," + currentTimeStamp.toString() + "," + h_amount + "," + h_data);
+						" VALUES( " + c_d_id + "," + c_w_id + "," + c_id + "," + d_id + "," + w_id + "," + currentTimeStamp.toString() + "," + h_amount + "," /*+ h_data*/);
 				pStmts.getStatement(19).executeUpdate();
 				count.increment();
 
