@@ -3,6 +3,7 @@ package org.opensharding.tpcc;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,22 +25,26 @@ public class TpccThread extends Thread {
 	String driverClassName;
 	String jdbcUrl;
 	
-	TpccStatements pStmts;
+	//TpccStatements pStmts;
 	Counter count;
 	
 	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count, String driver, String dURL) {
-		 this.number = number;
-		 this.port = port;
-		 this.connect_string = connect_string;
-		 this.db_password = db_password;
-		 this.db_string = db_string;
-		 this.db_user = db_user;
-		 this.is_local = is_local;
-		 this.num_conn = num_conn;
-		 this.num_ware = num_ware;
-		 this.count = count;
-		 this.driverClassName = driver;
-		 this.jdbcUrl = dURL;
+        this.number = number;
+        this.port = port;
+        this.connect_string = connect_string;
+        this.db_password = db_password;
+        this.db_string = db_string;
+        this.db_user = db_user;
+        this.is_local = is_local;
+        this.num_conn = num_conn;
+        this.num_ware = num_ware;
+        this.count = count;
+        this.driverClassName = driver;
+        this.jdbcUrl = dURL;
+
+        DecimalFormat df = new DecimalFormat("0000");
+        Thread.currentThread().setName("tpcc-" + df.format(number));
+
 	}
 
     public void run() {

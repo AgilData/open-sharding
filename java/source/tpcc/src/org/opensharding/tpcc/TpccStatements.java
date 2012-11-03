@@ -81,7 +81,7 @@ public class TpccStatements {
 	 * Commit a transaction.
 	 */
 	public void commit() {
-        logger.trace("commit()");
+        logger.trace("COMMIT");
         try {
             conn.commit();
         } catch (SQLException e) {
@@ -93,7 +93,7 @@ public class TpccStatements {
 	 * Rollback a transaction.
 	 */
 	public void rollback() {
-        logger.trace("rollback()");
+        logger.trace("ROLLBACK");
         try {
             conn.rollback();
         } catch (SQLException e) {
