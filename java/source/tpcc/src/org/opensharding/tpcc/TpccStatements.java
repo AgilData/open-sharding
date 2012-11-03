@@ -1,10 +1,16 @@
 package org.opensharding.tpcc;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.PrintStream;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.SQLException;
 
 public class TpccStatements {
+
+    private static final Logger logger = LogManager.getLogger(TpccStatements.class);
 	
 	public static int STMT_COUNT = 35;
 	
@@ -67,33 +73,32 @@ public class TpccStatements {
 		return pStmts[idx];
 	}
 	
-	/**
-	 * Return connection.
-	 * @return
-	 */
-	public Connection getConnection() {
-		return conn;
-	}
+    public void setAutoCommit(boolean b) throws SQLException {
+        conn.setAutoCommit(b);
+    }
 	
 	/**
 	 * Commit a transaction.
 	 */
-	public void commit() {
-		try {
-			conn.commit();
-		} catch(Throwable th) {
-			th.printStackTrace();
-		}
-	}
+	public void commit() throws SQLException {
+        logger.trace("commit()");
+        try {
+            conn.commit();
+        } catch (SQLException e) {
+            logger.error("COMMIT FAILED", e);
+        }
+    }
 
 	/**
 	 * Rollback a transaction.
 	 */
-	public void rollback() {
-		try {
-			conn.rollback();
-		} catch(Throwable th) {
-			th.printStackTrace();
-		}
-	}
+	public void rollback() throws SQLException {
+        logger.trace("rollback()");
+        try {
+            conn.rollback();
+        } catch (SQLException e) {
+            logger.error("ROLLBACK FAILED", e);
+            throw e;
+        }
+    }
 }

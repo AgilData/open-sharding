@@ -272,6 +272,8 @@ public class Tpcc {
 		Tpcc tpcc = new Tpcc();
 		tpcc.init();
 		int ret = tpcc.runBenchmark();
+
+        System.out.println("Terminating process now");
 		System.exit(ret);
 	}
 			

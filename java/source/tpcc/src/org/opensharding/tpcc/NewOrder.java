@@ -90,7 +90,7 @@ public class NewOrder implements TpccConstants {
 		try {
 			
 			// Start a transaction.
-			pStmts.getConnection().setAutoCommit(false);
+			pStmts.setAutoCommit(false);
 			if(DEBUG) logger.debug("Transaction:	New Order");
 			int w_id = w_id_arg;
 			int d_id = d_id_arg;
@@ -383,7 +383,7 @@ public class NewOrder implements TpccConstants {
 		} catch (Exception e) {
 			try {
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
-				pStmts.getConnection().rollback();
+				pStmts.rollback();
 			} catch(Throwable th) {
 				throw new RuntimeException("New Order error", th);
 			} finally {

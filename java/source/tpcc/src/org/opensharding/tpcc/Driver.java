@@ -87,7 +87,8 @@ public class Driver implements TpccConstants {
 	    //CHECK: Is activate_transaction handled correctly?
 	    int sequence = Util.seqGet();
 	    while( Tpcc.activate_transaction == 1 ){
-	    	if(DEBUG) logger.debug("runTransaction: sequence: " + sequence);
+
+	    	if(DEBUG) logger.debug("BEFORE runTransaction: sequence: " + sequence);
 	    	
 	    	if(sequence == 0){
 	    		doNeword(t_num, conn, pStmts, count);
@@ -103,7 +104,10 @@ public class Driver implements TpccConstants {
 	    		System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
 				System.exit(1);
 	    	}
-	    	sequence = Util.seqGet();
+
+            if(DEBUG) logger.debug("AFTER runTransaction: sequence: " + sequence);
+
+            sequence = Util.seqGet();
 
 		  }
 

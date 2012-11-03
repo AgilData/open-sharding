@@ -21,7 +21,7 @@ public class Delivery implements TpccConstants {
 	public  int delivery(int w_id_arg, int o_carrier_id_arg, Counter count){
 		try{
 			// Start a transaction.
-			pStmts.getConnection().setAutoCommit(false);
+			pStmts.setAutoCommit(false);
 			if (DEBUG) logger.debug("Transaction:	Delivery");
 			int w_id = w_id_arg;
 			int o_carrier_id = o_carrier_id_arg;
@@ -164,7 +164,7 @@ public class Delivery implements TpccConstants {
 		} catch (Exception e) {
 			try {
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
-				pStmts.getConnection().rollback();
+				pStmts.rollback();
 			} catch(Throwable th) {
 				throw new RuntimeException("Delivery error", th);
 			} finally {
