@@ -201,24 +201,23 @@ public class Driver implements TpccConstants {
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty);
 	      endTime =  System.nanoTime();
 
-	      if(ret >= 1){
+	      if(ret == 1){
 	    	  rt = (double)(endTime - beginTime);
-	        if (freport_file != null) {
-	        	freport_file.printf("%d %.3f\n", time_count, rt);
-	        }
-
-		if(rt > max_rt[0])
-		  max_rt[0]=rt;
-		RtHist.histInc(0, rt);
-		if(counting_on >= 1){
-		  if( rt < RTIME_NEWORD ){
-		    success[0]++;
-		    success2[0][t_num]++;
-		  }else{
-		    late[0]++;
-		    late2[0][t_num]++;
-		  }
-		}
+		        
+			if(rt > max_rt[0])
+			  max_rt[0]=rt;
+			
+			RtHist.histInc(0, rt);
+			
+			//if(counting_on >= 1){
+			  if( rt < RTIME_NEWORD ){
+			    success[0]++;
+			    success2[0][t_num]++;
+			  }else{
+			    late[0]++;
+			    late2[0][t_num]++;
+			  }
+			//}
 
 		return (1); /* end */
 	      }else{
