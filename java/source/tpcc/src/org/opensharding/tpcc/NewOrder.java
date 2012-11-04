@@ -135,8 +135,8 @@ public class NewOrder implements TpccConstants {
 			
 			//Timestamp 
 			java.sql.Timestamp time = new Timestamp(System.currentTimeMillis());
-			String currentTimeStamp = "'" + time.toString() + "'";
-			
+			//String currentTimeStamp = "'" + time.toString() + "'";
+			String currentTimeStamp = time.toString();
 			
 			
 			//Get prepared statement
