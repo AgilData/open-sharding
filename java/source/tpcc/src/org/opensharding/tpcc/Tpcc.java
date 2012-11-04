@@ -66,6 +66,11 @@ public class Tpcc implements TpccConstants{
 	private int[][] retry2;
 	private int[][] failure2;
 	public static int counting_on =0;
+	
+	private int[] success2_sum = new int[TRANSACTION_COUNT];
+    private int[] late2_sum = new int[TRANSACTION_COUNT];
+    private int[] retry2_sum = new int[TRANSACTION_COUNT];
+    private int[] failure2_sum = new int[TRANSACTION_COUNT];
 
 
 	private int[] prev_s = new int[5];
@@ -255,6 +260,103 @@ public class Tpcc implements TpccConstants{
         for(int j = 0; j< TRANSACTION_COUNT; j++ ){
         	total = total + success[j] + late[j];
         }
+        
+        System.out.println("<Raw Results>");
+        for (int i=0; i<TRANSACTION_COUNT; i++ ){
+          System.out.printf("  [%d] sc:%d  lt:%d  rt:%d  fl:%d \n", i, success[i], late[i], retry[i], failure[i]);
+        }
+        System.out.printf(" in %d sec.\n", (measureTime / PRINT_INTERVAL) * PRINT_INTERVAL);
+
+        System.out.println("<Raw Results2(sum ver.)>");
+        for(int i=0; i<TRANSACTION_COUNT; i++ ){
+            success2_sum[i] = 0;
+            late2_sum[i] = 0;
+            retry2_sum[i] = 0;
+            failure2_sum[i] = 0;
+            for(int k=0; k<numConn; k++ ){
+	      	  success2_sum[i] += success2[i][k];
+	      	  late2_sum[i] += late2[i][k];
+	      	  retry2_sum[i] += retry2[i][k];
+	      	  failure2_sum[i] += failure2[i][k];
+            }
+        }
+        for (int i=0; i<TRANSACTION_COUNT; i++ ){
+           System.out.printf("  [%d] sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+        }
+
+        System.out.println("<Constraint Check> (all must be [OK])\n [transaction percentage]");
+        int j=0;
+        int i =0;
+        for (i=0, j=0; i< TRANSACTION_COUNT; i++ ){
+          j += (success[i] + late[i]);
+        }
+
+        double f = 100.0 * (float)(success[1] + late[1])/(float)j;
+        System.out.printf("        Payment: %f%% (>=43.0%%)",f);
+        if ( f >= 43.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)(success[2] + late[2])/(float)j;
+        System.out.printf("   Order-Status: %f%% (>= 4.0%%)",f);
+        if ( f >= 4.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)(success[3] + late[3])/(float)j;
+        System.out.printf("       Delivery: %3.2f%% (>= 4.0%%)",f);
+        if ( f >= 4.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)(success[4] + late[4])/(float)j;
+        System.out.printf("    Stock-Level: %3.2f%% (>= 4.0%%)",f);
+        if ( f >= 4.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+
+        System.out.printf(" [response time (at least 90%% passed)]\n");
+        f = 100.0 * (float)success[0]/(float)(success[0] + late[0]);
+        System.out.printf("      New-Order: %3.2f%% ",f);
+        if ( f >= 90.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)success[1]/(float)(success[1] + late[1]);
+        System.out.printf("        Payment: %3.2f%% ",f);
+        if ( f >= 90.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)success[2]/(float)(success[2] + late[2]);
+        System.out.printf("   Order-Status: %3.2f%% ",f);
+        if ( f >= 90.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)success[3]/(float)(success[3] + late[3]);
+        System.out.printf("       Delivery: %3.2f%% ",f);
+        if ( f >= 90.0 ){
+          System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        f = 100.0 * (float)success[4]/(float)(success[4] + late[4]);
+        System.out.printf("    Stock-Level: %3.2f%% ",f);
+        if ( f >= 90.0 ){
+         System.out.printf(" [OK]\n");
+        }else{
+          System.out.printf(" [NG] *\n");
+        }
+        
         System.out.printf("TEST TIME              : %s\n", df.format(actualTestTime/1000.0f));
         System.out.printf("TOTAL TRANSACTIONS     : %s\n", df.format(total));
         System.out.printf("TRANSACTIONS PER MINUTE: %s\n", df.format(total*60000.0f/actualTestTime));
