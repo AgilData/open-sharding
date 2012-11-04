@@ -32,7 +32,7 @@ public class Driver implements TpccConstants {
 	private int[][] retry2;
 	private int[][] failure2;
 
-	public double[] max_rt = new double[5];
+	public double[] max_rt = new double[TRANSACTION_COUNT];
 
 	public long[] clk_tck;
 
@@ -82,6 +82,9 @@ public class Driver implements TpccConstants {
 			this.retry2 = retry2;
 			this.failure2 = failure2;
 			
+			for(int i=0; i< TRANSACTION_COUNT; i++){
+				max_rt[i]=0.0;
+			}
 			
 		} catch(Throwable th) {
 			throw new RuntimeException("Error initializing Driver", th);
