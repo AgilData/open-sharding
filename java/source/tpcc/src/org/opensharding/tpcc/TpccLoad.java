@@ -17,6 +17,7 @@ public class TpccLoad implements TpccConstants {
 	static int num_ware = 0;
 	static int fd = 0;
 	static int seed = 0;
+	
 
 	 int particle_flg = 0; /* "1" means particle mode */
 	 int part_no = 0; /* 1:items 2:warehouse 3:customer 4:orders */
@@ -40,6 +41,7 @@ public class TpccLoad implements TpccConstants {
 	private static final String PASSWORD = "PASSWORD";
 	private static final String SHARDCOUNT = "SHARDCOUNT";
 	private static final String JDBCURL = "JDBCURL";
+	private static final String SHARDID = "SHARDID";
 	
 	private Properties properties;
 	private InputStream inputStream;
@@ -81,6 +83,7 @@ public class TpccLoad implements TpccConstants {
 	    int num_ware = 0;
 	    String jdbcUrl = null;
 	    String javaDriver = null;
+	    int shardId = -1;
 
 		System.out.printf("*************************************\n");
 		System.out.printf("*** Java TPC-C Data Loader  ***\n");
@@ -97,6 +100,7 @@ public class TpccLoad implements TpccConstants {
 		shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
 		javaDriver = properties.getProperty(DRIVER);
 		jdbcUrl = properties.getProperty(JDBCURL);
+		shardId = Integer.parseInt(properties.getProperty(SHARDID));
 		  
 		if(connect_string == null){
 			throw new RuntimeException("Host is null.");
@@ -118,6 +122,9 @@ public class TpccLoad implements TpccConstants {
 		}
 		if(jdbcUrl == null){
 			  throw new RuntimeException("JDBC Url is null.");
+		}
+		if(shardId == -1){
+			throw new RuntimeException("ShardId was not obtained");
 		}
 		
 		System.out.printf("<Parameters>\n");
@@ -180,22 +187,22 @@ public class TpccLoad implements TpccConstants {
 		if(particle_flg==0){
 			System.out.printf("Particle flag: %d\n", particle_flg);
 			Load.loadItems(conn, shardCount, option_debug);
-			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
-			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
-			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
+			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
+			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
 				 Load.loadItems(conn, shardCount, option_debug);
 				 break;
 			case 2:
-			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
+			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
 			    break;
 			case 3:
-			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
+			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 			    break;
 			case 4:
-			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);;
+			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);;
 			    break;
 			default:
 			    System.out.printf("Unknown part_no\n");
