@@ -102,7 +102,7 @@ public class Payment implements TpccConstants{
 				count.increment();
 
 			} catch (SQLException e) {
-				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
+				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id, e);
 				throw new Exception("Payment Update transaction error", e);
 			}
 			
