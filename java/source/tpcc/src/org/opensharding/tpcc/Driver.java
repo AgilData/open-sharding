@@ -199,8 +199,10 @@ public class Driver implements TpccConstants {
 	      endTime =  System.nanoTime();
 
 	      if(ret == 1){
-	    	  rt = (double)(endTime - beginTime);
-		        
+	    	
+	    	rt = (double)(endTime - beginTime);
+		    if(DEBUG) logger.debug("rt value: " + rt + " max_rt[0] value: " + max_rt[0]);
+		    	
 			if(rt > max_rt[0])
 			  max_rt[0]=rt;
 			
