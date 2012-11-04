@@ -25,10 +25,23 @@ public class TpccThread extends Thread {
 	String driverClassName;
 	String jdbcUrl;
 	
+	private int[] success;
+	private int[] late;
+	private int[] retry;
+	private int[] failure;
+
+	private int[][] success2;
+	private int[][] late2;
+	private int[][] retry2;
+	private int[][] failure2;
+
 	//TpccStatements pStmts;
-	Counter count;
 	
-	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, String db_string, int num_ware, int num_conn, Counter count, String driver, String dURL) {
+	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, 
+			String db_string, int num_ware, int num_conn, String driver, String dURL,
+			int[] success, int[] late, int[] retry, int[] failure, 
+			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
+		
         this.number = number;
         this.port = port;
         this.connect_string = connect_string;
@@ -38,9 +51,19 @@ public class TpccThread extends Thread {
         this.is_local = is_local;
         this.num_conn = num_conn;
         this.num_ware = num_ware;
-        this.count = count;
         this.driverClassName = driver;
         this.jdbcUrl = dURL;
+        
+		this.success = success;
+		this.late = late;
+		this.retry = retry;
+		this.failure = failure;
+		
+		this.success2 = success2;
+		this.late2 = late2;
+		this.retry2 = retry2;
+		this.failure2 = failure2;
+
 	}
 
     public void run() {
@@ -69,13 +92,13 @@ public class TpccThread extends Thread {
 
         try {
             // Create a driver instance.
-            Driver driver = new Driver(conn);
+            Driver driver = new Driver(conn, success, late, retry, failure, success2, late2, retry2, failure2);
 
             if (DEBUG) {
                 logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
             }
 
-            driver.runTransaction(number, count, num_ware, num_conn);
+            driver.runTransaction(number, num_ware, num_conn);
 
         } catch (Throwable e) {
             logger.error("Unhandled exception", e);

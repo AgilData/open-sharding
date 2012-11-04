@@ -23,8 +23,7 @@ public class OrderStat implements TpccConstants{
 		     int d_id_arg,		/* district id */
 		     int byname,		/* select by c_id or c_last? */
 		     int c_id_arg,		/* customer id */
-		     String c_last_arg,  /* customer last name, format? */
-		     Counter count
+		     String c_last_arg  /* customer last name, format? */
 	)
 	{
 		
@@ -69,7 +68,6 @@ public class OrderStat implements TpccConstants{
 					if(rs.next()){
 						namecnt = rs.getInt(1);
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {
@@ -100,7 +98,6 @@ public class OrderStat implements TpccConstants{
 						c_middle = rs.getString(3);
 						c_last = rs.getString(4);
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {
@@ -124,7 +121,6 @@ public class OrderStat implements TpccConstants{
 						c_middle = rs.getString(3);
 						c_last = rs.getString(4);						
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e){
@@ -153,7 +149,6 @@ public class OrderStat implements TpccConstants{
 					o_entry_d = rs.getString(2);
 					o_carrier_id = rs.getInt(3);
 				}
-				count.increment();
 
 				rs.close();
 			} catch (SQLException e){
@@ -177,7 +172,6 @@ public class OrderStat implements TpccConstants{
 					ol_amount = rs.getFloat(4);
 					ol_delivery_d = rs.getString(5);
 				}
-				count.increment();
 
 				rs.close();
 			} catch (SQLException e){

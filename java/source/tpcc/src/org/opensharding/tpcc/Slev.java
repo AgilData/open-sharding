@@ -22,8 +22,7 @@ public class Slev implements TpccConstants{
 	public  int slev( int t_num,
 			  int w_id_arg,		/* warehouse id */
 			  int d_id_arg,		/* district id */
-			  int level_arg,		/* stock level */	
-			  Counter count
+			  int level_arg		/* stock level */	
 		)
 		{
 			try{
@@ -45,7 +44,6 @@ public class Slev implements TpccConstants{
 					pStmts.getStatement(32).setInt(2, w_id);
 					if(TRACE) logger.trace("SELECT d_next_o_id FROM district WHERE d_id = " + d_id + " AND d_w_id = " + w_id);
 					ResultSet rs = pStmts.getStatement(32).executeQuery();
-					count.increment();
 
 					if(rs.next()){
 						d_next_o_id = rs.getInt(1);
@@ -69,7 +67,6 @@ public class Slev implements TpccConstants{
 					while(rs.next()){
 						ol_i_id = rs.getInt(1);
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {
@@ -88,7 +85,6 @@ public class Slev implements TpccConstants{
 					if(rs.next()){
 						i_count = rs.getInt(1);
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {

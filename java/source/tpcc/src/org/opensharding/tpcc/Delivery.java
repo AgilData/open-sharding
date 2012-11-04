@@ -18,7 +18,7 @@ public class Delivery implements TpccConstants {
 		this.pStmts = pStmts;
 	}
 	
-	public  int delivery(int w_id_arg, int o_carrier_id_arg, Counter count){
+	public  int delivery(int w_id_arg, int o_carrier_id_arg){
 		try{
 			// Start a transaction.
 			pStmts.setAutoCommit(false);
@@ -48,7 +48,7 @@ public class Delivery implements TpccConstants {
 					if(rs.next()) {
 						no_o_id = rs.getInt(1);
 					}
-					count.increment();
+					
 					rs.close();
 				} catch (SQLException e) {
 					throw new Exception("Delivery Select transaction error", e);
@@ -68,7 +68,7 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(26).setInt(2, d_id);
 					pStmts.getStatement(26).setInt(3, w_id);
 					pStmts.getStatement(26).executeUpdate();
-					count.increment();
+					
 
 				} catch (SQLException e) {
 					throw new Exception(" Delivery Delete transaction error", e);
@@ -87,7 +87,7 @@ public class Delivery implements TpccConstants {
 					if(rs.next()){
 						c_id = rs.getInt(1);
 					}
-					count.increment();
+					
 
 					rs.close();
 				} catch (SQLException e) {
@@ -103,7 +103,7 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(28).setInt(3, d_id);
 					pStmts.getStatement(28).setInt(4, w_id);
 					pStmts.getStatement(28).executeUpdate();
-					count.increment();
+					
 
 				} catch (SQLException e) {
 					throw new Exception("Delivery Update transcation error", e);
@@ -119,7 +119,7 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(29).setInt(3, d_id);
 					pStmts.getStatement(29).setInt(4, w_id);
 					pStmts.getStatement(29).executeUpdate();
-					count.increment();
+					
 
 				} catch (SQLException e) {
 					throw new Exception("Delivery Update transaction error", e);
@@ -137,7 +137,7 @@ public class Delivery implements TpccConstants {
 					if(rs.next()){
 						ol_total = rs.getFloat(1);
 					}
-					count.increment();
+					
 
 					rs.close();
 				} catch (SQLException e) {
@@ -154,7 +154,7 @@ public class Delivery implements TpccConstants {
 					pStmts.getStatement(31).setInt(3, d_id);
 					pStmts.getStatement(31).setInt(4, w_id);
 					pStmts.getStatement(31).executeUpdate();
-					count.increment();
+					
 
 				} catch (SQLException e) {
 					throw new Exception("Delivery Update transaction error", e);

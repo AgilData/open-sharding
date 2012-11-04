@@ -30,8 +30,7 @@ public class Payment implements TpccConstants{
 		     int c_d_id_arg,
 		     int c_id_arg,		/* customer id */
 		     String c_last_arg,	        /* customer last name */
-		     float h_amount_arg,	 /* payment amount */ 
-		     Counter count
+		     float h_amount_arg	 /* payment amount */ 
 	)
 	{
 		try{
@@ -99,7 +98,6 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(9).setInt(2, w_id);
 				if(TRACE) logger.trace("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
 				pStmts.getStatement(9).executeUpdate();
-				count.increment();
 
 			} catch (SQLException e) {
 				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id, e);
@@ -122,7 +120,6 @@ public class Payment implements TpccConstants{
 					w_zip = rs.getString(5);
 					w_name = rs.getString(6);
 				}
-				count.increment();
 
 				rs.close();
 				
@@ -139,7 +136,6 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(11).setInt(3, d_id);
 				if(TRACE) logger.trace("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id);
 				pStmts.getStatement(11).executeUpdate();
-				count.increment();
 
 			} catch (SQLException e) {
 				throw new Exception("Payment update transaction error", e);
@@ -162,7 +158,6 @@ public class Payment implements TpccConstants{
 					d_zip = rs.getString(5);
 					d_name = rs.getString(6);					
 				}
-				count.increment();
 
 				rs.close();
 			} catch (SQLException e) {
@@ -186,7 +181,6 @@ public class Payment implements TpccConstants{
 					if(rs.next()){
 						namecnt = rs.getInt(1);
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {
@@ -205,7 +199,6 @@ public class Payment implements TpccConstants{
 					while(rs.next()){
 						c_id = rs.getInt(1);
 					}
-					count.increment();
 
 					rs.close();
 				} catch (SQLException e) {
@@ -242,7 +235,6 @@ public class Payment implements TpccConstants{
 					c_balance = rs.getFloat(13);
 					c_since = rs.getString(14);
 				}
-				count.increment();
 
 				rs.close();
 				
@@ -268,7 +260,6 @@ public class Payment implements TpccConstants{
 						if(rs.next()){
 							c_data = rs.getString(1);
 						}
-						count.increment();
 
 						rs.close();
 					} catch (SQLException e) {
@@ -295,7 +286,6 @@ public class Payment implements TpccConstants{
 						pStmts.getStatement(17).setInt(5, c_id);
 						if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + ", c_data = " + c_data + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 						pStmts.getStatement(17).executeUpdate();
-						count.increment();
 
 					} catch (SQLException e) {
 						throw new Exception("Payment update transaction error", e);
@@ -315,7 +305,6 @@ public class Payment implements TpccConstants{
 						pStmts.getStatement(18).setInt(4, c_id);
 						if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 						pStmts.getStatement(18).executeUpdate();
-						count.increment();
 
 					} catch (SQLException e) {
 						throw new Exception("Payment update transaction error", e);
@@ -334,7 +323,6 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(18).setInt(4, c_id);
 					if(TRACE) logger.trace("UPDATE customer SET c_balance = " + c_balance + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id);
 					pStmts.getStatement(18).executeUpdate();
-					count.increment();
 
 				} catch (SQLException e) {
 					throw new Exception("Payment update transaction error", e);
@@ -359,7 +347,6 @@ public class Payment implements TpccConstants{
 				if(TRACE) logger.trace("INSERT INTO history(h_c_d_id, h_c_w_id, h_c_id, h_d_id, h_w_id, h_date, h_amount, h_data)" +
 						" VALUES( " + c_d_id + "," + c_w_id + "," + c_id + "," + d_id + "," + w_id + "," + currentTimeStamp.toString() + "," + h_amount + "," /*+ h_data*/);
 				pStmts.getStatement(19).executeUpdate();
-				count.increment();
 
 			} catch (SQLException e) {
 				throw new Exception("Payment insert transaction error", e);

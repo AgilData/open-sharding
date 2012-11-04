@@ -82,8 +82,7 @@ public class NewOrder implements TpccConstants {
 		    int o_all_local_arg,	/* are all order lines local */
 		    int itemid[],		/* ids of items to be ordered */
 		    int supware[],		/* warehouses supplying items */
-		    int qty[],
-		    Counter count
+		    int qty[]
 	)
 	{
 
@@ -180,7 +179,7 @@ public class NewOrder implements TpccConstants {
 					//System.exit(1);
 				}
 				rs.close();
-				count.increment();
+				
 			} catch (SQLException e) {
 				logger.error("SELECT d_next_o_id, d_tax FROM district WHERE d_id = " + d_id  + "  AND d_w_id = " + w_id + " FOR UPDATE", e);
 				throw new Exception("Neworder select transaction error", e);
@@ -195,7 +194,7 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(2).setInt(3, w_id);
 				if(TRACE) logger.trace("UPDATE district SET d_next_o_id = " + d_next_o_id + " + 1 WHERE d_id = " + d_id + " AND d_w_id = " + w_id);
 				pStmts.getStatement(2).executeUpdate();
-				count.increment();
+				
 
 			} catch (SQLException e) {
 				throw new Exception("NewOrder update transaction error", e);
@@ -217,7 +216,7 @@ public class NewOrder implements TpccConstants {
 				if(TRACE) logger.trace("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) " +
 						"VALUES(" + o_id + ","+ d_id + "," + w_id + "," + c_id + "," +  currentTimeStamp + "," + o_ol_cnt + "," + o_all_local+ ")");
 				pStmts.getStatement(3).executeUpdate();
-				count.increment();
+				
 
 			} catch (SQLException e) {
 				logger.error("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) " +
@@ -233,7 +232,7 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(4).setInt(3, w_id);
 				if(TRACE) logger.trace("INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) VALUES (" + o_id + "," + d_id + "," + w_id + ")");
 				pStmts.getStatement(4).executeUpdate();
-				count.increment();
+				
 
 			} catch (SQLException e) {
 				throw new Exception("NewOrder insert transaction error", e);
@@ -278,12 +277,11 @@ public class NewOrder implements TpccConstants {
 						i_name = rs.getString(2);
 						i_data = rs.getString(3);
 					} else {
-						count.increment();
 
 						rs.close();
 						throw new AbortedTransactionException();
 					}
-					count.increment();
+					
 
 					rs.close();
 				} catch (SQLException e) {
@@ -315,7 +313,7 @@ public class NewOrder implements TpccConstants {
 						s_dist_09 = rs.getString(11);
 						s_dist_10 = rs.getString(12);
 					}
-					count.increment();
+					
 
 					rs.close();
 				} catch (SQLException e) {
@@ -348,7 +346,7 @@ public class NewOrder implements TpccConstants {
 					pStmts.getStatement(7).setInt(3, ol_supply_w_id);
 					if(TRACE) logger.trace("UPDATE stock SET s_quantity = " + s_quantity + " WHERE s_i_id = " + ol_i_id + " AND s_w_id = " + ol_supply_w_id);
 					pStmts.getStatement(7).executeUpdate();
-					count.increment();
+					
 
 				} catch (SQLException e) {
 					throw new Exception("NewOrder update transaction error", e);
@@ -375,7 +373,7 @@ public class NewOrder implements TpccConstants {
 							"VALUES (" + o_id + "," + d_id + "," + w_id + "," + ol_number + "," + ol_i_id + "," + ol_supply_w_id + "," + ol_quantity + ","
 							+ ol_amount + "," + ol_dist_info.toString() + ")");
 					pStmts.getStatement(8).executeUpdate();
-					count.increment();
+					
 
 				} catch (SQLException e) {
 					throw new Exception("NewOrder insert transaction error", e);

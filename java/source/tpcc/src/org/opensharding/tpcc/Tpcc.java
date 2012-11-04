@@ -56,6 +56,8 @@ public class Tpcc {
 	private String javaDriver;
 	private String jdbcUrl;
 
+	private static final int TRANSACTION_COUNT = 5;
+	
 	private int num_node; /* number of servers that consists of cluster i.e. RAC (0:normal mode)*/
 	private int  NUM_NODE_MAX = 8;
 	private String node_string;
@@ -63,10 +65,16 @@ public class Tpcc {
 	private int time_count;
 	private int PRINT_INTERVAL=10;
 
-	private int[] success = new int[5];
-	private int[] late = new int[5];
-	private int[] retry = new int[5];
-	private int[] failure = new int[5];
+	private int[] success = new int[TRANSACTION_COUNT];
+	private int[] late = new int[TRANSACTION_COUNT];
+	private int[] retry = new int[TRANSACTION_COUNT];
+	private int[] failure = new int[TRANSACTION_COUNT];
+	
+	private int[][] success2;
+	private int[][] late2;
+	private int[][] retry2;
+	private int[][] failure2;
+
 
 	private int[] prev_s = new int[5];
 	private int[] prev_l = new int[5];
@@ -97,6 +105,7 @@ public class Tpcc {
 		  }
 		  try{
 			  properties.load(inputStream);
+			  
 		  }catch (IOException e){
 			  throw new RuntimeException("Error loading properties file", e);
 		  }
@@ -114,7 +123,7 @@ public class Tpcc {
 		RtHist.histInit();
 		activate_transaction = 1;
 		
-		for (int i=0; i<5; i++ ){
+		for (int i=0; i<TRANSACTION_COUNT; i++ ){
 		    success[i]=0;
 		    late[i]=0;
 		    retry[i]=0;
@@ -183,6 +192,11 @@ public class Tpcc {
 			}
 		}
 		
+		// Init 2-dimensional arrays.
+		success2 = new int[TRANSACTION_COUNT][num_conn];
+		late2 = new int[TRANSACTION_COUNT][num_conn];
+		retry2 = new int[TRANSACTION_COUNT][num_conn];
+		failure2 = new int[TRANSACTION_COUNT][num_conn];
 		      
 		//long delay1 = measure_time*1000;
 		
@@ -211,7 +225,9 @@ public class Tpcc {
 		// Start each server.
 		
 		for(int i =0; i<num_conn; i++) {
-			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, count, javaDriver, jdbcUrl);
+			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, 
+					javaDriver, jdbcUrl,
+					success, late, retry, failure, success2, late2, retry2, failure2);
 			executor.execute(worker);
 		}
 
