@@ -261,12 +261,23 @@ public class Tpcc implements TpccConstants{
         	total = total + success[j] + late[j];
         }
         
+        
+        /*
+         *  Raw Results 
+         */
         System.out.println("<Raw Results>");
         for (int i=0; i<TRANSACTION_COUNT; i++ ){
-          System.out.printf("  [%d] sc:%d  lt:%d  rt:%d  fl:%d \n", i, success[i], late[i], retry[i], failure[i]);
+        	if(i == 0) System.out.printf("  |NewOrder| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
+        	if(i == 1) System.out.printf("  |Payment| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
+        	if(i == 2) System.out.printf("  |Order Stat| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
+        	if(i == 3) System.out.printf("  |Delivery| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
+        	if(i == 4) System.out.printf("  |Slev| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
         }
         System.out.printf(" in %d sec.\n", (measureTime / PRINT_INTERVAL) * PRINT_INTERVAL);
-
+        
+        /*
+         * Raw Results 2
+         */
         System.out.println("<Raw Results2(sum ver.)>");
         for(int i=0; i<TRANSACTION_COUNT; i++ ){
             success2_sum[i] = 0;
@@ -319,7 +330,10 @@ public class Tpcc implements TpccConstants{
         }else{
           System.out.printf(" [NG] *\n");
         }
-
+        
+        /*
+         * Response Time 
+         */
         System.out.printf(" [response time (at least 90%% passed)]\n");
         f = 100.0 * (float)success[0]/(float)(success[0] + late[0]);
         System.out.printf("      New-Order: %f%% ",f);

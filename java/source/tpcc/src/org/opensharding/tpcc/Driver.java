@@ -146,10 +146,7 @@ public class Driver implements TpccConstants {
 	    int i = 0;
 	    int ret = 0;
 	    double rt = 0.0;
-	    //CHECK: What needs to be done with these variables
-	   // clock_t clk1,clk2;
-	   // struct timespec tbuf1;
-	   // struct timespec tbuf2;
+	    
 	    long beginTime = 0;
 	    long endTime = 0;
 	    
@@ -158,9 +155,9 @@ public class Driver implements TpccConstants {
 	    int c_id = 0;
 	    int ol_cnt = 0;
 	    int  all_local = 1;
-	    int  notfound = MAXITEMS+1;  /* valid item ids are numbered consecutively
-					    [1..MAXITEMS] */
+	    int  notfound = MAXITEMS+1;
 	    int rbk = 0;
+	    
 	    int[] itemid = new int[MAX_NUM_ITEMS];
 	    int[] supware = new int[MAX_NUM_ITEMS];
 	    int[] qty = new int[MAX_NUM_ITEMS];
