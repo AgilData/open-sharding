@@ -209,7 +209,7 @@ public class Driver implements TpccConstants {
 			
 			RtHist.histInc(0, rt);
 			
-			//if(counting_on >= 1){
+			if(Tpcc.counting_on == 1){
 			  if( rt < RTIME_NEWORD ){
 			    success[0]++;
 			    success2[0][t_num]++;
@@ -217,12 +217,12 @@ public class Driver implements TpccConstants {
 			    late[0]++;
 			    late2[0][t_num]++;
 			  }
-			//}
+			}
 
 		return (1); /* end */
 	      }else{
 
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  retry[0]++;
 			  retry2[0][t_num]++;
 			}
@@ -230,7 +230,7 @@ public class Driver implements TpccConstants {
 	      }
 	    }
 
-	    if(counting_on >= 1){
+	    if(Tpcc.counting_on >= 1){
 	      retry[0]--;
 	      retry2[0][t_num]--;
 	      failure[0]++;
@@ -317,7 +317,7 @@ public class Driver implements TpccConstants {
 	    	  if(rt > max_rt[1])
 	    		max_rt[1]=rt;
 	    	RtHist.histInc(1, rt);
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  if( rt < RTIME_PAYMENT ){
 			    success[1]++;
 			    success2[1][t_num]++;
@@ -330,7 +330,7 @@ public class Driver implements TpccConstants {
 			return (1); /* end */
 	      }else{
 
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  retry[1]++;
 			  retry2[1][t_num]++;
 			}
@@ -338,7 +338,7 @@ public class Driver implements TpccConstants {
 	      }
 	    }
 
-	    if(counting_on >= 1){
+	    if(Tpcc.counting_on >= 1){
 	      retry[1]--;
 	      retry2[1][t_num]--;
 	      failure[1]++;
@@ -399,7 +399,7 @@ public class Driver implements TpccConstants {
 	    	  if(rt > max_rt[2])
 	    		  max_rt[2]=rt;
 			RtHist.histInc(2, rt);
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  if( rt < RTIME_ORDSTAT ){
 			    success[2]++;
 			    success2[2][t_num]++;
@@ -412,7 +412,7 @@ public class Driver implements TpccConstants {
 			return (1); /* end */
 	      }else{
 
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  retry[2]++;
 			  retry2[2][t_num]++;
 			}
@@ -420,7 +420,7 @@ public class Driver implements TpccConstants {
 	      }
 	    }
 
-	    if(counting_on >= 1){
+	    if(Tpcc.counting_on >= 1){
 	      retry[2]--;
 	      retry2[2][t_num]--;
 	      failure[2]++;
@@ -464,7 +464,7 @@ public class Driver implements TpccConstants {
 	    	if(rt > max_rt[3])
 			  max_rt[3]=rt;
 			RtHist.histInc(3, rt );
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  if( rt < RTIME_DELIVERY ){
 			    success[3]++;
 			    success2[3][t_num]++;
@@ -477,7 +477,7 @@ public class Driver implements TpccConstants {
 			return (1); /* end */
 	      }else{
 
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  retry[3]++;
 			  retry2[3][t_num]++;
 			}
@@ -485,7 +485,7 @@ public class Driver implements TpccConstants {
 	      }
 	    }
 
-	    if(counting_on >= 1){
+	    if(Tpcc.counting_on >= 1){
 	      retry[3]--;
 	      retry2[3][t_num]--;
 	      failure[3]++;
@@ -535,7 +535,7 @@ public class Driver implements TpccConstants {
 	    	if(rt > max_rt[4])
 			  max_rt[4]=rt;
 			RtHist.histInc(4, rt );
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  if( rt < RTIME_SLEV ){
 			    success[4]++;
 			    success2[4][t_num]++;
@@ -548,7 +548,7 @@ public class Driver implements TpccConstants {
 			return (1); /* end */
 	      }else{
 
-			if(counting_on >= 1){
+			if(Tpcc.counting_on >= 1){
 			  retry[4]++;
 			  retry2[4][t_num]++;
 			}
@@ -556,7 +556,7 @@ public class Driver implements TpccConstants {
 	      }
 	    }
 
-	    if(counting_on >= 1){
+	    if(Tpcc.counting_on >= 1){
 	      retry[4]--;
 	      retry2[4][t_num]--;
 	      failure[4]++;

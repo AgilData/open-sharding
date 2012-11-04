@@ -65,6 +65,7 @@ public class Tpcc implements TpccConstants{
 	private int[][] late2;
 	private int[][] retry2;
 	private int[][] failure2;
+	public static int counting_on =0;
 
 
 	private int[] prev_s = new int[5];
@@ -72,7 +73,6 @@ public class Tpcc implements TpccConstants{
 
 	private double[] max_rt = new double[5];
 	private int port= 3306;
-	private Counter count = new Counter();
 
 	private Properties properties;
 	private InputStream inputStream;
@@ -130,6 +130,7 @@ public class Tpcc implements TpccConstants{
 		
 		/* number of node (default 0) */
 		num_node = 0;
+		counting_on = 1;
 		  
 		connectString = properties.getProperty(HOST);
 		dbString = properties.getProperty(DATABASE);
