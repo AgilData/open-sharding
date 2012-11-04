@@ -221,7 +221,7 @@ public class NewOrder implements TpccConstants {
 
 			} catch (SQLException e) {
 				logger.error("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) " +
-						"VALUES(" + o_id + ","+ d_id + "," + w_id + "," + c_id + "," +  currentTimeStamp + "," + o_ol_cnt + "," + o_all_local+ ")");
+						"VALUES(" + o_id + ","+ d_id + "," + w_id + "," + c_id + "," +  currentTimeStamp + "," + o_ol_cnt + "," + o_all_local+ ")", e);
 				throw new Exception("NewOrder insert transaction error",e );
 			}
 			
