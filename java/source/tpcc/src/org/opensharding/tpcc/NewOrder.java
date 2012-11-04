@@ -182,6 +182,7 @@ public class NewOrder implements TpccConstants {
 				rs.close();
 				count.increment();
 			} catch (SQLException e) {
+				logger.error("SELECT d_next_o_id, d_tax FROM district WHERE d_id = " + d_id  + "  AND d_w_id = " + w_id + " FOR UPDATE");
 				throw new Exception("Neworder select transaction error", e);
 			}
 			
@@ -219,6 +220,8 @@ public class NewOrder implements TpccConstants {
 				count.increment();
 
 			} catch (SQLException e) {
+				logger.error("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) " +
+						"VALUES(" + o_id + ","+ d_id + "," + w_id + "," + c_id + "," +  currentTimeStamp + "," + o_ol_cnt + "," + o_all_local+ ")");
 				throw new Exception("NewOrder insert transaction error",e );
 			}
 			
