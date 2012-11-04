@@ -216,11 +216,13 @@ public class Driver implements TpccConstants {
 			if(Tpcc.counting_on == 1){
 				if(DEBUG) logger.debug(" rt: " + rt + " RTIME_NEWORD " + RTIME_NEWORD);
 				if( rt < RTIME_NEWORD ){
-				  success[0]++;
-				  success2[0][t_num]++;
+					if(DEBUG) logger.debug("Rt < RTIME_NEWORD");
+					success[0]++;
+					success2[0][t_num]++;
 				}else{
-				  late[0]++;
-				  late2[0][t_num]++;
+					if(DEBUG) logger.debug("Rt > RTIME_NEWORD");
+					late[0]++;
+					late2[0][t_num]++;
 				}
 			}
 
