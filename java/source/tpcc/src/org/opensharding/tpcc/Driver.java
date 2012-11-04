@@ -204,21 +204,24 @@ public class Driver implements TpccConstants {
 	      if(ret == 1){
 	    	
 	    	rt = (double)(endTime - beginTime);
-		    if(DEBUG) logger.debug("rt value: " + rt + " max_rt[0] value: " + max_rt[0]);
+		    if(DEBUG) logger.debug("BEFORE rt value: " + rt + " max_rt[0] value: " + max_rt[0]);
 		    	
 			if(rt > max_rt[0])
 			  max_rt[0]=rt;
 			
+			if(DEBUG) logger.debug("AFTER rt value: " + rt + " max_rt[0] value: " + max_rt[0]);
+			
 			RtHist.histInc(0, rt);
 			
 			if(Tpcc.counting_on == 1){
-			  if( rt < RTIME_NEWORD ){
-			    success[0]++;
-			    success2[0][t_num]++;
-			  }else{
-			    late[0]++;
-			    late2[0][t_num]++;
-			  }
+				if(DEBUG) logger.debug(" rt: " + rt + " RTIME_NEWORD " + RTIME_NEWORD);
+				if( rt < RTIME_NEWORD ){
+				  success[0]++;
+				  success2[0][t_num]++;
+				}else{
+				  late[0]++;
+				  late2[0][t_num]++;
+				}
 			}
 
 		return (1); /* end */
