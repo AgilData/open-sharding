@@ -292,7 +292,12 @@ public class Tpcc implements TpccConstants{
             }
         }
         for (int i=0; i<TRANSACTION_COUNT; i++ ){
-           System.out.printf("  [%d] sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+           if(i == 0) System.out.printf("  |NewOrder| sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+           if(i == 1) System.out.printf("  |Payment| sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+           if(i == 2) System.out.printf("  |Order Stat| sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+           if(i == 3) System.out.printf("  |Delivery| sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+           if(i == 4) System.out.printf("  |Slev| sc:%d  lt:%d  rt:%d  fl:%d \n", i, success2_sum[i], late2_sum[i], retry2_sum[i], failure2_sum[i]);
+
         }
 
         System.out.println("<Constraint Check> (all must be [OK])\n [transaction percentage]");
@@ -336,6 +341,7 @@ public class Tpcc implements TpccConstants{
          */
         System.out.printf(" [response time (at least 90%% passed)]\n");
         f = 100.0 * (float)success[0]/(float)(success[0] + late[0]);
+        if(DEBUG) logger.debug("f: " + f + " success[0]: " + success[0] + " late[0]: " + late[0]);
         System.out.printf("      New-Order: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
@@ -343,6 +349,7 @@ public class Tpcc implements TpccConstants{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[1]/(float)(success[1] + late[1]);
+        if(DEBUG) logger.debug("f: " + f + " success[1]: " + success[1] + " late[1]: " + late[1]);
         System.out.printf("        Payment: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
@@ -350,6 +357,7 @@ public class Tpcc implements TpccConstants{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[2]/(float)(success[2] + late[2]);
+        if(DEBUG) logger.debug("f: " + f + " success[2]: " + success[2] + " late[2]: " + late[2]);
         System.out.printf("   Order-Status: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
@@ -357,6 +365,7 @@ public class Tpcc implements TpccConstants{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[3]/(float)(success[3] + late[3]);
+        if(DEBUG) logger.debug("f: " + f + " success[3]: " + success[3] + " late[3]: " + late[3]);
         System.out.printf("       Delivery: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
@@ -364,6 +373,7 @@ public class Tpcc implements TpccConstants{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[4]/(float)(success[4] + late[4]);
+        if(DEBUG) logger.debug("f: " + f + " success[4]: " + success[4] + " late[4]: " + late[4]);
         System.out.printf("    Stock-Level: %f%% ",f);
         if ( f >= 90.0 ){
          System.out.printf(" [OK]\n");
