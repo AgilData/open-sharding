@@ -306,14 +306,14 @@ public class Tpcc implements TpccConstants{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)(success[3] + late[3])/(float)j;
-        System.out.printf("       Delivery: %3.2f%% (>= 4.0%%)",f);
+        System.out.printf("       Delivery: %f%% (>= 4.0%%)",f);
         if ( f >= 4.0 ){
           System.out.printf(" [OK]\n");
         }else{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)(success[4] + late[4])/(float)j;
-        System.out.printf("    Stock-Level: %3.2f%% (>= 4.0%%)",f);
+        System.out.printf("    Stock-Level: %f%% (>= 4.0%%)",f);
         if ( f >= 4.0 ){
           System.out.printf(" [OK]\n");
         }else{
@@ -322,35 +322,35 @@ public class Tpcc implements TpccConstants{
 
         System.out.printf(" [response time (at least 90%% passed)]\n");
         f = 100.0 * (float)success[0]/(float)(success[0] + late[0]);
-        System.out.printf("      New-Order: %3.2f%% ",f);
+        System.out.printf("      New-Order: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
         }else{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[1]/(float)(success[1] + late[1]);
-        System.out.printf("        Payment: %3.2f%% ",f);
+        System.out.printf("        Payment: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
         }else{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[2]/(float)(success[2] + late[2]);
-        System.out.printf("   Order-Status: %3.2f%% ",f);
+        System.out.printf("   Order-Status: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
         }else{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[3]/(float)(success[3] + late[3]);
-        System.out.printf("       Delivery: %3.2f%% ",f);
+        System.out.printf("       Delivery: %f%% ",f);
         if ( f >= 90.0 ){
           System.out.printf(" [OK]\n");
         }else{
           System.out.printf(" [NG] *\n");
         }
         f = 100.0 * (float)success[4]/(float)(success[4] + late[4]);
-        System.out.printf("    Stock-Level: %3.2f%% ",f);
+        System.out.printf("    Stock-Level: %f%% ",f);
         if ( f >= 90.0 ){
          System.out.printf(" [OK]\n");
         }else{
