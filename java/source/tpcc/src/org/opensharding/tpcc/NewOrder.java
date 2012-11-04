@@ -182,7 +182,7 @@ public class NewOrder implements TpccConstants {
 				rs.close();
 				count.increment();
 			} catch (SQLException e) {
-				logger.error("SELECT d_next_o_id, d_tax FROM district WHERE d_id = " + d_id  + "  AND d_w_id = " + w_id + " FOR UPDATE");
+				logger.error("SELECT d_next_o_id, d_tax FROM district WHERE d_id = " + d_id  + "  AND d_w_id = " + w_id + " FOR UPDATE", e);
 				throw new Exception("Neworder select transaction error", e);
 			}
 			
