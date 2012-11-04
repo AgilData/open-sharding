@@ -1,16 +1,9 @@
 package org.opensharding.tpcc;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.text.DecimalFormat;
-import java.util.Calendar;
 import java.util.Properties;
-import java.util.Timer;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -18,7 +11,7 @@ import java.util.concurrent.TimeUnit;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Tpcc {
+public class Tpcc implements TpccConstants{
 	
 	private static final Logger logger = LogManager.getLogger(Tpcc.class);
 	private static final boolean DEBUG = logger.isDebugEnabled();
@@ -41,22 +34,20 @@ public class Tpcc {
 	private int DB_STRING_MAX = 128;
 	private int MAX_CLUSTER_SIZE = 128;
 
-	private String connect_string;
+	private String connectString;
 
-	private String db_string;
-	private String db_host;
-	private String db_user;
-	private String db_password;
+	private String dbString;
+	private String dbHost;
+	private String dbUser;
+	private String dbPassword;
 
 
-	private int num_ware;
-	private int num_conn;
-	private int rampup_time;
-	private int measure_time;
+	private int numWare;
+	private int numConn;
+	private int rampupTime;
+	private int measureTime;
 	private String javaDriver;
 	private String jdbcUrl;
-
-	private static final int TRANSACTION_COUNT = 5;
 	
 	private int num_node; /* number of servers that consists of cluster i.e. RAC (0:normal mode)*/
 	private int  NUM_NODE_MAX = 8;
@@ -115,13 +106,14 @@ public class Tpcc {
 
 	private int runBenchmark() {
 		
-		logger.info("***************************************");
-		logger.info("****** Java TPC-C Load Generator ******");
-		logger.info("***************************************");
+		System.out.println("***************************************");
+		System.out.println("****** Java TPC-C Load Generator ******");
+		System.out.println("***************************************");
 		
 		/* initialize */
 		RtHist.histInit();
 		activate_transaction = 1;
+		
 		
 		for (int i=0; i<TRANSACTION_COUNT; i++ ){
 		    success[i]=0;
@@ -139,39 +131,39 @@ public class Tpcc {
 		/* number of node (default 0) */
 		num_node = 0;
 		  
-		connect_string = properties.getProperty(HOST);
-		db_string = properties.getProperty(DATABASE);
-		db_user = properties.getProperty(USER);
-		db_password = properties.getProperty(PASSWORD);
-		num_ware = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
-		num_conn = Integer.parseInt(properties.getProperty(CONNECTIONS));
-		rampup_time = Integer.parseInt(properties.getProperty(RAMPUPTIME));
-		measure_time = Integer.parseInt(properties.getProperty(DURATION));
+		connectString = properties.getProperty(HOST);
+		dbString = properties.getProperty(DATABASE);
+		dbUser = properties.getProperty(USER);
+		dbPassword = properties.getProperty(PASSWORD);
+		numWare = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
+		numConn = Integer.parseInt(properties.getProperty(CONNECTIONS));
+		rampupTime = Integer.parseInt(properties.getProperty(RAMPUPTIME));
+		measureTime = Integer.parseInt(properties.getProperty(DURATION));
 		javaDriver = properties.getProperty(DRIVER);
 		jdbcUrl = properties.getProperty(JDBCURL);
 		  
-		if(connect_string == null){
+		if(connectString == null){
 			throw new RuntimeException("Host is null.");
 		}
-		if(db_string == null){
+		if(dbString == null){
 			  throw new RuntimeException("Database name is null.");
 		}
-		if(db_user == null){
+		if(dbUser == null){
 			  throw new RuntimeException("User is null.");
 		}
-		if(db_password == null){
+		if(dbPassword == null){
 			  throw new RuntimeException("Password is null.");
 		}
-		if(num_ware < 1){
+		if(numWare < 1){
 			  throw new RuntimeException("Warehouse count has to be greater than or equal to 1.");
 		}
-		if(num_conn < 1){
+		if(numConn < 1){
 			  throw new RuntimeException("Connections has to be greater than or equal to 1.");
 		}
-		if(rampup_time < 1){
+		if(rampupTime < 1){
 			  throw new RuntimeException("Rampup time has to be greater than or equal to 1.");
 		}
-		if(measure_time < 1){
+		if(measureTime < 1){
 			throw new RuntimeException("Duration has to be greater than or equal to 1.");
 		}
 		if(javaDriver == null){
@@ -182,35 +174,35 @@ public class Tpcc {
 		}
 		
 		if( num_node > 0 ){
-			  if( num_ware % num_node != 0 ){
+			  if( numWare % num_node != 0 ){
 				  logger.error(" [warehouse] value must be devided by [num_node].");
 			  return 1;
 			  }
-			if( num_conn % num_node != 0 ) {
+			if( numConn % num_node != 0 ) {
 				  logger.error("[connection] value must be devided by [num_node].");
 					  return 1;
 			}
 		}
 		
 		// Init 2-dimensional arrays.
-		success2 = new int[TRANSACTION_COUNT][num_conn];
-		late2 = new int[TRANSACTION_COUNT][num_conn];
-		retry2 = new int[TRANSACTION_COUNT][num_conn];
-		failure2 = new int[TRANSACTION_COUNT][num_conn];
+		success2 = new int[TRANSACTION_COUNT][numConn];
+		late2 = new int[TRANSACTION_COUNT][numConn];
+		retry2 = new int[TRANSACTION_COUNT][numConn];
+		failure2 = new int[TRANSACTION_COUNT][numConn];
 		      
 		//long delay1 = measure_time*1000;
 		
 		System.out.printf("<Parameters>\n");
 		 
-		System.out.printf("     [server]: %s\n",connect_string);
-		System.out.printf("     [DBname]: %s\n", db_string);
-		System.out.printf("       [user]: %s\n", db_user);
-		System.out.printf("       [pass]: %s\n", db_password);
+		System.out.printf("     [server]: %s\n",connectString);
+		System.out.printf("     [DBname]: %s\n", dbString);
+		System.out.printf("       [user]: %s\n", dbUser);
+		System.out.printf("       [pass]: %s\n", dbPassword);
 		
-		System.out.printf("  [warehouse]: %d\n", num_ware);
-		System.out.printf(" [connection]: %d\n", num_conn);
-		System.out.printf("     [rampup]: %d (sec.)\n", rampup_time);
-		System.out.printf("    [measure]: %d (sec.)\n", measure_time);
+		System.out.printf("  [warehouse]: %d\n", numWare);
+		System.out.printf(" [connection]: %d\n", numConn);
+		System.out.printf("     [rampup]: %d (sec.)\n", rampupTime);
+		System.out.printf("    [measure]: %d (sec.)\n", measureTime);
 		System.out.printf("     [driver]: %s\n", javaDriver);
 		System.out.printf("        [URL]: %s\n", jdbcUrl);
 		
@@ -220,12 +212,12 @@ public class Tpcc {
 		/* set up threads */
 		  
 		if(DEBUG) logger.debug("Creating TpccThread");
-		ExecutorService executor = Executors.newFixedThreadPool(num_conn, new NamedThreadFactory("tpcc-thread"));
+		ExecutorService executor = Executors.newFixedThreadPool(numConn, new NamedThreadFactory("tpcc-thread"));
 		
 		// Start each server.
 		
-		for(int i =0; i<num_conn; i++) {
-			Runnable worker = new TpccThread(i, port, 1, connect_string, db_user, db_password, db_string, num_ware, num_conn, 
+		for(int i =0; i<numConn; i++) {
+			Runnable worker = new TpccThread(i, port, 1, connectString, dbUser, dbPassword, dbString, numWare, numConn, 
 					javaDriver, jdbcUrl,
 					success, late, retry, failure, success2, late2, retry2, failure2);
 			executor.execute(worker);
@@ -234,7 +226,7 @@ public class Tpcc {
         // rampup time
         System.out.printf("\nRAMPUP START.\n\n");
         try {
-            Thread.sleep(rampup_time * 1000);
+            Thread.sleep(rampupTime * 1000);
         } catch (InterruptedException e) {
             logger.error("Rampup wait interrupted", e);
         }
@@ -243,14 +235,11 @@ public class Tpcc {
         // measure time
 		System.out.printf("\nMEASURING START.\n\n");
 
-        // reset counter
-        count.reset();
-
         // loop for the measure_time
         final long startTime = System.currentTimeMillis();
         DecimalFormat df = new DecimalFormat("#,##0.0");
         long runTime = 0;
-		while ((runTime = System.currentTimeMillis() - startTime) < measure_time*1000) {
+		while ((runTime = System.currentTimeMillis() - startTime) < measureTime*1000) {
             System.out.println("Current execution time lapse: " + df.format(runTime/1000.0f) + " seconds");
             try {
                 Thread.sleep(1000);
@@ -261,7 +250,10 @@ public class Tpcc {
         final long actualTestTime = System.currentTimeMillis() - startTime;
 
         // show results
-        final long total = count.get();
+        double total = 0.0;
+        for(int j = 0; j< TRANSACTION_COUNT; j++ ){
+        	total = total + success[j] + late[j];
+        }
         System.out.printf("TEST TIME              : %s\n", df.format(actualTestTime/1000.0f));
         System.out.printf("TOTAL TRANSACTIONS     : %s\n", df.format(total));
         System.out.printf("TRANSACTIONS PER MINUTE: %s\n", df.format(total*60000.0f/actualTestTime));
