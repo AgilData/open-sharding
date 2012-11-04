@@ -203,7 +203,7 @@ public class Driver implements TpccConstants {
 
 	      if(ret == 1){
 	    	
-	    	rt = (double)(endTime - beginTime);
+	    	rt = (double)((endTime - beginTime)/1000000.0);
 		    if(DEBUG) logger.debug("BEFORE rt value: " + rt + " max_rt[0] value: " + max_rt[0]);
 		    	
 			if(rt > max_rt[0])
