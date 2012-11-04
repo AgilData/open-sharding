@@ -195,15 +195,15 @@ public class Driver implements TpccConstants {
 		qty[i] = Util.randomNumber(1, 10);
 	    }
 	    
-	    beginTime = System.nanoTime();
+	    beginTime = System.currentTimeMillis();
 	    for (i = 0; i < MAX_RETRY; i++) {
 	      if(DEBUG) logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local  + " qty: " +  qty);
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty);
-	      endTime =  System.nanoTime();
+	      endTime =  System.currentTimeMillis();
 
 	      if(ret == 1){
 	    	
-	    	rt = (double)((endTime - beginTime)/1000000.0);
+	    	rt = (double)(endTime - beginTime);
 		    if(DEBUG) logger.debug("BEFORE rt value: " + rt + " max_rt[0] value: " + max_rt[0]);
 		    	
 			if(rt > max_rt[0])
