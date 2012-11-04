@@ -256,12 +256,7 @@ public class Tpcc implements TpccConstants{
         final long actualTestTime = System.currentTimeMillis() - startTime;
 
         // show results
-        double total = 0.0;
-        for(int j = 0; j< TRANSACTION_COUNT; j++ ){
-        	total = total + success[j] + late[j];
-        }
-        
-        
+        System.out.println("---------------------------------------------------");
         /*
          *  Raw Results 
          */
@@ -379,6 +374,17 @@ public class Tpcc implements TpccConstants{
          System.out.printf(" [OK]\n");
         }else{
           System.out.printf(" [NG] *\n");
+        }
+        
+        double total = 0.0;
+        for(j = 0; j< TRANSACTION_COUNT; j++ ){
+        	total = total + success[j] + late[j];
+        	if(j == 0) System.out.println(" NewOrder Total: " + (success[j] + late[j]));
+        	if(j == 1) System.out.println(" Payment Total: " + (success[j] + late[j]));
+        	if(j == 2) System.out.println(" OrderStat Total: " + (success[j] + late[j]));
+        	if(j == 3) System.out.println(" Delivery Total: " + (success[j] + late[j]));
+        	if(j == 4) System.out.println(" NewOrder Total: " + (success[j] + late[j]));
+        	
         }
         
         System.out.printf("TEST TIME              : %s\n", df.format(actualTestTime/1000.0f));
