@@ -3,13 +3,13 @@
 
     <appenders>
         <Console name="Console" target="SYSTEM_OUT">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n %throwable{short}"/>
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} %-5level [%t] %logger{36} - %msg%n %throwable{full}"/>
         </Console>
     </appenders>
 
     <appender type="File" name="File" fileName="${sys:log.file}">
         <layout type="PatternLayout">
-            <pattern>%d %p %C{1.} [%t] %m%n %throwable{short}</pattern>
+            <pattern>%d %p %C{1.} [%t] %m%n %throwable{full}</pattern>
         </layout>
     </appender>
 
