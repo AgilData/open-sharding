@@ -95,7 +95,7 @@ public class TpccThread extends Thread {
                     logger.error("", e);
                 }
             }
-            prop.put("username", db_user);
+            prop.put("user", db_user);
             prop.put("password", db_password);
 
             conn = DriverManager.getConnection(jdbcUrl, prop);
