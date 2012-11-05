@@ -150,6 +150,7 @@ public class NewOrder implements TpccConstants {
 				pStmts.getStatement(0).setInt(column++, d_id);
 				pStmts.getStatement(0).setInt(column++, c_id);
 				if(TRACE) logger.trace("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
+                long t1 = System.currentTimeMillis();
 				ResultSet rs = pStmts.getStatement(0).executeQuery();
 				if(rs.next()){
 					c_discount = rs.getFloat(1);
@@ -158,7 +159,10 @@ public class NewOrder implements TpccConstants {
 					w_tax = rs.getFloat(4);
 				}		
 				rs.close();
-			} catch (SQLException e) {
+                long t2 = System.currentTimeMillis();
+                if(TRACE) logger.trace("TOOK " + (t2-t1) + " ms to run: SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
+
+            } catch (SQLException e) {
 				logger.error("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id, e);
 				throw new Exception("NewOrder select transaction error", e);
 			}
