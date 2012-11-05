@@ -176,9 +176,8 @@ public class NewOrder implements TpccConstants {
 					d_next_o_id = rs.getInt(1);
 					d_tax = rs.getFloat(2);
 				}else{
-					logger.error("Failed to obtain d_next_o_id");
-					rs.close();
-					//System.exit(1);
+					logger.error("Failed to obtain d_next_o_id. No results to query: "
+                            + "SELECT d_next_o_id, d_tax FROM district WHERE d_id = " + d_id  + "  AND d_w_id = " + w_id + " FOR UPDATE");
 				}
 				rs.close();
 				
