@@ -54,7 +54,7 @@ public class Tpcc implements TpccConstants{
 	private String node_string;
 
 	private int time_count;
-	private int PRINT_INTERVAL=10;
+	private int PRINT_INTERVAL = 10;
 
 	private int[] success = new int[TRANSACTION_COUNT];
 	private int[] late = new int[TRANSACTION_COUNT];
@@ -135,8 +135,7 @@ public class Tpcc implements TpccConstants{
 		
 		/* number of node (default 0) */
 		num_node = 0;
-		counting_on = 1;
-		  
+
 		connectString = properties.getProperty(HOST);
 		dbString = properties.getProperty(DATABASE);
 		dbUser = properties.getProperty(USER);
@@ -235,17 +234,22 @@ public class Tpcc implements TpccConstants{
 			executor.execute(worker);
 		}
 
-        // rampup time
-        System.out.printf("\nRAMPUP START.\n\n");
-        try {
-            Thread.sleep(rampupTime * 1000);
-        } catch (InterruptedException e) {
-            logger.error("Rampup wait interrupted", e);
+        if (rampupTime > 0) {
+            // rampup time
+            System.out.printf("\nRAMPUP START.\n\n");
+            try {
+                Thread.sleep(rampupTime * 1000);
+            } catch (InterruptedException e) {
+                logger.error("Rampup wait interrupted", e);
+            }
+            System.out.printf("\nRAMPUP END.\n\n");
         }
-        System.out.printf("\nRAMPUP END.\n\n");
 
         // measure time
 		System.out.printf("\nMEASURING START.\n\n");
+
+        // start counting
+        counting_on = 1;
 
         // loop for the measure_time
         final long startTime = System.currentTimeMillis();
@@ -274,7 +278,7 @@ public class Tpcc implements TpccConstants{
         	if(i == 3) System.out.printf("  |Delivery| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
         	if(i == 4) System.out.printf("  |Slev| sc:%d  lt:%d  rt:%d  fl:%d \n", success[i], late[i], retry[i], failure[i]);
         }
-        System.out.printf(" in %d sec.\n", (measureTime / PRINT_INTERVAL) * PRINT_INTERVAL);
+        System.out.printf(" in %f sec.\n", actualTestTime/1000.0f);
         
         /*
          * Raw Results 2
@@ -392,10 +396,18 @@ public class Tpcc implements TpccConstants{
         	if(j == 4) System.out.println(" NewOrder Total: " + (success[j] + late[j]));
         	
         }
-        
+
+        float tpcm = (success[0] + late[0]) * 60000f / actualTestTime;
+
+        System.out.println();
+        System.out.println("<TpmC>");
+        System.out.println(tpcm + " TpmC");
+
+        /*
         System.out.printf("TEST TIME              : %s\n", df.format(actualTestTime/1000.0f));
         System.out.printf("TOTAL TRANSACTIONS     : %s\n", df.format(total));
         System.out.printf("TRANSACTIONS PER MINUTE: %s\n", df.format(total*60000.0f/actualTestTime));
+        */
 
         // stop threads
         System.out.printf("\nSTOPPING THREADS\n");
