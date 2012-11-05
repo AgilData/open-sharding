@@ -282,8 +282,8 @@ public class NewOrder implements TpccConstants {
                         i_data = rs.getString(3);
                     } else {
                         if (logger.isDebugEnabled()) {
+                            logger.debug("No item found for item id " + ol_i_id);
                         }
-                        logger.warn("No item found for item id " + ol_i_id);
                         throw new AbortedTransactionException();
                     }
 
@@ -404,7 +404,7 @@ public class NewOrder implements TpccConstants {
                 logger.debug("Caught AbortedTransactionException");
             }
             pStmts.rollback();
-            return 0;
+            return 1; // this is not an error!
         } catch (Exception e) {
             logger.error("New Order error", e);
             pStmts.rollback();
