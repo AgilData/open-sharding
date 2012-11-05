@@ -236,8 +236,6 @@ public class Driver implements TpccConstants {
 
                 if (Tpcc.counting_on) {
 
-                    logger.info("NEWORD RETRY (RETURN " + ret + ")");
-
                     retry[0]++;
                     retry2[0][t_num]++;
                 }
