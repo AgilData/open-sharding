@@ -23,8 +23,6 @@ public class Util implements TpccConstants {
     private static final int C_1023 = randomNumber(0, 1023);
     private static final int C_8191 = randomNumber(0, 8191);
 
-    private static final Random rnd = new Random();
-
     //Member Functions
     public static void shuffle() {
         //Counters
@@ -32,6 +30,8 @@ public class Util implements TpccConstants {
         int j;
         int tmp;
         int rmd;
+
+        Random rnd = new Random();
 
         for (i = 0, j = 0; i < no; i++, j++) {
             seq[j] = 0;
@@ -79,17 +79,11 @@ public class Util implements TpccConstants {
     }
 
     public synchronized static int seqGet() {
-        int retval = 0;
-
         if (nextNum >= total) {
             shuffle();
             nextNum = 0;
         }
-        retval = seq[nextNum];
-        ++nextNum;
-
-        return retval;
-
+        return seq[nextNum++];
     }
 
     public static void setSeed(int seed) {
