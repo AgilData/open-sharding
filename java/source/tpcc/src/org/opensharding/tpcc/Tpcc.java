@@ -147,7 +147,8 @@ public class Tpcc implements TpccConstants{
 		measureTime = Integer.parseInt(properties.getProperty(DURATION));
 		javaDriver = properties.getProperty(DRIVER);
 		jdbcUrl = properties.getProperty(JDBCURL);
-		  
+        String jdbcFetchSize = properties.getProperty("JDBCFETCHSIZE");
+
 		if(connectString == null){
 			throw new RuntimeException("Host is null.");
 		}
@@ -178,6 +179,11 @@ public class Tpcc implements TpccConstants{
 		if(jdbcUrl == null){
 			  throw new RuntimeException("JDBC Url is null.");
 		}
+        int fetchSize = 100;
+        if (jdbcFetchSize != null) {
+            fetchSize = Integer.parseInt(jdbcFetchSize);
+        }
+
 		
 		if( num_node > 0 ){
 			  if( numWare % num_node != 0 ){
@@ -224,7 +230,7 @@ public class Tpcc implements TpccConstants{
 		
 		for(int i =0; i<numConn; i++) {
 			Runnable worker = new TpccThread(i, port, 1, connectString, dbUser, dbPassword, dbString, numWare, numConn, 
-					javaDriver, jdbcUrl,
+					javaDriver, jdbcUrl, fetchSize,
 					success, late, retry, failure, success2, late2, retry2, failure2);
 			executor.execute(worker);
 		}

@@ -58,12 +58,12 @@ public class Driver implements TpccConstants {
 	 * Constructor.
 	 * @param conn
 	 */
-	public Driver(Connection conn, int[] success, int[] late, int[] retry, int[] failure, 
+	public Driver(Connection conn, int fetchSize, int[] success, int[] late, int[] retry, int[] failure,
 			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
 		try {
 			this.conn = conn;
 			
-			pStmts = new TpccStatements(conn);
+			pStmts = new TpccStatements(conn, fetchSize);
 			
 			// Initialize the transactions.
 			newOrder = new NewOrder(pStmts);
@@ -97,6 +97,8 @@ public class Driver implements TpccConstants {
 		num_ware = numWare;
 		num_conn = numConn;
 
+        int count = 0;
+
 	    /* Actually, WaitTimes are needed... */
 	    //CHECK: Is activate_transaction handled correctly?
 	    int sequence = Util.seqGet();
@@ -117,9 +119,10 @@ public class Driver implements TpccConstants {
                 }else if(sequence == 4){
                     doSlev(t_num, conn, pStmts);
                 }else{
-                    System.out.printf("Error - Unknown sequence: %d.\n", Util.seqGet());
-                    System.exit(1);
+                    throw new IllegalStateException("Error - Unknown sequence");
                 }
+
+                count++;
             }
             catch (Throwable th) {
                 logger.error("FAILED", th);
@@ -133,7 +136,7 @@ public class Driver implements TpccConstants {
 
 		  }
 
-	    
+        logger.info("Driver terminated after " + count + " transactions");
 
 	    return(0);
 
