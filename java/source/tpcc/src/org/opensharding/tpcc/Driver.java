@@ -3,6 +3,7 @@ package org.opensharding.tpcc;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.Statement;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -200,7 +201,7 @@ public class Driver implements TpccConstants {
 	    
 	    beginTime = System.currentTimeMillis();
 	    for (i = 0; i < MAX_RETRY; i++) {
-	      if(DEBUG) logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local  + " qty: " +  qty);
+	      if(DEBUG) logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local  + " qty: " + Arrays.toString(qty));
 	      ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty);
 	      endTime =  System.currentTimeMillis();
 
