@@ -1,9 +1,13 @@
 package org.opensharding.tpcc;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,6 +28,7 @@ public class TpccThread extends Thread {
 	String db_string;
 	String driverClassName;
 	String jdbcUrl;
+    int fetchSize;
 	
 	private int[] success;
 	private int[] late;
@@ -38,7 +43,7 @@ public class TpccThread extends Thread {
 	//TpccStatements pStmts;
 	
 	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, 
-			String db_string, int num_ware, int num_conn, String driver, String dURL,
+			String db_string, int num_ware, int num_conn, String driver, String dURL, int fetchSize,
 			int[] success, int[] late, int[] retry, int[] failure, 
 			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
 		
@@ -53,6 +58,7 @@ public class TpccThread extends Thread {
         this.num_ware = num_ware;
         this.driverClassName = driver;
         this.jdbcUrl = dURL;
+        this.fetchSize = fetchSize;
         
 		this.success = success;
 		this.late = late;
@@ -77,7 +83,23 @@ public class TpccThread extends Thread {
         Connection conn;
 
         try {
-            conn = DriverManager.getConnection(jdbcUrl, db_user, db_password);
+
+            Properties prop = new Properties();
+            File connPropFile = new File("conf/jdbc-connection.properties");
+            if (connPropFile.exists()) {
+                try {
+                    final FileInputStream is = new FileInputStream(connPropFile);
+                    prop.load(is);
+                    is.close();
+                } catch (IOException e) {
+                    logger.error("", e);
+                }
+            }
+            prop.put("username", db_user);
+            prop.put("password", db_password);
+
+            conn = DriverManager.getConnection(jdbcUrl, prop);
+
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             throw new RuntimeException("Connection to specific host error", e);
@@ -92,7 +114,8 @@ public class TpccThread extends Thread {
 
         try {
             // Create a driver instance.
-            Driver driver = new Driver(conn, success, late, retry, failure, success2, late2, retry2, failure2);
+            Driver driver = new Driver(conn, fetchSize,
+                    success, late, retry, failure, success2, late2, retry2, failure2);
 
             if (DEBUG) {
                 logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);

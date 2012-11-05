@@ -15,11 +15,13 @@ public class TpccStatements {
 	public static int STMT_COUNT = 35;
 	
 	private Connection conn;
+    int fetchSize;
 	private PreparedStatement[] pStmts = new PreparedStatement[STMT_COUNT];
 	
 	
-	public TpccStatements(Connection conn) {
+	public TpccStatements(Connection conn, int fetchSize) {
 		this.conn = conn;
+		this.fetchSize = fetchSize;
 		init();
 	}
 	
@@ -61,6 +63,10 @@ public class TpccStatements {
 			pStmts[32] = conn.prepareStatement("SELECT d_next_o_id FROM district WHERE d_id = ? AND d_w_id = ?");
 			pStmts[33] = conn.prepareStatement("SELECT DISTINCT ol_i_id FROM order_line WHERE ol_w_id = ? AND ol_d_id = ? AND ol_o_id < ? AND ol_o_id >= (? - 20)");
 			pStmts[34] = conn.prepareStatement("SELECT count(*) FROM stock WHERE s_w_id = ? AND s_i_id = ? AND s_quantity < ?");
+
+            for (int i=0; i<pStmts.length; i++) {
+                pStmts[i].setFetchSize(fetchSize);
+            }
 			
 		} catch(Exception e) {
 			throw new RuntimeException("init error", e);

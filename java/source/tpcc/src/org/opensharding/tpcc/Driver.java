@@ -58,12 +58,12 @@ public class Driver implements TpccConstants {
 	 * Constructor.
 	 * @param conn
 	 */
-	public Driver(Connection conn, int[] success, int[] late, int[] retry, int[] failure, 
+	public Driver(Connection conn, int fetchSize, int[] success, int[] late, int[] retry, int[] failure,
 			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
 		try {
 			this.conn = conn;
 			
-			pStmts = new TpccStatements(conn);
+			pStmts = new TpccStatements(conn, fetchSize);
 			
 			// Initialize the transactions.
 			newOrder = new NewOrder(pStmts);
