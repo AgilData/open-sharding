@@ -115,7 +115,8 @@ public class TpccThread extends Thread {
         try {
             // Create a driver instance.
             Driver driver = new Driver(conn, fetchSize,
-                    success, late, retry, failure, success2, late2, retry2, failure2);
+                    success, late, retry, failure,
+                    success2, late2, retry2, failure2);
 
             if (DEBUG) {
                 logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);

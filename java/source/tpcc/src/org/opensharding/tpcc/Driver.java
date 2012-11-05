@@ -23,11 +23,13 @@ public class Driver implements TpccConstants {
     public int time_count;
     public PrintWriter freport_file;
 
+    // total count for all threads
     private int[] success;
     private int[] late;
     private int[] retry;
     private int[] failure;
 
+    // per thread counts
     private int[][] success2;
     private int[][] late2;
     private int[][] retry2;
@@ -35,15 +37,13 @@ public class Driver implements TpccConstants {
 
     public double[] max_rt = new double[TRANSACTION_COUNT];
 
-    public long[] clk_tck;
-
     //Private variables
-    private int MAX_RETRY = 2000;
-    private int RTIME_NEWORD = 5;
-    private int RTIME_PAYMENT = 5;
-    private int RTIME_ORDSTAT = 5;
-    private int RTIME_DELIVERY = 80;
-    private int RTIME_SLEV = 20;
+    private final int MAX_RETRY = 2000;
+    private final int RTIME_NEWORD = 5;
+    private final int RTIME_PAYMENT = 5;
+    private final int RTIME_ORDSTAT = 5;
+    private final int RTIME_DELIVERY = 80;
+    private final int RTIME_SLEV = 20;
 
     private Connection conn;
     private TpccStatements pStmts;
@@ -60,7 +60,8 @@ public class Driver implements TpccConstants {
      *
      * @param conn
      */
-    public Driver(Connection conn, int fetchSize, int[] success, int[] late, int[] retry, int[] failure,
+    public Driver(Connection conn, int fetchSize,
+                  int[] success, int[] late, int[] retry, int[] failure,
                   int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
         try {
             this.conn = conn;
@@ -234,6 +235,9 @@ public class Driver implements TpccConstants {
             } else {
 
                 if (Tpcc.counting_on) {
+
+                    logger.info("NEWORD RETRY (RETURN " + ret + ")");
+
                     retry[0]++;
                     retry2[0][t_num]++;
                 }
