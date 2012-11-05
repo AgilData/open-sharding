@@ -627,7 +627,7 @@ public class Load implements TpccConstants {
 						c_credit = "G";
 					else
 						c_credit = "B";
-					c_credit = "C";
+					c_credit += "C";
 
 					c_credit_lim = 50000;
 					c_discount = (float) (((float) Util.randomNumber(0, 50)) / 100.0);
