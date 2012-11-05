@@ -65,8 +65,8 @@ public class Tpcc implements TpccConstants{
 	private int[][] late2;
 	private int[][] retry2;
 	private int[][] failure2;
-	public static int counting_on =0;
-	
+	public static volatile boolean counting_on = false;
+
 	private int[] success2_sum = new int[TRANSACTION_COUNT];
     private int[] late2_sum = new int[TRANSACTION_COUNT];
     private int[] retry2_sum = new int[TRANSACTION_COUNT];
@@ -249,7 +249,7 @@ public class Tpcc implements TpccConstants{
 		System.out.printf("\nMEASURING START.\n\n");
 
         // start counting
-        counting_on = 1;
+        counting_on = true;
 
         // loop for the measure_time
         final long startTime = System.currentTimeMillis();
