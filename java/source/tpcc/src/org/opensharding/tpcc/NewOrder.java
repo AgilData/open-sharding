@@ -403,6 +403,9 @@ public class NewOrder implements TpccConstants {
             if (logger.isDebugEnabled()) {
                 logger.debug("Caught AbortedTransactionException");
             }
+
+            logger.info("Caught AbortedTransactionException");
+
             pStmts.rollback();
             return 0;
         } catch (Exception e) {
