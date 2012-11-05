@@ -122,6 +122,7 @@ public class Payment implements TpccConstants{
 				rs.close();
 				
 			} catch (SQLException e) {
+				logger.error("SELECT w_street_1, w_street_2, w_city, w_state, w_zip, w_name FROM warehouse WHERE w_id = "+ w_id, e);
 				throw new Exception("Payment select transaction error", e);
 			}
 			
@@ -136,6 +137,7 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(11).executeUpdate();
 
 			} catch (SQLException e) {
+				logger.error("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id, e);
 				throw new Exception("Payment update transaction error", e);
 			}
 			
@@ -159,6 +161,7 @@ public class Payment implements TpccConstants{
 
 				rs.close();
 			} catch (SQLException e) {
+				logger.error("SELECT d_street_1, d_street_2, d_city, d_state, d_zip, d_name FROM district WHERE d_w_id = " + w_id +" AND d_id = " + d_id, e);
 				throw new Exception("Payment select transaction error", e);
 			}
 			
@@ -182,6 +185,7 @@ public class Payment implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT count(c_id) FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last, e);
 					throw new Exception("Payment select transaction error", e);
 				}
 				
@@ -211,6 +215,7 @@ public class Payment implements TpccConstants{
 					rs.close();
 
 				} catch (SQLException e) {
+					logger.error("SELECT c_id FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last + " ORDER BY c_first", e);
 					throw new Exception("Payment select transaction error", e);
 				}
 			
@@ -247,6 +252,8 @@ public class Payment implements TpccConstants{
 				rs.close();
 				
 			} catch (SQLException e) {
+				logger.error("SELECT c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since FROM customer " +
+						"WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id + " FOR UPDATE", e);
 				throw new Exception("Payment select transaction error", e);
 			}
 			
@@ -269,6 +276,7 @@ public class Payment implements TpccConstants{
 
 						rs.close();
 					} catch (SQLException e) {
+						logger.error("SELECT c_data FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id, e);
 						throw new Exception("Payment select transaction error", e);
 					}
 
@@ -292,6 +300,7 @@ public class Payment implements TpccConstants{
 						pStmts.getStatement(17).executeUpdate();
 
 					} catch (SQLException e) {
+						logger.error("UPDATE customer SET c_balance = " + c_balance + ", c_data = " + c_data + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id, e);
 						throw new Exception("Payment update transaction error", e);
 					}
 				
@@ -311,6 +320,7 @@ public class Payment implements TpccConstants{
 						pStmts.getStatement(18).executeUpdate();
 
 					} catch (SQLException e) {
+						logger.error("UPDATE customer SET c_balance = " + c_balance + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id, e);
 						throw new Exception("Payment update transaction error", e);
 					}
 					
@@ -329,6 +339,7 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(18).executeUpdate();
 
 				} catch (SQLException e) {
+					logger.error("UPDATE customer SET c_balance = " + c_balance + " WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id, e);
 					throw new Exception("Payment update transaction error", e);
 				}
 				
@@ -353,24 +364,29 @@ public class Payment implements TpccConstants{
 				pStmts.getStatement(19).executeUpdate();
 
 			} catch (SQLException e) {
+				logger.error("INSERT INTO history(h_c_d_id, h_c_w_id, h_c_id, h_d_id, h_w_id, h_date, h_amount, h_data)" +
+						" VALUES( " + c_d_id + "," + c_w_id + "," + c_id + "," + d_id + "," + w_id + "," + currentTimeStamp.toString() + "," + h_amount + "," /*+ h_data*/, e);
 				throw new Exception("Payment insert transaction error", e);
 			}
+			
+			
+			// Commit.
+			pStmts.commit();
+			
+			return 1;
+
 		
 		} catch (Exception e) {
 			try {
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 				pStmts.rollback();
+				return 0;
 			} catch(Throwable th) {
 				throw new RuntimeException("Payment error", th);
 			} finally {
 				logger.error("Payment error", e);
 			}
 		}
-		
-		// Commit.
-		pStmts.commit();
-		
-		return (1);
 
 		
 		

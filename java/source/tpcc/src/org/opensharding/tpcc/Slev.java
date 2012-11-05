@@ -50,6 +50,7 @@ public class Slev implements TpccConstants{
 						}
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT d_next_o_id FROM district WHERE d_id = " + d_id + " AND d_w_id = " + w_id, e);
 					throw new Exception("Slev select transaction error", e);
 				}
 				
@@ -70,6 +71,8 @@ public class Slev implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT DISTINCT ol_i_id FROM order_line WHERE ol_w_id = " + w_id + " AND ol_d_id = " +  d_id + " AND ol_o_id < " + d_next_o_id + 
+							" AND ol_o_id >= (" + d_next_o_id + " - 20)", e);
 					throw new Exception("Slev select transaction error", e);
 				}
 				
@@ -88,12 +91,20 @@ public class Slev implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT count(*) FROM stock WHERE s_w_id = " + w_id + " AND s_i_id = " + ol_i_id + " AND s_quantity < " + level, e);
 					throw new Exception("Slev select transaction error", e);
 				}
+				
+				// Commit.
+				pStmts.commit();
+				
+				return 1;
+				
 			} catch (Exception e) {
 				try {
 					// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 					pStmts.rollback();
+					return 0;
 				} catch(Throwable th) {
 					throw new RuntimeException("Slev error", th);
 				} finally {
@@ -101,11 +112,7 @@ public class Slev implements TpccConstants{
 				}
 			}
 			
-			// Commit.
-			pStmts.commit();
-			
-			return 1;
-			
+
 		}
 
 }

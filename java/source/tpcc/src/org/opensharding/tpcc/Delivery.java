@@ -51,6 +51,7 @@ public class Delivery implements TpccConstants {
 					
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT COALESCE(MIN(no_o_id),0) FROM new_orders WHERE no_d_id = " + d_id + " AND no_w_id = " + w_id, e);
 					throw new Exception("Delivery Select transaction error", e);
 				}
 				
@@ -71,6 +72,7 @@ public class Delivery implements TpccConstants {
 					
 
 				} catch (SQLException e) {
+					logger.error("DELETE FROM new_orders WHERE no_o_id = " + no_o_id + " AND no_d_id = " + d_id + " AND no_w_id = " + w_id, e);
 					throw new Exception(" Delivery Delete transaction error", e);
 				}
 				
@@ -91,6 +93,7 @@ public class Delivery implements TpccConstants {
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT o_c_id FROM orders WHERE o_id = " + no_o_id + " AND o_d_id = " + d_id  + " AND o_w_id = " + w_id, e);
 					throw new Exception(" Delivery Select transaction error", e);
 				}
 								
@@ -106,6 +109,7 @@ public class Delivery implements TpccConstants {
 					
 
 				} catch (SQLException e) {
+					logger.error("UPDATE orders SET o_carrier_id = " + o_carrier_id + " WHERE o_id = " + no_o_id + " AND o_d_id = " + d_id + " AND o_w_id = " + w_id, e);
 					throw new Exception("Delivery Update transcation error", e);
 				}
 				
@@ -122,6 +126,7 @@ public class Delivery implements TpccConstants {
 					
 
 				} catch (SQLException e) {
+					logger.error("UPDATE order_line SET ol_delivery_d = " + currentTimeStamp.toString() + " WHERE ol_o_id = " + no_o_id + " AND ol_d_id = " + d_id + " AND ol_w_id = " + w_id, e);
 					throw new Exception("Delivery Update transaction error", e);
 				}
 				
@@ -141,6 +146,7 @@ public class Delivery implements TpccConstants {
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT SUM(ol_amount) FROM order_line WHERE ol_o_id = " + no_o_id + " AND ol_d_id = " + d_id + " AND ol_w_id = " + w_id, e);
 					throw new Exception("Delivery Select transaction error", e);
 				}
 				
@@ -157,25 +163,27 @@ public class Delivery implements TpccConstants {
 					
 
 				} catch (SQLException e) {
+					logger.error("UPDATE customer SET c_balance = c_balance + " + ol_total + ", c_delivery_cnt = c_delivery_cnt + 1 WHERE c_id = " + c_id + " AND c_d_id = " + d_id + " AND c_w_id = " + w_id, e);
 					throw new Exception("Delivery Update transaction error", e);
 				}
 			}
 		
+			// Commit.
+			pStmts.commit();
+			
+			return 1;
+			
 		} catch (Exception e) {
 			try {
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 				pStmts.rollback();
+				return 0;
 			} catch(Throwable th) {
 				throw new RuntimeException("Delivery error", th);
 			} finally {
 				logger.error("Delivery error", e);
 			}
 		}
-		
-		// Commit.
-		pStmts.commit();
-		
-		return 1;
 		
 	}
 

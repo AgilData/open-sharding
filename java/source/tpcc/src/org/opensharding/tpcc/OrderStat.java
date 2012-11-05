@@ -71,6 +71,7 @@ public class OrderStat implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT count(c_id) FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last, e);
 					throw new Exception("OrderStat Select transaction error", e);
 				}
 				
@@ -101,6 +102,8 @@ public class OrderStat implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e) {
+					logger.error("SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE " +
+							"c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last + " ORDER BY c_first", e);
 					throw new Exception("OrderStat Select transaction error", e);
 				}
 				
@@ -124,6 +127,8 @@ public class OrderStat implements TpccConstants{
 
 					rs.close();
 				} catch (SQLException e){
+					logger.error("SELECT c_balance, c_first, c_middle, c_last FROM customer WHERE " +
+							"c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_id = " + c_id, e);
 					throw new Exception("OrderStat select transaction error", e);
 				}
 				
@@ -152,6 +157,9 @@ public class OrderStat implements TpccConstants{
 
 				rs.close();
 			} catch (SQLException e){
+				logger.error("SELECT o_id, o_entry_d, COALESCE(o_carrier_id,0) FROM orders " +
+						"WHERE o_w_id = " + c_w_id + " AND o_d_id = " + c_d_id + " AND o_c_id = " + c_id + " AND o_id = " +
+						"(SELECT MAX(o_id) FROM orders WHERE o_w_id = " + c_w_id + " AND o_d_id = " + c_d_id + " AND o_c_id = " + c_id, e);
 				throw new Exception("OrderState select transaction error", e);
 			}
 
@@ -175,12 +183,20 @@ public class OrderStat implements TpccConstants{
 
 				rs.close();
 			} catch (SQLException e){
+				logger.error("SELECT ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_delivery_d FROM order_line " +
+						"WHERE ol_w_id = " + c_w_id + " AND ol_d_id = " + c_d_id + " AND ol_o_id = " + o_id, e);
 				throw new Exception("OrderStat select transaction error", e);
 			}
+			
+			// Commit.
+			pStmts.commit();
+				
+			return 1;
 		} catch (Exception e) {
 			try {
 				// Rollback if an aborted transaction, they are intentional in some percentage of cases.
 				pStmts.rollback();
+				return 0;
 			} catch(Throwable th) {
 				throw new RuntimeException("Order stat error", th);
 			} finally {
@@ -188,10 +204,7 @@ public class OrderStat implements TpccConstants{
 			}
 		}
 		
-		// Commit.
-		pStmts.commit();
-			
-		return 1;
+		
 
 	}
 

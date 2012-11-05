@@ -38,11 +38,11 @@ public class Driver implements TpccConstants {
 
 	//Private variables
 	private int MAX_RETRY = 2000;
-	private int RTIME_NEWORD = 100;
-	private int RTIME_PAYMENT = 100;
-	private int RTIME_ORDSTAT = 100;
-	private int RTIME_DELIVERY = 100;
-	private int RTIME_SLEV = 100;
+	private int RTIME_NEWORD = 5;
+	private int RTIME_PAYMENT = 5;
+	private int RTIME_ORDSTAT = 5;
+	private int RTIME_DELIVERY = 80;
+	private int RTIME_SLEV = 20;
 	
 	private Connection conn;
 	private TpccStatements pStmts;
