@@ -100,6 +100,10 @@ public class Util implements TpccConstants {
             div = div * -1;
         }
         int value = min + div;
+
+        if (value < min || value > max) {
+            throw new IllegalStateException("next=" + next + ", div=" + div + ", min=" + min + ", max=" + max + ", value=" + value);
+        }
         return value;
     }
 
