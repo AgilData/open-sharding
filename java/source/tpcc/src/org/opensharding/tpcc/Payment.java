@@ -84,9 +84,7 @@ public class Payment implements TpccConstants{
 			int proceed = 0;
 	        
 	        //Time Stamp
-	        Calendar calendar = Calendar.getInstance();
-			Date now = calendar.getTime();
-			Timestamp currentTimeStamp = new Timestamp(now.getTime());
+			final Timestamp currentTimeStamp = new Timestamp(System.currentTimeMillis());
 	
 			proceed = 1;
 			
@@ -195,20 +193,30 @@ public class Payment implements TpccConstants{
 					pStmts.getStatement(14).setInt(2, c_d_id);
 					pStmts.getStatement(14).setString(3, c_last);
 					if(TRACE) logger.trace("SELECT c_id FROM customer WHERE c_w_id = " + c_w_id + " AND c_d_id = " + c_d_id + " AND c_last = " + c_last + " ORDER BY c_first");
-					ResultSet rs = pStmts.getStatement(14).executeQuery();
-					while(rs.next()){
-						c_id = rs.getInt(1);
-					}
 
+                    if (namecnt % 2 == 1) {
+                        namecnt++;	/* Locate midpoint customer; */
+                    }
+
+                    ResultSet rs = pStmts.getStatement(14).executeQuery();
+                    for (n = 0; n < namecnt / 2; n++) {
+                        if (rs.next()) {
+                            //SUCCESS
+                            c_id = rs.getInt(1);
+                        }
+                        else {
+                            throw new IllegalStateException();
+                        }
+                    }
 					rs.close();
+
 				} catch (SQLException e) {
 					throw new Exception("Payment select transaction error", e);
 				}
 			
-				if (namecnt % 2 == 1) 
-					namecnt++;	/* Locate midpoint customer; */
-				
-			}
+            }
+
+            proceed = 6;
 				
 			//Get the prepared statement
 			//"SELECT c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_credit, c_credit_lim, c_discount, c_balance, c_since FROM customer WHERE c_w_id = ? AND c_d_id = ? AND c_id = ? FOR UPDATE"
@@ -244,8 +252,6 @@ public class Payment implements TpccConstants{
 			
 			c_balance += h_amount;
 			
-			//CHECK: Do we need to do it this way?
-			//c_credit.toCharArray()[2] = '\0';
 			if(c_credit != null){
 				if (c_credit.contains("BC")) {
 					proceed = 7;
@@ -266,15 +272,12 @@ public class Payment implements TpccConstants{
 						throw new Exception("Payment select transaction error", e);
 					}
 
+                    //TODO: c_new_data is never used - this is a bug ported exactly from the original code
 					c_new_data = String.format("| %d %d %d %d %d $%f %s %s", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
 
-                    //TODO: fix this ....
+                    //TODO: fix this - causes index out of bounds exceptions
 					//c_new_data = ( c_new_data + c_data.substring(0, (500 - c_new_data.length()) ) );
-					
-					
-					//CHECK: Is this how we want to do this?
-					//c_new_data.toCharArray()[500] = '\0';
-		
+
 					proceed = 8;
 					//Get prepared statement
 					//"UPDATE customer SET c_balance = ?, c_data = ? WHERE c_w_id = ? AND c_d_id = ? AND c_id = ?"
