@@ -27,8 +27,7 @@ public class TpccStatements {
 	
 	public void init() {
 		try {
-//			pStmts[0] = conn.prepareStatement("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = ? AND c_d_id = ? AND c_id = ?");
-			pStmts[0] = conn.prepareStatement("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_d_id = ? AND c_id = ?");
+			pStmts[0] = conn.prepareStatement("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = ? AND c_d_id = ? AND c_id = ?");
 			pStmts[1] = conn.prepareStatement("SELECT d_next_o_id, d_tax FROM district WHERE d_id = ? AND d_w_id = ? FOR UPDATE");
 			pStmts[2] = conn.prepareStatement("UPDATE district SET d_next_o_id = ? + 1 WHERE d_id = ? AND d_w_id = ?");
 			pStmts[3] = conn.prepareStatement("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) VALUES(?, ?, ?, ?, ?, ?, ?)");
