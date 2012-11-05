@@ -266,7 +266,7 @@ public class Payment implements TpccConstants{
 						throw new Exception("Payment select transaction error", e);
 					}
 					
-					c_new_data = String.format("| %d %d %d %d %d $%f %c %c", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
+					c_new_data = String.format("| %d %d %d %d %d $%f %s %s", c_id, c_d_id, c_w_id, d_id, w_id, h_amount, currentTimeStamp.toString(), c_data);
 					
 					c_new_data = ( c_new_data + c_data.substring(0, (500 - c_new_data.length()) ) );
 					
