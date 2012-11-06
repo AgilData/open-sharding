@@ -537,7 +537,6 @@ public class Driver implements TpccConstants {
 
             if (ret >= 1) {
 
-                //rt = (double)(tbuf2.tv_sec * 1000.0 + tbuf2.tv_nsec/1000000.0-tbuf1.tv_sec * 1000.0 - tbuf1.tv_nsec/1000000.0);
                 rt = (double) (endTime - beginTime);
                 if (rt > max_rt[4])
                     max_rt[4] = rt;

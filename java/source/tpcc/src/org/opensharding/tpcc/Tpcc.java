@@ -342,7 +342,7 @@ public class Tpcc implements TpccConstants {
         System.out.printf(" [response time (at least 90%% passed)]\n");
 
         for (int n=0; n<TRANSACTION_NAME.length; n++) {
-            f = 100.0 * (float) success[0] / (float) (success[n] + late[n]);
+            f = 100.0 * (float) success[n] / (float) (success[n] + late[n]);
             if (DEBUG) logger.debug("f: " + f + " success[" + n + "]: " + success[n] + " late[" + n + "]: " + late[n]);
             System.out.printf("      %s: %f%% ", TRANSACTION_NAME[n], f);
             if (f >= 90.0) {
