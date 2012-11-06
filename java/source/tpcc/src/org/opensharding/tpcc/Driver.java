@@ -314,11 +314,11 @@ public class Driver implements TpccConstants {
         // if(DEBUG) logger.debug("Payment| cnum: " + c_num + "  w_id: " +w_id + " d_id: " + d_id + " c_id: " + c_id + " c_last: " + c_last + " h_amount: " + h_amount + " byname: " + byname + " c_w_id: " + c_w_id +  " c_d_id: " + c_d_id );
 
         //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
-        beginTime = System.nanoTime();
+        beginTime = System.currentTimeMillis();
         for (i = 0; i < MAX_RETRY; i++) {
             ret = payment.payment(t_num, w_id, d_id, byname, c_w_id, c_d_id, c_id, c_last, h_amount);
             // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
-            endTime = System.nanoTime();
+            endTime = System.currentTimeMillis();
 
             if (ret >= 1) {
 
@@ -395,11 +395,11 @@ public class Driver implements TpccConstants {
         }
 
         //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
-        beginTime = System.nanoTime();
+        beginTime = System.currentTimeMillis();
         for (i = 0; i < MAX_RETRY; i++) {
             ret = orderStat.ordStat(t_num, w_id, d_id, byname, c_id, c_last);
             // clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
-            endTime = System.nanoTime();
+            endTime = System.currentTimeMillis();
 
             if (ret >= 1) {
 
@@ -462,10 +462,10 @@ public class Driver implements TpccConstants {
         }
         o_carrier_id = Util.randomNumber(1, 10);
 
-        beginTime = System.nanoTime();
+        beginTime = System.currentTimeMillis();
         for (i = 0; i < MAX_RETRY; i++) {
             ret = delivery.delivery(w_id, o_carrier_id);
-            endTime = System.nanoTime();
+            endTime = System.currentTimeMillis();
             if (ret >= 1) {
 
                 rt = (double) (endTime - beginTime);
@@ -529,11 +529,11 @@ public class Driver implements TpccConstants {
         level = Util.randomNumber(10, 20);
 
         // clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
-        beginTime = System.nanoTime();
+        beginTime = System.currentTimeMillis();
         for (i = 0; i < MAX_RETRY; i++) {
             ret = slev.slev(t_num, w_id, d_id, level);
             //clk2 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf2 );
-            endTime = System.nanoTime();
+            endTime = System.currentTimeMillis();
 
             if (ret >= 1) {
 
