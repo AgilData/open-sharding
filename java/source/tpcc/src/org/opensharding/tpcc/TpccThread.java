@@ -95,13 +95,15 @@ public class TpccThread extends Thread {
                     prop.load(is);
                     is.close();
 
-                    logger.info("Connection properties: {");
-                    final Set<Map.Entry<Object,Object>> entries = prop.entrySet();
-                    for (Map.Entry<Object,Object> entry : entries) {
-                        logger.info(entry.getKey() + " = " + entry.getValue());
-                    }
+                    if (logger.isDebugEnabled()) {
+                        logger.debug("Connection properties: {");
+                        final Set<Map.Entry<Object,Object>> entries = prop.entrySet();
+                        for (Map.Entry<Object,Object> entry : entries) {
+                            logger.debug(entry.getKey() + " = " + entry.getValue());
+                        }
 
-                    logger.info("}");
+                        logger.debug("}");
+                    }
 
                 } catch (IOException e) {
                     logger.error("", e);
@@ -122,12 +124,6 @@ public class TpccThread extends Thread {
             throw new RuntimeException("Connection to specific host error", e);
         }
 
-
-        try {
-            conn.setAutoCommit(false);
-        } catch (SQLException e) {
-            throw new RuntimeException("Set AutoCommit error", e);
-        }
 
         try {
             // Create a driver instance.
