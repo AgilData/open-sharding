@@ -111,7 +111,6 @@ public class Driver implements TpccConstants {
 
                 if (sequence == 0) {
                     doNeword(t_num, conn, pStmts);
-
                 } else if (sequence == 1) {
                     doPayment(t_num, conn, pStmts);
                 } else if (sequence == 2) {

@@ -7,7 +7,9 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.Properties;
+import java.util.Set;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -87,18 +89,33 @@ public class TpccThread extends Thread {
             Properties prop = new Properties();
             File connPropFile = new File("conf/jdbc-connection.properties");
             if (connPropFile.exists()) {
+                logger.info("Loading JDBC connection properties from " + connPropFile.getAbsolutePath());
                 try {
                     final FileInputStream is = new FileInputStream(connPropFile);
                     prop.load(is);
                     is.close();
+
+                    logger.info("Connection properties: {");
+                    final Set<Map.Entry<Object,Object>> entries = prop.entrySet();
+                    for (Map.Entry<Object,Object> entry : entries) {
+                        logger.info(entry.getKey() + " = " + entry.getValue());
+                    }
+
+                    logger.info("}");
+
                 } catch (IOException e) {
                     logger.error("", e);
                 }
+            }
+            else {
+                logger.warn(connPropFile.getAbsolutePath() + " does not exist! Using default connection properties");
             }
             prop.put("user", db_user);
             prop.put("password", db_password);
 
             conn = DriverManager.getConnection(jdbcUrl, prop);
+            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED); //TODO: make configurable
+            conn.setAutoCommit(false);
 
         } catch (SQLException e) {
             // TODO Auto-generated catch block
