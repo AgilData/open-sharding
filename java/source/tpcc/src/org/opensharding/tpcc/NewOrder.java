@@ -1,9 +1,6 @@
 package org.opensharding.tpcc;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -28,6 +25,12 @@ public class NewOrder implements TpccConstants {
     private String s_dist_09 = null;
     private String s_dist_10 = null;
 
+    String[] iname = new String[MAX_NUM_ITEMS];
+    String[] bg = new String[MAX_NUM_ITEMS];
+    float[] amt = new float[MAX_NUM_ITEMS];
+    float[] price = new float[MAX_NUM_ITEMS];
+    int[] stock = new int[MAX_NUM_ITEMS];
+    int[] ol_num_seq = new int[MAX_NUM_ITEMS];
 
     /**
      * Constructor.
@@ -116,16 +119,10 @@ public class NewOrder implements TpccConstants {
             int ol_number = 0;
             int ol_quantity = 0;
 
-            String[] iname = new String[MAX_NUM_ITEMS];
-            String[] bg = new String[MAX_NUM_ITEMS];
-            float[] amt = new float[MAX_NUM_ITEMS];
-            float[] price = new float[MAX_NUM_ITEMS];
-            int[] stock = new int[MAX_NUM_ITEMS];
 
 
             int min_num = 0;
             int i = 0, j = 0, tmp = 0, swp = 0;
-            int[] ol_num_seq = new int[MAX_NUM_ITEMS];
 
 
             //struct timespec tbuf1,tbuf_start;
@@ -142,13 +139,14 @@ public class NewOrder implements TpccConstants {
             //"SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = w_id AND c_d_id = ? AND c_id = ?"
             try {
                 int column = 1;
-                pStmts.getStatement(0).setInt(column++, w_id);
-                pStmts.getStatement(0).setInt(column++, w_id);
-                pStmts.getStatement(0).setInt(column++, d_id);
-                pStmts.getStatement(0).setInt(column++, c_id);
+                final PreparedStatement pstmt0 = pStmts.getStatement(0);
+                pstmt0.setInt(column++, w_id);
+                pstmt0.setInt(column++, w_id);
+                pstmt0.setInt(column++, d_id);
+                pstmt0.setInt(column++, c_id);
                 if (TRACE)
                     logger.trace("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
-                ResultSet rs = pStmts.getStatement(0).executeQuery();
+                ResultSet rs = pstmt0.executeQuery();
                 if (rs.next()) {
                     c_discount = rs.getFloat(1);
                     c_last = rs.getString(2);
@@ -165,11 +163,12 @@ public class NewOrder implements TpccConstants {
             //"SELECT d_next_o_id, d_tax FROM district WHERE d_id = ? AND d_w_id = ? FOR UPDATE"
 
             try {
-                pStmts.getStatement(1).setInt(1, d_id);
-                pStmts.getStatement(1).setInt(2, w_id);
+                final PreparedStatement pstmt1 = pStmts.getStatement(1);
+                pstmt1.setInt(1, d_id);
+                pstmt1.setInt(2, w_id);
                 if (TRACE)
                     logger.trace("SELECT d_next_o_id, d_tax FROM district WHERE d_id = " + d_id + "  AND d_w_id = " + w_id + " FOR UPDATE");
-                ResultSet rs = pStmts.getStatement(1).executeQuery();
+                ResultSet rs = pstmt1.executeQuery();
                 if (rs.next()) {
                     d_next_o_id = rs.getInt(1);
                     d_tax = rs.getFloat(2);
@@ -188,12 +187,13 @@ public class NewOrder implements TpccConstants {
             //"UPDATE district SET d_next_o_id = ? + 1 WHERE d_id = ? AND d_w_id = ?"
 
             try {
-                pStmts.getStatement(2).setInt(1, d_next_o_id);
-                pStmts.getStatement(2).setInt(2, d_id);
-                pStmts.getStatement(2).setInt(3, w_id);
+                final PreparedStatement pstmt2 = pStmts.getStatement(2);
+                pstmt2.setInt(1, d_next_o_id);
+                pstmt2.setInt(2, d_id);
+                pstmt2.setInt(3, w_id);
                 if (TRACE)
                     logger.trace("UPDATE district SET d_next_o_id = " + d_next_o_id + " + 1 WHERE d_id = " + d_id + " AND d_w_id = " + w_id);
-                pStmts.getStatement(2).executeUpdate();
+                pstmt2.executeUpdate();
 
 
             } catch (SQLException e) {
@@ -207,17 +207,18 @@ public class NewOrder implements TpccConstants {
             //"INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) VALUES(?, ?, ?, ?, ?, ?, ?)"
 
             try {
-                pStmts.getStatement(3).setInt(1, o_id);
-                pStmts.getStatement(3).setInt(2, d_id);
-                pStmts.getStatement(3).setInt(3, w_id);
-                pStmts.getStatement(3).setInt(4, c_id);
-                pStmts.getStatement(3).setString(5, currentTimeStamp);
-                pStmts.getStatement(3).setInt(6, o_ol_cnt);
-                pStmts.getStatement(3).setInt(7, o_all_local);
+                final PreparedStatement pstmt3 = pStmts.getStatement(3);
+                pstmt3.setInt(1, o_id);
+                pstmt3.setInt(2, d_id);
+                pstmt3.setInt(3, w_id);
+                pstmt3.setInt(4, c_id);
+                pstmt3.setString(5, currentTimeStamp);
+                pstmt3.setInt(6, o_ol_cnt);
+                pstmt3.setInt(7, o_all_local);
                 if (TRACE)
                     logger.trace("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) " +
                             "VALUES(" + o_id + "," + d_id + "," + w_id + "," + c_id + "," + currentTimeStamp + "," + o_ol_cnt + "," + o_all_local + ")");
-                pStmts.getStatement(3).executeUpdate();
+                pstmt3.executeUpdate();
 
 
             } catch (SQLException e) {
@@ -229,12 +230,13 @@ public class NewOrder implements TpccConstants {
             //Get prepared statement
             //"INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) VALUES (?,?,?)
             try {
-                pStmts.getStatement(4).setInt(1, o_id);
-                pStmts.getStatement(4).setInt(2, d_id);
-                pStmts.getStatement(4).setInt(3, w_id);
+                final PreparedStatement pstmt4 = pStmts.getStatement(4);
+                pstmt4.setInt(1, o_id);
+                pstmt4.setInt(2, d_id);
+                pstmt4.setInt(3, w_id);
                 if (TRACE)
                     logger.trace("INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) VALUES (" + o_id + "," + d_id + "," + w_id + ")");
-                pStmts.getStatement(4).executeUpdate();
+                pstmt4.executeUpdate();
 
 
             } catch (SQLException e) {
@@ -273,15 +275,16 @@ public class NewOrder implements TpccConstants {
                 //"SELECT i_price, i_name, i_data FROM item WHERE i_id = ?"
 
                 try {
-                    pStmts.getStatement(5).setInt(1, ol_i_id);
+                    final PreparedStatement pstmt5 = pStmts.getStatement(5);
+                    pstmt5.setInt(1, ol_i_id);
                     if (TRACE) logger.trace("SELECT i_price, i_name, i_data FROM item WHERE i_id =" + ol_i_id);
-                    ResultSet rs = pStmts.getStatement(5).executeQuery();
+                    ResultSet rs = pstmt5.executeQuery();
                     if (rs.next()) {
                         i_price = rs.getFloat(1);
                         i_name = rs.getString(2);
                         i_data = rs.getString(3);
                     } else {
-                        if (logger.isDebugEnabled()) {
+                        if (DEBUG) {
                             logger.debug("No item found for item id " + ol_i_id);
                         }
                         throw new AbortedTransactionException();
@@ -299,12 +302,13 @@ public class NewOrder implements TpccConstants {
                 //Get prepared statement
                 //"SELECT s_quantity, s_data, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10 FROM stock WHERE s_i_id = ? AND s_w_id = ? FOR UPDATE"
                 try {
-                    pStmts.getStatement(6).setInt(1, ol_i_id);
-                    pStmts.getStatement(6).setInt(2, ol_supply_w_id);
+                    final PreparedStatement pstmt6 = pStmts.getStatement(6);
+                    pstmt6.setInt(1, ol_i_id);
+                    pstmt6.setInt(2, ol_supply_w_id);
                     if (TRACE)
                         logger.trace("SELECT s_quantity, s_data, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10 FROM " +
                                 "stock WHERE s_i_id = " + ol_i_id + " AND s_w_id = " + ol_supply_w_id + " FOR UPDATE");
-                    ResultSet rs = pStmts.getStatement(6).executeQuery();
+                    ResultSet rs = pstmt6.executeQuery();
                     if (rs.next()) {
                         s_quantity = rs.getInt(1);
                         s_data = rs.getString(2);
@@ -332,7 +336,7 @@ public class NewOrder implements TpccConstants {
 
                 stock[ol_num_seq[ol_number - 1]] = s_quantity;
 
-                if ((i_data.toString().contains("original")) && (s_data.toString().contains("original"))) {
+                if ((i_data.contains("original")) && (s_data.contains("original"))) {
                     bg[ol_num_seq[ol_number - 1]] = "B";
 
                 } else {
@@ -349,12 +353,13 @@ public class NewOrder implements TpccConstants {
                 //Get the prepared statement
                 //"UPDATE stock SET s_quantity = ? WHERE s_i_id = ? AND s_w_id = ?"
                 try {
-                    pStmts.getStatement(7).setInt(1, s_quantity);
-                    pStmts.getStatement(7).setInt(2, ol_i_id);
-                    pStmts.getStatement(7).setInt(3, ol_supply_w_id);
+                    final PreparedStatement pstmt7 = pStmts.getStatement(7);
+                    pstmt7.setInt(1, s_quantity);
+                    pstmt7.setInt(2, ol_i_id);
+                    pstmt7.setInt(3, ol_supply_w_id);
                     if (TRACE)
                         logger.trace("UPDATE stock SET s_quantity = " + s_quantity + " WHERE s_i_id = " + ol_i_id + " AND s_w_id = " + ol_supply_w_id);
-                    pStmts.getStatement(7).executeUpdate();
+                    pstmt7.executeUpdate();
 
 
                 } catch (SQLException e) {
@@ -370,26 +375,27 @@ public class NewOrder implements TpccConstants {
                 //"INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
 
                 try {
-                    pStmts.getStatement(8).setInt(1, o_id);
-                    pStmts.getStatement(8).setInt(2, d_id);
-                    pStmts.getStatement(8).setInt(3, w_id);
-                    pStmts.getStatement(8).setInt(4, ol_number);
-                    pStmts.getStatement(8).setInt(5, ol_i_id);
-                    pStmts.getStatement(8).setInt(6, ol_supply_w_id);
-                    pStmts.getStatement(8).setInt(7, ol_quantity);
-                    pStmts.getStatement(8).setFloat(8, ol_amount);
-                    pStmts.getStatement(8).setString(9, ol_dist_info.toString());
+                    final PreparedStatement pstmt8 = pStmts.getStatement(8);
+                    pstmt8.setInt(1, o_id);
+                    pstmt8.setInt(2, d_id);
+                    pstmt8.setInt(3, w_id);
+                    pstmt8.setInt(4, ol_number);
+                    pstmt8.setInt(5, ol_i_id);
+                    pstmt8.setInt(6, ol_supply_w_id);
+                    pstmt8.setInt(7, ol_quantity);
+                    pstmt8.setFloat(8, ol_amount);
+                    pstmt8.setString(9, ol_dist_info);
                     if (TRACE)
                         logger.trace("INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info) " +
                                 "VALUES (" + o_id + "," + d_id + "," + w_id + "," + ol_number + "," + ol_i_id + "," + ol_supply_w_id + "," + ol_quantity + ","
-                                + ol_amount + "," + ol_dist_info.toString() + ")");
-                    pStmts.getStatement(8).executeUpdate();
+                                + ol_amount + "," + ol_dist_info + ")");
+                    pstmt8.executeUpdate();
 
 
                 } catch (SQLException e) {
                     logger.error("INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_quantity, ol_amount, ol_dist_info) " +
                             "VALUES (" + o_id + "," + d_id + "," + w_id + "," + ol_number + "," + ol_i_id + "," + ol_supply_w_id + "," + ol_quantity + ","
-                            + ol_amount + "," + ol_dist_info.toString() + ")", e);
+                            + ol_amount + "," + ol_dist_info + ")", e);
                     throw new Exception("NewOrder insert transaction error", e);
                 }
 
