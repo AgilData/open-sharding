@@ -100,7 +100,7 @@ public class TpccLoad implements TpccConstants {
 		shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
 		javaDriver = properties.getProperty(DRIVER);
 		jdbcUrl = properties.getProperty(JDBCURL);
-		//shardId = Integer.parseInt(properties.getProperty(SHARDID));
+		shardId = Integer.parseInt(properties.getProperty(SHARDID));
 		  
 		if(connect_string == null){
 			throw new RuntimeException("Host is null.");
@@ -123,9 +123,9 @@ public class TpccLoad implements TpccConstants {
 		if(jdbcUrl == null){
 			  throw new RuntimeException("JDBC Url is null.");
 		}
-//		if(shardId == -1){
-//			throw new RuntimeException("ShardId was not obtained");
-//		}
+		if(shardId == -1){
+			throw new RuntimeException("ShardId was not obtained");
+		}
 		
 		System.out.printf("<Parameters>\n");
 		if(is_local==0) System.out.printf("     [server]: %s\n", connect_string);
@@ -135,7 +135,7 @@ public class TpccLoad implements TpccConstants {
 		System.out.printf("       [pass]: %s\n", db_password);
 
 		System.out.printf("  [warehouse]: %d\n", num_ware);
-
+		System.out.printf(" [shardId]: %d\n", shardId);
 		if(particle_flg==1){
 		    System.out.printf("  [part(1-4)]: %d\n", part_no);
 		    System.out.printf("     [MIN WH]: %d\n", min_ware);
@@ -187,22 +187,22 @@ public class TpccLoad implements TpccConstants {
 		if(particle_flg==0){
 			System.out.printf("Particle flag: %d\n", particle_flg);
 			Load.loadItems(conn, shardCount, option_debug);
-			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
-			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
-			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
+			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
+			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
 				 Load.loadItems(conn, shardCount, option_debug);
 				 break;
 			case 2:
-			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
+			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
 			    break;
 			case 3:
-			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
+			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 			    break;
 			case 4:
-			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);;
+			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 			    break;
 			default:
 			    System.out.printf("Unknown part_no\n");

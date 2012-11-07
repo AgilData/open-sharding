@@ -131,7 +131,7 @@ public class Load implements TpccConstants {
 	 * table |      Loads Stock, District as Warehouses are created | ARGUMENTS |
 	 * none +==================================================================
 	 */
-	public static void loadWare(Connection conn, int shardCount, int min_ware, int max_ware, boolean option_debug){
+	public static void loadWare(Connection conn, int shardCount, int min_ware, int max_ware, boolean option_debug, int shardId){
 
 		int w_id;
 	    String w_name = null;
@@ -155,12 +155,8 @@ public class Load implements TpccConstants {
 			throw new RuntimeException("Creation of statement failed", e);
 		}
 
-		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
-
 		System.out.printf("Loading Warehouse \n");
-	  //  w_id = (int) min_ware;
 	
-	   
 	    retry:
 		    if (retried )
 		        System.out.printf("Retrying ....\n");
@@ -174,7 +170,7 @@ public class Load implements TpccConstants {
 					}
 				}
 				
-				
+				if((currentShard == shardId) || (shardId == 0)){
 					System.out.println("Current Shard: " + currentShard);
 					/* Generate Warehouse Data */
 		
@@ -232,7 +228,7 @@ public class Load implements TpccConstants {
 					stock(w_id, conn, shardCount, currentShard);
 					district(w_id, conn, shardCount, currentShard);
 				
-				
+				}	
 
 		}
 		/* EXEC SQL COMMIT WORK; */
@@ -256,7 +252,7 @@ public class Load implements TpccConstants {
 	 * | ARGUMENTS |      none
 	 * +==================================================================
 	 */
-	public static void loadCust(Connection conn, int shardCount, int min_ware, int max_ware){
+	public static void loadCust(Connection conn, int shardCount, int min_ware, int max_ware, int shardId){
 
 		int w_id = 1;
 		int d_id = 1;
@@ -265,7 +261,7 @@ public class Load implements TpccConstants {
 
 		for (; w_id <= max_ware; w_id++)
 			for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
-				customer(d_id, w_id, conn, shardCount);
+				customer(d_id, w_id, conn, shardCount, shardId);
 
 		return;
 	}
@@ -276,7 +272,7 @@ public class Load implements TpccConstants {
 	 * Order_Line Tables | ARGUMENTS |      none
 	 * +==================================================================
 	 */
-	public static void loadOrd(Connection conn, int shardCount, int min_ware, int max_ware){
+	public static void loadOrd(Connection conn, int shardCount, int min_ware, int max_ware, int shardId){
 
 		int w_id = 1;
 		float w_tax = 0;
@@ -287,7 +283,7 @@ public class Load implements TpccConstants {
 
 		for (; w_id <= max_ware; w_id++)
 			for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
-				orders(d_id, w_id, conn, shardCount);
+				orders(d_id, w_id, conn, shardCount, shardId);
 
 		return;
 	}
@@ -549,7 +545,7 @@ public class Load implements TpccConstants {
 	 * customer id |      d_id - district id |      w_id - warehouse id
 	 * +==================================================================
 	 */
-	public static void customer(int d_id, int w_id, Connection conn, int shardCount){
+	public static void customer(int d_id, int w_id, Connection conn, int shardCount, int shardId){
 		int c_id = 0;
 		int c_d_id = 0;
 		int c_w_id = 0;
@@ -594,7 +590,7 @@ public class Load implements TpccConstants {
 			}
 		}
 		
-		
+		if((currentShard == shardId) || (shardId == 0)){
 			retry:
 			    if (retried)
 			        System.out.printf("Retrying ...\n");
@@ -764,8 +760,7 @@ public class Load implements TpccConstants {
 					throw new RuntimeException("Batch execution History error", e);
 				}
 		
-		
-	
+		}
 		
 		System.out.printf("Customer Done.\n");
 
@@ -779,7 +774,7 @@ public class Load implements TpccConstants {
 	 * warehouse id
 	 * +==================================================================
 	 */
-	public static void orders(int d_id, int w_id, Connection conn, int shardCount){
+	public static void orders(int d_id, int w_id, Connection conn, int shardCount, int shardId){
 		int o_id = 0;
 		int o_c_id = 0;
 		int o_d_id = 0;
@@ -815,7 +810,7 @@ public class Load implements TpccConstants {
 			}
 		}
 		
-		
+		if((currentShard == shardId) || (shardId == 0 )){
 			System.out.printf("Loading Orders for D=%d, W= %d\n", d_id, w_id);
 			o_d_id = d_id;
 			o_w_id = w_id;
@@ -1065,8 +1060,7 @@ public class Load implements TpccConstants {
 			}
 			
 			
-		
-
+		}
 		
 
 		System.out.printf("Orders Done.\n");
