@@ -158,7 +158,7 @@ public class Load implements TpccConstants {
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
 
 		System.out.printf("Loading Warehouse \n");
-	    w_id = (int) min_ware;
+	  //  w_id = (int) min_ware;
 	
 	   
 	    retry:
