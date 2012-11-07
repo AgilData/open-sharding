@@ -12,7 +12,7 @@ public class TpccStatements {
 
     private static final Logger logger = LogManager.getLogger(TpccStatements.class);
 	
-	public static int STMT_COUNT = 35;
+	public static int STMT_COUNT = 36;
 	
 	private Connection conn;
     int fetchSize;
@@ -62,6 +62,7 @@ public class TpccStatements {
 			pStmts[32] = prepareStatement("SELECT d_next_o_id FROM district WHERE d_id = ? AND d_w_id = ?");
 			pStmts[33] = prepareStatement("SELECT DISTINCT ol_i_id FROM order_line WHERE ol_w_id = ? AND ol_d_id = ? AND ol_o_id < ? AND ol_o_id >= (? - 20)");
 			pStmts[34] = prepareStatement("SELECT count(*) FROM stock WHERE s_w_id = ? AND s_i_id = ? AND s_quantity < ?");
+			pStmts[35] = prepareStatement("/*DBS_HINT: dbs_shard_action=shard_read, dbs_table_name=warehouse, dbs_shard_key_param_index=1 */ SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = ? AND c_d_id = ? AND c_id = ?");
 
             for (int i=0; i<pStmts.length; i++) {
                 pStmts[i].setFetchSize(fetchSize);

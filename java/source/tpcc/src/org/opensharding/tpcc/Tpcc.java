@@ -26,6 +26,7 @@ public class Tpcc implements TpccConstants {
     private static final String RAMPUPTIME = "RAMPUPTIME";
     private static final String DURATION = "DURATION";
     private static final String JDBCURL = "JDBCURL";
+    private static final String SHARDCOUNT = "SHARDCOUNT";
 
     private static final String PROPERTIESFILE = "tpcc.properties";
 
@@ -40,6 +41,7 @@ public class Tpcc implements TpccConstants {
     private String dbHost;
     private String dbUser;
     private String dbPassword;
+    private int shardCount;
 
 
     private int numWare;
@@ -147,6 +149,7 @@ public class Tpcc implements TpccConstants {
         measureTime = Integer.parseInt(properties.getProperty(DURATION));
         javaDriver = properties.getProperty(DRIVER);
         jdbcUrl = properties.getProperty(JDBCURL);
+        shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
         String jdbcFetchSize = properties.getProperty("JDBCFETCHSIZE");
 
         if (connectString == null) {
@@ -231,7 +234,7 @@ public class Tpcc implements TpccConstants {
         for (int i = 0; i < numConn; i++) {
             Runnable worker = new TpccThread(i, port, 1, connectString, dbUser, dbPassword, dbString, numWare, numConn,
                     javaDriver, jdbcUrl, fetchSize,
-                    success, late, retry, failure, success2, late2, retry2, failure2);
+                    success, late, retry, failure, success2, late2, retry2, failure2, shardCount);
             executor.execute(worker);
         }
 

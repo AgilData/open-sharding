@@ -94,7 +94,7 @@ public class Driver implements TpccConstants {
         }
     }
 
-    public int runTransaction(int t_num, int numWare, int numConn) {
+    public int runTransaction(int t_num, int numWare, int numConn, int shardCount) {
 
         num_ware = numWare;
         num_conn = numConn;
@@ -110,7 +110,7 @@ public class Driver implements TpccConstants {
                 if (DEBUG) logger.debug("BEFORE runTransaction: sequence: " + sequence);
 
                 if (sequence == 0) {
-                    doNeword(t_num, conn, pStmts);
+                    doNeword(t_num, conn, pStmts, shardCount);
                 } else if (sequence == 1) {
                     doPayment(t_num, conn, pStmts);
                 } else if (sequence == 2) {
@@ -145,7 +145,7 @@ public class Driver implements TpccConstants {
       * prepare data and execute the new order transaction for one order
       * officially, this is supposed to be simulated terminal I/O
       */
-    private int doNeword(int t_num, Connection conn, TpccStatements pStmts) {
+    private int doNeword(int t_num, Connection conn, TpccStatements pStmts, int shardCount) {
         int c_num = 0;
         int i = 0;
         int ret = 0;
@@ -202,7 +202,7 @@ public class Driver implements TpccConstants {
         for (i = 0; i < MAX_RETRY; i++) {
             if (DEBUG)
                 logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local + " qty: " + Arrays.toString(qty));
-            ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty);
+            ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, shardCount);
             endTime = System.currentTimeMillis();
 
             if (ret == 1) {

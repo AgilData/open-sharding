@@ -31,6 +31,7 @@ public class TpccThread extends Thread {
 	String driverClassName;
 	String jdbcUrl;
     int fetchSize;
+    int shardCount;
 	
 	private int[] success;
 	private int[] late;
@@ -47,7 +48,7 @@ public class TpccThread extends Thread {
 	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, 
 			String db_string, int num_ware, int num_conn, String driver, String dURL, int fetchSize,
 			int[] success, int[] late, int[] retry, int[] failure, 
-			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
+			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2, int shardCount) {
 		
         this.number = number;
         this.port = port;
@@ -71,6 +72,8 @@ public class TpccThread extends Thread {
 		this.late2 = late2;
 		this.retry2 = retry2;
 		this.failure2 = failure2;
+		
+		this.shardCount = shardCount;
 
 	}
 
@@ -135,7 +138,7 @@ public class TpccThread extends Thread {
                 logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
             }
 
-            driver.runTransaction(number, num_ware, num_conn);
+            driver.runTransaction(number, num_ware, num_conn, shardCount);
 
         } catch (Throwable e) {
             logger.error("Unhandled exception", e);
