@@ -100,7 +100,7 @@ public class TpccLoad implements TpccConstants {
 		shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
 		javaDriver = properties.getProperty(DRIVER);
 		jdbcUrl = properties.getProperty(JDBCURL);
-		shardId = Integer.parseInt(properties.getProperty(SHARDID));
+		//shardId = Integer.parseInt(properties.getProperty(SHARDID));
 		  
 		if(connect_string == null){
 			throw new RuntimeException("Host is null.");
@@ -123,9 +123,9 @@ public class TpccLoad implements TpccConstants {
 		if(jdbcUrl == null){
 			  throw new RuntimeException("JDBC Url is null.");
 		}
-		if(shardId == -1){
-			throw new RuntimeException("ShardId was not obtained");
-		}
+//		if(shardId == -1){
+//			throw new RuntimeException("ShardId was not obtained");
+//		}
 		
 		System.out.printf("<Parameters>\n");
 		if(is_local==0) System.out.printf("     [server]: %s\n", connect_string);
