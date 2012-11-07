@@ -187,22 +187,22 @@ public class TpccLoad implements TpccConstants {
 		if(particle_flg==0){
 			System.out.printf("Particle flag: %d\n", particle_flg);
 			Load.loadItems(conn, shardCount, option_debug);
-			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
-			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
-			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
+			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
+			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
 				 Load.loadItems(conn, shardCount, option_debug);
 				 break;
 			case 2:
-			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
+			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug);
 			    break;
 			case 3:
-			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware);
 			    break;
 			case 4:
-			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);;
+			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware);;
 			    break;
 			default:
 			    System.out.printf("Unknown part_no\n");
