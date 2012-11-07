@@ -91,16 +91,16 @@ public class Load implements TpccConstants {
 			                item
 			                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
 			try {
-//				if (shardCount > 0){
-//					stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-//							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-//				}else{
-//					stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-//							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-//				}
+				if (shardCount > 0){
+					stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+				}else{
+					stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+				}
 				
-				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+//				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+//						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 			} catch (SQLException e) {
 				throw new RuntimeException("Item insert error", e);
 			}
@@ -165,7 +165,7 @@ public class Load implements TpccConstants {
 		    if (retried )
 		        System.out.printf("Retrying ....\n");
 		    retried = true;
-			for (w_id = 0; w_id < max_ware; w_id++) {
+			for (w_id = 1; w_id <= max_ware; w_id++) {
 				
 				if(shardCount > 0){
 					currentShard = (w_id  % shardCount);
@@ -259,12 +259,12 @@ public class Load implements TpccConstants {
 	 */
 	public static void loadCust(Connection conn, int shardCount, int min_ware, int max_ware, int shardId){
 
-		int w_id = 0;
-		int d_id = 0;
+		int w_id = 1;
+		int d_id = 1;
 		
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
 
-		for (; w_id < max_ware; w_id++)
+		for (; w_id <= max_ware; w_id++)
 			for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
 				customer(d_id, w_id, conn, shardCount, shardId);
 
@@ -279,14 +279,14 @@ public class Load implements TpccConstants {
 	 */
 	public static void loadOrd(Connection conn, int shardCount, int min_ware, int max_ware, int shardId){
 
-		int w_id = 0;
+		int w_id = 1;
 		float w_tax = 0;
-		int d_id = 0;
+		int d_id = 1;
 		float d_tax = 0;
 
 		/* EXEC SQL WHENEVER SQLERROR GOTO sqlerr;*/
 
-		for (; w_id < max_ware; w_id++)
+		for (; w_id <= max_ware; w_id++)
 			for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
 				orders(d_id, w_id, conn, shardCount, shardId);
 
