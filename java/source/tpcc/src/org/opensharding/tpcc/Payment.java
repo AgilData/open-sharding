@@ -88,19 +88,7 @@ public class Payment implements TpccConstants{
 	
 			proceed = 1;
 			
-			//Get prepared statement
-			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
-			try {
-				
-				pStmts.getStatement(9).setFloat(1, h_amount);
-				pStmts.getStatement(9).setInt(2, w_id);
-				if(TRACE) logger.trace("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
-				pStmts.getStatement(9).executeUpdate();
-
-			} catch (SQLException e) {
-				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id, e);
-				throw new Exception("Payment Update transaction error", e);
-			}
+			
 			
 			proceed = 2;
 			//Get prepared statement
@@ -369,7 +357,19 @@ public class Payment implements TpccConstants{
 				throw new Exception("Payment insert transaction error", e);
 			}
 			
-			
+			//Get prepared statement
+			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
+			try {
+				
+				pStmts.getStatement(9).setFloat(1, h_amount);
+				pStmts.getStatement(9).setInt(2, w_id);
+				if(TRACE) logger.trace("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
+				pStmts.getStatement(9).executeUpdate();
+
+			} catch (SQLException e) {
+				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id, e);
+				throw new Exception("Payment Update transaction error", e);
+			}
 			// Commit.
 			pStmts.commit();
 			
