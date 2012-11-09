@@ -88,7 +88,19 @@ public class Payment implements TpccConstants{
 	
 			proceed = 1;
 			
-			
+			//Get prepared statement
+			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
+			try {
+				
+				pStmts.getStatement(9).setFloat(1, h_amount);
+				pStmts.getStatement(9).setInt(2, w_id);
+				if(TRACE) logger.trace("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
+				pStmts.getStatement(9).executeUpdate();
+
+			} catch (SQLException e) {
+				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id, e);
+				throw new Exception("Payment Update transaction error", e);
+			}
 			
 			proceed = 2;
 			//Get prepared statement
@@ -115,7 +127,19 @@ public class Payment implements TpccConstants{
 			}
 			
 			proceed = 3;
-			
+			//Get prepared statement
+			//"UPDATE district SET d_ytd = d_ytd + ? WHERE d_w_id = ? AND d_id = ?"
+			try {
+				pStmts.getStatement(11).setFloat(1, h_amount);
+				pStmts.getStatement(11).setInt(2, w_id);
+				pStmts.getStatement(11).setInt(3, d_id);
+				if(TRACE) logger.trace("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id);
+				pStmts.getStatement(11).executeUpdate();
+
+			} catch (SQLException e) {
+				logger.error("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id, e);
+				throw new Exception("Payment update transaction error", e);
+			}
 			
 			proceed = 4;
 			//Get prepared statement
@@ -345,33 +369,7 @@ public class Payment implements TpccConstants{
 				throw new Exception("Payment insert transaction error", e);
 			}
 			
-			//Get prepared statement
-			//"UPDATE warehouse SET w_ytd = w_ytd + ? WHERE w_id = ?"
-			try {
-				
-				pStmts.getStatement(9).setFloat(1, h_amount);
-				pStmts.getStatement(9).setInt(2, w_id);
-				if(TRACE) logger.trace("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id);
-				pStmts.getStatement(9).executeUpdate();
-
-			} catch (SQLException e) {
-				logger.error("UPDATE warehouse SET w_ytd = w_ytd + " + h_amount + " WHERE w_id = "+ w_id, e);
-				throw new Exception("Payment Update transaction error", e);
-			}
 			
-			//Get prepared statement
-			//"UPDATE district SET d_ytd = d_ytd + ? WHERE d_w_id = ? AND d_id = ?"
-			try {
-				pStmts.getStatement(11).setFloat(1, h_amount);
-				pStmts.getStatement(11).setInt(2, w_id);
-				pStmts.getStatement(11).setInt(3, d_id);
-				if(TRACE) logger.trace("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id);
-				pStmts.getStatement(11).executeUpdate();
-
-			} catch (SQLException e) {
-				logger.error("UPDATE district SET d_ytd = d_ytd + " + h_amount + " WHERE d_w_id = " + w_id + " AND d_id = " + d_id, e);
-				throw new Exception("Payment update transaction error", e);
-			}
 			// Commit.
 			pStmts.commit();
 			
