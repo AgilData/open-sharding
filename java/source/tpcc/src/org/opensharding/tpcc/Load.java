@@ -70,18 +70,8 @@ public class Load implements TpccConstants {
 
 			i_data =  Util.makeAlphaString(26, 50);
 			if (orig[i_id] != 0) {
-				
 				pos = Util.randomNumber(0, i_data.length() - 8);
-				char[] tempData = new char[i_data.length() + 8];
-				tempData[pos] = 'o';
-				tempData[pos + 1] = 'r';
-				tempData[pos + 2] = 'i';
-				tempData[pos + 3] = 'g';
-				tempData[pos + 4] = 'i';
-				tempData[pos + 5] = 'n';
-				tempData[pos + 6] = 'a';
-				tempData[pos + 7] = 'l';
-				i_data = tempData.toString();
+                i_data = i_data.substring(0, pos) + "original" + i_data.substring(pos+8);
 			}
 			
 			/*System.out.printf("IID = %d, Name= %s, Price = %f\n",
