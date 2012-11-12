@@ -3,7 +3,6 @@ package org.opensharding.tpcc;
 import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.Arrays;
 import java.util.concurrent.*;
 
@@ -15,6 +14,11 @@ public class Driver implements TpccConstants {
 
     private static final Logger logger = LogManager.getLogger(Driver.class);
     private static final boolean DEBUG = logger.isDebugEnabled();
+
+    /**
+     * For debug use only.
+     */
+    private static final boolean DETECT_LOCK_WAIT_TIMEOUTS = false;
 
     //CHECK: The following variables are externs??
     public int counting_on;
@@ -105,8 +109,6 @@ public class Driver implements TpccConstants {
 
         int count = 0;
 
-        boolean async = true;
-
         /* Actually, WaitTimes are needed... */
         //CHECK: Is activate_transaction handled correctly?
         int sequence = Util.seqGet();
@@ -115,9 +117,9 @@ public class Driver implements TpccConstants {
             try {
                 if (DEBUG) logger.debug("BEFORE runTransaction: sequence: " + sequence);
 
-                if (async) {
+                if (DETECT_LOCK_WAIT_TIMEOUTS) {
                     final int _sequence = sequence;
-                    FutureTask t = new FutureTask(new Callable(){
+                    FutureTask t = new FutureTask<Object>(new Callable<Object>(){
                         @Override
                         public Object call() throws Exception {
                             doNextTransaction(t_num, shardCount, _sequence);
