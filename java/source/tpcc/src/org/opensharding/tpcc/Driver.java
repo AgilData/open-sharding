@@ -2,8 +2,10 @@ package org.opensharding.tpcc;
 
 import java.io.PrintWriter;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Arrays;
+import java.util.concurrent.*;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -94,12 +96,16 @@ public class Driver implements TpccConstants {
         }
     }
 
-    public int runTransaction(int t_num, int numWare, int numConn, int shardCount) {
+    private final Executor exec = Executors.newSingleThreadExecutor();
+
+    public int runTransaction(final int t_num, final int numWare, final int numConn, final int shardCount) {
 
         num_ware = numWare;
         num_conn = numConn;
 
         int count = 0;
+
+        boolean async = true;
 
         /* Actually, WaitTimes are needed... */
         //CHECK: Is activate_transaction handled correctly?
@@ -109,23 +115,44 @@ public class Driver implements TpccConstants {
             try {
                 if (DEBUG) logger.debug("BEFORE runTransaction: sequence: " + sequence);
 
-                if (sequence == 0) {
-                    doNeword(t_num, conn, pStmts, shardCount);
-                } else if (sequence == 1) {
-                    doPayment(t_num, conn, pStmts);
-                } else if (sequence == 2) {
-                    doOrdstat(t_num, conn, pStmts);
-                } else if (sequence == 3) {
-                    doDelivery(t_num, conn, pStmts);
-                } else if (sequence == 4) {
-                    doSlev(t_num, conn, pStmts);
-                } else {
-                    throw new IllegalStateException("Error - Unknown sequence");
+                if (async) {
+                    final int _sequence = sequence;
+                    FutureTask t = new FutureTask(new Callable(){
+                        @Override
+                        public Object call() throws Exception {
+                            doNextTransaction(t_num, shardCount, _sequence);
+                            return null;
+                        }
+                    });
+                    exec.execute(t);
+
+                    try {
+                        t.get(15, TimeUnit.SECONDS);
+                    } catch (InterruptedException e) {
+                        logger.error("InterruptedException", e);
+                        Tpcc.activate_transaction = 0;
+                    } catch (ExecutionException e) {
+                        logger.error("Unhandled exception", e);
+                        Tpcc.activate_transaction = 0;
+                    } catch (TimeoutException e) {
+                        logger.error("Detected Lock Wait", e);
+                        Tpcc.activate_transaction = 0;
+                    }
+
+                }
+                else {
+                    doNextTransaction(t_num, shardCount, sequence);
                 }
 
                 count++;
             } catch (Throwable th) {
                 logger.error("FAILED", th);
+                Tpcc.activate_transaction = 0;
+                try {
+                    conn.rollback();
+                } catch (SQLException e) {
+                    logger.error("", e);
+                }
                 return -1;
             } finally {
                 if (DEBUG) logger.debug("AFTER runTransaction: sequence: " + sequence);
@@ -139,6 +166,22 @@ public class Driver implements TpccConstants {
 
         return (0);
 
+    }
+
+    private void doNextTransaction(int t_num, int shardCount, int sequence) {
+        if (sequence == 0) {
+            doNeword(t_num, conn, pStmts, shardCount);
+        } else if (sequence == 1) {
+            doPayment(t_num, conn, pStmts);
+        } else if (sequence == 2) {
+            doOrdstat(t_num, conn, pStmts);
+        } else if (sequence == 3) {
+            doDelivery(t_num, conn, pStmts);
+        } else if (sequence == 4) {
+            doSlev(t_num, conn, pStmts);
+        } else {
+            throw new IllegalStateException("Error - Unknown sequence");
+        }
     }
 
     /*
