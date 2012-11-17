@@ -164,7 +164,7 @@ public class Driver implements TpccConstants {
 
         }
 
-        logger.info("Driver terminated after " + count + " transactions");
+        logger.debug("Driver terminated after {} transactions", count);
 
         return (0);
 
