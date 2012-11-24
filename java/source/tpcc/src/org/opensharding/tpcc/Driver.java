@@ -20,6 +20,11 @@ public class Driver implements TpccConstants {
      */
     private static final boolean DETECT_LOCK_WAIT_TIMEOUTS = false;
 
+    /**
+     * Can be disabled for debug use only.
+     */
+    private static final boolean ALLOW_MULTI_WAREHOUSE_TX = false;
+
     //CHECK: The following variables are externs??
     public int counting_on;
     public int num_ware;
@@ -234,11 +239,16 @@ public class Driver implements TpccConstants {
             if ((i == ol_cnt - 1) && (rbk == 1)) {
                 itemid[i] = notfound;
             }
-            if (Util.randomNumber(1, 100) != 1) {
+            if (ALLOW_MULTI_WAREHOUSE_TX) {
+                if (Util.randomNumber(1, 100) != 1) {
+                    supware[i] = w_id;
+                } else {
+                    supware[i] = otherWare(w_id);
+                    all_local = 0;
+                }
+            }
+            else {
                 supware[i] = w_id;
-            } else {
-                supware[i] = otherWare(w_id);
-                all_local = 0;
             }
             qty[i] = Util.randomNumber(1, 10);
         }
@@ -349,13 +359,20 @@ public class Driver implements TpccConstants {
         } else {
             byname = 0; /* select by customer id */
         }
-        if (Util.randomNumber(1, 100) <= 85) {
+        if (ALLOW_MULTI_WAREHOUSE_TX) {
+            if (Util.randomNumber(1, 100) <= 85) {
+                c_w_id = w_id;
+                c_d_id = d_id;
+            } else {
+                c_w_id = otherWare(w_id);
+                c_d_id = Util.randomNumber(1, DIST_PER_WARE);
+            }
+        }
+        else {
             c_w_id = w_id;
             c_d_id = d_id;
-        } else {
-            c_w_id = otherWare(w_id);
-            c_d_id = Util.randomNumber(1, DIST_PER_WARE);
         }
+
         // if(DEBUG) logger.debug("Payment| cnum: " + c_num + "  w_id: " +w_id + " d_id: " + d_id + " c_id: " + c_id + " c_last: " + c_last + " h_amount: " + h_amount + " byname: " + byname + " c_w_id: " + c_w_id +  " c_d_id: " + c_d_id );
 
         //clk1 = clock_gettime(CLOCK_THREAD_CPUTIME_ID, &tbuf1 );
