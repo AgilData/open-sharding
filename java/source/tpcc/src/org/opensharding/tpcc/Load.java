@@ -16,7 +16,7 @@ public class Load implements TpccConstants {
 	 * ARGUMENTS |      none
 	 * +==================================================================
 	 */
-	public static void loadItems(Connection conn, int shardCount, boolean option_debug)
+	public static void loadItems(Connection conn, int shardCount, boolean option_debug, StringBuilder sb, int statementSize)
 	{
 		optionDebug = option_debug;
 		int i_id = 0;
@@ -24,6 +24,7 @@ public class Load implements TpccConstants {
 	    String i_name = null;
 		float i_price = 0;
 		String i_data = null;
+		int sbCount = 0;
 
 		int idatasize = 0;
 		int[] orig = new int[MAXITEMS+1];
@@ -85,10 +86,25 @@ public class Load implements TpccConstants {
 					stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
 							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 				}else{
-					stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+					sb.append("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
 							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 				}
 				
+				if(i > 1 ){
+					sb.append(",");
+					sbCount++;
+				}
+				
+				if(sbCount == statementSize){
+					/* EXEC SQL COMMIT WORK; */
+					try {
+						stmt.execute(sb.toString());
+					} catch (SQLException e) {
+						throw new RuntimeException("Item batch error", e);
+					}
+					sbCount = 0;
+					sb.delete(0, sb.length());
+				}
 //				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
 //						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 			} catch (SQLException e) {
@@ -102,15 +118,12 @@ public class Load implements TpccConstants {
 			}
 		}
 
-		/* EXEC SQL COMMIT WORK; */
-		
 		try {
-			stmt.executeBatch();
-			stmt.close();
+			stmt.execute(sb.toString());
 		} catch (SQLException e) {
 			throw new RuntimeException("Item batch error", e);
 		}
-		
+		sb.delete(0, sb.length());
 		System.out.printf("Item Done. \n");
 		return;
 	}
