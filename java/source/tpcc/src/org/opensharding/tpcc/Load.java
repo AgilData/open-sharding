@@ -16,7 +16,7 @@ public class Load implements TpccConstants {
 	 * ARGUMENTS |      none
 	 * +==================================================================
 	 */
-	public static void loadItems(Connection conn, int shardCount, boolean option_debug, StringBuilder sb, int statementSize)
+	public static void loadItems(Connection conn, int shardCount, boolean option_debug, StringBuilder sb, int statementSize) throws SQLException
 	{
 		optionDebug = option_debug;
 		int i_id = 0;
@@ -78,38 +78,31 @@ public class Load implements TpccConstants {
 			/*System.out.printf("IID = %d, Name= %s, Price = %f\n",
 				       i_id, i_name, i_price); *///DEBUG
 
-			/* EXEC SQL INSERT INTO
-			                item
-			                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
-			try {
-				if (shardCount > 0){
-					sb.append("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-				}else{
-					sb.append("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+			if (shardCount > 0){
+				sb.append("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+			}else{
+				sb.append("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+			}
+			
+			if(i > 1 ){
+				sb.append(",");
+				sbCount++;
+			}
+			
+			if(sbCount == statementSize){
+				/* EXEC SQL COMMIT WORK; */
+				try {
+					stmt.execute(sb.toString());
+				} catch (SQLException e) {
+					throw new RuntimeException("Item batch error", e);
 				}
-				
-				if(i > 1 ){
-					sb.append(",");
-					sbCount++;
-				}
-				
-				if(sbCount == statementSize){
-					/* EXEC SQL COMMIT WORK; */
-					try {
-						stmt.execute(sb.toString());
-					} catch (SQLException e) {
-						throw new RuntimeException("Item batch error", e);
-					}
-					sbCount = 0;
-					sb.delete(0, sb.length());
-				}
+				sbCount = 0;
+				sb.delete(0, sb.length());
+			}
 //				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
 //						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-			} catch (SQLException e) {
-				throw new RuntimeException("Item insert error", e);
-			}
 
 			if ( (i_id % 100) == 0) {
 				System.out.printf(".");
