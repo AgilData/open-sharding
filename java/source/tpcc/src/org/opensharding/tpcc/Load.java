@@ -83,7 +83,7 @@ public class Load implements TpccConstants {
 			                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
 			try {
 				if (shardCount > 0){
-					stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+					stmt.append("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
 							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 				}else{
 					sb.append("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
