@@ -119,7 +119,7 @@ public class TpccThread extends Thread {
             prop.put("password", db_password);
 
             conn = DriverManager.getConnection(jdbcUrl, prop);
-            conn.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED); //TODO: make configurable
+            conn.setTransactionIsolation(Connection.TRANSACTION_REPEATABLE_READ);
             conn.setAutoCommit(false);
 
         } catch (SQLException e) {

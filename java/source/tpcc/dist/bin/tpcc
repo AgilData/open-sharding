@@ -19,14 +19,16 @@ OPTIONS = "-Dfile.encoding=UTF8"
 HEAPSIZE = "512m"
 XMS = "-Xms16m"
 XMX = "-Xmx#{HEAPSIZE}"
-
+JPROFILER = "-agentpath:/opt/jprofiler6/bin/linux-x64/libjprofilerti.so=offline,id=285,config=/root/smoketest/jprofiler/jprofiler-config.xml -Xbootclasspath/a:/opt/jprofiler6/bin/agent.jar"
 
 jars = "#{BASEDIR}/tpcc-jars/*.jar"
 
 class_path = "-classpath #{BASEDIR}/conf:#{Dir.glob(jars).join(':')}"
 
 cmd = [JAVA, OPTIONS, XMS, XMX, class_path, CLASS].join(' ')
-    
+
+#cmd = [JAVA, OPTIONS, XMS, XMX, JPROFILER, class_path, CLASS].join(' ')
+
 puts cmd
 
 # Run the command. Use exec, this outputs STDOUT and STDERR for the process.
