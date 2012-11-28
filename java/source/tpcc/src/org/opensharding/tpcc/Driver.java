@@ -23,7 +23,7 @@ public class Driver implements TpccConstants {
     /**
      * Can be disabled for debug use only.
      */
-    private static final boolean ALLOW_MULTI_WAREHOUSE_TX = false;
+    private static final boolean ALLOW_MULTI_WAREHOUSE_TX = true;
 
     //CHECK: The following variables are externs??
     public int counting_on;
