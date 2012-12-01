@@ -77,32 +77,24 @@ public class Load implements TpccConstants {
 			
 			/*System.out.printf("IID = %d, Name= %s, Price = %f\n",
 				       i_id, i_name, i_price); *///DEBUG
-
-			if (shardCount > 0){
-				sb.append("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-			}else{
-				sb.append("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
-			}
-			
-			if(i > 1 ){
-				sb.append(",");
-				sbCount++;
-			}
-			
-			if(sbCount == statementSize){
-				/* EXEC SQL COMMIT WORK; */
-				try {
-					stmt.execute(sb.toString());
-				} catch (SQLException e) {
-					throw new RuntimeException("Item batch error", e);
+			try{
+				if (shardCount > 0){
+					stmt.addBatch("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+				}else{
+					stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
+							+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 				}
-				sbCount = 0;
-				sb.delete(0, sb.length());
+			}catch (SQLException e) {
+				throw new RuntimeException("Item insert error", e);
 			}
-//				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-//						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
+
+
+			
+		
+			
+
+//				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 					+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 
 			if ( (i_id % 100) == 0) {
 				System.out.printf(".");
@@ -110,13 +102,6 @@ public class Load implements TpccConstants {
 					System.out.printf(" %d\n", i_id);
 			}
 		}
-
-		try {
-			stmt.execute(sb.toString());
-		} catch (SQLException e) {
-			throw new RuntimeException("Item batch error", e);
-		}
-		sb.delete(0, sb.length());
 		System.out.printf("Item Done. \n");
 		return;
 	}
