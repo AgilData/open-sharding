@@ -1,6 +1,6 @@
 <project name="OpenSharding Java TPCC" default="build">
 	
-	<property name="version" value="1.0.0" />
+	<property name="version" value="1.0.1" />
 	
 	<path id="log4j2.classpath">
       <fileset dir="../../3rdparty/log4j-2.0">
