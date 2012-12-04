@@ -159,6 +159,13 @@ public class Load implements TpccConstants {
 
         System.out.printf("Loading Warehouse \n");
 
+        final String warehouseStub = "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_ytd) VALUES ";
+        final StringBuilder warehouseSQL = new StringBuilder();
+        final Record warehouseRecord = new Record(9);
+        int warehouseBatchSize = 0;
+        int warehouseMaxBatchSize = 100;
+
+
         retry:
         if (retried)
             System.out.printf("Retrying ....\n");
@@ -196,31 +203,35 @@ public class Load implements TpccConstants {
                                        :w_zip,:w_tax,:w_ytd);*/
                 //   /*DBS_HINT: dbs_shard_action=shard_read, dbs_pshard=2 */
                 try {
-                    if (shardCount > 0) {
-                        stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-                                + currentShard + "*/"
-                                + "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_ytd) values("
-                                + w_id + ","
-                                + "'" + w_name + "'" + ","
-                                + "'" + w_street_1 + "'" + ","
-                                + "'" + w_street_2 + "'" + ","
-                                + "'" + w_city + "'" + ","
-                                + "'" + w_state + "'" + ","
-                                + "'" + w_zip + "'" + ","
-                                + w_tax + ","
-                                + w_ytd + ")");
-                    } else {
-                        stmt.addBatch("INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_ytd) values("
-                                + w_id + ","
-                                + "'" + w_name + "'" + ","
-                                + "'" + w_street_1 + "'" + ","
-                                + "'" + w_street_2 + "'" + ","
-                                + "'" + w_city + "'" + ","
-                                + "'" + w_state + "'" + ","
-                                + "'" + w_zip + "'" + ","
-                                + w_tax + ","
-                                + w_ytd + ")");
+
+                    warehouseRecord.reset();
+                    warehouseRecord.add(w_id);
+                    warehouseRecord.add(w_name);
+                    warehouseRecord.add(w_street_1);
+                    warehouseRecord.add(w_street_2);
+                    warehouseRecord.add(w_city);
+                    warehouseRecord.add(w_state);
+                    warehouseRecord.add(w_zip);
+                    warehouseRecord.add(w_tax);
+                    warehouseRecord.add(w_ytd);
+
+                    if (warehouseBatchSize==0) {
+                        warehouseSQL.append(warehouseStub);
                     }
+                    else {
+                        warehouseSQL.append(",");
+                    }
+
+                    warehouseSQL.append("(");
+                    warehouseRecord.append(warehouseSQL, ",");
+                    warehouseSQL.append(")");
+
+                    if (++warehouseBatchSize == warehouseMaxBatchSize) {
+                        stmt.execute(warehouseSQL.toString());
+                        warehouseSQL.setLength(0);
+                        warehouseBatchSize = 0;
+                    }
+
 
                 } catch (SQLException e) {
                     throw new RuntimeException("Warehouse insert error", e);
@@ -237,15 +248,13 @@ public class Load implements TpccConstants {
         //TODO: Throw an exception here
 
         try {
-            stmt.executeBatch();
+            if (warehouseBatchSize > 0) {
+                stmt.execute(warehouseSQL.toString());
+            }
             stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException("Warehouse batch error", e);
         }
-
-
-        return;
-
     }
 
     /*
@@ -595,6 +604,20 @@ public class Load implements TpccConstants {
             }
         }
 
+        final String customerStub = "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, " +
+                "c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, " +
+                "c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) VALUES ";
+        final StringBuilder customerSQL = new StringBuilder();
+        int customerBatchSize = 0;
+        int customerMaxBatchSize = 100;
+        final Record customerRecord = new Record(21);
+        
+        final String historyStub = "INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) VALUES ";
+        final StringBuilder historySQL = new StringBuilder();
+        int historyBatchSize = 0;
+        int historyMaxBatchSize = 100;
+        final Record historyRecord = new Record(8);
+
         if ((currentShard == shardId) || (shardId == 0)) {
             retry:
             if (retried)
@@ -650,55 +673,55 @@ public class Load implements TpccConstants {
                                   :c_credit_lim,:c_discount,:c_balance,
                                   10.0, 1, 0,:c_data);*/
                 try {
-                    if (shardCount > 0) {
-                        stmtCust.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-                                + currentShard + "*/"
-                                + "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
-                                + c_id + ","
-                                + c_d_id + ","
-                                + c_w_id + ","
-                                + "'" + c_first + "'" + ","
-                                + "'" + c_middle + "'" + ","
-                                + "'" + c_last + "'" + ","
-                                + "'" + c_street_1 + "'" + ","
-                                + "'" + c_street_2 + "'" + ","
-                                + "'" + c_city + "'" + ","
-                                + "'" + c_state + "'" + ","
-                                + "'" + c_zip + "'" + ","
-                                + "'" + c_phone + "'" + ","
-                                + "'" + date + "'" + ","
-                                + "'" + c_credit + "'" + ","
-                                + c_credit_lim + ","
-                                + c_discount + ","
-                                + c_balance + ","
-                                + 10.0 + ","
-                                + 1 + ","
-                                + 0 + ","
-                                + "'" + c_data + "'" + ")");
-                    } else {
-                        stmtCust.addBatch("INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) values("
-                                + c_id + ","
-                                + c_d_id + ","
-                                + c_w_id + ","
-                                + "'" + c_first + "'" + ","
-                                + "'" + c_middle + "'" + ","
-                                + "'" + c_last + "'" + ","
-                                + "'" + c_street_1 + "'" + ","
-                                + "'" + c_street_2 + "'" + ","
-                                + "'" + c_city + "'" + ","
-                                + "'" + c_state + "'" + ","
-                                + "'" + c_zip + "'" + ","
-                                + "'" + c_phone + "'" + ","
-                                + "'" + date + "'" + ","
-                                + "'" + c_credit + "'" + ","
-                                + c_credit_lim + ","
-                                + c_discount + ","
-                                + c_balance + ","
-                                + 10.0 + ","
-                                + 1 + ","
-                                + 0 + ","
-                                + "'" + c_data + "'" + ")");
-                    }
+
+
+                    customerRecord.reset();
+                    customerRecord.add(c_id);
+                    customerRecord.add(c_d_id);
+                    customerRecord.add(c_w_id);
+                    customerRecord.add(c_first);
+                    customerRecord.add(c_middle);
+                    customerRecord.add(c_last);
+                    customerRecord.add(c_street_1);
+                    customerRecord.add(c_street_2);
+                    customerRecord.add(c_city);
+                    customerRecord.add(c_state);
+                    customerRecord.add(c_zip);
+                    customerRecord.add(c_phone);
+                    customerRecord.add(date);
+                    customerRecord.add(c_credit);
+                    customerRecord.add(c_credit_lim);
+                    customerRecord.add(c_discount);
+                    customerRecord.add(c_balance);
+                    customerRecord.add(10.0);
+                    customerRecord.add(1);
+                    customerRecord.add(0);
+                    customerRecord.add(c_data);
+                    
+                    //if SQL 
+
+                        if (customerBatchSize==0) {
+                            customerSQL.append(customerStub);
+                        }
+                        else {
+                            customerSQL.append(",");
+                        }
+                        customerSQL.append("(");
+                        customerRecord.append(customerSQL, ",");
+                        customerSQL.append(")");
+                        
+                        if (++customerBatchSize == customerMaxBatchSize) {
+                            stmtCust.execute(customerSQL.toString());
+                            customerSQL.setLength(0);
+                            customerBatchSize = 0;
+                        }
+                    
+                    //else if FILE
+                    
+                        //output.write(customerRecord.toString('\t'));
+                    
+                    //
+
 
                 } catch (SQLException e) {
                     throw new RuntimeException("Customer insert error", e);
@@ -714,28 +737,32 @@ public class Load implements TpccConstants {
                                        :c_d_id,:c_w_id, :timestamp,
                                        :h_amount,:h_data);*/
                 try {
-                    if (shardCount > 0) {
-                        stmtHist.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-                                + currentShard + "*/"
-                                + "INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
-                                + c_id + ","
-                                + c_d_id + ","
-                                + c_w_id + ","
-                                + c_d_id + ","
-                                + c_w_id + ","
-                                + "'" + date + "'" + ","
-                                + h_amount + ","
-                                + "'" + h_data + "'" + ")");
-                    } else {
-                        stmtHist.addBatch("INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) values("
-                                + c_id + ","
-                                + c_d_id + ","
-                                + c_w_id + ","
-                                + c_d_id + ","
-                                + c_w_id + ","
-                                + "'" + date + "'" + ","
-                                + h_amount + ","
-                                + "'" + h_data + "'" + ")");
+
+                    historyRecord.reset();
+                    historyRecord.add(c_id);
+                    historyRecord.add(c_d_id);
+                    historyRecord.add(c_w_id);
+                    historyRecord.add(c_d_id);
+                    historyRecord.add(c_w_id);
+                    historyRecord.add(date);
+                    historyRecord.add(h_amount);
+                    historyRecord.add(h_data);
+
+                    if (historyBatchSize==0) {
+                        historySQL.append(historyStub);
+                    }
+                    else {
+                        historySQL.append(",");
+                    }
+
+                    historySQL.append("(");
+                    historyRecord.append(historySQL, ",");
+                    historySQL.append(")");
+
+                    if (++historyBatchSize == historyMaxBatchSize) {
+                        stmtHist.execute(historySQL.toString());
+                        historySQL.setLength(0);
+                        historyBatchSize = 0;
                     }
 
                 } catch (SQLException e) {
@@ -752,14 +779,19 @@ public class Load implements TpccConstants {
             }
 
             try {
-                stmtCust.executeBatch();
+                if (customerBatchSize>0) {
+                    stmtCust.execute(customerSQL.toString());
+                }
                 stmtCust.close();
+            
             } catch (SQLException e) {
                 throw new RuntimeException("Batch execution Customer error", e);
             }
 
             try {
-                stmtHist.executeBatch();
+                if (historyBatchSize > 0) {
+                    stmtHist.execute(historySQL.toString());
+                }
                 stmtHist.close();
             } catch (SQLException e) {
                 throw new RuntimeException("Batch execution History error", e);
