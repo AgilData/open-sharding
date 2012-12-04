@@ -17,7 +17,7 @@ public class Tpcc implements TpccConstants {
     private static final Logger logger = LogManager.getLogger(Tpcc.class);
     private static final boolean DEBUG = logger.isDebugEnabled();
 
-    private static final String VERSION = "1.0.1";
+    public static final String VERSION = "1.0.1";
 
     private static final String DRIVER = "DRIVER";
     private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";

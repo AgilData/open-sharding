@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.text.DecimalFormat;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -90,7 +91,7 @@ public class TpccLoad implements TpccConstants {
 	    StringBuilder sb = new StringBuilder();
 	    
 		System.out.printf("*************************************\n");
-		System.out.printf("*** Java TPC-C Data Loader  ***\n");
+		System.out.printf("*** Java TPC-C Data Loader version " + Tpcc.VERSION + " ***\n");
 		System.out.printf("*************************************\n");
 
 		long start = System.currentTimeMillis();
@@ -196,7 +197,7 @@ public class TpccLoad implements TpccConstants {
 			System.out.printf("Particle flag: %d\n", particle_flg);
             Load.loadItems(conn, shardCount, option_debug);
 			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
-			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			Load.loadCust(conn, shardCount, (int) min_ware, (int) max_ware, shardId);
 			Load.loadOrd(conn, shardCount, (int)max_ware, shardId);
 		}else if(particle_flg==1){
 		    switch(part_no){
@@ -227,7 +228,24 @@ public class TpccLoad implements TpccConstants {
 	}
 	
 	public static void main(String[] argv){
-		TpccLoad tpccLoad = new TpccLoad();
+
+        // dump information about the environment we are running in
+        String sysProp[] = {
+                "os.name",
+                "os.arch",
+                "os.version",
+                "java.runtime.name",
+                "java.vm.version",
+                "java.library.path"
+        };
+
+        for (String s : sysProp) {
+            logger.info( "System Property: " + s + " = " + System.getProperty(s));
+        }
+
+        DecimalFormat df = new DecimalFormat("#,##0.0");
+        System.out.println("maxMemory = " + df.format(Runtime.getRuntime().totalMemory()/(1024.0*1024.0)) + " MB");
+        TpccLoad tpccLoad = new TpccLoad();
 		tpccLoad.init();
 		int ret = tpccLoad.runLoad();
 		System.exit(ret);
