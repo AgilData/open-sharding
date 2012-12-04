@@ -320,6 +320,14 @@ public class Load implements TpccConstants {
             throw new RuntimeException("Stament creation error", e);
         }
 
+        final String stockStub = "INSERT INTO stock (s_i_id, s_w_id, s_quantity, " +
+                "s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, " +
+                "s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, " +
+                "s_remote_cnt, s_data) VALUES ";
+        final StringBuilder stockSQL = new StringBuilder();
+        int stockBatchSize = 0;
+        int stockMaxBatchSize = 100;
+
         /* EXEC SQL WHENEVER SQLERROR GOTO sqlerr;*/
         System.out.printf("Loading Stock Wid=%d\n", w_id);
         s_w_id = w_id;
@@ -363,47 +371,40 @@ public class Load implements TpccConstants {
                               :s_dist_01,:s_dist_02,:s_dist_03,:s_dist_04,:s_dist_05,
                               :s_dist_06,:s_dist_07,:s_dist_08,:s_dist_09,:s_dist_10,
                               0, 0, 0,:s_data);*/
+
             try {
-                if (shardCount > 0) {
-                    stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-                            + currentShard + "*/"
-                            + "INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
-                            + s_i_id + ","
-                            + s_w_id + ","
-                            + s_quantity + ","
-                            + "'" + s_dist_01 + "'" + ","
-                            + "'" + s_dist_02 + "'" + ","
-                            + "'" + s_dist_03 + "'" + ","
-                            + "'" + s_dist_04 + "'" + ","
-                            + "'" + s_dist_05 + "'" + ","
-                            + "'" + s_dist_06 + "'" + ","
-                            + "'" + s_dist_07 + "'" + ","
-                            + "'" + s_dist_08 + "'" + ","
-                            + "'" + s_dist_09 + "'" + ","
-                            + "'" + s_dist_10 + "'" + ","
-                            + 0 + ","
-                            + 0 + ","
-                            + 0 + ","
-                            + "'" + s_data + "'" + ")");
-                } else {
-                    stmt.addBatch("INSERT INTO stock (s_i_id, s_w_id, s_quantity, s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, s_remote_cnt, s_data) values("
-                            + s_i_id + ","
-                            + s_w_id + ","
-                            + s_quantity + ","
-                            + "'" + s_dist_01 + "'" + ","
-                            + "'" + s_dist_02 + "'" + ","
-                            + "'" + s_dist_03 + "'" + ","
-                            + "'" + s_dist_04 + "'" + ","
-                            + "'" + s_dist_05 + "'" + ","
-                            + "'" + s_dist_06 + "'" + ","
-                            + "'" + s_dist_07 + "'" + ","
-                            + "'" + s_dist_08 + "'" + ","
-                            + "'" + s_dist_09 + "'" + ","
-                            + "'" + s_dist_10 + "'" + ","
-                            + 0 + ","
-                            + 0 + ","
-                            + 0 + ","
-                            + "'" + s_data + "'" + ")");
+
+                if (stockBatchSize==0) {
+                    stockSQL.append(stockStub);
+                }
+                else {
+                    stockSQL.append(",");
+                }
+
+                stockSQL.append("(");
+                stockSQL.append(s_i_id).append(",");
+                stockSQL.append(s_w_id).append(",");
+                stockSQL.append(s_quantity).append(",");
+                stockSQL.append("'").append(s_dist_01).append("',");
+                stockSQL.append("'").append(s_dist_02).append("',");
+                stockSQL.append("'").append(s_dist_03).append("',");
+                stockSQL.append("'").append(s_dist_04).append("',");
+                stockSQL.append("'").append(s_dist_05).append("',");
+                stockSQL.append("'").append(s_dist_06).append("',");
+                stockSQL.append("'").append(s_dist_07).append("',");
+                stockSQL.append("'").append(s_dist_08).append("',");
+                stockSQL.append("'").append(s_dist_09).append("',");
+                stockSQL.append("'").append(s_dist_10).append("',");
+                stockSQL.append(0).append(",");
+                stockSQL.append(0).append(",");
+                stockSQL.append(0).append(",");
+                stockSQL.append("'").append(s_data).append("'");
+                stockSQL.append(")");
+
+                if (++stockBatchSize == stockMaxBatchSize) {
+                    stmt.execute(stockSQL.toString());
+                    stockSQL.setLength(0);
+                    stockBatchSize = 0;
                 }
 
             } catch (SQLException e) {
@@ -422,7 +423,9 @@ public class Load implements TpccConstants {
         }
 
         try {
-            stmt.executeBatch();
+            if (stockBatchSize>0) {
+                stmt.execute(stockSQL.toString());
+            }
             stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException("Stock batch error", e);
