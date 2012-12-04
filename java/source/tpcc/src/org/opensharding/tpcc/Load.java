@@ -790,7 +790,7 @@ public class Load implements TpccConstants {
                 currentShard = shardCount;
             }
         }
-        
+
         final String orderStub = "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) VALUES ";
         final StringBuilder orderSQL = new StringBuilder();
         int orderBatchSize = 0;
