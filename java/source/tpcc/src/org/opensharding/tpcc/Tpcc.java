@@ -2,6 +2,7 @@ package org.opensharding.tpcc;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.Properties;
 import java.util.concurrent.ExecutorService;
@@ -15,6 +16,8 @@ public class Tpcc implements TpccConstants {
 
     private static final Logger logger = LogManager.getLogger(Tpcc.class);
     private static final boolean DEBUG = logger.isDebugEnabled();
+
+    private static final String VERSION = "1.0.1";
 
     private static final String DRIVER = "DRIVER";
     private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";
@@ -385,6 +388,26 @@ public class Tpcc implements TpccConstants {
     }
 
     public static void main(String[] argv) {
+
+        System.out.println("TPCC version " + VERSION);
+
+        // dump information about the environment we are running in
+        String sysProp[] = {
+                "os.name",
+                "os.arch",
+                "os.version",
+                "java.runtime.name",
+                "java.vm.version",
+                "java.library.path"
+        };
+
+        for (String s : sysProp) {
+            logger.info( "System Property: " + s + " = " + System.getProperty(s));
+        }
+
+        DecimalFormat df = new DecimalFormat("#,##0.0");
+        System.out.println("maxMemory = " + df.format(Runtime.getRuntime().totalMemory()/(1024.0*1024.0)) + " MB");
+
         Tpcc tpcc = new Tpcc();
         tpcc.init();
         int ret = tpcc.runBenchmark();

@@ -202,7 +202,7 @@ public class TpccLoad implements TpccConstants {
 			}
 			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
 			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
-			Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			Load.loadOrd(conn, shardCount, (int)max_ware, shardId);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
@@ -220,7 +220,7 @@ public class TpccLoad implements TpccConstants {
 			    Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 			    break;
 			case 4:
-			    Load.loadOrd(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
+			    Load.loadOrd(conn, shardCount, (int)max_ware, shardId);
 			    break;
 			default:
 			    System.out.printf("Unknown part_no\n");
