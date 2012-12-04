@@ -847,15 +847,18 @@ public class Load implements TpccConstants {
 
         final String orderStub = "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) VALUES ";
         final StringBuilder orderSQL = new StringBuilder();
+        final Record orderRecord = new Record(8);
         int orderBatchSize = 0;
         final int orderMaxBatchSize = 100;
 
         final String newOrderStub = "INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) VALUES ";
         final StringBuilder newOrderSQL = new StringBuilder();
+        final Record newOrderRecord = new Record(3);
         int newOrderBatchSize = 0;
         final int newOrderMaxBatchSize = 100;
 
         final String orderLineStub = "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) VAULES ";
+        final Record orderLineRecord = new Record(10);
         final StringBuilder orderLineSQL = new StringBuilder();
         int orderLineBatchSize = 0;
         final int orderLineMaxBatchSize = 100;
@@ -885,6 +888,16 @@ public class Load implements TpccConstants {
                                         NULL,:o_ol_cnt, 1);*/
                     try {
 
+                        orderRecord.reset();
+                        orderRecord.add(o_id);
+                        orderRecord.add(o_d_id);
+                        orderRecord.add(o_w_id);
+                        orderRecord.add(o_c_id);
+                        orderRecord.add(date);
+                        orderRecord.add("NULL");
+                        orderRecord.add(o_ol_cnt);
+                        orderRecord.add(1);
+
                         if (orderBatchSize == 0) {
                             orderSQL.append(orderStub);
                         } else {
@@ -892,14 +905,7 @@ public class Load implements TpccConstants {
                         }
 
                         orderSQL.append("(");
-                        orderSQL.append(o_id).append(',');
-                        orderSQL.append(o_d_id).append(',');
-                        orderSQL.append(o_w_id).append(',');
-                        orderSQL.append(o_c_id).append(',');
-                        orderSQL.append("'").append(date).append("',");
-                        orderSQL.append("NULL").append(',');
-                        orderSQL.append(o_ol_cnt).append(',');
-                        orderSQL.append(1);
+                        orderRecord.append(orderSQL, ",");
                         orderSQL.append(")");
 
                         if (++orderBatchSize == orderMaxBatchSize) {
@@ -916,6 +922,12 @@ public class Load implements TpccConstants {
                                          new_orders
                                          values(:o_id,:o_d_id,:o_w_id);*/
                     try {
+
+                        newOrderRecord.reset();
+                        newOrderRecord.add(o_id);
+                        newOrderRecord.add(o_d_id);
+                        newOrderRecord.add(o_w_id);
+
                         if (newOrderBatchSize == 0) {
                             newOrderSQL.append(newOrderStub);
                         } else {
@@ -923,9 +935,7 @@ public class Load implements TpccConstants {
                         }
 
                         newOrderSQL.append('(');
-                        newOrderSQL.append(o_id).append(',');
-                        newOrderSQL.append(o_d_id).append(',');
-                        newOrderSQL.append(o_w_id);
+                        newOrderRecord.append(newOrderSQL, ",");
                         newOrderSQL.append(')');
 
                         if (++newOrderBatchSize == newOrderMaxBatchSize) {
@@ -944,6 +954,17 @@ public class Load implements TpccConstants {
                                 :timestamp,
                                 :o_carrier_id,:o_ol_cnt, 1);*/
                     try {
+
+                        orderRecord.reset();
+                        orderRecord.add(o_id);
+                        orderRecord.add(o_d_id);
+                        orderRecord.add(o_w_id);
+                        orderRecord.add(o_c_id);
+                        orderRecord.add(date);
+                        orderRecord.add(o_carrier_id);
+                        orderRecord.add(o_ol_cnt);
+                        orderRecord.add(1);
+
                         if (orderBatchSize == 0) {
                             orderSQL.append(orderStub);
                         } else {
@@ -951,14 +972,7 @@ public class Load implements TpccConstants {
                         }
 
                         orderSQL.append("(");
-                        orderSQL.append(o_id).append(',');
-                        orderSQL.append(o_d_id).append(',');
-                        orderSQL.append(o_w_id).append(',');
-                        orderSQL.append(o_c_id).append(',');
-                        orderSQL.append("'").append(date).append("',");
-                        orderSQL.append(o_carrier_id).append(',');
-                        orderSQL.append(o_ol_cnt).append(',');
-                        orderSQL.append(1);
+                        orderRecord.append(orderSQL, ",");
                         orderSQL.append(")");
 
                         if (++orderBatchSize == orderMaxBatchSize) {
@@ -997,6 +1011,18 @@ public class Load implements TpccConstants {
                                              :ol_quantity,:ol_amount,:ol_dist_info);*/
                         try {
 
+                            orderLineRecord.reset();
+                            orderLineRecord.add(o_id);
+                            orderLineRecord.add(o_d_id);
+                            orderLineRecord.add(o_w_id);
+                            orderLineRecord.add(ol);
+                            orderLineRecord.add(ol_i_id);
+                            orderLineRecord.add(ol_supply_w_id);
+                            orderLineRecord.add("NULL");
+                            orderLineRecord.add(ol_quantity);
+                            orderLineRecord.add(ol_amount);
+                            orderLineRecord.add(ol_dist_info);
+
                             if (orderLineBatchSize == 0) {
                                 orderLineSQL.append(orderLineStub);
                             } else {
@@ -1004,16 +1030,7 @@ public class Load implements TpccConstants {
                             }
 
                             orderLineSQL.append("(");
-                            orderLineSQL.append(o_id).append(',');
-                            orderLineSQL.append(o_d_id).append(',');
-                            orderLineSQL.append(o_w_id).append(',');
-                            orderLineSQL.append(ol).append(',');
-                            orderLineSQL.append(ol_i_id).append(',');
-                            orderLineSQL.append(ol_supply_w_id).append(',');
-                            orderLineSQL.append("NULL").append(',');
-                            orderLineSQL.append(ol_quantity).append(',');
-                            orderLineSQL.append(ol_amount).append(',');
-                            orderLineSQL.append("'").append(ol_dist_info).append("'");
+                            orderLineRecord.append(orderLineSQL, ",");
                             orderLineSQL.append(")");
 
                             if (++orderLineBatchSize == orderLineMaxBatchSize) {
@@ -1035,6 +1052,18 @@ public class Load implements TpccConstants {
                                      :ol_quantity,:tmp_float,:ol_dist_info);*/
                         try {
 
+                            orderLineRecord.reset();
+                            orderLineRecord.add(o_id);
+                            orderLineRecord.add(o_d_id);
+                            orderLineRecord.add(o_w_id);
+                            orderLineRecord.add(ol);
+                            orderLineRecord.add(ol_i_id);
+                            orderLineRecord.add(ol_supply_w_id);
+                            orderLineRecord.add(date);
+                            orderLineRecord.add(ol_quantity);
+                            orderLineRecord.add(tmp_float);
+                            orderLineRecord.add(ol_dist_info);
+
                             if (orderLineBatchSize == 0) {
                                 orderLineSQL.append(orderLineStub);
                             } else {
@@ -1042,16 +1071,7 @@ public class Load implements TpccConstants {
                             }
 
                             orderLineSQL.append("(");
-                            orderLineSQL.append(o_id).append(',');
-                            orderLineSQL.append(o_d_id).append(',');
-                            orderLineSQL.append(o_w_id).append(',');
-                            orderLineSQL.append(ol).append(',');
-                            orderLineSQL.append(ol_i_id).append(',');
-                            orderLineSQL.append(ol_supply_w_id).append(',');
-                            orderLineSQL.append("'").append(date).append("',");
-                            orderLineSQL.append(ol_quantity).append(',');
-                            orderLineSQL.append(tmp_float).append(',');
-                            orderLineSQL.append("'").append(ol_dist_info).append("'");
+                            orderLineRecord.append(orderLineSQL, ",");
                             orderLineSQL.append(")");
 
                             if (++orderLineBatchSize == orderLineMaxBatchSize) {
