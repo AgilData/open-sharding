@@ -16,14 +16,13 @@ public class Load implements TpccConstants {
       * ARGUMENTS |      none
       * +==================================================================
       */
-    public static void loadItems(Connection conn, int shardCount, boolean option_debug, StringBuilder sb, int statementSize) throws SQLException {
+    public static void loadItems(Connection conn, int shardCount, boolean option_debug) {
         optionDebug = option_debug;
         int i_id = 0;
         int i_im_id = 0;
         String i_name = null;
         float i_price = 0;
         String i_data = null;
-        int sbCount = 0;
 
         int idatasize = 0;
         int[] orig = new int[MAXITEMS + 1];
@@ -51,8 +50,11 @@ public class Load implements TpccConstants {
             orig[pos] = 1;
         }
 
-        if (retried >= 1)
-            System.out.printf("Retrying ...\n");
+        final String itemStub = "INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) VALUES ";
+        final StringBuilder itemSQL = new StringBuilder();
+        int itemBatchSize = 0;
+        int itemMaxBatchSize = 100;
+
         for (i_id = 1; i_id <= MAXITEMS; i_id++) {
 
             /* Generate Item Data */
@@ -75,31 +77,34 @@ public class Load implements TpccConstants {
             /*System.out.printf("IID = %d, Name= %s, Price = %f\n",
                           i_id, i_name, i_price); *///DEBUG
 
-            if (shardCount > 0) {
-                sb.append("/*DBS_HINT: dbs_shard_action=global_write*/ INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + ","
-                        + "'" + i_name + "'" + "," + i_price + "," + "'" + i_data + "'" + ")");
-            } else {
-                sb.append("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + ","
-                        + "'" + i_name + "'" + "," + i_price + "," + "'" + i_data + "'" + ")");
-            }
+            /* EXEC SQL INSERT INTO
+                               item
+                               values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
+            try {
 
-            if (i > 1) {
-                sb.append(",");
-                sbCount++;
-            }
-
-            if (sbCount == statementSize) {
-                /* EXEC SQL COMMIT WORK; */
-                try {
-                    stmt.execute(sb.toString());
-                } catch (SQLException e) {
-                    throw new RuntimeException("Item batch error", e);
+                if (itemBatchSize == 0) {
+                    itemSQL.append(itemStub);
+                } else {
+                    itemSQL.append(',');
                 }
-                sbCount = 0;
-                sb.delete(0, sb.length());
+
+                itemSQL.append("(");
+                itemSQL.append(i_id).append(",");
+                itemSQL.append(i_im_id).append(",");
+                itemSQL.append("'").append(i_name).append("',");
+                itemSQL.append(i_price).append(',');
+                itemSQL.append("'").append(i_data).append("'");
+                itemSQL.append(")");
+
+                if (++itemBatchSize == itemMaxBatchSize) {
+                    stmt.execute(itemSQL.toString());
+                    itemSQL.setLength(0);
+                    itemBatchSize = 0;
+                }
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Item insert error", e);
             }
-//				stmt.addBatch("INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) values(" + i_id + "," + i_im_id + "," 
-//						+ "'" + i_name +"'" + "," + i_price + "," + "'"+i_data+"'" + ")");
 
             if ((i_id % 100) == 0) {
                 System.out.printf(".");
@@ -108,14 +113,18 @@ public class Load implements TpccConstants {
             }
         }
 
+        /* EXEC SQL COMMIT WORK; */
+
         try {
-            stmt.execute(sb.toString());
+            if (itemBatchSize>0) {
+                stmt.execute(itemSQL.toString());
+            }
+            stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException("Item batch error", e);
         }
-        sb.delete(0, sb.length());
+
         System.out.printf("Item Done. \n");
-        return;
     }
 
     /*
@@ -137,6 +146,7 @@ public class Load implements TpccConstants {
         double w_ytd = 0;
 
         int tmp = 0;
+        boolean retried = false;
         int currentShard = 0;
         Statement stmt;
 
@@ -149,6 +159,10 @@ public class Load implements TpccConstants {
 
         System.out.printf("Loading Warehouse \n");
 
+        retry:
+        if (retried)
+            System.out.printf("Retrying ....\n");
+        retried = true;
         for (w_id = 1; w_id <= max_ware; w_id++) {
 
             if (shardCount > 0) {
@@ -831,10 +845,9 @@ public class Load implements TpccConstants {
                                         NULL,:o_ol_cnt, 1);*/
                     try {
 
-                        if (orderBatchSize==0) {
+                        if (orderBatchSize == 0) {
                             orderSQL.append(orderStub);
-                        }
-                        else {
+                        } else {
                             orderSQL.append(",");
                         }
 
@@ -863,10 +876,9 @@ public class Load implements TpccConstants {
                                          new_orders
                                          values(:o_id,:o_d_id,:o_w_id);*/
                     try {
-                        if (newOrderBatchSize==0) {
+                        if (newOrderBatchSize == 0) {
                             newOrderSQL.append(newOrderStub);
-                        }
-                        else {
+                        } else {
                             newOrderSQL.append(',');
                         }
 
@@ -892,10 +904,9 @@ public class Load implements TpccConstants {
                                 :timestamp,
                                 :o_carrier_id,:o_ol_cnt, 1);*/
                     try {
-                        if (orderBatchSize==0) {
+                        if (orderBatchSize == 0) {
                             orderSQL.append(orderStub);
-                        }
-                        else {
+                        } else {
                             orderSQL.append(",");
                         }
 
@@ -946,10 +957,9 @@ public class Load implements TpccConstants {
                                              :ol_quantity,:ol_amount,:ol_dist_info);*/
                         try {
 
-                            if (orderLineBatchSize==0) {
+                            if (orderLineBatchSize == 0) {
                                 orderLineSQL.append(orderLineStub);
-                            }
-                            else {
+                            } else {
                                 orderLineSQL.append(",");
                             }
 
@@ -985,10 +995,9 @@ public class Load implements TpccConstants {
                                      :ol_quantity,:tmp_float,:ol_dist_info);*/
                         try {
 
-                            if (orderLineBatchSize==0) {
+                            if (orderLineBatchSize == 0) {
                                 orderLineSQL.append(orderLineStub);
-                            }
-                            else {
+                            } else {
                                 orderLineSQL.append(",");
                             }
 
@@ -1030,17 +1039,14 @@ public class Load implements TpccConstants {
                 }
             }
 
-
-
-
             try {
-                if (orderBatchSize>0) {
+                if (orderBatchSize > 0) {
                     stmt.execute(orderSQL.toString());
                 }
-                if (newOrderBatchSize>0) {
+                if (newOrderBatchSize > 0) {
                     stmt.execute(newOrderSQL.toString());
                 }
-                if (orderLineBatchSize>0) {
+                if (orderLineBatchSize > 0) {
                     stmt.execute(orderLineSQL.toString());
                 }
                 stmt.close();

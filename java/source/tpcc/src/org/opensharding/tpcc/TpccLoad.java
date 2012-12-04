@@ -42,7 +42,7 @@ public class TpccLoad implements TpccConstants {
 	private static final String SHARDCOUNT = "SHARDCOUNT";
 	private static final String JDBCURL = "JDBCURL";
 	private static final String SHARDID = "SHARDID";
-	private static final String STATEMENTSIZE = "STATEMENTSIZE";
+//	private static final String STATEMENTSIZE = "STATEMENTSIZE";
 	
 	private Properties properties;
 	private InputStream inputStream;
@@ -85,7 +85,7 @@ public class TpccLoad implements TpccConstants {
 	    String jdbcUrl = null;
 	    String javaDriver = null;
 	    int shardId = -1;
-	    int statementSize = -1;
+//	    int statementSize = -1;
 	    
 	    StringBuilder sb = new StringBuilder();
 	    
@@ -105,7 +105,7 @@ public class TpccLoad implements TpccConstants {
 		javaDriver = properties.getProperty(DRIVER);
 		jdbcUrl = properties.getProperty(JDBCURL);
 		shardId = Integer.parseInt(properties.getProperty(SHARDID));
-		statementSize = Integer.parseInt(properties.getProperty(STATEMENTSIZE));
+		//statementSize = Integer.parseInt(properties.getProperty(STATEMENTSIZE));
 		  
 		if(connect_string == null){
 			throw new RuntimeException("Host is null.");
@@ -131,9 +131,9 @@ public class TpccLoad implements TpccConstants {
 		if(shardId == -1){
 			throw new RuntimeException("ShardId was not obtained");
 		}
-		if(statementSize == -1){
-			throw new RuntimeException("StatementSize was not specified.");
-		}
+//		if(statementSize == -1){
+//			throw new RuntimeException("StatementSize was not specified.");
+//		}
 		
 		System.out.printf("<Parameters>\n");
 		if(is_local==0) System.out.printf("     [server]: %s\n", connect_string);
@@ -194,24 +194,14 @@ public class TpccLoad implements TpccConstants {
 		max_ware = num_ware;
 		if(particle_flg==0){
 			System.out.printf("Particle flag: %d\n", particle_flg);
-			try {
-				Load.loadItems(conn, shardCount, option_debug, sb, statementSize);
-			} catch (SQLException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+            Load.loadItems(conn, shardCount, option_debug);
 			Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
 			Load.loadCust(conn, shardCount, (int)min_ware, (int)max_ware, shardId);
 			Load.loadOrd(conn, shardCount, (int)max_ware, shardId);
 		}else if(particle_flg==1){
 		    switch(part_no){
 			case 1:
-				 try {
-					Load.loadItems(conn, shardCount, option_debug, sb, statementSize);
-				} catch (SQLException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+                Load.loadItems(conn, shardCount, option_debug);
 				 break;
 			case 2:
 			    Load.loadWare(conn, shardCount, (int)min_ware, (int)max_ware, option_debug, shardId);
