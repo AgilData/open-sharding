@@ -444,18 +444,17 @@ public class Load implements TpccConstants {
       * +==================================================================
       */
     public static boolean district(int w_id, Connection conn, int shardCount, int currentShard) {
-        int d_id = 0;
-        int d_w_id = 0;
-        String d_name = null;
-        String d_street_1 = null;
-        String d_street_2 = null;
-        String d_city = null;
-        String d_state = null;
-        String d_zip = null;
-        ;
-        float d_tax = 0;
-        float d_ytd = 0;
-        int d_next_o_id = 0;
+        int d_id;
+        int d_w_id;
+        String d_name;
+        String d_street_1;
+        String d_street_2;
+        String d_city;
+        String d_state;
+        String d_zip;
+        float d_tax;
+        float d_ytd;
+        int d_next_o_id;
         boolean error = false;
         Statement stmt;
         try {
@@ -468,6 +467,12 @@ public class Load implements TpccConstants {
         d_w_id = w_id;
         d_ytd = (float) 30000.0;
         d_next_o_id = 3001;
+        
+        final String districtStub = "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, " +
+                "d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id) VALUES ";
+        final StringBuilder districtSQL = new StringBuilder();
+        int districtBatchSize = 0;
+        int districtMaxBatchSize = 100;
 
         retry:
         for (d_id = 1; d_id <= DIST_PER_WARE; d_id++) {
@@ -489,34 +494,32 @@ public class Load implements TpccConstants {
                               :d_street_1,:d_street_2,:d_city,:d_state,:d_zip,
                               :d_tax,:d_ytd,:d_next_o_id);*/
             try {
-                if (shardCount > 0) {
-                    stmt.addBatch("/*DBS_HINT: dbs_shard_action=shard_write, dbs_pshard="
-                            + currentShard + "*/"
-                            + "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
-                            + d_id + ","
-                            + d_w_id + ","
-                            + "'" + d_name + "'" + ","
-                            + "'" + d_street_1 + "'" + ","
-                            + "'" + d_street_2 + "'" + ","
-                            + "'" + d_city + "'" + ","
-                            + "'" + d_state + "'" + ","
-                            + "'" + d_zip + "'" + ","
-                            + d_tax + ","
-                            + d_ytd + ","
-                            + d_next_o_id + ")");
-                } else {
-                    stmt.addBatch("INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id)  values("
-                            + d_id + ","
-                            + d_w_id + ","
-                            + "'" + d_name + "'" + ","
-                            + "'" + d_street_1 + "'" + ","
-                            + "'" + d_street_2 + "'" + ","
-                            + "'" + d_city + "'" + ","
-                            + "'" + d_state + "'" + ","
-                            + "'" + d_zip + "'" + ","
-                            + d_tax + ","
-                            + d_ytd + ","
-                            + d_next_o_id + ")");
+                
+                if (districtBatchSize==0) {
+                    districtSQL.append(districtStub);
+                }
+                else {
+                    districtSQL.append(",");
+                }
+                
+                districtSQL.append("(");
+                districtSQL.append(d_id).append(",");
+                districtSQL.append(d_w_id).append(",");
+                districtSQL.append("'").append(d_name).append("',");
+                districtSQL.append("'").append(d_street_1).append("',");
+                districtSQL.append("'").append(d_street_2).append("',");
+                districtSQL.append("'").append(d_city).append("',");
+                districtSQL.append("'").append(d_state).append("',");
+                districtSQL.append("'").append(d_zip).append("',");
+                districtSQL.append(d_tax).append(",");
+                districtSQL.append(d_ytd).append(",");
+                districtSQL.append(d_next_o_id);
+                districtSQL.append(")");
+                
+                if (++districtBatchSize == districtMaxBatchSize) {
+                    stmt.execute(districtSQL.toString());
+                    districtSQL.setLength(0);
+                    districtBatchSize = 0;
                 }
 
             } catch (SQLException e) {
@@ -529,7 +532,9 @@ public class Load implements TpccConstants {
         }
 
         try {
-            stmt.executeBatch();
+            if (districtBatchSize > 0) {
+                stmt.execute(districtSQL.toString());
+            }
             stmt.close();
         } catch (SQLException e) {
             throw new RuntimeException("District execute batach error", e);
