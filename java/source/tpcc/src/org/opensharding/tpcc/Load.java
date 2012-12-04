@@ -1,5 +1,6 @@
 package org.opensharding.tpcc;
 
+import java.io.OutputStream;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -51,6 +52,7 @@ public class Load implements TpccConstants {
         }
 
         final String itemStub = "INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) VALUES ";
+        final Record itemRecord = new Record(5);
         final StringBuilder itemSQL = new StringBuilder();
         int itemBatchSize = 0;
         int itemMaxBatchSize = 100;
@@ -81,6 +83,13 @@ public class Load implements TpccConstants {
                                item
                                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
             try {
+                
+                itemRecord.reset();
+                itemRecord.add(i_id);
+                itemRecord.add(i_im_id);
+                itemRecord.add(i_name);
+                itemRecord.add(i_price);
+                itemRecord.add(i_data);
 
                 if (itemBatchSize == 0) {
                     itemSQL.append(itemStub);
@@ -89,11 +98,7 @@ public class Load implements TpccConstants {
                 }
 
                 itemSQL.append("(");
-                itemSQL.append(i_id).append(",");
-                itemSQL.append(i_im_id).append(",");
-                itemSQL.append("'").append(i_name).append("',");
-                itemSQL.append(i_price).append(',');
-                itemSQL.append("'").append(i_data).append("'");
+                itemRecord.append(itemSQL, ",");
                 itemSQL.append(")");
 
                 if (++itemBatchSize == itemMaxBatchSize) {
@@ -300,7 +305,7 @@ public class Load implements TpccConstants {
       * ARGUMENTS |      w_id - warehouse id
       * +==================================================================
       */
-    public static boolean stock(int w_id, Connection conn, int shardCount, int currentShard) {
+    public static boolean stock(int w_id, Connection conn, int shardCount, int currentShard/*, OutputStream os, String fileDelimiter*/) {
         int s_i_id = 0;
         int s_w_id = 0;
         int s_quantity = 0;
@@ -333,6 +338,7 @@ public class Load implements TpccConstants {
                 "s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, " +
                 "s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, " +
                 "s_remote_cnt, s_data) VALUES ";
+        final Record stockRecord = new Record(17);
         final StringBuilder stockSQL = new StringBuilder();
         int stockBatchSize = 0;
         int stockMaxBatchSize = 100;
@@ -382,39 +388,48 @@ public class Load implements TpccConstants {
                               0, 0, 0,:s_data);*/
 
             try {
+                
+                stockRecord.reset();
+                stockRecord.add(s_i_id);
+                stockRecord.add(s_w_id);
+                stockRecord.add(s_quantity);
+                stockRecord.add(s_dist_01);
+                stockRecord.add(s_dist_02);
+                stockRecord.add(s_dist_03);
+                stockRecord.add(s_dist_04);
+                stockRecord.add(s_dist_05);
+                stockRecord.add(s_dist_06);
+                stockRecord.add(s_dist_07);
+                stockRecord.add(s_dist_08);
+                stockRecord.add(s_dist_09);
+                stockRecord.add(s_dist_10);
+                stockRecord.add(0);
+                stockRecord.add(0);
+                stockRecord.add(0);
+                stockRecord.add(s_data);
+                
+//                if (os != null) {
+//                    os.write(stockRecord.toString(), fileDelimiter);
+//                }
+//                else {
 
-                if (stockBatchSize==0) {
-                    stockSQL.append(stockStub);
-                }
-                else {
-                    stockSQL.append(",");
-                }
-
-                stockSQL.append("(");
-                stockSQL.append(s_i_id).append(",");
-                stockSQL.append(s_w_id).append(",");
-                stockSQL.append(s_quantity).append(",");
-                stockSQL.append("'").append(s_dist_01).append("',");
-                stockSQL.append("'").append(s_dist_02).append("',");
-                stockSQL.append("'").append(s_dist_03).append("',");
-                stockSQL.append("'").append(s_dist_04).append("',");
-                stockSQL.append("'").append(s_dist_05).append("',");
-                stockSQL.append("'").append(s_dist_06).append("',");
-                stockSQL.append("'").append(s_dist_07).append("',");
-                stockSQL.append("'").append(s_dist_08).append("',");
-                stockSQL.append("'").append(s_dist_09).append("',");
-                stockSQL.append("'").append(s_dist_10).append("',");
-                stockSQL.append(0).append(",");
-                stockSQL.append(0).append(",");
-                stockSQL.append(0).append(",");
-                stockSQL.append("'").append(s_data).append("'");
-                stockSQL.append(")");
-
-                if (++stockBatchSize == stockMaxBatchSize) {
-                    stmt.execute(stockSQL.toString());
-                    stockSQL.setLength(0);
-                    stockBatchSize = 0;
-                }
+                    if (stockBatchSize==0) {
+                        stockSQL.append(stockStub);
+                    }
+                    else {
+                        stockSQL.append(",");
+                    }
+    
+                    stockSQL.append("(");
+                    stockRecord.append(stockSQL, ",");
+                    stockSQL.append(")");
+    
+                    if (++stockBatchSize == stockMaxBatchSize) {
+                        stmt.execute(stockSQL.toString());
+                        stockSQL.setLength(0);
+                        stockBatchSize = 0;
+                    }
+//                }
 
             } catch (SQLException e) {
                 throw new RuntimeException("Stock insert error", e);
@@ -479,6 +494,7 @@ public class Load implements TpccConstants {
         
         final String districtStub = "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, " +
                 "d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id) VALUES ";
+        final Record districtRecord = new Record(11);
         final StringBuilder districtSQL = new StringBuilder();
         int districtBatchSize = 0;
         int districtMaxBatchSize = 100;
@@ -503,7 +519,19 @@ public class Load implements TpccConstants {
                               :d_street_1,:d_street_2,:d_city,:d_state,:d_zip,
                               :d_tax,:d_ytd,:d_next_o_id);*/
             try {
-                
+                districtRecord.reset();
+                districtRecord.add(d_id);
+                districtRecord.add(d_w_id);
+                districtRecord.add(d_name);
+                districtRecord.add(d_street_1);
+                districtRecord.add(d_street_2);
+                districtRecord.add(d_city);
+                districtRecord.add(d_state);
+                districtRecord.add(d_zip);
+                districtRecord.add(d_tax);
+                districtRecord.add(d_ytd);
+                districtRecord.add(d_next_o_id);
+
                 if (districtBatchSize==0) {
                     districtSQL.append(districtStub);
                 }
@@ -512,17 +540,7 @@ public class Load implements TpccConstants {
                 }
                 
                 districtSQL.append("(");
-                districtSQL.append(d_id).append(",");
-                districtSQL.append(d_w_id).append(",");
-                districtSQL.append("'").append(d_name).append("',");
-                districtSQL.append("'").append(d_street_1).append("',");
-                districtSQL.append("'").append(d_street_2).append("',");
-                districtSQL.append("'").append(d_city).append("',");
-                districtSQL.append("'").append(d_state).append("',");
-                districtSQL.append("'").append(d_zip).append("',");
-                districtSQL.append(d_tax).append(",");
-                districtSQL.append(d_ytd).append(",");
-                districtSQL.append(d_next_o_id);
+                districtRecord.append(districtSQL, ",");
                 districtSQL.append(")");
                 
                 if (++districtBatchSize == districtMaxBatchSize) {
@@ -894,7 +912,7 @@ public class Load implements TpccConstants {
                         orderRecord.add(o_w_id);
                         orderRecord.add(o_c_id);
                         orderRecord.add(date);
-                        orderRecord.add("NULL");
+                        orderRecord.add(null);
                         orderRecord.add(o_ol_cnt);
                         orderRecord.add(1);
 
@@ -1018,7 +1036,7 @@ public class Load implements TpccConstants {
                             orderLineRecord.add(ol);
                             orderLineRecord.add(ol_i_id);
                             orderLineRecord.add(ol_supply_w_id);
-                            orderLineRecord.add("NULL");
+                            orderLineRecord.add(null);
                             orderLineRecord.add(ol_quantity);
                             orderLineRecord.add(ol_amount);
                             orderLineRecord.add(ol_dist_info);
