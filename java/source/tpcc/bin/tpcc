@@ -25,7 +25,7 @@ jars = "#{BASEDIR}/tpcc-jars/*.jar"
 
 class_path = "-classpath #{BASEDIR}/conf:#{Dir.glob(jars).join(':')}"
 
-cmd = [JAVA, OPTIONS, XMS, XMX, class_path, CLASS].join(' ')
+cmd = [JAVA, OPTIONS, XMS, XMX, class_path, CLASS, ARGV].join(' ')
 
 #cmd = [JAVA, OPTIONS, XMS, XMX, JPROFILER, class_path, CLASS].join(' ')
 

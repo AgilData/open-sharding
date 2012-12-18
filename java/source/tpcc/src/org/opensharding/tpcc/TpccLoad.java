@@ -14,6 +14,17 @@ import org.apache.logging.log4j.Logger;
 
 
 public class TpccLoad implements TpccConstants {
+	private String connectString;
+	private String dbString;
+	private String dbUser = null;
+	private String dbPassword = null;
+    private int port= 3306;
+    private int shardCount = 0;
+    private String jdbcUrl = null;
+    private String javaDriver = null;
+    private int shardId = -1;
+	
+	
 	/* Global SQL Variables */
 	static int num_ware = 0;
 	static int fd = 0;
@@ -43,7 +54,6 @@ public class TpccLoad implements TpccConstants {
 	private static final String SHARDCOUNT = "SHARDCOUNT";
 	private static final String JDBCURL = "JDBCURL";
 	private static final String SHARDID = "SHARDID";
-//	private static final String STATEMENTSIZE = "STATEMENTSIZE";
 	
 	private Properties properties;
 	private InputStream inputStream;
@@ -75,20 +85,53 @@ public class TpccLoad implements TpccConstants {
 
 
 	
-	private int runLoad(){
-		String connect_string = null;
-		String db_string = null;
-		String db_user = null;
-		String db_password = null;
-	    int port= 3306;
-	    int shardCount = 0;
-	    int num_ware = 0;
-	    String jdbcUrl = null;
-	    String javaDriver = null;
-	    int shardId = -1;
-//	    int statementSize = -1;
+	private int runLoad(boolean overridePropertiesFile, String[] argv){
 	    
-	    StringBuilder sb = new StringBuilder();
+	    if(overridePropertiesFile){
+	    	for(int i=0; i<argv.length; i=i+2){
+        		if(argv[i].equals("-h")){
+        			connectString = argv[i+1];
+        		}else if(argv[i].equals("-d")){
+        			dbString = argv[i+1];
+        		}else if(argv[i].equals("-u")){
+        			dbUser = argv[i+1];
+        		}else if(argv[i].equals("-p")){
+        			dbPassword = argv[i+1];
+        		}else if(argv[i].equals("-j")){
+        			javaDriver = argv[i+1];
+        		}else if(argv[i].equals("-l")){
+        			jdbcUrl = argv[i+1];
+        		}else if(argv[i].equals("-s")){
+        			shardCount = Integer.parseInt(argv[i+1]);
+        		}else if(argv[i].equals("-i")){
+        			shardId = Integer.parseInt(argv[i+1]);
+        		}else{
+        			System.out.println("Incorrect Argument: " + argv[i]);
+        			System.out.println("The possible arguments are as follows: ");
+        			System.out.println("-h [database host]");
+        			System.out.println("-d [database name]");
+        			System.out.println("-u [database username]");
+        			System.out.println("-p [database password]");
+        			System.out.println("-w [number of warehouses]");
+        			System.out.println("-j [java driver]");
+        			System.out.println("-l [jdbc url]");
+        			System.out.println("-s [shard count]");
+        			System.out.println("-i [shard id]");
+        			System.exit(-1);
+
+        		}
+        	}
+	    }else{
+	    	connectString = properties.getProperty(HOST);
+			dbString = properties.getProperty(DATABASE);
+			dbUser = properties.getProperty(USER);
+			dbPassword = properties.getProperty(PASSWORD);
+			num_ware = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
+			shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
+			javaDriver = properties.getProperty(DRIVER);
+			jdbcUrl = properties.getProperty(JDBCURL);
+			shardId = Integer.parseInt(properties.getProperty(SHARDID));
+	    }
 	    
 		System.out.printf("*************************************\n");
 		System.out.printf("*** Java TPC-C Data Loader version " + Tpcc.VERSION + " ***\n");
@@ -97,27 +140,18 @@ public class TpccLoad implements TpccConstants {
 		long start = System.currentTimeMillis();
 		System.out.println("Execution time start: " + start);
 		
-		connect_string = properties.getProperty(HOST);
-		db_string = properties.getProperty(DATABASE);
-		db_user = properties.getProperty(USER);
-		db_password = properties.getProperty(PASSWORD);
-		num_ware = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
-		shardCount = Integer.parseInt(properties.getProperty(SHARDCOUNT));
-		javaDriver = properties.getProperty(DRIVER);
-		jdbcUrl = properties.getProperty(JDBCURL);
-		shardId = Integer.parseInt(properties.getProperty(SHARDID));
-		//statementSize = Integer.parseInt(properties.getProperty(STATEMENTSIZE));
+		
 		  
-		if(connect_string == null){
+		if(connectString == null){
 			throw new RuntimeException("Host is null.");
 		}
-		if(db_string == null){
+		if(dbString == null){
 			  throw new RuntimeException("Database name is null.");
 		}
-		if(db_user == null){
+		if(dbUser == null){
 			  throw new RuntimeException("User is null.");
 		}
-		if(db_password == null){
+		if(dbPassword == null){
 			  throw new RuntimeException("Password is null.");
 		}
 		if(num_ware < 1){
@@ -132,16 +166,14 @@ public class TpccLoad implements TpccConstants {
 		if(shardId == -1){
 			throw new RuntimeException("ShardId was not obtained");
 		}
-//		if(statementSize == -1){
-//			throw new RuntimeException("StatementSize was not specified.");
-//		}
+
 		
 		System.out.printf("<Parameters>\n");
-		if(is_local==0) System.out.printf("     [server]: %s\n", connect_string);
+		if(is_local==0) System.out.printf("     [server]: %s\n", connectString);
 		if(is_local==0) System.out.printf("     [port]: %d\n", port);
-		System.out.printf("     [DBname]: %s\n", db_string);
-		System.out.printf("       [user]: %s\n", db_user);
-		System.out.printf("       [pass]: %s\n", db_password);
+		System.out.printf("     [DBname]: %s\n", dbString);
+		System.out.printf("       [user]: %s\n", dbUser);
+		System.out.printf("       [pass]: %s\n", dbPassword);
 
 		System.out.printf("  [warehouse]: %d\n", num_ware);
 		System.out.printf(" [shardId]: %d\n", shardId);
@@ -165,7 +197,7 @@ public class TpccLoad implements TpccConstants {
 		Connection conn;
 
 		try {
-			conn = DriverManager.getConnection (jdbcUrl, db_user, db_password);
+			conn = DriverManager.getConnection (jdbcUrl, dbUser, dbPassword);
 		} catch (SQLException e) {
 			// TODO Auto-generated catch block
 			throw new RuntimeException("Connection to local host error", e);
@@ -246,8 +278,35 @@ public class TpccLoad implements TpccConstants {
         DecimalFormat df = new DecimalFormat("#,##0.0");
         System.out.println("maxMemory = " + df.format(Runtime.getRuntime().totalMemory()/(1024.0*1024.0)) + " MB");
         TpccLoad tpccLoad = new TpccLoad();
-		tpccLoad.init();
-		int ret = tpccLoad.runLoad();
+        
+        int ret = 0;
+        if(argv.length ==0){
+        	System.out.println("Using the tpcc.properties file for the load configuration.");
+    		tpccLoad.init();
+    		ret = tpccLoad.runLoad(false, argv);
+        }else{
+    		
+    		if((argv.length % 2) == 0){
+            	System.out.println("Using the command line arguments for the load configuration.");
+        		ret = tpccLoad.runLoad(true, argv);
+        	}else{
+        		System.out.println("Invalid number of arguments.");
+        		System.out.println("Incorrect Argument: " + argv[i]);
+    			System.out.println("The possible arguments are as follows: ");
+    			System.out.println("-h [database host]");
+    			System.out.println("-d [database name]");
+    			System.out.println("-u [database username]");
+    			System.out.println("-p [database password]");
+    			System.out.println("-w [number of warehouses]");
+    			System.out.println("-j [java driver]");
+    			System.out.println("-l [jdbc url]");
+    			System.out.println("-s [shard count]");
+    			System.out.println("-i [shard id]");
+    			System.exit(-1);
+
+        	}
+        }
+
 		System.exit(ret);
 	}
 
