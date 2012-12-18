@@ -4,6 +4,11 @@
 
 **** Tpcc Load ****
 
+Database Creation:
+
+The database must first be created with the following script.
+bin/create_table.sql
+
 Configuration: 
 
   The load script can be configured with two methods. 
@@ -59,6 +64,11 @@ Load Execution:
   
   bin/tpccLoad -> Defaults to using the tpcc.properties file.
   bin/tpccLoad [ARGUMENTS] -> Uses the arguments passed in the command line.
+  
+Load Follow Up:
+
+  After the completion of the load, the following index script must be run on the databases.
+  dist/bin/add_fkey_idx.sql
 
 **** Tpcc Benchmark ****
 
@@ -113,7 +123,7 @@ Configuration:
     -l [jdbc url]
     -h [jdbc fetch size]
     
-Load Execution:
+Benchmark Execution:
    
   The load can be carried out by executing the bin/tpccLoad script in two different ways.
   
