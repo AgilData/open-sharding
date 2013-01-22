@@ -1,7 +1,7 @@
 <project name="libmyosp" default="release">
 
     <property name="version" value="1.2" />
-    <property name="buildnum" value="014" />
+    <property name="buildnum" value="018" />
     <property name="buildtype" value="RC.osp-virtual-hosts" />
 
     <target name="init" >
