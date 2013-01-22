@@ -93,7 +93,7 @@ private:
 
 
 public:
-    MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection*);
+    MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection*);
     virtual ~MySQLOSPConnection();
     bool connect(const char *, const char *, const char *, const char *, unsigned int port, const char *unix_socket, unsigned long clientflag) ;
     void setError(const char *sqlstate, int x_errno, const char *x_error);

@@ -53,7 +53,7 @@ using namespace util;
 
 Logger &MySQLOSPConnection::log = Logger::getLogger("MySQLOSPConnection");
 
-MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
+MySQLOSPConnection::MySQLOSPConnection(MYSQL *mysql, string host, int port, string database, string user, string password, MySQLConnMap *mysqlResourceMap, OSPConnection *ospConn) {
 
     this->mysqlResourceMap = mysqlResourceMap;
     this->ospConn = ospConn;
@@ -102,6 +102,9 @@ MySQLOSPConnection::MySQLOSPConnection(string host, int port, string database, s
     fieldCount = 0;
 
     pid = getpid();
+    
+    // populate mysql server_capabilities
+    mysql->server_capabilities = 8192; // CLIENT_TRANSACTIONS
 
 }
 

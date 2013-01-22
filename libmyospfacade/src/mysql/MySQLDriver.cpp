@@ -623,7 +623,7 @@ int do_osp_connect(MYSQL *mysql, ConnectInfo *info, MySQLAbstractConnection *con
 
         // create MySQL OSP connection object
         try {
-            conn = new MySQLOSPConnection(info->host, info->port, info->target_schema_name, info->user, info->passwd, getResourceMap(), ospConn);
+            conn = new MySQLOSPConnection(mysql, info->host, info->port, info->target_schema_name, info->user, info->passwd, getResourceMap(), ospConn);
         }
         catch (...) {
             setErrorState(mysql, CR_UNKNOWN_ERROR, "OSP connection error", "OSP01");
