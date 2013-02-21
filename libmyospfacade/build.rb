@@ -2,8 +2,8 @@
 
 require 'time'
 
-MYOSP_VERSION   = "1.4"
-MYOSP_BUILDNUM  = "2"
+MYOSP_VERSION   = "1.5"
+MYOSP_BUILDNUM  = "1"
 MYOSP_TIMESTAMP = Time.new.strftime("%Y%m%d-%H%M%S")
 
 def run_command (cmd)
@@ -94,14 +94,13 @@ end
 
 def create_tar(mysql_version)
     
-    platform = `cat /etc/issue`
     branch = get_branch_name
     
     tar_filename = ""
     if branch == "master"
-        tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
+        tar_filename = "myosp-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-PLATFORMNAMEVERSION-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
         else
-        tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-#{get_platform}-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
+        tar_filename = "myosp-#{branch}-#{MYOSP_VERSION}.#{MYOSP_BUILDNUM}-PLATFORMNAMEVERSION-mysql-#{mysql_version}-#{MYOSP_TIMESTAMP}.tgz"
     end
     
     # create temp dir
@@ -135,7 +134,7 @@ def create_tar(mysql_version)
     puts "***********************************************************************************************************"
     puts "***********************************************************************************************************"
 
-    puts "RUN THIS COMMAND IF YOU WANT TO RELEASE THIS VERSION:"
+    puts "RUN THIS COMMAND IF YOU WANT TO RELEASE THIS VERSION: Please replace PLATFORMNAMEVERSION with platform name and version."
     puts
     puts svn_import_command
     puts
