@@ -87,9 +87,7 @@ void OSPMessageDecoder::decode(OSPMessage *message, OSPByteBuffer *bb) {
 
                 message->setField(fieldNumber, fieldValue);
             } else {
-                char temp[512];
-                sprintf("%d", wireType);
-                log.error(string("Unsupported wire type ") + string(temp));
+                log.error(string("Unsupported wire type ") + Util::toString(temp));
                 throw "UNSUPPORTED WIRE TYPE";
             }
         } catch (const char *ex) {
