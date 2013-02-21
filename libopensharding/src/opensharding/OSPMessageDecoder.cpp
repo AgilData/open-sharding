@@ -64,6 +64,10 @@ void OSPMessageDecoder::decode(OSPMessage *message, OSPByteBuffer *bb) {
                 if (TRACE) log.trace(string("fieldValue = ") + Util::toString(fieldValue));
 
                 message->setField(fieldNumber, fieldValue);
+            } else if (wireType == 1) {
+
+                throw "UNSUPPORTED WIRE TYPE 1 (FIXED64)";
+
             } else if (wireType == 2) {
                 // length delimited
                 int fieldLength = bb->readVarInt();
@@ -87,7 +91,7 @@ void OSPMessageDecoder::decode(OSPMessage *message, OSPByteBuffer *bb) {
 
                 message->setField(fieldNumber, fieldValue);
             } else {
-                log.error(string("Unsupported wire type ") + Util::toString(temp));
+                log.error(string("Unsupported wire type ") + Util::toString(wireType));
                 throw "UNSUPPORTED WIRE TYPE";
             }
         } catch (const char *ex) {
