@@ -70,7 +70,7 @@ private:
     int stmtID;
 
     /* Last query (debug use only) */
-    String lastQuery;
+    string lastQuery;
 
     /* Last result set response */
     int affectedRows;
