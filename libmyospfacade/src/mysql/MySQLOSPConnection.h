@@ -101,6 +101,7 @@ public:
     void setError(const char *sqlstate, int x_errno, const char *x_error);
     string getLogPrefix(MYSQL *mysql);
     char *ensureCapacity(char *buffer, unsigned int *length, unsigned int capacity);
+    void _processMessage(OSPMessage*);
     void processMessage(OSPMessage*);
 
     // highest priority methods to add support for
