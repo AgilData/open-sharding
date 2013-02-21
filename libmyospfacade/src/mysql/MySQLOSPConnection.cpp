@@ -228,8 +228,11 @@ int MySQLOSPConnection::mysql_real_query(MYSQL *mysql, const char *sql, unsigned
         
         currentRes = NULL;
 
+        string SQL = string(sql);
+        lastQuery = SQL;
+
         // send execute request - response messages will be handled by processMessage()
-        OSPExecuteRequest request(connID, stmtID, string(sql));
+        OSPExecuteRequest request(connID, stmtID, SQL);
         ospConn->sendMessage(&request, true, this);
 
         // processMessage will set my_errno if anything goes wrong
@@ -306,6 +309,16 @@ MYSQL_RES * MySQLOSPConnection::mysql_store_result(MYSQL *mysql) {
 }
 
 void MySQLOSPConnection::processMessage(OSPMessage *message) {
+    try {
+        _processMessage(message);
+    }
+    catch (...) {
+        log.error(string("Error processing results for query: ") + lastQuery);
+        throw Util::createException("Error processing results for query (see log for SQL)");
+    }
+}
+
+void MySQLOSPConnection::_processMessage(OSPMessage *message) {
 
     // cast to expected message type
     OSPWireResponse *wireResponse = dynamic_cast<OSPWireResponse *>(message);

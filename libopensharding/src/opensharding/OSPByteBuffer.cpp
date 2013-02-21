@@ -135,7 +135,7 @@ int OSPByteBuffer::readVarInt() {
 
     // validation checks for offset, length
     if (offset+1 > length) {
-        throw Util::createException("attempt to read past end of buffer in OSPByteBuffer::readVarInt()");
+        throw Util::createException("attempt to read past end of buffer after reading 0 bytes in OSPByteBuffer::readVarInt()");
     }
 
     int b;
@@ -143,24 +143,28 @@ int OSPByteBuffer::readVarInt() {
 
     b = (buffer[offset++]); result  = (b & 0x7F)      ; if (!(b & 0x80)) goto done;
     if (offset+1 > length) {
-        throw Util::createException("attempt to read past end of buffer in OSPByteBuffer::readVarInt()");
+        throw Util::createException("attempt to read past end of buffer after reading 1 byte in OSPByteBuffer::readVarInt()");
     }
     b = (buffer[offset++]); result |= (b & 0x7F) <<  7; if (!(b & 0x80)) goto done;
     if (offset+1 > length) {
-        throw Util::createException("attempt to read past end of buffer in OSPByteBuffer::readVarInt()");
+        throw Util::createException("attempt to read past end of buffer after reading 2 bytes in OSPByteBuffer::readVarInt()");
     }
     b = (buffer[offset++]); result |= (b & 0x7F) << 14; if (!(b & 0x80)) goto done;
     if (offset+1 > length) {
-        throw Util::createException("attempt to read past end of buffer in OSPByteBuffer::readVarInt()");
+        throw Util::createException("attempt to read past end of buffer after reading 3 bytes in OSPByteBuffer::readVarInt()");
     }
     b = (buffer[offset++]); result |= (b & 0x7F) << 21; if (!(b & 0x80)) goto done;
     if (offset+1 > length) {
-        throw Util::createException("attempt to read past end of buffer in OSPByteBuffer::readVarInt()");
+        throw Util::createException("attempt to read past end of buffer after reading 4 bytes in OSPByteBuffer::readVarInt()");
     }
+
+    // NOTE: we are dealing with a 32 bit int in C so no point trying to read more than 28 bits (35 would be too many)
+
+    /*
     b = (buffer[offset++]); result |=  b         << 28; if (!(b & 0x80)) goto done;
     if (offset+1 > length) {
-        throw Util::createException("attempt to read past end of buffer in OSPByteBuffer::readVarInt()");
-    }
+        throw Util::createException("attempt to read past end of buffer after reading 5 bytes in OSPByteBuffer::readVarInt()");
+    } */
 
     //TODO: handle this
     // If the input is larger than 32 bits, we still need to read it all
@@ -171,7 +175,7 @@ int OSPByteBuffer::readVarInt() {
 
     // We have overrun the maximum size of a varint (10 bytes).  Assume
     // the data is corrupt.
-    throw Util::createException("FAILED_TO_DECODE_VARINT");
+    throw Util::createException("FAILED_TO_DECODE_VARINT_TOO_MANY_BYTES");
 
 done:
     //log.info(string("readVarInt() returning ") + Util::toString(result));

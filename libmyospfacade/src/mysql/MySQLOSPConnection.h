@@ -69,6 +69,9 @@ private:
     /* OSP statement ID */
     int stmtID;
 
+    /* Last query (debug use only) */
+    String lastQuery;
+
     /* Last result set response */
     int affectedRows;
     int insertID;
