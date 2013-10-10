@@ -2,11 +2,11 @@
 
     <path id="tpcc.deps">
         <!-- dbShards jars -->
-        <fileset dir="../../jars">
+        <fileset dir="3rdparty/log4j2">
             <include name="*.jar"/>
         </fileset>
         <!-- user jars -->
-        <fileset dir="../../user-jars">
+        <fileset dir="jdbc-drivers">
             <include name="*.jar"/>
         </fileset>
     </path>
@@ -48,6 +48,8 @@
         <echo message="Valid targets: build, tpccload, tpccrun" />
         <echo message="" />
         <echo message="NOTE: Review/edit tpcc.properties before running tpccload or tpccrun" />
+        <echo message="" />
+        <echo message="Place JDBC driver jars in jdbc-drivers/ directory" />
     </target>
 
 </project>
