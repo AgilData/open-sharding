@@ -18,6 +18,13 @@ public class TpccThread extends Thread {
 
 	private static final Logger logger = LoggerFactory.getLogger(TpccThread.class);
 	private static final boolean DEBUG = logger.isDebugEnabled();
+
+    /**
+     * Dedicated JDBC connection for this thread.
+     */
+    Connection conn;
+
+    Driver driver;
 	
 	int number;
 	int port;
@@ -46,7 +53,7 @@ public class TpccThread extends Thread {
 	//TpccStatements pStmts;
 	
 	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, 
-			String db_string, int num_ware, int num_conn, String driver, String dURL, int fetchSize,
+			String db_string, int num_ware, int num_conn, String driverClassName, String dURL, int fetchSize,
 			int[] success, int[] late, int[] retry, int[] failure, 
 			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2, int shardCount) {
 		
@@ -59,7 +66,7 @@ public class TpccThread extends Thread {
         this.is_local = is_local;
         this.num_conn = num_conn;
         this.num_ware = num_ware;
-        this.driverClassName = driver;
+        this.driverClassName = driverClassName;
         this.jdbcUrl = dURL;
         this.fetchSize = fetchSize;
         
@@ -75,17 +82,38 @@ public class TpccThread extends Thread {
 		
 		this.shardCount = shardCount;
 
-	}
+        connectToDatabase();
+
+        // Create a driver instance.
+        driver = new Driver(conn, fetchSize,
+                success, late, retry, failure,
+                success2, late2, retry2, failure2);
+
+    }
 
     public void run() {
+
+        try {
+            if (DEBUG) {
+                logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
+            }
+
+            driver.runTransaction(number, num_ware, num_conn, shardCount);
+
+        } catch (Throwable e) {
+            logger.error("Unhandled exception", e);
+        }
+
+    }
+
+    private Connection connectToDatabase() {
+
         logger.info("Connection to database: driver: " + driverClassName + " url: " + jdbcUrl);
         try {
             Class.forName(driverClassName);
         } catch (ClassNotFoundException e1) {
             throw new RuntimeException("Failed to load JDBC driver class: " + driverClassName, e1);
         }
-
-        Connection conn;
 
         try {
 
@@ -123,27 +151,9 @@ public class TpccThread extends Thread {
             conn.setAutoCommit(false);
 
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            throw new RuntimeException("Connection to specific host error", e);
+            throw new RuntimeException("Failed to connect to database", e);
         }
-
-
-        try {
-            // Create a driver instance.
-            Driver driver = new Driver(conn, fetchSize,
-                    success, late, retry, failure,
-                    success2, late2, retry2, failure2);
-
-            if (DEBUG) {
-                logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
-            }
-
-            driver.runTransaction(number, num_ware, num_conn, shardCount);
-
-        } catch (Throwable e) {
-            logger.error("Unhandled exception", e);
-        }
-
+        return conn;
     }
 }
 
