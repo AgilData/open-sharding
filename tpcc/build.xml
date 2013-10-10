@@ -43,6 +43,22 @@
         </java>
     </target>
 
+    <target name="tpccrun-with-jprofiler" depends="build">
+        <java classname="org.opensharding.tpcc.Tpcc" fork="yes" maxmemory="512m">
+            <!-- JProfiler Linux -->
+            <!--<jvmarg value="-agentpath:/opt/jprofiler6/linux-x64/libjprofilerti.so=offline,id=285,config=jprofiler-config.xml" />-->
+            <!-- JProfiler Mac -->
+            <jvmarg value="-agentpath:/opt/jprofiler6/bin/macos/libjprofilerti.jnilib=offline,id=122,config=jprofiler-config.xml" />
+
+            <jvmarg value="-Xbootclasspath/a:/opt/jprofiler6/agent.jar" />
+            <jvmarg value="-Dfile.encoding=UTF8" />
+            <jvmarg value="-Dlog4j.configurationFile=log4j2.xml" />
+            <!--<arg value="tpcc.properties" />-->
+            <classpath refid="tpcc.deps" />
+            <classpath path="tpcc.jar" />
+        </java>
+    </target>
+
     <target name="default">
         <echo message="Usage: ant [target]" />
         <echo message="" />
