@@ -1,7 +1,11 @@
 package org.opensharding.tpcc;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+//import org.slf4j.LoggerFactory;
+//import org.slf4j.Logger;
+
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -10,7 +14,8 @@ import java.sql.SQLException;
 
 public class TpccStatements {
 
-    private static final Logger logger = LogManager.getLogger(TpccStatements.class);
+//    private static final Logger logger = LoggerFactory.getLogger(TpccStatements.class);
+    private static final Logger logger = LoggerFactory.getLogger(TpccStatements.class);
 	
 	public static int STMT_COUNT = 36;
 	

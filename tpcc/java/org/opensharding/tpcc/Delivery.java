@@ -4,11 +4,11 @@ import java.sql.*;
 import java.util.Calendar;
 import java.util.Date;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class Delivery implements TpccConstants {
-	private static final Logger logger = LogManager.getLogger(Driver.class);
+	private static final Logger logger = LoggerFactory.getLogger(Driver.class);
 	private static final boolean DEBUG = logger.isDebugEnabled();
 	private static final boolean TRACE = logger.isTraceEnabled();
 	

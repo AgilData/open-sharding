@@ -1,5 +1,6 @@
 package org.opensharding.tpcc;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -9,12 +10,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 
 public class Tpcc implements TpccConstants {
 
-    private static final Logger logger = LogManager.getLogger(Tpcc.class);
+    private static final Logger logger = LoggerFactory.getLogger(Tpcc.class);
     private static final boolean DEBUG = logger.isDebugEnabled();
 
     public static final String VERSION = "1.0.1";
@@ -91,13 +92,9 @@ public class Tpcc implements TpccConstants {
         logger.info("Loading properties from: " + PROPERTIESFILE);
 
         properties = new Properties();
-        inputStream = getClass().getClassLoader().getResourceAsStream(PROPERTIESFILE);
-        if (inputStream == null) {
-            throw new RuntimeException("Failed to access properties.");
-        }
         try {
+            inputStream = new FileInputStream(PROPERTIESFILE);
             properties.load(inputStream);
-
         } catch (IOException e) {
             throw new RuntimeException("Error loading properties file", e);
         }
