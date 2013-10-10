@@ -1,11 +1,12 @@
 <project name="tpcc" default="default">
 
     <path id="tpcc.deps">
-        <!-- dbShards jars -->
         <fileset dir="3rdparty/log4j2">
             <include name="*.jar"/>
         </fileset>
-        <!-- user jars -->
+        <fileset dir="3rdparty/slf4j">
+            <include name="*.jar"/>
+        </fileset>
         <fileset dir="jdbc-drivers">
             <include name="*.jar"/>
         </fileset>

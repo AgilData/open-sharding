@@ -82,7 +82,7 @@ public class TpccThread extends Thread {
         try {
             Class.forName(driverClassName);
         } catch (ClassNotFoundException e1) {
-            throw new RuntimeException("Class for mysql error", e1);
+            throw new RuntimeException("Failed to load JDBC driver class: " + driverClassName, e1);
         }
 
         Connection conn;
