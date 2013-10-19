@@ -1,6 +1,6 @@
 package org.opensharding.tpcc;
 
-import org.opensharding.tpcc.load.CSVLoader;
+import org.opensharding.tpcc.load.FileLoader;
 import org.opensharding.tpcc.load.JdbcPreparedStatementLoader;
 import org.opensharding.tpcc.load.JdbcStatementLoader;
 import org.opensharding.tpcc.load.RecordLoader;
@@ -37,7 +37,7 @@ public class TpccLoadConfig {
             case JDBC_PREPARED_STATEMENT:
                 return new JdbcPreparedStatementLoader(conn, tableName, columnName, jdbcInsertIgnore, jdbcBatchSize);
             case CSV:
-                return new CSVLoader(new File(outputDir, tableName + ".csv"));
+                return new FileLoader(new File(outputDir, tableName + ".txt"));
             default:
                 throw new IllegalStateException();
         }

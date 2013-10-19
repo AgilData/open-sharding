@@ -1,5 +1,6 @@
 package org.opensharding.tpcc.load;
 
+import java.util.Arrays;
 import java.util.Date;
 
 /**
@@ -42,33 +43,12 @@ public class Record {
         return field;
     }
 
-    public void write(StringBuilder b, String delim) {
-        for (int i=0; i< field.length; i++) {
-            if (i>0) {
-                b.append(delim);
-            }
-            boolean enquote = false;
-            if (field[i] != null && (field[i] instanceof String || field[i] instanceof Date)) {
-                enquote = true;
-            }
-            if (enquote) {
-                b.append('\'');
-            }
-            b.append(field[i]);
-            if (enquote) {
-                b.append('\'');
-            }
-        }
-    }
-
-    public String toString(String delim) {
-        toStringBuilder.setLength(0);
-        write(toStringBuilder, delim);
-        return toStringBuilder.toString();
+    public int getColumnCount() {
+        return field.length;
     }
 
     @Override
     public String toString() {
-        return toString(",");
+        return Arrays.toString(field);
     }
 }

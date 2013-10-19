@@ -3,6 +3,7 @@ package org.opensharding.tpcc.load;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 
 /**
  * Copyright (C) 2011 CodeFutures Corporation. All rights reserved.
@@ -52,7 +53,7 @@ public class JdbcStatementLoader implements RecordLoader {
             b.append(',');
         }
         b.append('(');
-        r.write(b, ",");
+        write(b, r, ",");
         b.append(')');
 
         if (++currentBatchSize==maxBatchSize) {
@@ -72,6 +73,26 @@ public class JdbcStatementLoader implements RecordLoader {
             throw new RuntimeException("Error loading into table '" + tableName + "' with SQL: " + sql, e);
         }
         currentBatchSize = 0;
+    }
+
+    public void write(StringBuilder b, Record r, String delim) throws Exception {
+        b.setLength(0);
+        final Object[] field = r.getField();
+        for (int i=0; i< field.length; i++) {
+            if (i>0) {
+                b.append("\t");
+            }
+            if (field[i] instanceof Date) {
+//                b.append("'").append(dateTimeFormat.format((Date)field[i])).append("'");
+                b.append("'").append((Date)field[i]).append("'");
+            }
+            else if (field[i] instanceof String) {
+                b.append("'").append(field[i]).append("'");
+            }
+            else {
+                b.append((String)field[i]);
+            }
+        }
     }
 
     public void commit() throws Exception {
