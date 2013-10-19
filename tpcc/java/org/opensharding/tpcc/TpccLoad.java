@@ -249,16 +249,18 @@ public class TpccLoad implements TpccConstants {
                         System.out.printf("1:ITEMS 2:WAREHOUSE 3:CUSTOMER 4:ORDERS\n");
                 }
             }
+
+            System.out.printf("\n...DATA LOADING COMPLETED SUCCESSFULLY.\n");
         }
         catch (Exception e) {
             System.out.println("Error loading data");
             e.printStackTrace();
         }
 
-        System.out.printf("\n...DATA LOADING COMPLETED SUCCESSFULLY.\n");
-
         long end = System.currentTimeMillis();
-        System.out.println("Total execution time: " + (double) ((((double) end - (double) start) / 1000.0)) / 60.0 + " Min");
+        double time = ((((double) end - (double) start) / 1000.0)) / 60.0;
+        DecimalFormat df = new DecimalFormat("#,##0.0");
+        System.out.println("Total execution time: " + df.format(time) + " Min");
         return 0;
 
     }

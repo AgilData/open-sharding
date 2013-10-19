@@ -1,7 +1,7 @@
 package org.opensharding.tpcc;
 
 import org.opensharding.tpcc.load.CSVLoader;
-import org.opensharding.tpcc.load.JdbcLoader;
+import org.opensharding.tpcc.load.JdbcStatementLoader;
 import org.opensharding.tpcc.load.RecordLoader;
 
 import java.io.File;
@@ -18,14 +18,18 @@ public class TpccLoadConfig {
         CSV
     }
 
-    private LoadType loadType = LoadType.CSV;
+    private LoadType loadType = LoadType.JDBC;
 
     private Connection conn;
+
+    private boolean jdbcInsertIgnore = true;
+
+    private int jdbcBatchSize = 100;
 
     public RecordLoader createLoader(String tableName, String columnName[]) throws IOException {
         switch (loadType) {
             case JDBC:
-                return new JdbcLoader(conn, tableName, columnName, 100);
+                return new JdbcStatementLoader(conn, tableName, columnName, jdbcInsertIgnore, jdbcBatchSize);
             case CSV:
                 return new CSVLoader(new File("test_" + tableName + ".csv"));
             default:

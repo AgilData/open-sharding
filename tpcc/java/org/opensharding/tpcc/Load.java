@@ -652,15 +652,15 @@ public class Load implements TpccConstants {
             }
         }
 
-        final String ORDERS_COLUMN_NAME[] = { "o_id", " o_d_id", " o_w_id", " o_c_id", " o_entry_d", " o_carrier_id", " o_ol_cnt", " o_all_local" };
+        final String ORDERS_COLUMN_NAME[] = { "o_id", "o_d_id", "o_w_id", "o_c_id", "o_entry_d", "o_carrier_id", "o_ol_cnt", "o_all_local"};
         final Record orderRecord = new Record(8);
-        final RecordLoader orderLoader = loadConfig.createLoader("order", ORDERS_COLUMN_NAME);
+        final RecordLoader orderLoader = loadConfig.createLoader("orders", ORDERS_COLUMN_NAME);
 
-        final String NEW_ORDERS_COLUMN_NAMES[] = { "no_o_id", " no_d_id", " no_w_id" };
+        final String NEW_ORDERS_COLUMN_NAMES[] = { "no_o_id", "no_d_id", "no_w_id"};
         final Record newOrderRecord = new Record(3);
         final RecordLoader newOrderLoader = loadConfig.createLoader("new_orders", NEW_ORDERS_COLUMN_NAMES);
 
-        final String ORDER_LINE_COLUMN_NAME[] = { "ol_o_id", " ol_d_id", " ol_w_id", " ol_number", " ol_i_id", " ol_supply_w_id", " ol_delivery_d", " ol_quantity", " ol_amount", " ol_dist_info" };
+        final String ORDER_LINE_COLUMN_NAME[] = { "ol_o_id", "ol_d_id", "ol_w_id", "ol_number", "ol_i_id", "ol_supply_w_id", "ol_delivery_d", "ol_quantity", "ol_amount", "ol_dist_info"};
         final Record orderLineRecord = new Record(10);
         final RecordLoader orderLineLoader = loadConfig.createLoader("order_line", ORDER_LINE_COLUMN_NAME);
 
