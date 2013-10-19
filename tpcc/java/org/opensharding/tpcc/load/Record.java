@@ -1,19 +1,26 @@
 package org.opensharding.tpcc.load;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.Date;
 
 /**
- * Copyright (C) 2011 CodeFutures Corporation. All rights reserved.
+ * Simple object to represent a single row of data being loaded to the database (or written to a CSV file).
  */
 public class Record {
 
+    /**
+     * Column values.
+     */
+    private final Object data[];
+
+    /**
+     * Index of next column to write value to.
+     */
     private int index;
 
-    private Object data[];
-
-    final StringBuilder toStringBuilder = new StringBuilder();
+    /**
+     * Re-usable buffer for building string representations of the row.
+     */
+    private final StringBuilder toStringBuilder = new StringBuilder();
 
     public Record(int columnCount) {
         this.data = new Object[columnCount];
@@ -25,13 +32,6 @@ public class Record {
 
     public void add(Object value) {
         data[index++] = value;
-    }
-
-    public void write(OutputStream os, String delim) throws IOException {
-        StringBuilder b = new StringBuilder();
-        write(b, delim);
-        os.write(b.toString().getBytes());
-        os.write("\n".getBytes());
     }
 
     public void write(StringBuilder b, String delim) {
@@ -57,5 +57,10 @@ public class Record {
         toStringBuilder.setLength(0);
         write(toStringBuilder, delim);
         return toStringBuilder.toString();
+    }
+
+    @Override
+    public String toString() {
+        return toString(",");
     }
 }

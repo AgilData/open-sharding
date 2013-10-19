@@ -8,7 +8,7 @@ import java.io.IOException;
 /**
  * Copyright (C) 2011 CodeFutures Corporation. All rights reserved.
  */
-public class CSVLoader implements RecordProcessor {
+public class CSVLoader implements RecordLoader {
 
     protected BufferedOutputStream os;
 
@@ -18,8 +18,14 @@ public class CSVLoader implements RecordProcessor {
         this.os = new BufferedOutputStream(new FileOutputStream(file));
     }
 
-    public void process(Record r) throws Exception {
+    public void load(Record r) throws Exception {
         r.write(b, ",");
+        os.write(b.toString().getBytes());
+        os.write("\n".getBytes());
+    }
+
+    public void commit() throws Exception {
+        // ignore
     }
 
     public void close() throws Exception {

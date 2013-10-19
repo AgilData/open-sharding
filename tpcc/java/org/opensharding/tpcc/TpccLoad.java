@@ -221,31 +221,38 @@ public class TpccLoad implements TpccConstants {
 
 
         System.out.printf("TPCC Data Load Started...\n");
-        max_ware = num_ware;
-        if (particle_flg == 0) {
-            System.out.printf("Particle flag: %d\n", particle_flg);
-            Load.loadItems(conn, shardCount, option_debug);
-            Load.loadWare(conn, shardCount, (int) min_ware, (int) max_ware, option_debug, shardId);
-            Load.loadCust(loadConfig, shardCount, (int) min_ware, (int) max_ware, shardId);
-            Load.loadOrd(conn, shardCount, (int) max_ware, shardId);
-        } else if (particle_flg == 1) {
-            switch (part_no) {
-                case 1:
-                    Load.loadItems(conn, shardCount, option_debug);
-                    break;
-                case 2:
-                    Load.loadWare(conn, shardCount, (int) min_ware, (int) max_ware, option_debug, shardId);
-                    break;
-                case 3:
-                    Load.loadCust(loadConfig, shardCount, (int) min_ware, (int) max_ware, shardId);
-                    break;
-                case 4:
-                    Load.loadOrd(conn, shardCount, (int) max_ware, shardId);
-                    break;
-                default:
-                    System.out.printf("Unknown part_no\n");
-                    System.out.printf("1:ITEMS 2:WAREHOUSE 3:CUSTOMER 4:ORDERS\n");
+
+        try {
+            max_ware = num_ware;
+            if (particle_flg == 0) {
+                System.out.printf("Particle flag: %d\n", particle_flg);
+                Load.loadItems(loadConfig, option_debug);
+                Load.loadWare(loadConfig, shardCount, (int) min_ware, (int) max_ware, option_debug, shardId);
+                Load.loadCust(loadConfig, shardCount, (int) min_ware, (int) max_ware, shardId);
+                Load.loadOrd(loadConfig, shardCount, (int) max_ware, shardId);
+            } else if (particle_flg == 1) {
+                switch (part_no) {
+                    case 1:
+                        Load.loadItems(loadConfig, option_debug);
+                        break;
+                    case 2:
+                        Load.loadWare(loadConfig, shardCount, (int) min_ware, (int) max_ware, option_debug, shardId);
+                        break;
+                    case 3:
+                        Load.loadCust(loadConfig, shardCount, (int) min_ware, (int) max_ware, shardId);
+                        break;
+                    case 4:
+                        Load.loadOrd(loadConfig, shardCount, (int) max_ware, shardId);
+                        break;
+                    default:
+                        System.out.printf("Unknown part_no\n");
+                        System.out.printf("1:ITEMS 2:WAREHOUSE 3:CUSTOMER 4:ORDERS\n");
+                }
             }
+        }
+        catch (Exception e) {
+            System.out.println("Error loading data");
+            e.printStackTrace();
         }
 
         System.out.printf("\n...DATA LOADING COMPLETED SUCCESSFULLY.\n");

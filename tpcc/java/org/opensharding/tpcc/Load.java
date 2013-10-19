@@ -1,9 +1,8 @@
 package org.opensharding.tpcc;
 
 import org.opensharding.tpcc.load.Record;
-import org.opensharding.tpcc.load.RecordProcessor;
+import org.opensharding.tpcc.load.RecordLoader;
 
-import java.io.IOException;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -19,7 +18,7 @@ public class Load implements TpccConstants {
       * ARGUMENTS |      none
       * +==================================================================
       */
-    public static void loadItems(Connection conn, int shardCount, boolean option_debug) {
+    public static void loadItems(TpccLoadConfig loadConfig, boolean option_debug) throws Exception {
         optionDebug = option_debug;
         int i_id = 0;
         int i_im_id = 0;
@@ -27,25 +26,20 @@ public class Load implements TpccConstants {
         float i_price = 0;
         String i_data = null;
 
-        int idatasize = 0;
+//        int idatasize = 0;
         int[] orig = new int[MAXITEMS + 1];
         int pos = 0;
         int i = 0;
-        int retried = 0;
-        Statement stmt;
-        try {
-            stmt = conn.createStatement();
-        } catch (SQLException e) {
-            throw new RuntimeException("Items statement creation error", e);
-        }
+//        int retried = 0;
 
 
         /* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
 
         System.out.printf("Loading Item \n");
 
-        for (i = 0; i < MAXITEMS / 10; i++)
+        for (i = 0; i < MAXITEMS / 10; i++) {
             orig[i] = 0;
+        }
         for (i = 0; i < MAXITEMS / 10; i++) {
             do {
                 pos = Util.randomNumber(0, MAXITEMS);
@@ -53,11 +47,9 @@ public class Load implements TpccConstants {
             orig[pos] = 1;
         }
 
-        final String itemStub = "INSERT INTO item (i_id, i_im_id, i_name, i_price, i_data) VALUES ";
+        final String ITEM_COLUMN_NAME[] = { "i_id", " i_im_id", " i_name", " i_price", " i_data" };
         final Record itemRecord = new Record(5);
-        final StringBuilder itemSQL = new StringBuilder();
-        int itemBatchSize = 0;
-        int itemMaxBatchSize = 100;
+        final RecordLoader itemLoader = loadConfig.createLoader("item", ITEM_COLUMN_NAME);
 
         for (i_id = 1; i_id <= MAXITEMS; i_id++) {
 
@@ -84,35 +76,15 @@ public class Load implements TpccConstants {
             /* EXEC SQL INSERT INTO
                                item
                                values(:i_id,:i_im_id,:i_name,:i_price,:i_data); */
-            try {
-                
-                itemRecord.reset();
-                itemRecord.add(i_id);
-                itemRecord.add(i_im_id);
-                itemRecord.add(i_name);
-                itemRecord.add(i_price);
-                itemRecord.add(i_data);
-
-                if (itemBatchSize == 0) {
-                    itemSQL.append(itemStub);
-                } else {
-                    itemSQL.append(',');
-                }
-
-                itemSQL.append("(");
-                itemRecord.write(itemSQL, ",");
-                itemSQL.append(")");
-
-                if (++itemBatchSize == itemMaxBatchSize) {
-                    stmt.execute(itemSQL.toString());
-                    itemSQL.setLength(0);
-                    itemBatchSize = 0;
-                }
-
-            } catch (SQLException e) {
-                throw new RuntimeException("Item insert error", e);
-            }
-
+            itemRecord.reset();
+            itemRecord.add(i_id);
+            itemRecord.add(i_im_id);
+            itemRecord.add(i_name);
+            itemRecord.add(i_price);
+            itemRecord.add(i_data);
+            
+            itemLoader.load(itemRecord);
+    
             if ((i_id % 100) == 0) {
                 System.out.printf(".");
                 if ((i_id % 5000) == 0)
@@ -121,15 +93,8 @@ public class Load implements TpccConstants {
         }
 
         /* EXEC SQL COMMIT WORK; */
-
-        try {
-            if (itemBatchSize>0) {
-                stmt.execute(itemSQL.toString());
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException("Item batch error", e);
-        }
+        
+        itemLoader.close();
 
         System.out.printf("Item Done. \n");
     }
@@ -140,7 +105,7 @@ public class Load implements TpccConstants {
       * table |      Loads Stock, District as Warehouses are created | ARGUMENTS |
       * none +==================================================================
       */
-    public static void loadWare(Connection conn, int shardCount, int min_ware, int max_ware, boolean option_debug, int shardId) {
+    public static void loadWare(TpccLoadConfig loadConfig, int shardCount, int min_ware, int max_ware, boolean option_debug, int shardId) throws Exception {
 
         int w_id;
         String w_name = null;
@@ -153,31 +118,21 @@ public class Load implements TpccConstants {
         double w_ytd = 0;
 
         int tmp = 0;
-        boolean retried = false;
+        //boolean retried = false;
         int currentShard = 0;
-        Statement stmt;
-
-
-        try {
-            stmt = conn.createStatement();
-        } catch (SQLException e) {
-            throw new RuntimeException("Creation of statement failed", e);
-        }
 
         System.out.printf("Loading Warehouse \n");
 
-        final String warehouseStub = "INSERT INTO warehouse (w_id, w_name, w_street_1, w_street_2, w_city, w_state, w_zip, w_tax, w_ytd) VALUES ";
-        final StringBuilder warehouseSQL = new StringBuilder();
+        final String WAREHOUSE_COLUMN_NAME[] = { "w_id", " w_name", " w_street_1", " w_street_2", " w_city", " w_state", " w_zip", " w_tax", " w_ytd" };
         final Record warehouseRecord = new Record(9);
-        int warehouseBatchSize = 0;
-        int warehouseMaxBatchSize = 100;
+        final RecordLoader warehouseLoader = loadConfig.createLoader("warehouse", WAREHOUSE_COLUMN_NAME);
 
 
-        retry:
-        if (retried)
-            System.out.printf("Retrying ....\n");
-        retried = true;
-        for (w_id = 1; w_id <= max_ware; w_id++) {
+        //retry:
+//        if (retried)
+//            System.out.printf("Retrying ....\n");
+//        retried = true;
+        for (w_id = min_ware; w_id <= max_ware; w_id++) {
 
             if (shardCount > 0) {
                 currentShard = (w_id % shardCount);
@@ -208,60 +163,31 @@ public class Load implements TpccConstants {
                                         values(:w_id,:w_name,
                                        :w_street_1,:w_street_2,:w_city,:w_state,
                                        :w_zip,:w_tax,:w_ytd);*/
-                //   /*DBS_HINT: dbs_shard_action=shard_read, dbs_pshard=2 */
-                try {
 
-                    warehouseRecord.reset();
-                    warehouseRecord.add(w_id);
-                    warehouseRecord.add(w_name);
-                    warehouseRecord.add(w_street_1);
-                    warehouseRecord.add(w_street_2);
-                    warehouseRecord.add(w_city);
-                    warehouseRecord.add(w_state);
-                    warehouseRecord.add(w_zip);
-                    warehouseRecord.add(w_tax);
-                    warehouseRecord.add(w_ytd);
+                warehouseRecord.reset();
+                warehouseRecord.add(w_id);
+                warehouseRecord.add(w_name);
+                warehouseRecord.add(w_street_1);
+                warehouseRecord.add(w_street_2);
+                warehouseRecord.add(w_city);
+                warehouseRecord.add(w_state);
+                warehouseRecord.add(w_zip);
+                warehouseRecord.add(w_tax);
+                warehouseRecord.add(w_ytd);
 
-                    if (warehouseBatchSize==0) {
-                        warehouseSQL.append(warehouseStub);
-                    }
-                    else {
-                        warehouseSQL.append(",");
-                    }
-
-                    warehouseSQL.append("(");
-                    warehouseRecord.write(warehouseSQL, ",");
-                    warehouseSQL.append(")");
-
-                    if (++warehouseBatchSize == warehouseMaxBatchSize) {
-                        stmt.execute(warehouseSQL.toString());
-                        warehouseSQL.setLength(0);
-                        warehouseBatchSize = 0;
-                    }
-
-
-                } catch (SQLException e) {
-                    throw new RuntimeException("Warehouse insert error", e);
-                }
+                warehouseLoader.load(warehouseRecord);
+                warehouseLoader.commit();
 
                 /** Make Rows associated with Warehouse **/
-                stock(w_id, conn, shardCount, currentShard);
-                district(w_id, conn, shardCount, currentShard);
-
+                stock(loadConfig, w_id);
+                district(loadConfig, w_id);
             }
 
         }
+
         /* EXEC SQL COMMIT WORK; */
-        //TODO: Throw an exception here
 
-        try {
-            if (warehouseBatchSize > 0) {
-                stmt.execute(warehouseSQL.toString());
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException("Warehouse batch error", e);
-        }
+        warehouseLoader.close();
     }
 
     /*
@@ -278,7 +204,7 @@ public class Load implements TpccConstants {
                     loadCustomer(loadConfig, d_id, w_id, shardCount, shardId);
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error loading customers", e);
         }
     }
@@ -289,14 +215,18 @@ public class Load implements TpccConstants {
       * Order_Line Tables | ARGUMENTS |      none
       * +==================================================================
       */
-    public static void loadOrd(Connection conn, int shardCount, int max_ware, int shardId) {
-        // for each warehouse
-        for (int w_id = 1; w_id <= max_ware; w_id++) {
-            // for each district
-            for (int d_id = 1; d_id <= DIST_PER_WARE; d_id++) {
-                // generate orders
-                orders(d_id, w_id, conn, shardCount, shardId);
+    public static void loadOrd(TpccLoadConfig loadConfig, int shardCount, int max_ware, int shardId) {
+        try {
+            // for each warehouse
+            for (int w_id = 1; w_id <= max_ware; w_id++) {
+                // for each district
+                for (int d_id = 1; d_id <= DIST_PER_WARE; d_id++) {
+                    // generate orders
+                    loadOrders(loadConfig, d_id, w_id, shardCount, shardId);
+                }
             }
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to load orders", e);
         }
     }
 
@@ -306,7 +236,8 @@ public class Load implements TpccConstants {
       * ARGUMENTS |      w_id - warehouse id
       * +==================================================================
       */
-    public static boolean stock(int w_id, Connection conn, int shardCount, int currentShard/*, OutputStream os, String fileDelimiter*/) {
+    public static boolean stock(TpccLoadConfig loadConfig, int w_id) throws Exception {
+
         int s_i_id = 0;
         int s_w_id = 0;
         int s_quantity = 0;
@@ -323,33 +254,29 @@ public class Load implements TpccConstants {
         String s_dist_10 = null;
         String s_data = null;
 
-        int sdatasize = 0;
+        //int sdatasize = 0;
         int[] orig = new int[MAXITEMS + 1];
         int pos = 0;
         int i = 0;
         boolean error = false;
-        Statement stmt;
-        try {
-            stmt = conn.createStatement();
-        } catch (SQLException e) {
-            throw new RuntimeException("Stament creation error", e);
-        }
 
-        final String stockStub = "INSERT INTO stock (s_i_id, s_w_id, s_quantity, " +
-                "s_dist_01, s_dist_02, s_dist_03, s_dist_04, s_dist_05, s_dist_06, " +
-                "s_dist_07, s_dist_08, s_dist_09, s_dist_10, s_ytd, s_order_cnt, " +
-                "s_remote_cnt, s_data) VALUES ";
+        final String STOCK_COLUMN_NAME[] = { "s_i_id", " s_w_id", " s_quantity", " " +
+                "s_dist_01", " s_dist_02", " s_dist_03", " s_dist_04", " s_dist_05", " s_dist_06", " " +
+                "s_dist_07", " s_dist_08", " s_dist_09", " s_dist_10", " s_ytd", " s_order_cnt", " " +
+                "s_remote_cnt", " s_data"
+        };
+        
         final Record stockRecord = new Record(17);
-        final StringBuilder stockSQL = new StringBuilder();
-        int stockBatchSize = 0;
-        int stockMaxBatchSize = 100;
+        RecordLoader stockLoader = loadConfig.createLoader("stock", STOCK_COLUMN_NAME);
 
         /* EXEC SQL WHENEVER SQLERROR GOTO sqlerr;*/
         System.out.printf("Loading Stock Wid=%d\n", w_id);
         s_w_id = w_id;
 
-        for (i = 0; i < MAXITEMS / 10; i++)
+        for (i = 0; i < MAXITEMS / 10; i++) {
             orig[i] = 0;
+        }
+
         for (i = 0; i < MAXITEMS / 10; i++) {
             do {
                 pos = Util.randomNumber(0, MAXITEMS);
@@ -357,7 +284,7 @@ public class Load implements TpccConstants {
             orig[pos] = 1;
         }
 
-        retry:
+        ////retry:
         for (s_i_id = 1; s_i_id <= MAXITEMS; s_i_id++) {
 
             /* Generate Stock Data */
@@ -376,9 +303,9 @@ public class Load implements TpccConstants {
 
 
             s_data = Util.makeAlphaString(26, 50);
-            sdatasize = s_data.length();
+            //sdatasize = s_data.length();
             if (orig[s_i_id] != 0) {//TODO:Change this later
-                pos = Util.randomNumber(0, sdatasize - 8);
+                //pos = Util.randomNumber(0, sdatasize - 8);
                 s_data = "original";
             }
             /*EXEC SQL INSERT INTO
@@ -388,53 +315,26 @@ public class Load implements TpccConstants {
                               :s_dist_06,:s_dist_07,:s_dist_08,:s_dist_09,:s_dist_10,
                               0, 0, 0,:s_data);*/
 
-            try {
-                
-                stockRecord.reset();
-                stockRecord.add(s_i_id);
-                stockRecord.add(s_w_id);
-                stockRecord.add(s_quantity);
-                stockRecord.add(s_dist_01);
-                stockRecord.add(s_dist_02);
-                stockRecord.add(s_dist_03);
-                stockRecord.add(s_dist_04);
-                stockRecord.add(s_dist_05);
-                stockRecord.add(s_dist_06);
-                stockRecord.add(s_dist_07);
-                stockRecord.add(s_dist_08);
-                stockRecord.add(s_dist_09);
-                stockRecord.add(s_dist_10);
-                stockRecord.add(0);
-                stockRecord.add(0);
-                stockRecord.add(0);
-                stockRecord.add(s_data);
-                
-//                if (os != null) {
-//                    os.write(stockRecord.toString(), fileDelimiter);
-//                }
-//                else {
+            stockRecord.reset();
+            stockRecord.add(s_i_id);
+            stockRecord.add(s_w_id);
+            stockRecord.add(s_quantity);
+            stockRecord.add(s_dist_01);
+            stockRecord.add(s_dist_02);
+            stockRecord.add(s_dist_03);
+            stockRecord.add(s_dist_04);
+            stockRecord.add(s_dist_05);
+            stockRecord.add(s_dist_06);
+            stockRecord.add(s_dist_07);
+            stockRecord.add(s_dist_08);
+            stockRecord.add(s_dist_09);
+            stockRecord.add(s_dist_10);
+            stockRecord.add(0);
+            stockRecord.add(0);
+            stockRecord.add(0);
+            stockRecord.add(s_data);
 
-                    if (stockBatchSize==0) {
-                        stockSQL.append(stockStub);
-                    }
-                    else {
-                        stockSQL.append(",");
-                    }
-    
-                    stockSQL.append("(");
-                    stockRecord.write(stockSQL, ",");
-                    stockSQL.append(")");
-    
-                    if (++stockBatchSize == stockMaxBatchSize) {
-                        stmt.execute(stockSQL.toString());
-                        stockSQL.setLength(0);
-                        stockBatchSize = 0;
-                    }
-//                }
-
-            } catch (SQLException e) {
-                throw new RuntimeException("Stock insert error", e);
-            }
+            stockLoader.load(stockRecord);
 
             if (optionDebug)
                 System.out.printf("SID = %d, WID = %d, Quan = %d\n",
@@ -447,15 +347,7 @@ public class Load implements TpccConstants {
             }
         }
 
-        try {
-            if (stockBatchSize>0) {
-                stmt.execute(stockSQL.toString());
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException("Stock batch error", e);
-        }
-
+        stockLoader.close();
 
         System.out.printf(" Stock Done.\n");
         return error;
@@ -468,7 +360,7 @@ public class Load implements TpccConstants {
       * | ARGUMENTS |      w_id - warehouse id
       * +==================================================================
       */
-    public static boolean district(int w_id, Connection conn, int shardCount, int currentShard) {
+    public static boolean district(TpccLoadConfig loadConfig, int w_id) throws Exception {
         int d_id;
         int d_w_id;
         String d_name;
@@ -481,26 +373,17 @@ public class Load implements TpccConstants {
         float d_ytd;
         int d_next_o_id;
         boolean error = false;
-        Statement stmt;
-        try {
-            stmt = conn.createStatement();
-        } catch (SQLException e1) {
-            throw new RuntimeException("District statemet creation error", e1);
-        }
 
         System.out.printf("Loading District\n");
         d_w_id = w_id;
         d_ytd = (float) 30000.0;
         d_next_o_id = 3001;
         
-        final String districtStub = "INSERT INTO district (d_id, d_w_id, d_name, d_street_1, d_street_2, " +
-                "d_city, d_state, d_zip, d_tax, d_ytd, d_next_o_id) VALUES ";
+        final String[] DISTRICT_COLUMN_NAME = { "d_id", " d_w_id", " d_name", " d_street_1", " d_street_2", " d_city", " d_state", " d_zip", " d_tax", " d_ytd", " d_next_o_id" };
         final Record districtRecord = new Record(11);
-        final StringBuilder districtSQL = new StringBuilder();
-        int districtBatchSize = 0;
-        int districtMaxBatchSize = 100;
+        final RecordLoader districtLoader = loadConfig.createLoader("district", DISTRICT_COLUMN_NAME);
 
-        retry:
+        //retry:
         for (d_id = 1; d_id <= DIST_PER_WARE; d_id++) {
 
             /* Generate District Data */
@@ -519,54 +402,29 @@ public class Load implements TpccConstants {
                                values(:d_id,:d_w_id,:d_name,
                               :d_street_1,:d_street_2,:d_city,:d_state,:d_zip,
                               :d_tax,:d_ytd,:d_next_o_id);*/
-            try {
-                districtRecord.reset();
-                districtRecord.add(d_id);
-                districtRecord.add(d_w_id);
-                districtRecord.add(d_name);
-                districtRecord.add(d_street_1);
-                districtRecord.add(d_street_2);
-                districtRecord.add(d_city);
-                districtRecord.add(d_state);
-                districtRecord.add(d_zip);
-                districtRecord.add(d_tax);
-                districtRecord.add(d_ytd);
-                districtRecord.add(d_next_o_id);
 
-                if (districtBatchSize==0) {
-                    districtSQL.append(districtStub);
-                }
-                else {
-                    districtSQL.append(",");
-                }
-                
-                districtSQL.append("(");
-                districtRecord.write(districtSQL, ",");
-                districtSQL.append(")");
-                
-                if (++districtBatchSize == districtMaxBatchSize) {
-                    stmt.execute(districtSQL.toString());
-                    districtSQL.setLength(0);
-                    districtBatchSize = 0;
-                }
+            districtRecord.reset();
+            districtRecord.add(d_id);
+            districtRecord.add(d_w_id);
+            districtRecord.add(d_name);
+            districtRecord.add(d_street_1);
+            districtRecord.add(d_street_2);
+            districtRecord.add(d_city);
+            districtRecord.add(d_state);
+            districtRecord.add(d_zip);
+            districtRecord.add(d_tax);
+            districtRecord.add(d_ytd);
+            districtRecord.add(d_next_o_id);
 
-            } catch (SQLException e) {
-                throw new RuntimeException("District insert batch error", e);
-            }
+            districtLoader.load(districtRecord);
+
             if (optionDebug)
                 System.out.printf("DID = %d, WID = %d, Name = %s, Tax = %f\n",
                         d_id, d_w_id, d_name, d_tax);
 
         }
 
-        try {
-            if (districtBatchSize > 0) {
-                stmt.execute(districtSQL.toString());
-            }
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException("District execute batach error", e);
-        }
+        districtLoader.close();
 
         return error;
 
@@ -579,7 +437,7 @@ public class Load implements TpccConstants {
       * customer id |      d_id - district id |      w_id - warehouse id
       * +==================================================================
       */
-    public static void loadCustomer(TpccLoadConfig loadConfig, int d_id, int w_id, int shardCount, int shardId) throws IOException {
+    public static void loadCustomer(TpccLoadConfig loadConfig, int d_id, int w_id, int shardCount, int shardId) throws Exception {
         int c_id = 0;
         int c_d_id = 0;
         int c_w_id = 0;
@@ -592,7 +450,7 @@ public class Load implements TpccConstants {
         String c_state = null;
         String c_zip = null;
         String c_phone = null;
-        String c_since = null;
+//        String c_since = null;
         String c_credit = null;
 
         int c_credit_lim = 0;
@@ -603,7 +461,7 @@ public class Load implements TpccConstants {
         double h_amount = 0.0;
 
         String h_data = null;
-        boolean retried = false;
+//        //boolean retried = false;
 
         System.out.printf("Loading Customer for DID=%d, WID=%d\n", d_id, w_id);
         int currentShard = 0;
@@ -620,19 +478,19 @@ public class Load implements TpccConstants {
                 "c_discount", "c_balance", "c_ytd_payment", "c_payment_cnt", "c_delivery_cnt", "c_data"
         };
         final Record customerRecord = new Record(21);
-        final RecordProcessor customerLoader = loadConfig.createLoader("customer", CUSTOMER_COLUMNS, 100);
+        final RecordLoader customerLoader = loadConfig.createLoader("customer", CUSTOMER_COLUMNS);
 
         final String[] HISTORY_COLUMN_NAME = {
                 "h_c_id", "h_c_d_id", "h_c_w_id", "h_d_id", "h_w_id", "h_date", "h_amount", "h_data"
         };
         final Record historyRecord = new Record(8);
-        final RecordProcessor historyLoader = loadConfig.createLoader("history", HISTORY_COLUMN_NAME, 100);
+        final RecordLoader historyLoader = loadConfig.createLoader("history", HISTORY_COLUMN_NAME);
 
         if ((currentShard == shardId) || (shardId == 0)) {
-            retry:
-            if (retried)
-                System.out.printf("Retrying ...\n");
-            retried = true;
+            //retry:
+//            if (retried)
+//                System.out.printf("Retrying ...\n");
+//            retried = true;
             for (c_id = 1; c_id <= CUST_PER_DIST; c_id++) {
 
                 /* Generate Customer Data */
@@ -708,7 +566,7 @@ public class Load implements TpccConstants {
                     customerRecord.add(0);
                     customerRecord.add(c_data);
                     
-                    customerLoader.process(customerRecord);
+                    customerLoader.load(customerRecord);
                     
                 } catch (Exception e) {
                     throw new RuntimeException("Customer insert error", e);
@@ -735,7 +593,7 @@ public class Load implements TpccConstants {
                     historyRecord.add(h_amount);
                     historyRecord.add(h_data);
                     
-                    historyLoader.process(historyRecord);
+                    historyLoader.load(historyRecord);
 
                 } catch (Exception e) {
                     throw new RuntimeException("Insert into History error", e);
@@ -753,6 +611,9 @@ public class Load implements TpccConstants {
 
         }
 
+        customerLoader.close();
+        historyLoader.close();
+
         System.out.printf("Customer Done.\n");
     }
 
@@ -763,7 +624,7 @@ public class Load implements TpccConstants {
       * warehouse id
       * +==================================================================
       */
-    public static void orders(int d_id, int w_id, Connection conn, int shardCount, int shardId) {
+    public static void loadOrders(TpccLoadConfig loadConfig, int d_id, int w_id, int shardCount, int shardId) throws Exception {
         int o_id;
         int o_c_id;
         int o_d_id;
@@ -782,12 +643,6 @@ public class Load implements TpccConstants {
 //        float c_discount;
 
         float tmp_float;
-        Statement stmt;
-        try {
-            stmt = conn.createStatement();
-        } catch (SQLException e1) {
-            throw new RuntimeException("District statement creation error", e1);
-        }
 
         int currentShard = 0;
         if (shardCount > 0) {
@@ -797,23 +652,17 @@ public class Load implements TpccConstants {
             }
         }
 
-        final String orderStub = "INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_carrier_id, o_ol_cnt, o_all_local) VALUES ";
-        final StringBuilder orderSQL = new StringBuilder();
+        final String ORDERS_COLUMN_NAME[] = { "o_id", " o_d_id", " o_w_id", " o_c_id", " o_entry_d", " o_carrier_id", " o_ol_cnt", " o_all_local" };
         final Record orderRecord = new Record(8);
-        int orderBatchSize = 0;
-        final int orderMaxBatchSize = 100;
+        final RecordLoader orderLoader = loadConfig.createLoader("order", ORDERS_COLUMN_NAME);
 
-        final String newOrderStub = "INSERT INTO new_orders (no_o_id, no_d_id, no_w_id) VALUES ";
-        final StringBuilder newOrderSQL = new StringBuilder();
+        final String NEW_ORDERS_COLUMN_NAMES[] = { "no_o_id", " no_d_id", " no_w_id" };
         final Record newOrderRecord = new Record(3);
-        int newOrderBatchSize = 0;
-        final int newOrderMaxBatchSize = 100;
+        final RecordLoader newOrderLoader = loadConfig.createLoader("new_orders", NEW_ORDERS_COLUMN_NAMES);
 
-        final String orderLineStub = "INSERT INTO order_line (ol_o_id, ol_d_id, ol_w_id, ol_number, ol_i_id, ol_supply_w_id, ol_delivery_d, ol_quantity, ol_amount, ol_dist_info) VALUES ";
+        final String ORDER_LINE_COLUMN_NAME[] = { "ol_o_id", " ol_d_id", " ol_w_id", " ol_number", " ol_i_id", " ol_supply_w_id", " ol_delivery_d", " ol_quantity", " ol_amount", " ol_dist_info" };
         final Record orderLineRecord = new Record(10);
-        final StringBuilder orderLineSQL = new StringBuilder();
-        int orderLineBatchSize = 0;
-        final int orderLineMaxBatchSize = 100;
+        final RecordLoader orderLineLoader = loadConfig.createLoader("order_line", ORDER_LINE_COLUMN_NAME);
 
         if ((currentShard == shardId) || (shardId == 0)) {
             System.out.printf("Loading Orders for D=%d, W=%d\n", d_id, w_id);
@@ -838,104 +687,47 @@ public class Load implements TpccConstants {
                                          values(:o_id,:o_d_id,:o_w_id,:o_c_id,
                                         :timestamp,
                                         NULL,:o_ol_cnt, 1);*/
-                    try {
 
-                        orderRecord.reset();
-                        orderRecord.add(o_id);
-                        orderRecord.add(o_d_id);
-                        orderRecord.add(o_w_id);
-                        orderRecord.add(o_c_id);
-                        orderRecord.add(date);
-                        orderRecord.add(null);
-                        orderRecord.add(o_ol_cnt);
-                        orderRecord.add(1);
+                    orderRecord.reset();
+                    orderRecord.add(o_id);
+                    orderRecord.add(o_d_id);
+                    orderRecord.add(o_w_id);
+                    orderRecord.add(o_c_id);
+                    orderRecord.add(date);
+                    orderRecord.add(null);
+                    orderRecord.add(o_ol_cnt);
+                    orderRecord.add(1);
 
-                        if (orderBatchSize == 0) {
-                            orderSQL.append(orderStub);
-                        } else {
-                            orderSQL.append(",");
-                        }
+                    orderLoader.load(orderRecord);
 
-                        orderSQL.append("(");
-                        orderRecord.write(orderSQL, ",");
-                        orderSQL.append(")");
-
-                        if (++orderBatchSize == orderMaxBatchSize) {
-                            stmt.execute(orderSQL.toString());
-                            orderSQL.setLength(0);
-                            orderBatchSize = 0;
-                        }
-
-                    } catch (SQLException e) {
-                        throw new RuntimeException("Orders insert error", e);
-                    }
 
                     /*EXEC SQL INSERT INTO
                                          new_orders
                                          values(:o_id,:o_d_id,:o_w_id);*/
-                    try {
+                    newOrderRecord.reset();
+                    newOrderRecord.add(o_id);
+                    newOrderRecord.add(o_d_id);
+                    newOrderRecord.add(o_w_id);
 
-                        newOrderRecord.reset();
-                        newOrderRecord.add(o_id);
-                        newOrderRecord.add(o_d_id);
-                        newOrderRecord.add(o_w_id);
+                    newOrderLoader.load(newOrderRecord);
 
-                        if (newOrderBatchSize == 0) {
-                            newOrderSQL.append(newOrderStub);
-                        } else {
-                            newOrderSQL.append(',');
-                        }
-
-                        newOrderSQL.append('(');
-                        newOrderRecord.write(newOrderSQL, ",");
-                        newOrderSQL.append(')');
-
-                        if (++newOrderBatchSize == newOrderMaxBatchSize) {
-                            stmt.execute(newOrderSQL.toString());
-                            newOrderSQL.setLength(0);
-                            newOrderBatchSize = 0;
-                        }
-
-                    } catch (SQLException e) {
-                        throw new RuntimeException("New Orders insert error", e);
-                    }
                 } else {
                     /*EXEC SQL INSERT INTO
                              orders
                              values(:o_id,:o_d_id,:o_w_id,:o_c_id,
                                 :timestamp,
                                 :o_carrier_id,:o_ol_cnt, 1);*/
-                    try {
+                    orderRecord.reset();
+                    orderRecord.add(o_id);
+                    orderRecord.add(o_d_id);
+                    orderRecord.add(o_w_id);
+                    orderRecord.add(o_c_id);
+                    orderRecord.add(date);
+                    orderRecord.add(o_carrier_id);
+                    orderRecord.add(o_ol_cnt);
+                    orderRecord.add(1);
 
-                        orderRecord.reset();
-                        orderRecord.add(o_id);
-                        orderRecord.add(o_d_id);
-                        orderRecord.add(o_w_id);
-                        orderRecord.add(o_c_id);
-                        orderRecord.add(date);
-                        orderRecord.add(o_carrier_id);
-                        orderRecord.add(o_ol_cnt);
-                        orderRecord.add(1);
-
-                        if (orderBatchSize == 0) {
-                            orderSQL.append(orderStub);
-                        } else {
-                            orderSQL.append(",");
-                        }
-
-                        orderSQL.append("(");
-                        orderRecord.write(orderSQL, ",");
-                        orderSQL.append(")");
-
-                        if (++orderBatchSize == orderMaxBatchSize) {
-                            stmt.execute(orderSQL.toString());
-                            orderSQL.setLength(0);
-                            orderBatchSize = 0;
-                        }
-
-                    } catch (SQLException e) {
-                        throw new RuntimeException("Orders insert error", e);
-                    }
+                    orderLoader.load(orderRecord);
 
                 }
 
@@ -961,40 +753,20 @@ public class Load implements TpccConstants {
                                               values(:o_id,:o_d_id,:o_w_id,:ol,
                                              :ol_i_id,:ol_supply_w_id, NULL,
                                              :ol_quantity,:ol_amount,:ol_dist_info);*/
-                        try {
+                        orderLineRecord.reset();
+                        orderLineRecord.add(o_id);
+                        orderLineRecord.add(o_d_id);
+                        orderLineRecord.add(o_w_id);
+                        orderLineRecord.add(ol);
+                        orderLineRecord.add(ol_i_id);
+                        orderLineRecord.add(ol_supply_w_id);
+                        orderLineRecord.add(null);
+                        orderLineRecord.add(ol_quantity);
+                        orderLineRecord.add(ol_amount);
+                        orderLineRecord.add(ol_dist_info);
 
-                            orderLineRecord.reset();
-                            orderLineRecord.add(o_id);
-                            orderLineRecord.add(o_d_id);
-                            orderLineRecord.add(o_w_id);
-                            orderLineRecord.add(ol);
-                            orderLineRecord.add(ol_i_id);
-                            orderLineRecord.add(ol_supply_w_id);
-                            orderLineRecord.add(null);
-                            orderLineRecord.add(ol_quantity);
-                            orderLineRecord.add(ol_amount);
-                            orderLineRecord.add(ol_dist_info);
+                        orderLineLoader.load(orderLineRecord);
 
-                            if (orderLineBatchSize == 0) {
-                                orderLineSQL.append(orderLineStub);
-                            } else {
-                                orderLineSQL.append(",");
-                            }
-
-                            orderLineSQL.append("(");
-                            orderLineRecord.write(orderLineSQL, ",");
-                            orderLineSQL.append(")");
-
-                            if (++orderLineBatchSize == orderLineMaxBatchSize) {
-                                stmt.execute(orderLineSQL.toString());
-                                orderLineSQL.setLength(0);
-                                orderLineBatchSize = 0;
-                            }
-
-
-                        } catch (SQLException e) {
-                            throw new RuntimeException("Order line insert error", e);
-                        }
                     } else {
                         /*EXEC SQL INSERT INTO
                                   order_line
@@ -1002,70 +774,40 @@ public class Load implements TpccConstants {
                                      :ol_i_id,:ol_supply_w_id, 
                                      :timestamp,
                                      :ol_quantity,:tmp_float,:ol_dist_info);*/
-                        try {
+                        orderLineRecord.reset();
+                        orderLineRecord.add(o_id);
+                        orderLineRecord.add(o_d_id);
+                        orderLineRecord.add(o_w_id);
+                        orderLineRecord.add(ol);
+                        orderLineRecord.add(ol_i_id);
+                        orderLineRecord.add(ol_supply_w_id);
+                        orderLineRecord.add(date);
+                        orderLineRecord.add(ol_quantity);
+                        orderLineRecord.add(tmp_float);
+                        orderLineRecord.add(ol_dist_info);
 
-                            orderLineRecord.reset();
-                            orderLineRecord.add(o_id);
-                            orderLineRecord.add(o_d_id);
-                            orderLineRecord.add(o_w_id);
-                            orderLineRecord.add(ol);
-                            orderLineRecord.add(ol_i_id);
-                            orderLineRecord.add(ol_supply_w_id);
-                            orderLineRecord.add(date);
-                            orderLineRecord.add(ol_quantity);
-                            orderLineRecord.add(tmp_float);
-                            orderLineRecord.add(ol_dist_info);
+                        orderLineLoader.load(orderLineRecord);
 
-                            if (orderLineBatchSize == 0) {
-                                orderLineSQL.append(orderLineStub);
-                            } else {
-                                orderLineSQL.append(",");
-                            }
-
-                            orderLineSQL.append("(");
-                            orderLineRecord.write(orderLineSQL, ",");
-                            orderLineSQL.append(")");
-
-                            if (++orderLineBatchSize == orderLineMaxBatchSize) {
-                                stmt.execute(orderLineSQL.toString());
-                                orderLineSQL.setLength(0);
-                                orderLineBatchSize = 0;
-                            }
-
-
-                        } catch (SQLException e) {
-                            throw new RuntimeException("Order line insert error", e);
-                        }
                     }
 
-                    if (optionDebug)
+                    if (optionDebug) {
                         System.out.printf("OL = %d, IID = %d, QUAN = %d, AMT = %f\n",
                                 ol, ol_i_id, ol_quantity, ol_amount);
+                    }
 
                 }
                 if ((o_id % 100) == 0) {
                     System.out.printf(".");
 
-                    if ((o_id % 1000) == 0)
+                    if ((o_id % 1000) == 0) {
                         System.out.printf(" %d\n", o_id);
+                    }
                 }
             }
 
-            try {
-                if (orderBatchSize > 0) {
-                    stmt.execute(orderSQL.toString());
-                }
-                if (newOrderBatchSize > 0) {
-                    stmt.execute(newOrderSQL.toString());
-                }
-                if (orderLineBatchSize > 0) {
-                    stmt.execute(orderLineSQL.toString());
-                }
-                stmt.close();
-
-            } catch (SQLException e) {
-                throw new RuntimeException("Order batch execute error", e);
-            }
+            orderLoader.close();
+            orderLineLoader.close();
+            newOrderLoader.close();
         }
 
 
