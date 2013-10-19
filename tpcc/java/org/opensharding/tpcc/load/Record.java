@@ -10,7 +10,7 @@ public class Record {
     /**
      * Column values.
      */
-    private final Object data[];
+    private final Object field[];
 
     /**
      * Index of next column to write value to.
@@ -23,7 +23,7 @@ public class Record {
     private final StringBuilder toStringBuilder = new StringBuilder();
 
     public Record(int columnCount) {
-        this.data = new Object[columnCount];
+        this.field = new Object[columnCount];
     }
 
     public void reset() {
@@ -31,22 +31,30 @@ public class Record {
     }
 
     public void add(Object value) {
-        data[index++] = value;
+        field[index++] = value;
+    }
+
+    public Object getField(int i) {
+        return field[i];
+    }
+
+    public Object[] getField() {
+        return field;
     }
 
     public void write(StringBuilder b, String delim) {
-        for (int i=0; i<data.length; i++) {
+        for (int i=0; i< field.length; i++) {
             if (i>0) {
                 b.append(delim);
             }
             boolean enquote = false;
-            if (data[i] != null && (data[i] instanceof String || data[i] instanceof Date)) {
+            if (field[i] != null && (field[i] instanceof String || field[i] instanceof Date)) {
                 enquote = true;
             }
             if (enquote) {
                 b.append('\'');
             }
-            b.append(data[i]);
+            b.append(field[i]);
             if (enquote) {
                 b.append('\'');
             }

@@ -1,6 +1,7 @@
 package org.opensharding.tpcc;
 
 import org.opensharding.tpcc.load.CSVLoader;
+import org.opensharding.tpcc.load.JdbcPreparedStatementLoader;
 import org.opensharding.tpcc.load.JdbcStatementLoader;
 import org.opensharding.tpcc.load.RecordLoader;
 
@@ -14,13 +15,16 @@ import java.sql.Connection;
 public class TpccLoadConfig {
 
     enum LoadType {
-        JDBC,
+        JDBC_STATEMENT,
+        JDBC_PREPARED_STATEMENT,
         CSV
     }
 
-    private LoadType loadType = LoadType.JDBC;
+    private LoadType loadType = LoadType.JDBC_PREPARED_STATEMENT;
 
     private Connection conn;
+
+    private File outputDir;
 
     private boolean jdbcInsertIgnore = true;
 
@@ -28,13 +32,19 @@ public class TpccLoadConfig {
 
     public RecordLoader createLoader(String tableName, String columnName[]) throws IOException {
         switch (loadType) {
-            case JDBC:
+            case JDBC_STATEMENT:
                 return new JdbcStatementLoader(conn, tableName, columnName, jdbcInsertIgnore, jdbcBatchSize);
+            case JDBC_PREPARED_STATEMENT:
+                return new JdbcPreparedStatementLoader(conn, tableName, columnName, jdbcInsertIgnore, jdbcBatchSize);
             case CSV:
-                return new CSVLoader(new File("test_" + tableName + ".csv"));
+                return new CSVLoader(new File(outputDir, tableName + ".csv"));
             default:
                 throw new IllegalStateException();
         }
+    }
+
+    public void setOutputDir(File outputDir) {
+        this.outputDir = outputDir;
     }
 
     public Connection getConn() {

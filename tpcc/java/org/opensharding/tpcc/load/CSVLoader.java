@@ -19,6 +19,7 @@ public class CSVLoader implements RecordLoader {
     }
 
     public void load(Record r) throws Exception {
+        b.setLength(0);
         r.write(b, ",");
         os.write(b.toString().getBytes());
         os.write("\n".getBytes());

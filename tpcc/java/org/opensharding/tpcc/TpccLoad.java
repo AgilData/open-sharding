@@ -1,5 +1,6 @@
 package org.opensharding.tpcc;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -16,6 +17,8 @@ import org.slf4j.Logger;
 
 public class TpccLoad implements TpccConstants {
 
+    private String mode;
+    private String csvOutputDir;
     private String connectString;
     private String dbString;
     private String dbUser = null;
@@ -47,6 +50,8 @@ public class TpccLoad implements TpccConstants {
     private static final Logger logger = LoggerFactory.getLogger(Tpcc.class);
     private static final boolean DEBUG = logger.isDebugEnabled();
 
+    private static final String MODE = "MODE";
+    private static final String OUTPUTDIR = "OUTPUTDIR";
     private static final String DRIVER = "DRIVER";
     private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";
     private static final String HOST = "HOST";
@@ -85,7 +90,11 @@ public class TpccLoad implements TpccConstants {
 
         if (overridePropertiesFile) {
             for (int i = 0; i < argv.length; i = i + 2) {
-                if (argv[i].equals("-h")) {
+                if (argv[i].equals("-m")) {
+                    mode = argv[i + 1];
+                } else if (argv[i].equals("-o")) {
+                    csvOutputDir = argv[i + 1];
+                } else if (argv[i].equals("-h")) {
                     connectString = argv[i + 1];
                 } else if (argv[i].equals("-d")) {
                     dbString = argv[i + 1];
@@ -104,6 +113,8 @@ public class TpccLoad implements TpccConstants {
                 } else {
                     System.out.println("Incorrect Argument: " + argv[i]);
                     System.out.println("The possible arguments are as follows: ");
+                    System.out.println("-m [mode (CSV or JDBC)]");
+                    System.out.println("-o [csvoutput dir]");
                     System.out.println("-h [database host]");
                     System.out.println("-d [database name]");
                     System.out.println("-u [database username]");
@@ -118,6 +129,8 @@ public class TpccLoad implements TpccConstants {
                 }
             }
         } else {
+            mode = properties.getProperty(MODE);
+            csvOutputDir = properties.getProperty(OUTPUTDIR);
             connectString = properties.getProperty(HOST);
             dbString = properties.getProperty(DATABASE);
             dbUser = properties.getProperty(USER);
@@ -133,21 +146,36 @@ public class TpccLoad implements TpccConstants {
         System.out.printf("*** Java TPC-C Data Loader version " + Tpcc.VERSION + " ***\n");
         System.out.printf("*************************************\n");
 
-        long start = System.currentTimeMillis();
+        final long start = System.currentTimeMillis();
         System.out.println("Execution time start: " + start);
 
-        if (connectString == null) {
-            throw new RuntimeException("Host is null.");
+        if (mode == null) {
+            throw new RuntimeException("Mode is null.");
         }
-        if (dbString == null) {
-            throw new RuntimeException("Database name is null.");
+        boolean jdbcMode = mode.equalsIgnoreCase("JDBC");
+        if (jdbcMode) {
+            if (connectString == null) {
+                throw new RuntimeException("Host is null.");
+            }
+            if (dbString == null) {
+                throw new RuntimeException("Database name is null.");
+            }
+            if (dbUser == null) {
+                throw new RuntimeException("User is null.");
+            }
+            if (dbPassword == null) {
+                throw new RuntimeException("Password is null.");
+            }
         }
-        if (dbUser == null) {
-            throw new RuntimeException("User is null.");
+        else if (mode.equalsIgnoreCase("CSV")) {
+            if (csvOutputDir == null) {
+                throw new RuntimeException("Output dir is null.");
+            }
         }
-        if (dbPassword == null) {
-            throw new RuntimeException("Password is null.");
+        else {
+            throw new RuntimeException("Invalid mode '" + mode + "': must be CSV or JDBC");
         }
+
         if (num_ware < 1) {
             throw new RuntimeException("Warehouse count has to be greater than or equal to 1.");
         }
@@ -161,13 +189,18 @@ public class TpccLoad implements TpccConstants {
             throw new RuntimeException("ShardId was not obtained");
         }
 
-
         System.out.printf("<Parameters>\n");
         if (is_local == 0) System.out.printf("     [server]: %s\n", connectString);
         if (is_local == 0) System.out.printf("     [port]: %d\n", port);
-        System.out.printf("     [DBname]: %s\n", dbString);
-        System.out.printf("       [user]: %s\n", dbUser);
-        System.out.printf("       [pass]: %s\n", dbPassword);
+
+        if (jdbcMode) {
+            System.out.printf("     [DBname]: %s\n", dbString);
+            System.out.printf("       [user]: %s\n", dbUser);
+            System.out.printf("       [pass]: %s\n", dbPassword);
+        }
+        else {
+            System.out.printf(" [Output Dir]: %s\n", csvOutputDir);
+        }
 
         System.out.printf("  [warehouse]: %d\n", num_ware);
         System.out.printf(" [shardId]: %d\n", shardId);
@@ -180,45 +213,65 @@ public class TpccLoad implements TpccConstants {
         //TODO: Pass the seed in as a variable.
         Util.setSeed(seed);
 
+        TpccLoadConfig loadConfig = new TpccLoadConfig();
 
 		/* EXEC SQL WHENEVER SQLERROR GOTO Error_SqlCall; */
-        try {
-            Class.forName(javaDriver);
-        } catch (ClassNotFoundException e1) {
-            throw new RuntimeException("Class for mysql error", e1);
+        if (jdbcMode) {
+            try {
+                Class.forName(javaDriver);
+            } catch (ClassNotFoundException e1) {
+                throw new RuntimeException("Class for mysql error", e1);
+            }
+
+            Connection conn;
+
+            try {
+                //TODO: load from config
+                Properties jdbcConnectProp = new Properties();
+                jdbcConnectProp.setProperty("user", dbUser);
+                jdbcConnectProp.setProperty("password", dbPassword);
+                jdbcConnectProp.setProperty("useServerPrepStmts", "true");
+                jdbcConnectProp.setProperty("cachePrepStmts", "true");
+
+                conn = DriverManager.getConnection(jdbcUrl, jdbcConnectProp);
+                conn.setAutoCommit(false);
+
+            } catch (SQLException e) {
+                throw new RuntimeException("Connection error", e);
+            }
+
+
+            Statement stmt;
+            try {
+                stmt = conn.createStatement();
+            } catch (SQLException e) {
+                throw new RuntimeException("Could not create statement", e);
+            }
+            try {
+                stmt.execute("SET UNIQUE_CHECKS=0");
+            } catch (SQLException e) {
+                throw new RuntimeException("Could not set unique checks error", e);
+            }
+            try {
+                stmt.execute("SET FOREIGN_KEY_CHECKS=0");
+                stmt.close();
+            } catch (SQLException e) {
+                throw new RuntimeException("Could not set foreign key checks error", e);
+            }
+
+            loadConfig.setLoadType(TpccLoadConfig.LoadType.JDBC_STATEMENT);
+            loadConfig.setConn(conn);
         }
-
-        Connection conn;
-
-        try {
-            conn = DriverManager.getConnection(jdbcUrl, dbUser, dbPassword);
-        } catch (SQLException e) {
-            throw new RuntimeException("Connection error", e);
+        else {
+            File outputDir = new File(csvOutputDir);
+            if (!outputDir.exists()) {
+                if (!outputDir.mkdirs()) {
+                    throw new RuntimeException("Could not create dir: " + outputDir.getAbsolutePath());
+                }
+            }
+            loadConfig.setLoadType(TpccLoadConfig.LoadType.CSV);
+            loadConfig.setOutputDir(outputDir);
         }
-
-
-        Statement stmt;
-        try {
-            stmt = conn.createStatement();
-        } catch (SQLException e) {
-            throw new RuntimeException("Could not create statement", e);
-        }
-        try {
-            stmt.execute("SET UNIQUE_CHECKS=0");
-        } catch (SQLException e) {
-            throw new RuntimeException("Could not set unique checks error", e);
-        }
-        try {
-            stmt.execute("SET FOREIGN_KEY_CHECKS=0");
-            stmt.close();
-        } catch (SQLException e) {
-            throw new RuntimeException("Could not set foreign key checks error", e);
-        }
-
-        TpccLoadConfig loadConfig = new TpccLoadConfig();
-        loadConfig.setLoadType(TpccLoadConfig.LoadType.JDBC);
-        loadConfig.setConn(conn);
-
 
         System.out.printf("TPCC Data Load Started...\n");
 
@@ -257,12 +310,21 @@ public class TpccLoad implements TpccConstants {
             e.printStackTrace();
         }
 
-        long end = System.currentTimeMillis();
-        double time = ((((double) end - (double) start) / 1000.0)) / 60.0;
-        DecimalFormat df = new DecimalFormat("#,##0.0");
-        System.out.println("Total execution time: " + df.format(time) + " Min");
-        return 0;
+        final long end = System.currentTimeMillis();
+        final long durationSeconds = (long) ((end - start) / 1000.0f);
 
+        long seconds = durationSeconds % 60;
+        long minutes = (durationSeconds - seconds) / 60;
+
+        DecimalFormat df1 = new DecimalFormat("#,##0");
+        DecimalFormat df2 = new DecimalFormat("#,##0.000");
+        System.out.println("Total execution time: "
+                + df1.format(minutes) + " minute(s), "
+                + df1.format(seconds) + " second(s) ("
+                + df2.format(durationSeconds / 60.0f) + " minutes)"
+        );
+
+        return 0;
     }
 
     public static void main(String[] argv) {
