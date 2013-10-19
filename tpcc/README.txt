@@ -1,7 +1,7 @@
-tpcc
-====
+Java TPC-C
+==========
 
-This project is a Java implementation of tpcc using JDBC and prepared statements.
+This project is a Java implementation of the TPC-C benchmark using JDBC and prepared statements.
 
 Configuration settings include database connection details are in tpcc.properties.
 

@@ -1,4 +1,4 @@
-package org.opensharding.tpcc;
+package org.opensharding.tpcc.load;
 
 import java.sql.Connection;
 import java.sql.Statement;
@@ -20,13 +20,12 @@ public class JdbcLoader implements RecordProcessor {
 
     StringBuilder b = new StringBuilder();
 
-    public JdbcLoader(Connection conn, String insertStub, int maxBatchSize) {
+    public JdbcLoader(Connection conn, String tableName, String columnName[], int maxBatchSize) {
         this.conn = conn;
         this.insertStub = insertStub;
         this.maxBatchSize = maxBatchSize;
     }
 
-    @Override
     public void process(Record r) throws Exception {
         if (currentBatchSize==0) {
             b.append(insertStub);
@@ -35,7 +34,7 @@ public class JdbcLoader implements RecordProcessor {
             b.append(',');
         }
         b.append('(');
-        r.append(b, ",");
+        r.write(b, ",");
         b.append(')');
         if (++currentBatchSize==maxBatchSize) {
             stmt.execute(b.toString());
@@ -44,7 +43,6 @@ public class JdbcLoader implements RecordProcessor {
         }
     }
 
-    @Override
     public void close() throws Exception {
         if (currentBatchSize>0) {
             stmt.execute(b.toString());

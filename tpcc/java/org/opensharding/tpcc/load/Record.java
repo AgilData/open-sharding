@@ -1,5 +1,7 @@
-package org.opensharding.tpcc;
+package org.opensharding.tpcc.load;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Date;
 
 /**
@@ -25,7 +27,14 @@ public class Record {
         data[index++] = value;
     }
 
-    public void append(StringBuilder b, String delim) {
+    public void write(OutputStream os, String delim) throws IOException {
+        StringBuilder b = new StringBuilder();
+        write(b, delim);
+        os.write(b.toString().getBytes());
+        os.write("\n".getBytes());
+    }
+
+    public void write(StringBuilder b, String delim) {
         for (int i=0; i<data.length; i++) {
             if (i>0) {
                 b.append(delim);
@@ -46,7 +55,7 @@ public class Record {
 
     public String toString(String delim) {
         toStringBuilder.setLength(0);
-        append(toStringBuilder, delim);
+        write(toStringBuilder, delim);
         return toStringBuilder.toString();
     }
 }

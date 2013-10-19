@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 
 
 public class TpccLoad implements TpccConstants {
+
     private String connectString;
     private String dbString;
     private String dbUser = null;
@@ -135,7 +136,6 @@ public class TpccLoad implements TpccConstants {
         long start = System.currentTimeMillis();
         System.out.println("Execution time start: " + start);
 
-
         if (connectString == null) {
             throw new RuntimeException("Host is null.");
         }
@@ -215,6 +215,10 @@ public class TpccLoad implements TpccConstants {
             throw new RuntimeException("Could not set foreign key checks error", e);
         }
 
+        TpccLoadConfig loadConfig = new TpccLoadConfig();
+        loadConfig.setLoadType(TpccLoadConfig.LoadType.JDBC);
+        loadConfig.setConn(conn);
+
 
         System.out.printf("TPCC Data Load Started...\n");
         max_ware = num_ware;
@@ -222,7 +226,7 @@ public class TpccLoad implements TpccConstants {
             System.out.printf("Particle flag: %d\n", particle_flg);
             Load.loadItems(conn, shardCount, option_debug);
             Load.loadWare(conn, shardCount, (int) min_ware, (int) max_ware, option_debug, shardId);
-            Load.loadCust(conn, shardCount, (int) min_ware, (int) max_ware, shardId);
+            Load.loadCust(loadConfig, shardCount, (int) min_ware, (int) max_ware, shardId);
             Load.loadOrd(conn, shardCount, (int) max_ware, shardId);
         } else if (particle_flg == 1) {
             switch (part_no) {
@@ -233,7 +237,7 @@ public class TpccLoad implements TpccConstants {
                     Load.loadWare(conn, shardCount, (int) min_ware, (int) max_ware, option_debug, shardId);
                     break;
                 case 3:
-                    Load.loadCust(conn, shardCount, (int) min_ware, (int) max_ware, shardId);
+                    Load.loadCust(loadConfig, shardCount, (int) min_ware, (int) max_ware, shardId);
                     break;
                 case 4:
                     Load.loadOrd(conn, shardCount, (int) max_ware, shardId);

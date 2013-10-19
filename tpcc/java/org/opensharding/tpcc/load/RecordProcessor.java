@@ -1,4 +1,4 @@
-package org.opensharding.tpcc;
+package org.opensharding.tpcc.load;
 
 /**
  * Copyright (C) 2011 CodeFutures Corporation. All rights reserved.

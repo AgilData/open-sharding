@@ -1,10 +1,12 @@
 package org.opensharding.tpcc;
 
-import java.io.OutputStream;
+import org.opensharding.tpcc.load.Record;
+import org.opensharding.tpcc.load.RecordProcessor;
+
+import java.io.IOException;
 import java.sql.Statement;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -98,7 +100,7 @@ public class Load implements TpccConstants {
                 }
 
                 itemSQL.append("(");
-                itemRecord.append(itemSQL, ",");
+                itemRecord.write(itemSQL, ",");
                 itemSQL.append(")");
 
                 if (++itemBatchSize == itemMaxBatchSize) {
@@ -228,7 +230,7 @@ public class Load implements TpccConstants {
                     }
 
                     warehouseSQL.append("(");
-                    warehouseRecord.append(warehouseSQL, ",");
+                    warehouseRecord.write(warehouseSQL, ",");
                     warehouseSQL.append(")");
 
                     if (++warehouseBatchSize == warehouseMaxBatchSize) {
@@ -268,18 +270,17 @@ public class Load implements TpccConstants {
       * | ARGUMENTS |      none
       * +==================================================================
       */
-    public static void loadCust(Connection conn, int shardCount, int min_ware, int max_ware, int shardId) {
-
-        int w_id = 1;
-        int d_id = 1;
-
+    public static void loadCust(TpccLoadConfig loadConfig, int shardCount, int min_ware, int max_ware, int shardId) {
         /* EXEC SQL WHENEVER SQLERROR GOTO sqlerr; */
-
-        for (; w_id <= max_ware; w_id++)
-            for (d_id = 1; d_id <= DIST_PER_WARE; d_id++)
-                customer(d_id, w_id, conn, shardCount, shardId);
-
-        return;
+        try {
+            for (int w_id = min_ware; w_id <= max_ware; w_id++) {
+                for (int d_id = 1; d_id <= DIST_PER_WARE; d_id++) {
+                    loadCustomer(loadConfig, d_id, w_id, shardCount, shardId);
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException("Error loading customers", e);
+        }
     }
 
     /*
@@ -421,7 +422,7 @@ public class Load implements TpccConstants {
                     }
     
                     stockSQL.append("(");
-                    stockRecord.append(stockSQL, ",");
+                    stockRecord.write(stockSQL, ",");
                     stockSQL.append(")");
     
                     if (++stockBatchSize == stockMaxBatchSize) {
@@ -540,7 +541,7 @@ public class Load implements TpccConstants {
                 }
                 
                 districtSQL.append("(");
-                districtRecord.append(districtSQL, ",");
+                districtRecord.write(districtSQL, ",");
                 districtSQL.append(")");
                 
                 if (++districtBatchSize == districtMaxBatchSize) {
@@ -578,7 +579,7 @@ public class Load implements TpccConstants {
       * customer id |      d_id - district id |      w_id - warehouse id
       * +==================================================================
       */
-    public static void customer(int d_id, int w_id, Connection conn, int shardCount, int shardId) {
+    public static void loadCustomer(TpccLoadConfig loadConfig, int d_id, int w_id, int shardCount, int shardId) throws IOException {
         int c_id = 0;
         int c_d_id = 0;
         int c_w_id = 0;
@@ -603,15 +604,6 @@ public class Load implements TpccConstants {
 
         String h_data = null;
         boolean retried = false;
-        Statement stmtCust;
-        Statement stmtHist;
-        try {
-            stmtCust = conn.createStatement();
-            stmtHist = conn.createStatement();
-        } catch (SQLException e1) {
-            throw new RuntimeException("Customer statemet creation error", e1);
-        }
-
 
         System.out.printf("Loading Customer for DID=%d, WID=%d\n", d_id, w_id);
         int currentShard = 0;
@@ -622,19 +614,19 @@ public class Load implements TpccConstants {
             }
         }
 
-        final String customerStub = "INSERT INTO customer (c_id, c_d_id, c_w_id, c_first, c_middle, c_last, " +
-                "c_street_1, c_street_2, c_city, c_state, c_zip, c_phone, c_since, c_credit, c_credit_lim, " +
-                "c_discount, c_balance, c_ytd_payment, c_payment_cnt, c_delivery_cnt, c_data) VALUES ";
-        final StringBuilder customerSQL = new StringBuilder();
-        int customerBatchSize = 0;
-        int customerMaxBatchSize = 100;
+        final String[] CUSTOMER_COLUMNS = {
+                "c_id", "c_d_id", "c_w_id", "c_first", "c_middle", "c_last", "c_street_1", "c_street_2", "c_city",
+                "c_state", "c_zip", "c_phone", "c_since", "c_credit", "c_credit_lim",
+                "c_discount", "c_balance", "c_ytd_payment", "c_payment_cnt", "c_delivery_cnt", "c_data"
+        };
         final Record customerRecord = new Record(21);
-        
-        final String historyStub = "INSERT INTO history (h_c_id, h_c_d_id, h_c_w_id, h_d_id, h_w_id, h_date, h_amount, h_data) VALUES ";
-        final StringBuilder historySQL = new StringBuilder();
-        int historyBatchSize = 0;
-        int historyMaxBatchSize = 100;
+        final RecordProcessor customerLoader = loadConfig.createLoader("customer", CUSTOMER_COLUMNS, 100);
+
+        final String[] HISTORY_COLUMN_NAME = {
+                "h_c_id", "h_c_d_id", "h_c_w_id", "h_d_id", "h_w_id", "h_date", "h_amount", "h_data"
+        };
         final Record historyRecord = new Record(8);
+        final RecordProcessor historyLoader = loadConfig.createLoader("history", HISTORY_COLUMN_NAME, 100);
 
         if ((currentShard == shardId) || (shardId == 0)) {
             retry:
@@ -677,8 +669,8 @@ public class Load implements TpccConstants {
                 c_data = Util.makeAlphaString(300, 500);
                 //gettimestamp(datetime, STRFTIME_FORMAT, TIMESTAMP_LEN); Java Equivalent below?
                 Calendar calendar = Calendar.getInstance();
-                Date now = calendar.getTime();
-                Timestamp currentTimeStamp = new Timestamp(now.getTime());
+                //Date now = calendar.getTime();
+                //Timestamp currentTimeStamp = new Timestamp(now.getTime());
                 Date date = new java.sql.Date(calendar.getTimeInMillis());
                 /*EXEC SQL INSERT INTO
                                         customer
@@ -716,32 +708,9 @@ public class Load implements TpccConstants {
                     customerRecord.add(0);
                     customerRecord.add(c_data);
                     
-                    //if SQL 
-
-                        if (customerBatchSize==0) {
-                            customerSQL.append(customerStub);
-                        }
-                        else {
-                            customerSQL.append(",");
-                        }
-                        customerSQL.append("(");
-                        customerRecord.append(customerSQL, ",");
-                        customerSQL.append(")");
-                        
-                        if (++customerBatchSize == customerMaxBatchSize) {
-                            stmtCust.execute(customerSQL.toString());
-                            customerSQL.setLength(0);
-                            customerBatchSize = 0;
-                        }
+                    customerLoader.process(customerRecord);
                     
-                    //else if FILE
-                    
-                        //output.write(customerRecord.toString('\t'));
-                    
-                    //
-
-
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Customer insert error", e);
                 }
 
@@ -765,30 +734,16 @@ public class Load implements TpccConstants {
                     historyRecord.add(date);
                     historyRecord.add(h_amount);
                     historyRecord.add(h_data);
+                    
+                    historyLoader.process(historyRecord);
 
-                    if (historyBatchSize==0) {
-                        historySQL.append(historyStub);
-                    }
-                    else {
-                        historySQL.append(",");
-                    }
-
-                    historySQL.append("(");
-                    historyRecord.append(historySQL, ",");
-                    historySQL.append(")");
-
-                    if (++historyBatchSize == historyMaxBatchSize) {
-                        stmtHist.execute(historySQL.toString());
-                        historySQL.setLength(0);
-                        historyBatchSize = 0;
-                    }
-
-                } catch (SQLException e) {
+                } catch (Exception e) {
                     throw new RuntimeException("Insert into History error", e);
                 }
-                if (optionDebug)
+                if (optionDebug) {
                     System.out.printf("CID = %d, LST = %s, P# = %s\n",
                             c_id, c_last, c_phone);
+                }
                 if ((c_id % 100) == 0) {
                     System.out.printf(".");
                     if ((c_id % 1000) == 0)
@@ -796,30 +751,9 @@ public class Load implements TpccConstants {
                 }
             }
 
-            try {
-                if (customerBatchSize>0) {
-                    stmtCust.execute(customerSQL.toString());
-                }
-                stmtCust.close();
-            
-            } catch (SQLException e) {
-                throw new RuntimeException("Batch execution Customer error", e);
-            }
-
-            try {
-                if (historyBatchSize > 0) {
-                    stmtHist.execute(historySQL.toString());
-                }
-                stmtHist.close();
-            } catch (SQLException e) {
-                throw new RuntimeException("Batch execution History error", e);
-            }
-
         }
 
         System.out.printf("Customer Done.\n");
-
-        return;
     }
 
     /*
@@ -923,7 +857,7 @@ public class Load implements TpccConstants {
                         }
 
                         orderSQL.append("(");
-                        orderRecord.append(orderSQL, ",");
+                        orderRecord.write(orderSQL, ",");
                         orderSQL.append(")");
 
                         if (++orderBatchSize == orderMaxBatchSize) {
@@ -953,7 +887,7 @@ public class Load implements TpccConstants {
                         }
 
                         newOrderSQL.append('(');
-                        newOrderRecord.append(newOrderSQL, ",");
+                        newOrderRecord.write(newOrderSQL, ",");
                         newOrderSQL.append(')');
 
                         if (++newOrderBatchSize == newOrderMaxBatchSize) {
@@ -990,7 +924,7 @@ public class Load implements TpccConstants {
                         }
 
                         orderSQL.append("(");
-                        orderRecord.append(orderSQL, ",");
+                        orderRecord.write(orderSQL, ",");
                         orderSQL.append(")");
 
                         if (++orderBatchSize == orderMaxBatchSize) {
@@ -1048,7 +982,7 @@ public class Load implements TpccConstants {
                             }
 
                             orderLineSQL.append("(");
-                            orderLineRecord.append(orderLineSQL, ",");
+                            orderLineRecord.write(orderLineSQL, ",");
                             orderLineSQL.append(")");
 
                             if (++orderLineBatchSize == orderLineMaxBatchSize) {
@@ -1089,7 +1023,7 @@ public class Load implements TpccConstants {
                             }
 
                             orderLineSQL.append("(");
-                            orderLineRecord.append(orderLineSQL, ",");
+                            orderLineRecord.write(orderLineSQL, ",");
                             orderLineSQL.append(")");
 
                             if (++orderLineBatchSize == orderLineMaxBatchSize) {
