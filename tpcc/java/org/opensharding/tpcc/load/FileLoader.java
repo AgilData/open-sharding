@@ -30,13 +30,13 @@ public class FileLoader implements RecordLoader {
         final Object[] field = r.getField();
         for (int i=0; i< field.length; i++) {
             if (i>0) {
-                b.append("\t");
+                b.append('\t');
             }
-            if (field[i] instanceof Date) {
-                b.append("'").append(dateTimeFormat.format((Date)field[i])).append("'");
+            if (field[i] == null) {
+                b.append("\\N");
             }
-            else if (field[i] instanceof String) {
-                b.append("'").append((String)field[i]).append("'");
+            else if (field[i] instanceof Date) {
+                b.append(dateTimeFormat.format((Date)field[i]));
             }
             else {
                 b.append(field[i]);

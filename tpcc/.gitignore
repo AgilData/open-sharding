@@ -1,4 +1,5 @@
 classes
+output
 tpcc.jar
 ./jdbc-driver/*.jar
 jprof*.xml
