@@ -98,7 +98,7 @@ public class TpccThread extends Thread {
                 logger.debug("Starting driver with: number: " + number + " num_ware: " + num_ware + " num_conn: " + num_conn);
             }
 
-            driver.runTransaction(number, num_ware, num_conn, shardCount);
+            driver.runTransaction(number, num_ware, num_conn);
 
         } catch (Throwable e) {
             logger.error("Unhandled exception", e);

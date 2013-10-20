@@ -26,13 +26,13 @@ public class Driver implements TpccConstants {
     private static final boolean ALLOW_MULTI_WAREHOUSE_TX = true;
 
     //CHECK: The following variables are externs??
-    public int counting_on;
+//    public int counting_on;
     public int num_ware;
     public int num_conn;
 
     public int num_node;
-    public int time_count;
-    public PrintWriter freport_file;
+//    public int time_count;
+//    public PrintWriter freport_file;
 
     // total count for all threads
     private int[] success;
@@ -107,7 +107,7 @@ public class Driver implements TpccConstants {
 
     private final Executor exec = Executors.newSingleThreadExecutor();
 
-    public int runTransaction(final int t_num, final int numWare, final int numConn, final int shardCount) {
+    public int runTransaction(final int t_num, final int numWare, final int numConn) {
 
         num_ware = numWare;
         num_conn = numConn;
@@ -126,7 +126,7 @@ public class Driver implements TpccConstants {
                     final int _sequence = sequence;
                     FutureTask t = new FutureTask<Object>(new Callable<Object>(){
                         public Object call() throws Exception {
-                            doNextTransaction(t_num, shardCount, _sequence);
+                            doNextTransaction(t_num, _sequence);
                             return null;
                         }
                     });
@@ -147,7 +147,7 @@ public class Driver implements TpccConstants {
 
                 }
                 else {
-                    doNextTransaction(t_num, shardCount, sequence);
+                    doNextTransaction(t_num, sequence);
                 }
 
                 count++;
@@ -174,7 +174,7 @@ public class Driver implements TpccConstants {
 
     }
 
-    private void doNextTransaction(int t_num, int shardCount, int sequence) {
+    private void doNextTransaction(int t_num, int sequence) {
         if (sequence == 0) {
             doNeword(t_num);
         } else if (sequence == 1) {
