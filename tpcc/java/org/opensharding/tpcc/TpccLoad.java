@@ -18,12 +18,9 @@ import org.slf4j.Logger;
 public class TpccLoad implements TpccConstants {
 
     private String mode;
-    private String csvOutputDir;
-    private String connectString;
-    private String dbString;
+    private String outputDir;
     private String dbUser = null;
     private String dbPassword = null;
-    private int port = 3306;
     private int shardCount = 0;
     private String jdbcUrl = null;
     private String javaDriver = null;
@@ -43,8 +40,8 @@ public class TpccLoad implements TpccConstants {
 
     /* Global Variables */
     static int i = 0;
-    static int is_local = 1;           /* "1" mean local */
-    static int DB_STRING_MAX = 51;
+//    static int is_local = 1;           /* "1" mean local */
+//    static int DB_STRING_MAX = 51;
     static boolean option_debug = false;	/* 1 if generating debug output    */
 
     private static final Logger logger = LoggerFactory.getLogger(Tpcc.class);
@@ -54,7 +51,6 @@ public class TpccLoad implements TpccConstants {
     private static final String OUTPUTDIR = "OUTPUTDIR";
     private static final String DRIVER = "DRIVER";
     private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";
-    private static final String HOST = "HOST";
     private static final String DATABASE = "DATABASE";
     private static final String USER = "USER";
     private static final String PASSWORD = "PASSWORD";
@@ -93,11 +89,7 @@ public class TpccLoad implements TpccConstants {
                 if (argv[i].equals("-m")) {
                     mode = argv[i + 1];
                 } else if (argv[i].equals("-o")) {
-                    csvOutputDir = argv[i + 1];
-                } else if (argv[i].equals("-h")) {
-                    connectString = argv[i + 1];
-                } else if (argv[i].equals("-d")) {
-                    dbString = argv[i + 1];
+                    outputDir = argv[i + 1];
                 } else if (argv[i].equals("-u")) {
                     dbUser = argv[i + 1];
                 } else if (argv[i].equals("-p")) {
@@ -113,10 +105,8 @@ public class TpccLoad implements TpccConstants {
                 } else {
                     System.out.println("Incorrect Argument: " + argv[i]);
                     System.out.println("The possible arguments are as follows: ");
-                    System.out.println("-m [mode (CSV or JDBC)]");
-                    System.out.println("-o [csvoutput dir]");
-                    System.out.println("-h [database host]");
-                    System.out.println("-d [database name]");
+                    System.out.println("-m [mode (FILE or JDBC)]");
+                    System.out.println("-o [file output dir]");
                     System.out.println("-u [database username]");
                     System.out.println("-p [database password]");
                     System.out.println("-w [number of warehouses]");
@@ -130,9 +120,7 @@ public class TpccLoad implements TpccConstants {
             }
         } else {
             mode = properties.getProperty(MODE);
-            csvOutputDir = properties.getProperty(OUTPUTDIR);
-            connectString = properties.getProperty(HOST);
-            dbString = properties.getProperty(DATABASE);
+            outputDir = properties.getProperty(OUTPUTDIR);
             dbUser = properties.getProperty(USER);
             dbPassword = properties.getProperty(PASSWORD);
             num_ware = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
@@ -154,12 +142,6 @@ public class TpccLoad implements TpccConstants {
         }
         boolean jdbcMode = mode.equalsIgnoreCase("JDBC");
         if (jdbcMode) {
-            if (connectString == null) {
-                throw new RuntimeException("Host is null.");
-            }
-            if (dbString == null) {
-                throw new RuntimeException("Database name is null.");
-            }
             if (dbUser == null) {
                 throw new RuntimeException("User is null.");
             }
@@ -167,8 +149,8 @@ public class TpccLoad implements TpccConstants {
                 throw new RuntimeException("Password is null.");
             }
         }
-        else if (mode.equalsIgnoreCase("CSV")) {
-            if (csvOutputDir == null) {
+        else if (mode.equalsIgnoreCase("FILE")) {
+            if (outputDir == null) {
                 throw new RuntimeException("Output dir is null.");
             }
         }
@@ -190,20 +172,19 @@ public class TpccLoad implements TpccConstants {
         }
 
         System.out.printf("<Parameters>\n");
-        if (is_local == 0) System.out.printf("     [server]: %s\n", connectString);
-        if (is_local == 0) System.out.printf("     [port]: %d\n", port);
 
         if (jdbcMode) {
-            System.out.printf("     [DBname]: %s\n", dbString);
+            System.out.printf("     [Driver]: %s\n", javaDriver);
+            System.out.printf("        [URL]: %s\n", jdbcUrl);
             System.out.printf("       [user]: %s\n", dbUser);
             System.out.printf("       [pass]: %s\n", dbPassword);
         }
         else {
-            System.out.printf(" [Output Dir]: %s\n", csvOutputDir);
+            System.out.printf(" [Output Dir]: %s\n", outputDir);
         }
 
         System.out.printf("  [warehouse]: %d\n", num_ware);
-        System.out.printf(" [shardId]: %d\n", shardId);
+        System.out.printf("    [shardId]: %d\n", shardId);
         if (particle_flg == 1) {
             System.out.printf("  [part(1-4)]: %d\n", part_no);
             System.out.printf("     [MIN WH]: %d\n", min_ware);
@@ -263,7 +244,7 @@ public class TpccLoad implements TpccConstants {
             loadConfig.setConn(conn);
         }
         else {
-            File outputDir = new File(csvOutputDir);
+            File outputDir = new File(this.outputDir);
             if (!outputDir.exists()) {
                 if (!outputDir.mkdirs()) {
                     throw new RuntimeException("Could not create dir: " + outputDir.getAbsolutePath());

@@ -33,7 +33,7 @@ public class TpccStatements {
 	public void init() {
 		try {
 			// NewOrder statements.
-			pStmts[0] = prepareStatement("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = ? AND c_d_id = ? AND c_id = ?");
+			pStmts[0] = prepareStatement("/*DBS_HINT: dbs_shard_action=shard_read, dbs_table_name=warehouse, dbs_shard_key_param_index=1 */ SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = ? AND c_d_id = ? AND c_id = ?");
 			pStmts[1] = prepareStatement("SELECT d_next_o_id, d_tax FROM district WHERE d_id = ? AND d_w_id = ? FOR UPDATE");
 			pStmts[2] = prepareStatement("UPDATE district SET d_next_o_id = ? + 1 WHERE d_id = ? AND d_w_id = ?");
 			pStmts[3] = prepareStatement("INSERT INTO orders (o_id, o_d_id, o_w_id, o_c_id, o_entry_d, o_ol_cnt, o_all_local) VALUES(?, ?, ?, ?, ?, ?, ?)");
@@ -77,9 +77,6 @@ public class TpccStatements {
 			pStmts[33] = prepareStatement("SELECT DISTINCT ol_i_id FROM order_line WHERE ol_w_id = ? AND ol_d_id = ? AND ol_o_id < ? AND ol_o_id >= (? - 20)");
 			pStmts[34] = prepareStatement("SELECT count(*) FROM stock WHERE s_w_id = ? AND s_i_id = ? AND s_quantity < ?");
 			
-			// New Order statement.
-			pStmts[35] = prepareStatement("/*DBS_HINT: dbs_shard_action=shard_read, dbs_table_name=warehouse, dbs_shard_key_param_index=1 */ SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = ? AND c_d_id = ? AND c_id = ?");
-
             for (int i=0; i<pStmts.length; i++) {
                 pStmts[i].setFetchSize(fetchSize);
             }

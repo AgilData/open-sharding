@@ -78,7 +78,7 @@ public class NewOrder implements TpccConstants {
         return ol_dist_info;
     }
 
-    public int neword(int t_num,
+    public int neword(int t_num,           /* thread number (not used) */
                       int w_id_arg,        /* warehouse id */
                       int d_id_arg,        /* district id */
                       int c_id_arg,        /* customer id */
@@ -86,8 +86,7 @@ public class NewOrder implements TpccConstants {
                       int o_all_local_arg,    /* are all order lines local */
                       int itemid[],        /* ids of items to be ordered */
                       int supware[],        /* warehouses supplying items */
-                      int qty[],
-                      int shardCount
+                      int qty[]
     ) {
 
         try {
@@ -138,55 +137,28 @@ public class NewOrder implements TpccConstants {
 
             //Get prepared statement
             //"SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = ? AND c_w_id = w_id AND c_d_id = ? AND c_id = ?"
-            if (shardCount > 0){
-            	try{
-            		int column = 1;
-            		final PreparedStatement dbPstmt = pStmts.getStatement(35);
-            		dbPstmt.setInt(column++, w_id);
-                    dbPstmt.setInt(column++, w_id);
-                    dbPstmt.setInt(column++, d_id);
-                    dbPstmt.setInt(column++, c_id);
-                    if (TRACE)
-                        logger.trace("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
-                    ResultSet rs = dbPstmt.executeQuery();
-                    if (rs.next()) {
-                        c_discount = rs.getFloat(1);
-                        c_last = rs.getString(2);
-                        c_credit = rs.getString(3);
-                        w_tax = rs.getFloat(4);
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    logger.error("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id, e);
-                    throw new Exception("NewOrder select transaction error", e);
+            try {
+                int column = 1;
+                final PreparedStatement pstmt0 = pStmts.getStatement(0);
+                pstmt0.setInt(column++, w_id);
+                pstmt0.setInt(column++, w_id);
+                pstmt0.setInt(column++, d_id);
+                pstmt0.setInt(column++, c_id);
+                if (TRACE)
+                    logger.trace("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
+                ResultSet rs = pstmt0.executeQuery();
+                if (rs.next()) {
+                    c_discount = rs.getFloat(1);
+                    c_last = rs.getString(2);
+                    c_credit = rs.getString(3);
+                    w_tax = rs.getFloat(4);
                 }
-            }else if(shardCount == 0){
-            	try {
-                    int column = 1;
-                    final PreparedStatement pstmt0 = pStmts.getStatement(0);
-                    pstmt0.setInt(column++, w_id);
-                    pstmt0.setInt(column++, w_id);
-                    pstmt0.setInt(column++, d_id);
-                    pstmt0.setInt(column++, c_id);
-                    if (TRACE)
-                        logger.trace("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id);
-                    ResultSet rs = pstmt0.executeQuery();
-                    if (rs.next()) {
-                        c_discount = rs.getFloat(1);
-                        c_last = rs.getString(2);
-                        c_credit = rs.getString(3);
-                        w_tax = rs.getFloat(4);
-                    }
-                    rs.close();
-                } catch (SQLException e) {
-                    logger.error("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id, e);
-                    throw new Exception("NewOrder select transaction error", e);
-                }
-            }else{
-            	logger.error("Improper value for shardCount: " + shardCount);
-            	throw new Exception("NewOrder select transaction error");
+                rs.close();
+            } catch (SQLException e) {
+                logger.error("SELECT c_discount, c_last, c_credit, w_tax FROM customer, warehouse WHERE w_id = " + w_id + " AND c_w_id = " + w_id + " AND c_d_id = " + d_id + " AND c_id = " + c_id, e);
+                throw new Exception("NewOrder select transaction error", e);
             }
-            
+
             //Get prepared statement
             //"SELECT d_next_o_id, d_tax FROM district WHERE d_id = ? AND d_w_id = ? FOR UPDATE"
 

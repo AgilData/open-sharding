@@ -125,7 +125,6 @@ public class Driver implements TpccConstants {
                 if (DETECT_LOCK_WAIT_TIMEOUTS) {
                     final int _sequence = sequence;
                     FutureTask t = new FutureTask<Object>(new Callable<Object>(){
-                        @Override
                         public Object call() throws Exception {
                             doNextTransaction(t_num, shardCount, _sequence);
                             return null;
@@ -177,15 +176,15 @@ public class Driver implements TpccConstants {
 
     private void doNextTransaction(int t_num, int shardCount, int sequence) {
         if (sequence == 0) {
-            doNeword(t_num, conn, pStmts, shardCount);
+            doNeword(t_num);
         } else if (sequence == 1) {
-            doPayment(t_num, conn, pStmts);
+            doPayment(t_num);
         } else if (sequence == 2) {
-            doOrdstat(t_num, conn, pStmts);
+            doOrdstat(t_num);
         } else if (sequence == 3) {
-            doDelivery(t_num, conn, pStmts);
+            doDelivery(t_num);
         } else if (sequence == 4) {
-            doSlev(t_num, conn, pStmts);
+            doSlev(t_num);
         } else {
             throw new IllegalStateException("Error - Unknown sequence");
         }
@@ -195,7 +194,7 @@ public class Driver implements TpccConstants {
       * prepare data and execute the new order transaction for one order
       * officially, this is supposed to be simulated terminal I/O
       */
-    private int doNeword(int t_num, Connection conn, TpccStatements pStmts, int shardCount) {
+    private int doNeword(int t_num) {
         int c_num = 0;
         int i = 0;
         int ret = 0;
@@ -257,7 +256,7 @@ public class Driver implements TpccConstants {
         for (i = 0; i < MAX_RETRY; i++) {
             if (DEBUG)
                 logger.debug("t_num: " + t_num + " w_id: " + w_id + " c_id: " + c_id + " ol_cnt: " + ol_cnt + " all_local: " + all_local + " qty: " + Arrays.toString(qty));
-            ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty, shardCount);
+            ret = newOrder.neword(t_num, w_id, d_id, c_id, ol_cnt, all_local, itemid, supware, qty);
             endTime = System.currentTimeMillis();
 
             if (ret == 1) {
@@ -322,7 +321,7 @@ public class Driver implements TpccConstants {
     /*
       * prepare data and execute payment transaction
       */
-    private int doPayment(int t_num, Connection conn, TpccStatements pStmts) {
+    private int doPayment(int t_num) {
         int c_num = 0;
         int byname = 0;
         int i = 0;
@@ -423,7 +422,7 @@ public class Driver implements TpccConstants {
     /*
       * prepare data and execute order status transaction
       */
-    private int doOrdstat(int t_num, Connection conn, TpccStatements pStmts) {
+    private int doOrdstat(int t_num) {
         int c_num = 0;
         int byname = 0;
         int i = 0;
@@ -505,7 +504,7 @@ public class Driver implements TpccConstants {
     /*
       * execute delivery transaction
       */
-    private int doDelivery(int t_num, Connection conn, TpccStatements pStmts) {
+    private int doDelivery(int t_num) {
         int c_num = 0;
         int i = 0;
         int ret = 0;
@@ -569,7 +568,7 @@ public class Driver implements TpccConstants {
     /*
       * prepare data and execute the stock level transaction
       */
-    private int doSlev(int t_num, Connection conn, TpccStatements pStmts) {
+    private int doSlev(int t_num) {
         int c_num = 0;
         int i = 0;
         int ret = 0;
