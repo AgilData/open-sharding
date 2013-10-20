@@ -31,6 +31,9 @@ To run the load process, run "ant tpccload".
 It is possible to load data into shards where the warehouse ID is used as a shard key. The
 SHARDCOUNT and SHARDID properties must be set correctly when generating or loading data.
 
+This option requires the use of a JDBC driver that supports automatic sharding, such as
+dbShards (http://www.dbshards.com).
+
 ===========================
 Running the TPC-C Benchmark
 ===========================
