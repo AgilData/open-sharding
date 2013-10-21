@@ -90,7 +90,7 @@ public class JdbcStatementLoader implements RecordLoader {
                 b.append("'").append(field[i]).append("'");
             }
             else {
-                b.append((String)field[i]);
+                b.append(field[i]);
             }
         }
     }
