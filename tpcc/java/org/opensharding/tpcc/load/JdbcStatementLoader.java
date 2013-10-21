@@ -76,21 +76,23 @@ public class JdbcStatementLoader implements RecordLoader {
     }
 
     public void write(StringBuilder b, Record r, String delim) throws Exception {
-        b.setLength(0);
         final Object[] field = r.getField();
         for (int i=0; i< field.length; i++) {
             if (i>0) {
-                b.append("\t");
+                b.append(delim);
             }
-            if (field[i] instanceof Date) {
+
+            final Object fieldValue = field[i];
+
+            if (fieldValue instanceof Date) {
 //                b.append("'").append(dateTimeFormat.format((Date)field[i])).append("'");
-                b.append("'").append((Date)field[i]).append("'");
+                b.append("'").append((Date) fieldValue).append("'");
             }
-            else if (field[i] instanceof String) {
-                b.append("'").append(field[i]).append("'");
+            else if (fieldValue instanceof String) {
+                b.append("'").append(fieldValue).append("'");
             }
             else {
-                b.append(field[i]);
+                b.append(fieldValue);
             }
         }
     }
