@@ -1,9 +1,6 @@
 package org.opensharding.tpcc;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -45,13 +42,11 @@ public class TpccLoad implements TpccConstants {
     static boolean option_debug = false;	/* 1 if generating debug output    */
 
     private static final Logger logger = LoggerFactory.getLogger(Tpcc.class);
-    private static final boolean DEBUG = logger.isDebugEnabled();
 
     private static final String MODE = "MODE";
     private static final String OUTPUTDIR = "OUTPUTDIR";
     private static final String DRIVER = "DRIVER";
     private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";
-    private static final String DATABASE = "DATABASE";
     private static final String USER = "USER";
     private static final String PASSWORD = "PASSWORD";
     private static final String SHARDCOUNT = "SHARDCOUNT";
@@ -245,7 +240,17 @@ public class TpccLoad implements TpccConstants {
         }
         else {
             File outputDir = new File(this.outputDir);
-            if (!outputDir.exists()) {
+            if (outputDir.exists()) {
+                String[] list = outputDir.list(new FilenameFilter() {
+                    public boolean accept(File dir, String name) {
+                        return name.endsWith(".txt");
+                    }
+                });
+                if (list.length > 0) {
+                    throw new RuntimeException("All text files must be deleted from " + outputDir + " before generating data");
+                }
+            }
+            else {
                 if (!outputDir.mkdirs()) {
                     throw new RuntimeException("Could not create dir: " + outputDir.getAbsolutePath());
                 }

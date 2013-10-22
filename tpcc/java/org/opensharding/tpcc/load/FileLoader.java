@@ -22,7 +22,7 @@ public class FileLoader implements RecordLoader {
     protected final StringBuilder b = new StringBuilder();
 
     public FileLoader(File file) throws IOException {
-        this.os = new BufferedOutputStream(new FileOutputStream(file));
+        this.os = new BufferedOutputStream(new FileOutputStream(file, true));
     }
 
     public void load(Record r) throws Exception {
