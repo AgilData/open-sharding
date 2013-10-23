@@ -17,7 +17,7 @@ public class TpccStatements {
 //    private static final Logger logger = LoggerFactory.getLogger(TpccStatements.class);
     private static final Logger logger = LoggerFactory.getLogger(TpccStatements.class);
 	
-	public static int STMT_COUNT = 36;
+	public static int STMT_COUNT = 35;
 	
 	private Connection conn;
     int fetchSize;
