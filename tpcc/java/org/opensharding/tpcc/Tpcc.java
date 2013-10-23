@@ -22,7 +22,6 @@ public class Tpcc implements TpccConstants {
 
     private static final String DRIVER = "DRIVER";
     private static final String WAREHOUSECOUNT = "WAREHOUSECOUNT";
-    private static final String HOST = "HOST";
     private static final String DATABASE = "DATABASE";
     private static final String USER = "USER";
     private static final String PASSWORD = "PASSWORD";
@@ -36,20 +35,17 @@ public class Tpcc implements TpccConstants {
 
     /* Global SQL Variables */
 
-    private String connectString;
-
+    private String javaDriver;
+    private String jdbcUrl;
     private String dbString;
     private String dbUser;
     private String dbPassword;
-    private int shardCount;
 
 
     private int numWare;
     private int numConn;
     private int rampupTime;
     private int measureTime;
-    private String javaDriver;
-    private String jdbcUrl;
     private int fetchSize = 100;
 
     private int num_node; /* number of servers that consists of cluster i.e. RAC (0:normal mode)*/
@@ -130,9 +126,7 @@ public class Tpcc implements TpccConstants {
         
         if(overridePropertiesFile){
         	for(int i=0; i<argv.length; i=i+2){
-        		if(argv[i].equals("-h")){
-        			connectString = argv[i+1];
-        		}else if(argv[i].equals("-d")){
+        		if(argv[i].equals("-d")){
         			dbString = argv[i+1];
         		}else if(argv[i].equals("-u")){
         			dbUser = argv[i+1];
@@ -172,7 +166,6 @@ public class Tpcc implements TpccConstants {
         	}
         }else{
         
-	        connectString = properties.getProperty(HOST);
 	        dbString = properties.getProperty(DATABASE);
 	        dbUser = properties.getProperty(USER);
 	        dbPassword = properties.getProperty(PASSWORD);
@@ -198,10 +191,13 @@ public class Tpcc implements TpccConstants {
                 return 1;
             }
         }
-        
 
-        if (connectString == null) {
-            throw new RuntimeException("Host is null.");
+
+        if (javaDriver == null) {
+            throw new RuntimeException("Java Driver is null.");
+        }
+        if (jdbcUrl == null) {
+            throw new RuntimeException("JDBC Url is null.");
         }
         if (dbString == null) {
             throw new RuntimeException("Database name is null.");
@@ -224,13 +220,7 @@ public class Tpcc implements TpccConstants {
         if (measureTime < 1) {
             throw new RuntimeException("Duration has to be greater than or equal to 1.");
         }
-        if (javaDriver == null) {
-            throw new RuntimeException("Java Driver is null.");
-        }
-        if (jdbcUrl == null) {
-            throw new RuntimeException("JDBC Url is null.");
-        }
-        
+
 
     
         
@@ -244,7 +234,8 @@ public class Tpcc implements TpccConstants {
 
         System.out.printf("<Parameters>\n");
 
-        System.out.printf("     [server]: %s\n", connectString);
+        System.out.printf("     [driver]: %s\n", javaDriver);
+        System.out.printf("        [URL]: %s\n", jdbcUrl);
         System.out.printf("     [DBname]: %s\n", dbString);
         System.out.printf("       [user]: %s\n", dbUser);
         System.out.printf("       [pass]: %s\n", dbPassword);
@@ -253,8 +244,6 @@ public class Tpcc implements TpccConstants {
         System.out.printf(" [connection]: %d\n", numConn);
         System.out.printf("     [rampup]: %d (sec.)\n", rampupTime);
         System.out.printf("    [measure]: %d (sec.)\n", measureTime);
-        System.out.printf("     [driver]: %s\n", javaDriver);
-        System.out.printf("        [URL]: %s\n", jdbcUrl);
 
         Util.seqInit(10, 10, 1, 1, 1);
 
@@ -267,9 +256,9 @@ public class Tpcc implements TpccConstants {
         // Start each server.
 
         for (int i = 0; i < numConn; i++) {
-            Runnable worker = new TpccThread(i, port, 1, connectString, dbUser, dbPassword, dbString, numWare, numConn,
+            Runnable worker = new TpccThread(i, port, 1, dbUser, dbPassword, dbString, numWare, numConn,
                     javaDriver, jdbcUrl, fetchSize,
-                    success, late, retry, failure, success2, late2, retry2, failure2, shardCount);
+                    success, late, retry, failure, success2, late2, retry2, failure2);
             executor.execute(worker);
         }
 

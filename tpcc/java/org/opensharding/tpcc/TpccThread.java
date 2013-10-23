@@ -31,15 +31,13 @@ public class TpccThread extends Thread {
 	int is_local;
 	int num_ware;
 	int num_conn;
-	String connect_string;
 	String db_user;
 	String db_password;
 	String db_string;
 	String driverClassName;
 	String jdbcUrl;
     int fetchSize;
-    int shardCount;
-	
+
 	private int[] success;
 	private int[] late;
 	private int[] retry;
@@ -52,14 +50,13 @@ public class TpccThread extends Thread {
 
 	//TpccStatements pStmts;
 	
-	public TpccThread(int number, int port, int is_local, String connect_string, String db_user, String db_password, 
+	public TpccThread(int number, int port, int is_local, String db_user, String db_password,
 			String db_string, int num_ware, int num_conn, String driverClassName, String dURL, int fetchSize,
 			int[] success, int[] late, int[] retry, int[] failure, 
-			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2, int shardCount) {
+			int[][] success2, int[][] late2, int[][] retry2, int[][] failure2) {
 		
         this.number = number;
         this.port = port;
-        this.connect_string = connect_string;
         this.db_password = db_password;
         this.db_string = db_string;
         this.db_user = db_user;
@@ -80,8 +77,6 @@ public class TpccThread extends Thread {
 		this.retry2 = retry2;
 		this.failure2 = failure2;
 		
-		this.shardCount = shardCount;
-
         connectToDatabase();
 
         // Create a driver instance.
