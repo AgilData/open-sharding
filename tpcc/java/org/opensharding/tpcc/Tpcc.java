@@ -37,7 +37,6 @@ public class Tpcc implements TpccConstants {
 
     private String javaDriver;
     private String jdbcUrl;
-    private String dbString;
     private String dbUser;
     private String dbPassword;
 
@@ -126,9 +125,7 @@ public class Tpcc implements TpccConstants {
         
         if(overridePropertiesFile){
         	for(int i=0; i<argv.length; i=i+2){
-        		if(argv[i].equals("-d")){
-        			dbString = argv[i+1];
-        		}else if(argv[i].equals("-u")){
+        		if(argv[i].equals("-u")){
         			dbUser = argv[i+1];
         		}else if(argv[i].equals("-p")){
         			dbPassword = argv[i+1];
@@ -166,7 +163,6 @@ public class Tpcc implements TpccConstants {
         	}
         }else{
         
-	        dbString = properties.getProperty(DATABASE);
 	        dbUser = properties.getProperty(USER);
 	        dbPassword = properties.getProperty(PASSWORD);
 	        numWare = Integer.parseInt(properties.getProperty(WAREHOUSECOUNT));
@@ -198,9 +194,6 @@ public class Tpcc implements TpccConstants {
         }
         if (jdbcUrl == null) {
             throw new RuntimeException("JDBC Url is null.");
-        }
-        if (dbString == null) {
-            throw new RuntimeException("Database name is null.");
         }
         if (dbUser == null) {
             throw new RuntimeException("User is null.");
@@ -236,7 +229,6 @@ public class Tpcc implements TpccConstants {
 
         System.out.printf("     [driver]: %s\n", javaDriver);
         System.out.printf("        [URL]: %s\n", jdbcUrl);
-        System.out.printf("     [DBname]: %s\n", dbString);
         System.out.printf("       [user]: %s\n", dbUser);
         System.out.printf("       [pass]: %s\n", dbPassword);
 
@@ -256,7 +248,7 @@ public class Tpcc implements TpccConstants {
         // Start each server.
 
         for (int i = 0; i < numConn; i++) {
-            Runnable worker = new TpccThread(i, port, 1, dbUser, dbPassword, dbString, numWare, numConn,
+            Runnable worker = new TpccThread(i, port, 1, dbUser, dbPassword, numWare, numConn,
                     javaDriver, jdbcUrl, fetchSize,
                     success, late, retry, failure, success2, late2, retry2, failure2);
             executor.execute(worker);
