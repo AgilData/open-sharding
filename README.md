@@ -1,5 +1,7 @@
 =====================================
+
 Open Sharding Protocol Driver Readme
+
 =====================================
 
 INTRODUCTION
@@ -41,9 +43,7 @@ The following OSP Facade Drivers are included in the project (more will be added
 - JDBC
 - Native MySQL(r) libmysqlclient
 - ODBC
-- Native PostgreSQL libpq (planned)=====================================
-Open Sharding Protocol Driver Readme
-=====================================
+- Native PostgreSQL libpq (planned)
 
 INTRODUCTION
 
@@ -148,22 +148,22 @@ To install the driver, do the following:
 Here are the steps required to use the OSP JDBC driver with your application:
 
 Register the driver:
-
+```java
 Class.forName("org.opensharding.jdbc.Driver").newInstance();
-
+```
 Get a connection to the OSP JDBC driver using the appropriate URL:
-
+```java
 Connection conn = DriverManager.getConnection(url, userName, password);
-
+```
  
 OSP MODE
 
 The OSP JDBC URL format is described here:
 
 When operating in "osp" mode, communicating with an OSP process or server, use the following JDBC URL format:
-
+```java
 jdbc:osp:[protocol]:[details]
-
+```
 The supported protocol values, along with required details and example URL strings are provided here:
 
 api (Direct API connectivity)
@@ -188,17 +188,17 @@ to the specified driver. This is useful to be able to communicate directly to a 
 and also to support the Shard Analyze log format provided by all OSP Facade Drivers (see Shard Analyze Logging below).
 
 The delegate mode URL format is:
-
+```java
 jdbc:osp:delegate:[third-party-driver-classname]:[third-party-url]
-
+```
 The third-party-driver-classname is the qualified classname for the delegate driver.
 
 The third-party-url is the standard JDBC URL supported by the specific third-party-driver driver.
 
 Example:
-
+```java
 jdbc:osp:delegate:org.postgresql.Driver:jdbc:postgresql:mydb"
-
+```
 When operating in delegate mode, you must include both the OSP JDBC jar file and the third-party
 driver jar file in the classpath of the application, and you must register both drivers as described above.
 
@@ -290,39 +290,43 @@ To install the driver, do the following:
 Here are the steps required to use the OSP JDBC driver with your application:
 
 Register the driver:
-
+```java
 Class.forName("org.opensharding.jdbc.Driver").newInstance();
-
+```
 Get a connection to the OSP JDBC driver using the appropriate URL:
-
+```java
 Connection conn = DriverManager.getConnection(url, userName, password);
-
+```
  
 OSP MODE
 
 The OSP JDBC URL format is described here:
 
 When operating in "osp" mode, communicating with an OSP process or server, use the following JDBC URL format:
-
+```java
 jdbc:osp:[protocol]:[details]
-
+```
 The supported protocol values, along with required details and example URL strings are provided here:
 
 api (Direct API connectivity)
+```java
 jdbc:osp:api:[ops-server-class-name]:[details]
-
+```
 tcp
+```java
 jdbc:osp:tcp:host[:port]
 jdbc:osp:tcp:myosphost:4001
-
+```
 uds (Unix Domain Socket)
+```java
 jdbc:osp:socket:[path-to-socket-file]
 jdbc:osp:socket:/var/sock/myospprocess.sock
-
+```
 named-pipes (Unix Named Pipes or Microsoft Windows Named Pipes)
+```java
 jdbc:osp:pipes:[pipe-name-prefix]
 jdbc:osp:pipes:/var/pipe/myosppipe_
-
+```
 DELEGATE MODE
 
 When operating in "delegate" mode, an osp driver loads any third party JDBC driver, delegating all functionality
@@ -330,17 +334,17 @@ to the specified driver. This is useful to be able to communicate directly to a 
 and also to support the Shard Analyze log format provided by all OSP Facade Drivers (see Shard Analyze Logging below).
 
 The delegate mode URL format is:
-
+```java
 jdbc:osp:delegate:[third-party-driver-classname]:[third-party-url]
-
+```
 The third-party-driver-classname is the qualified classname for the delegate driver.
 
 The third-party-url is the standard JDBC URL supported by the specific third-party-driver driver.
 
 Example:
-
+```java
 jdbc:osp:delegate:org.postgresql.Driver:jdbc:postgresql:mydb"
-
+```
 When operating in delegate mode, you must include both the OSP JDBC jar file and the third-party
 driver jar file in the classpath of the application, and you must register both drivers as described above.
 
